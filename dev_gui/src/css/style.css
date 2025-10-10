@@ -300,7 +300,8 @@ tr.disabled {@apply opacity-70}
 /* entry selected */
 .selected > .entryB, .selected > .entryN {@apply font-semibold  after:content-[attr(data-selected)] after:small-caps after:text-sm after:absolute after:top-0 after:bg-secondblue-400 after:text-stone-50 after:right-0 after:py-0 after:px-2 after:h-7 after:max-h-7 after:rounded-sm}
 .selected .entries  {@apply hidden}
-.folders .wait > .entryB, .folders .wait > .entryD, .folders .wait > .entryR {@apply after:mr-1 after:p-0.5 after:icon after:icon-arrow-path-sm}
+.folders .wait > .entryB, .folders .wait > .entryD,
+ .folders .wait > .entryR {@apply after:mr-1 after:p-0.5 after:icon after:icon-arrow-path-sm}
 .entries .editable {@apply font-normal border border-stone-300 border-dashed text-ellipsis min-w-[3rem] outline-transparent outline-none before:pl-0 after:pr-2 pl-2 bg-white}
 .entrycontrols {@apply text-sm  w-auto  mr-1 inline-block float-right relative}
 .entrycontrols span {@apply mr-1 sm:mr-1.5 rounded-full h-7 w-7 max-h-7 p-0.5 bg-transparent hover:bg-white cursor-pointer  static}
@@ -1104,7 +1105,7 @@ div.showfull div.data-import  {@apply max-h-[80%] }
 div.data-import .ts-wrapper.multi {@apply max-h-full overflow-hidden}
 div.showfull div.zone-import > div.btns-import {@apply max-h-[100%] }
 div.showfull div.data-import .ts-wrapper.multi {@apply absolute -mt-[100%] z-60 overflow-y-visible}/* hover:absolute hover:max-h-full hover:z-60 hover:overflow-y-visible*/
-.import-projects-list .selected {@apply text-stone-600 text-xs max-h-8 bg-secondblue-100}
+.import-projects-list td.selected {@apply text-stone-600 font-bold text-xs max-h-8 bg-secondblue-100 !important}
 .import-list-reset {@apply cursor-pointer  h-6 mt-1 text-stone-800 small-caps px-2 font-normal rounded hover:bg-stone-200 border border-stone-200 bg-transparent shadow-sm}
 /**********************/
 /* tools pages       */

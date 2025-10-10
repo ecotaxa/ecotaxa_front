@@ -847,19 +847,19 @@ export class TableComponent {
 
   }
 
-  displaySelected(queries, indexes, cellid, toggle = null) {
+  displaySelected(queries, indexes, cellid, filtered = false) {
     const trs = this.dom.querySelectorAll('tbody tr');
-    if (toggle === null) toggle = function(tr, value, idx) {
-     tr.hidden = value;
+    const toggle=(this.toggle) ? this.toggle : function(tr, value, idx,filtered=false) {
+     if (!tr.dataset.checked || !value) tr.hidden = value;
     }
     const reset = (queries.length === 0 && indexes.length === 0);
     trs.forEach((tr, index) => {
-      if (reset) toggle(tr, false);
+      if (reset) toggle(tr, false,index,filtered);
       else {
         const val = (queries.length > 0 && indexes.length === 0) ? NOTFOUND : (tr.dataset[this.cellidname] !== null) ? tr.dataset[this.cellidname] : tr.cells[cellid].textContent;
         const idx = indexes.indexOf(val);
-        if (idx < 0) toggle(tr, true, idx);
-        else toggle(tr, false, idx);
+        if (idx < 0) toggle(tr, true, idx,filtered);
+        else toggle(tr, false, idx, filtered);
       }
     });
   };
@@ -980,7 +980,6 @@ export class TableComponent {
         } else if (value.length > 2) {
           table_search(value);
         }
-
       }
     }
     searchinput.addEventListener("input", (e) => {

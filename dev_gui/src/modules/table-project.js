@@ -19,16 +19,15 @@ export const initImport = async (state) => {
             if (idx > -1) state.dataImport.imports[name].splice(idx, 1);
           }
           const selector = state.dom.querySelector('[' + state.dataImport.selector + '="' + value + '"]');
-          const indextocheck = state.dataImport.indexToCheck();
-
-          if (selector) {
+         // const indextocheck = state.dataImport.indexToCheck();
+         /* if (selector !==null) {
             const tr = selector.closest('tr');
-            const resets = state.dataImport.resetSelector(tr);
-            selector.parentElement.querySelectorAll('button, input').forEach((el, index) => {
+           // const resets = state.dataImport.resetSelector(tr);
+            selector.querySelectorAll('button, input').forEach((el, index) => {
               this.disableSelector(selector, false);
               this.toImport(el.parentElement, index, false);
             });
-          };
+          };*/
           break;
       }
     }

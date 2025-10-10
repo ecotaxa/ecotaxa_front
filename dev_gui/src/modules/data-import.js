@@ -110,9 +110,9 @@ export class DataImport {
           e.stopImmediatePropagation();
           const target = e.currentTarget;
           const add = (evt === 'click' || target.checked === true);
-          this.disableSelector(target, add);
+          if (!add) this.resetSelector(target.closest('tr'));
           this.toImport(target.parentElement, index, add);
-        };
+          };
         selector.removeEventListener(evt, apply_selection, false);
         selector.addEventListener(evt, apply_selection, false);
       };
@@ -145,10 +145,10 @@ export class DataImport {
   }
   disableSelector(selector, disable = true) {
     const type = selector.tagName.toLowerCase();
-    if (type === "input") {
-      if (selector.checked !== disable) selector.checked = disable;
+   if (type === "input") {
+     if (selector.checked && disable) selector.checked = false;
     } // disable button but toggle checkbox
-    else selector.disabled = disable;
+    selector.disabled = disable;
   }
 
   getDataToImport(cell, celldata) {
@@ -189,11 +189,6 @@ export class DataImport {
     if (!this.importzone) return;
     const ts = this.importzone.tomselect;
     if (ts) {
-      Object.values(ts.options).forEach((opt) => {
-        let obj = {};
-        obj[opt[ts.settings.valueField]] = opt[ts.settings.labelField];
-        if (!items[opt[ts.settings.valueField]]) items = Object.assign(items, obj);
-      });
       items = Object.entries(items);
       // sort items
       items.sort((a, b) => {
@@ -219,11 +214,6 @@ export class DataImport {
         ts.removeItem(key);
       });
     } else {
-      Object.values(this.importzone.options).forEach(opt => {
-        let obj = {};
-        obj[opt.value] = opt.text;
-        if (!items[opt.value]) items = Object.assign(items, obj);
-      });
       items = Object.entries(items);
       items.sort((a, b) => {
         let x = a[1];
@@ -250,6 +240,8 @@ export class DataImport {
 
   toImport(td, whatpart = 0, add = true) {
     // cell values in json  - no parse
+    const tr=td.parentElement;
+    if (add) tr.dataset.checked=add; else delete tr.dataset.checked;
     if (td.tagName.toLowerCase() !== 'td') td = td.closest('td');
     const rowindex = this.rowIndex(td);
     if (rowindex === null) return;
@@ -260,20 +252,18 @@ export class DataImport {
     if (!what) return;
     const parts = this.columnProperty('parts', cellindex);
     const selectcells = this.getSelectCells(cellindex, whatpart);
-    console.log('selectcells', selectcells)
     if (!selectcells) return;
     if ([typeimport.settings, typeimport.privileges].indexOf(what) >= 0) this.imports[models.contact] = this.findContact(this.datas[rowindex]);
     if ([typeimport.project, typeimport.taxo, typeimport.privileges].indexOf(what) >= 0) this.createImportzone(what);
     this.addResetButton();
     let ts = null;
-    console.log('this.trs', this.trs)
     selectcells.forEach((name, index) => {
       index = this.gridColumnIndex('name', name);
       if (index >= 0) {
         const tdindex = this.columnIndex('name', name);
         // show import buttons if importzone
         const cell = (tdindex >= 0) ? this.trs[rowindex].cells[tdindex] : null;
-        if (cell) cell.classList.add(css.selected);
+        if (cell && add) cell.classList.add(css.selected);
         const rowdata = this.datas[rowindex];
         const celldata = rowdata[index];
         const thcell = (tdindex >= 0) ? this.thcells[tdindex] : null;
@@ -352,20 +342,18 @@ export class DataImport {
               const idx = this.imports[name].indexOf(data);
               if (idx > -1) this.imports[name].splice(idx, 1);
             }
-            if (name === models.projid) {
+             if (name === models.projid) {
               const idx = this.columnIndex('name', 'title');
               // show import buttons if importzone
               const celllabel = (idx >= 0) ? this.trs[rowindex].cells[idx] : null;
               const datalabel = rowdata[idx];
               const label = (celllabel) ? this.getDataToImport(celllabel, datalabel) : data;
-              const items = {};
-              items[rowdata[this.tbl.getCellId(this.tbl.cellidname)]] = label;
-              this.populateImportZone(add, items);
+              const item = {};
+              item[rowdata[this.tbl.getCellId(this.tbl.cellidname)]] = label;
+              this.populateImportZone(add, item);
             }
-            if (ln === 0) {
-              if (add) this.filterByRecord(rowdata, rowindex);
-              else this.resetFilter();
-            }
+            if (add) this.filterByRecord(rowdata, rowindex);
+            else this.resetFilter(rowdata,rowindex);
             break;
           default:
             if (add) this.imports[name] = this.getDataToImport(cell, celldata);
@@ -468,15 +456,14 @@ export class DataImport {
       const celldata = this.datas[rowindex][i];
       const cell = this.trs[rowindex].cells[i];
       const data = this.getDataToImport(cell, celldata);
-      console.log('data ', data)
       if (!resets[name]) resets[name] = [data];
       else if (resets[name].indexOf(data) < 0) resets[name].push(data);
     }
     const selectors = tr.querySelectorAll('[' + this.selector + '] button, [' + this.selector + '] input');
     selectors.forEach((selector, i) => {
-      if (selector.disabled) this.disableSelector(selector, false);
-      const name = (selector.parentElement.dataset.name) ? selector.parentElement.dataset.name : null;
-      append_resets(name, selector.parentElement, i);
+         this.disableSelector(selector, false);
+        const name = (selector.parentElement.dataset.name) ? selector.parentElement.dataset.name : null;
+        append_resets(name, selector.parentElement, i);
     });
     tr.querySelectorAll('td.' + css.selected).forEach((td, i) => {
       td.classList.remove(css.selected);
@@ -493,6 +480,7 @@ export class DataImport {
       td.classList.remove(css.selected);
     });
   }
+
   resetImports() {
     this.imports = [];
     if (this.importzone) {

@@ -4,20 +4,29 @@ import {
 } from '../modules/modules-config.js';
 import {
   unescape_html,
-  fetchSettings
+  fetchSettings,
+  exec_handlers
 } from '../modules/utils.js';
 
 
 function ImportList(state, attach = null) {
   const rowimported = -1;
+  const selectimports=[];
+  const importindexes=[];
   const cellid = state.getCellId(state.cellidname);
-  const toggle = function(tr, value, idx) {
-    tr.hidden = value;
-    /*  if (value === true) tr.classList.add(css.disabled);
-      else {
-        tr.classList.remove(css.disabled);
-        state.dataImport.resetSelector(tr);
-      }*/
+  // display only lines with fields values equals to record fields values - criteria is a list of cellnames
+  const criteria_names = ['instrument', 'access'];
+  const criteria_ids = [];
+  criteria_names.forEach(colname => {
+      const index = state.getCellId(colname);
+      if (index > -1) criteria_ids.push(index);
+    });
+  state.toggle = function(tr, value, idx, filtered=false) {
+   if (filtered) { if(value) tr.classList.add(css.hide);
+     else {tr.classList.remove(css.hide);
+    // state.dataImport.resetSelector(tr);
+    }
+     } else tr.hidden = value;
   }
 
   async function compileProjectRecords(newone = 0) {
@@ -55,6 +64,7 @@ function ImportList(state, attach = null) {
   }
 
   function initList() {
+    if (!state.dataImport) return;
     const plugin = state.dataImport;
     if (plugin.targetimport) {
       let selected = null;
@@ -69,30 +79,28 @@ function ImportList(state, attach = null) {
   }
 
   function filterByRecord(record, recordindex) {
-    // display only lines with fields values equals to record fields values - criteria is a list of cellnames
-    const criteria_names = ['instrument', 'access'];
-    const criteria_ids = [];
-    criteria_names.forEach(colname => {
-      const index = state.getCellId(colname);
-      if (index > -1) criteria_ids.push(index);
-    });
     if (criteria_ids.length !== criteria_names.length) return;
-
     let datas = state.grid.data;
-    const indexes = [];
+    selectimports.push(record[cellid]);
     datas = datas.filter((row, i) => {
       let compare = true;
       if (i !== recordindex) criteria_ids.forEach(idx => {
         compare = compare && (record[idx] === row[idx]);
       });
-      if (compare) indexes.push(String(row[cellid]));
+      const val = String(row[cellid])
+      if (compare && importindexes.indexOf(val)===-1) importindexes.push(val);
       return compare;
     });
-    state.displaySelected(criteria_ids, indexes, cellid, toggle);
+    state.displaySelected(criteria_ids, importindexes, cellid,true);
   }
 
-  function resetFilter() {
-    state.displaySelected([], [], cellid, toggle);
+  function resetFilter(record, recordindex) {
+    let index = selectimports.indexOf(record[cellid]);
+    if (index > -1)  selectimports.splice(index, 1);
+    index = importindexes.indexOf(String(record[cellid]));
+    if (index > -1)  importindexes.splice(index, 1);
+    if (selectimports.length===0) state.displaySelected([],[], cellid, true);
+    else state.displaySelected(criteria_ids, importindexes, cellid,true);
   }
 
   if (attach) {
