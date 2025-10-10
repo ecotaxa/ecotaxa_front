@@ -4,6 +4,7 @@
 {%- macro make_part_form(type_export,datas)-%}
 {%-for name,option in formoptions[type_export].items() -%}
 {%- if name in datas.keys() -%}
+
 <div class="form-box" data-name={{name}}>
   {% if datas[name][1] == True %}  <span class="mr-2 italic font-normal">{{option.label}} </span>
   <input type="hidden" name="{{name}}" value={{formdatas[type_export].datas[name][0]}}>
@@ -20,7 +21,9 @@
   </div>
   {%- elif option.format=='textarea'-%}
   <label>{{option.label}}{%-if "help" in option -%}<i class="icon-help" data-for="{{'help_export_'+type_export+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%}</label>
-  <textarea class="form-textarea" name="{{name}}" placeholder="{{opt.placeholder if 'placeholder' in option}}" rows="4">{{datas[name][0] if name in datas}}</textarea>
+  <textarea class="form-textarea" name="{{name}}" placeholder="{{opt.placeholder if 'placeholder' in option}}" rows="4">{%- if (name=="formulae" and target_obj and target_obj.formulae!="") -%}
+{{target_obj.formulae}}
+{%-else-%}{{datas[name][0] if name in datas}}{%-endif-%}</textarea>
   {%- elif option.format=='taxoline'-%}
 {%-set comment = option.comment if "comment" in option else None-%}
 {%include('/v2/taxonomy/_import_taxo_mapping.html')%}
