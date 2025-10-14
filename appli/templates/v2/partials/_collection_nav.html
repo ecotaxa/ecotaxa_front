@@ -3,7 +3,7 @@
 {%- if current_user.is_app_admin==True -%}
 {%- set privilege.value="Manage"  -%}
 {%-elif targetcoll and targetcoll.id|int >0 -%}
-{% for manager in target_coll.managers -%}
+{% for manager in targetcoll.managers -%}
 {%if current_user.id|int == manager.id|int -%}
   {%- set privilege.value ="Manage" -%}
   {%-endif%}

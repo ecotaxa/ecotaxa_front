@@ -152,6 +152,7 @@ def export_format_options(_type=None, target="project"):
                 "format": "radio",
             },
             "taxo_mapping": {
+                "id": "summary_taxo_mapping",
                 "label": _("Mapping from present taxon to output replacement one "),
                 "comment": _(" Type '_discard_' to discard taxon"),
                 "format": "taxoline",

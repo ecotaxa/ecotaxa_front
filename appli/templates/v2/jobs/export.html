@@ -1,11 +1,10 @@
 {% extends "./v2/layout.html" %}
 {% from "./v2/macros/macros.html" import form_group_radio , modal with context %}
 {% from "./v2/project/macros.html" import display_filters , header_project_job with context %}
+{%-set shared="export-taxoline"-%}
 {%- macro make_part_form(type_export,datas)-%}
 {%-for name,option in formoptions[type_export].items() -%}
-{%- if name in datas.keys() -%}
-
-<div class="form-box" data-name={{name}}>
+{%- if name in datas.keys() -%}<div class="form-box" data-name={{name}}>
   {% if datas[name][1] == True %}  <span class="mr-2 italic font-normal">{{option.label}} </span>
   <input type="hidden" name="{{name}}" value={{formdatas[type_export].datas[name][0]}}>
     {%- for opt in option.options -%}
@@ -26,7 +25,7 @@
 {%-else-%}{{datas[name][0] if name in datas}}{%-endif-%}</textarea>
   {%- elif option.format=='taxoline'-%}
 {%-set comment = option.comment if "comment" in option else None-%}
-{%include('/v2/taxonomy/_import_taxo_mapping.html')%}
+<div data-shared="{{shared}}"></div>
  {%-endif-%}{%-endif-%}
 </div>{%-endif-%}{%-endfor%}
 {%-endmacro-%}
@@ -38,7 +37,7 @@
 {{header_project_job(title ,data, _('How to export data'), nav={"links":export_links,"query":"?target_type=collection&collection_id="+collection_id|string if collection_id|string!="0" and target_type=="collection" else "?projid="+projid|string})}}
 	<em class="block text-sm mt-2">{{_('Global export rules')}} <i data-for="help_global_export_rules" data-request="help" data-what="help"></i></em>
 </div>
-<form method="post" class="js js-submit js-tabs" action="{{request.path}}" data-event="click"  data-toggle=true  data-toggledisable=true enctype=multipart/form-data>
+<form method="post" class="js js-submit js-tabs" action="{{request.path}}" data-event="click"  data-toggle=true  data-toggledisable=true data-toggleshared=true enctype=multipart/form-data>
     <div class="block mb-4">{{display_filters(filters)}}</div>
     <div class="fieldset-wrapper w-full flex flex-row"><input type="hidden" name="collection_id" value="{{collection_id}}"><input type="hidden" name="projid" id="projid" value="{{projid}}">
       {% for type_export,formdata in formdatas.items() %}
@@ -46,6 +45,7 @@
       <div class="tab-content {{'pt-8' if export_type==None}}" id="{{type_export}}"  data-path="{{formdata.path}}"><em class="pb-4 block">{{formdata.legend}} <i data-for="help_export_{{type_export}}" data-request="help" data-what="help"></i></em>
       {{make_part_form(type_export,formdata.datas)}}
     </div></fieldset>{%-endfor-%}
+         <div id="{{shared}}" class="hide">{%include('/v2/taxonomy/_import_taxo_mapping.html')%}</div>
   </div>
       <div class="form-box mb-8 w-auto float-left clear-right">
           <button type="submit" class="button is-primary ">{{_('Start Task')}}</button>

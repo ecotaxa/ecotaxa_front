@@ -60,6 +60,25 @@ function createJsTabs() {
     tabcontents.forEach(tabcontent => {
       if (show === true) tabcontent.classList.remove(css.hide);
       else if (!tab.classList.contains(css.active)) tabcontent.classList.add(css.hide);
+      if (toggleshared) {
+            // for elements shared between tabs and displayed on tab activation
+            tab.querySelectorAll(domselectors.shared).forEach(shared => {
+              const sharedcontent = tab.parentElement.querySelector('#' + shared.dataset.shared);
+              sharedcontent.parent = sharedcontent.parentElement;
+
+              if (show) {
+                sharedcontent.classList.remove(css.hide);
+                shared.append(sharedcontent);
+                replaceLabels(shared, sharedcontent);
+              } else {
+                sharedcontent.classList.add(css.hide);
+                if (sharedcontent.parent) {
+                  sharedcontent.parent.append(sharedcontent);
+                  delete sharedcontent.parent;
+                }
+              }
+            });
+          }
       if (toggledisable === true) {
         tabcontent.querySelectorAll('input, select, button, textarea').forEach(el => {
           if (show) {
@@ -86,25 +105,6 @@ function createJsTabs() {
             window.history.replaceState({
               additionalInformation: 'Updated by jsTabs'
             }, document.title, window.location.origin + tabcontent.dataset.path + window.location.search);
-          }
-          if (toggleshared) {
-            // for elements shared between tabs and displayed on tab activation
-            tab.querySelectorAll(domselectors.shared).forEach(shared => {
-              const sharedcontent = tab.parentElement.querySelector('#' + shared.dataset.shared);
-              sharedcontent.parent = sharedcontent.parentElement;
-
-              if (show) {
-                sharedcontent.classList.remove(css.hide);
-                shared.append(sharedcontent);
-                replaceLabels(shared, sharedcontent);
-              } else {
-                sharedcontent.classList.add(css.hide);
-                if (sharedcontent.parent) {
-                  sharedcontent.parent.append(sharedcontent);
-                  delete sharedcontent.parent;
-                }
-              }
-            });
           }
         }
       }
