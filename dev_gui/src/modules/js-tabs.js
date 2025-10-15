@@ -19,13 +19,13 @@ function createJsTabs() {
       togglewhat = (item.dataset.togglewhat) ? item.dataset.togglewhat : null;
       toggleshared = (item.dataset.toggleshared) ? true : false;
       let l = 0;
+      let idxactive=null;
+      const ev = (item.dataset.event) ? item.dataset.event : 'click';
       btns.forEach((btn, index) => {
         const target = (btn.dataset.target) ? item.querySelector('#' + btn.dataset.target) : btn.closest(domselectors.component.tabs.tab);
+        if (target.classList.contains(css.active)) idxactive=index;
         if (!target) return;
-        const ev = (item.dataset.event) ? item.dataset.event : 'click';
         btn.style.left = l + 'px';
-
-
         l += parseInt(btn.offsetWidth) + 20;
         btn.addEventListener(ev, (e) => {
           if (e.currentTarget.disabled === true) {
@@ -48,8 +48,7 @@ function createJsTabs() {
           toggleTab(target, false);
         }
       });
-      const activeitem= item.querySelector(domselectors.component.tabs.tab,'.'+css.active);
-      if (activeitem) toggleTab(activeitem, true);
+      if (idxactive!==null) btns[idxactive].dispatchEvent(new Event(ev));
       if (!item.dataset.toggle) toggleDisplayListener(item, btns);
       item.jstabs = true;
     }
