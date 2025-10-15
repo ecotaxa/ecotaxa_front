@@ -18,3 +18,5 @@ MAILSERVICE_SALT = "xxxxx"
 BG_SCALE = ''
 #special logo suffix(christmas, easter...)
 LOGO_SPECIAL = '_noel'
+#block upload in several zip parts
+UPLOAD_IN_PARTS = False
