@@ -103,7 +103,7 @@ const funcselector='.js-autocomplete';
         break;
       case models.person:
         option.url = "/gui/search_persons?name=";
-        const personurl="gui/persons/create";
+        const personurl="/gui/persons/create/";
         if (item.dataset.prefix) option.settings.itemprefix=item.dataset.prefix;
         const open_new_person= async function() {
         const response = await fetch(personurl,fetchSettings);

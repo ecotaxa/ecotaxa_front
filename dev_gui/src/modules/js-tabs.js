@@ -48,6 +48,8 @@ function createJsTabs() {
           toggleTab(target, false);
         }
       });
+      const activeitem= item.querySelector(domselectors.component.tabs.tab,'.'+css.active);
+      if (activeitem) toggleTab(activeitem, true);
       if (!item.dataset.toggle) toggleDisplayListener(item, btns);
       item.jstabs = true;
     }
