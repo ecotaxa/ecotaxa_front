@@ -19,12 +19,14 @@ class ExportDarwinCoreJob(ExportJob):
 
     @classmethod
     def job_req(cls):
+        import json
+
         projid, collection_id = cls.get_target_id()
         dry_run = gvp("dry_run") == "1"
         include_predicted = gvp("include_predicted") == "1"
         with_absent = gvp("with_types_row") == "1"
         with_computations = gvpm("with_computations" or [])
-        computations_pre_mapping = gvp("taxo_mapping" or {})
+        computations_pre_mapping = json.loads(gvp("taxo_mapping" or {}))
         if computations_pre_mapping == "{}":
             computations_pre_mapping = {}
         formulae = gvp("formulae" or "")
