@@ -43,7 +43,7 @@ function create_range(node, chars, range) {
             }
         } else {
             for (const lp = 0; lp < node.childNodes.length; lp++) {
-                range = createRange(node.childNodes[lp], chars, range);
+                range = create_range(node.childNodes[lp], chars, range);
                 if (chars.count === 0) {
                    break;
                 }
