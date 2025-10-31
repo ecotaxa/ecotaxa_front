@@ -8,7 +8,7 @@ from werkzeug.datastructures import FileStorage
 
 from appli import gvg, XSSEscape, gvp
 from appli.project import sharedfilter
-from to_back.ecotaxa_cli_py.api import MyfilesApi
+from to_back.ecotaxa_cli_py.api import MyFilesApi
 from to_back.ecotaxa_cli_py.models import JobModel
 from appli.utils import ApiClient
 
@@ -91,7 +91,7 @@ class Job(object):
         uploaded_file: FileStorage = request.files.get("uploadfile")
         if uploaded_file is not None and uploaded_file.filename != "":
             # Relay the file to back-end
-            with ApiClient(MyfilesApi, request) as api:
+            with ApiClient(MyFilesApi, request) as api:
                 # Call using requests, as the generated openapi wrapper only reads the full file in memory.
                 url = (
                     api.api_client.configuration.host + "/user_files/"

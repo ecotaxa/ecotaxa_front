@@ -14,7 +14,6 @@ from to_back.ecotaxa_cli_py import (
     ProjectModel,
     ApiException,
     MinUserModel,
-    UsersApi,
 )
 from to_back.ecotaxa_cli_py.api import (
     AuthentificationApi,
@@ -28,7 +27,6 @@ from to_back.ecotaxa_cli_py.api import (
     TaxonomyTreeApi,
     MiscApi,
     InstrumentsApi,
-    MyfilesApi,
     JobsApi,
     AdminApi,
 )
@@ -47,7 +45,6 @@ A = TypeVar(
     TaxonomyTreeApi,
     MiscApi,
     InstrumentsApi,
-    MyfilesApi,
     JobsApi,
     AdminApi,
 )
