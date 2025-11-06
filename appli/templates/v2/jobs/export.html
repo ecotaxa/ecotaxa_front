@@ -20,7 +20,7 @@
   </div>
   {%- elif option.format=='textarea'-%}
   <label>{{option.label}}{%-if "help" in option -%}<i class="icon-help" data-for="{{'help_export_'+type_export+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%}</label>
-  <textarea class="form-textarea" name="{{name}}" placeholder="{{opt.placeholder if 'placeholder' in option}}" rows="4">{%- if (name=="formulae" and target_obj  and target_obj.formulae is defined and target_obj.formulae!="" ) -%}
+  <textarea class="form-textarea" name="{{name}}" placeholder="{{opt.placeholder if 'placeholder' in option}}" rows="4">{%- if (name=="formulae" and target_obj  and target_obj.formulae is defined and target_obj.formulae!="" and target_obj.formulae!=None) -%}
 {{target_obj.formulae}}
 {%-else-%}{{datas[name][0] if name in datas}}{%-endif-%}</textarea>
   {%- elif option.format=='taxoline'-%}
