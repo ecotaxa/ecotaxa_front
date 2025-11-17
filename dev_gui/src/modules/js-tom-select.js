@@ -457,10 +457,10 @@ const funcselector='.js-autocomplete';
             el.click();
         } ;
         ts.on('item_add', (v,el)=> {
-            if(refresh!==null) refresh(ts.items.join(','));
+            if(refresh!==null  && !item.dataset.hasOwnProperty("noaction")) refresh(ts.items.join(','));
             });
             ts.on('item_remove', (v,el)=> {
-            if(refresh!==null) refresh(ts.items.join(','));
+            if(refresh!==null && !item.dataset.hasOwnProperty("noaction")) refresh(ts.items.join(','));
             });
           }
           break;

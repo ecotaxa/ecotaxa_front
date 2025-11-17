@@ -82,7 +82,7 @@
               <div class="w-full tab-content mt-0">
           <div class="form-box">
             <div >{{ pick_from_other( (sourceid == 0),key='project',modal_title=_('Add or remove projects'), sourceid=sourceid) }}<label for="project_ids">{{_('Projects')}}<i data-for="help_collection_projects" data-request="help"></i></label></div>
-            <select id="project_ids" name="project_ids[]" data-type="project" data-refresh="refresh_aggregated" data-importfield="projid" class="js js-autocomplete form-multiselect project" multiple autocomplete=off required><option value="0">{{_('Select projects')}}</option>
+            <select id="project_ids" name="project_ids[]" data-type="project" data-refresh="refresh_aggregated" data-noaction data-importfield="projid" class="js js-autocomplete form-multiselect project" multiple autocomplete=off required><option value="0">{{_('Select projects')}}</option>
      {% for p in projectlist %}
               <option value="{{ p.id }}"  selected="selected">{{ p.title }}</option>
               {% endfor %}
