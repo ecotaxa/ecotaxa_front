@@ -92,7 +92,16 @@ is-done
           {% endfor %}
         </ul></div></div>
       </td>
-    </tr><tr><td colspan="2" class="ml-2 text-left ""><a class="font-btn triggershow" data-action="toggle"  data-target=".togglecollapse" data-show="{{_('View')}}" data-hide="{{_('Hide')}}">{{_('internal details')}}</a></td></tr>
+    </tr>{%-if "wrns" in job.result -%} <tr>
+      <th>{{_('Warnings')}} </th>
+      <td><div id="job-warnings"><ul>
+          {% for e in job.result["wrns"] %}
+            <li >{{ e }}</li>
+          {% endfor %}
+        </ul>
+          </div>
+      </td>
+    </tr>{%-endif-%}<tr><td colspan="2" class="ml-2 text-left ""><a class="font-btn triggershow" data-action="toggle"  data-target=".togglecollapse" data-show="{{_('View')}}" data-hide="{{_('Hide')}}">{{_('internal details')}}</a></td></tr>
     <tr class="togglecollapse">
       <th>{{_('Input Parameters')}}</th>
       <td>{{ job.params|string }}</td>
