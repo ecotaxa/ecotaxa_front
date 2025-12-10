@@ -11,7 +11,13 @@
     {{ v['htmldisplayname'] }}
 </span>
         <span class="taxoparent">{{ v['taxoparent']|safe }}</span>
-
+        {% if v['guide']>0 %}
+        <a href="https://ecotaxoguide.imev-mer.fr/taxonomic-sheets/{{v['guide']}}#"
+           target="_blank" onclick="event.stopImmediatePropagation();" class="taxo-guide-link"
+           title="Open EcoTaxoGuide" aria-label="Go to Guide">
+        &nbsp;<span class="glyphicon glyphicon-eye-open" style="color: #999"></span>&nbsp;
+        </a>
+        {% endif %}
         <div class="counterarea">
           <span class="counter label label-success">{{ v['nbr_v'] }}</span>
           {% if v['nbr_p']>0 %}

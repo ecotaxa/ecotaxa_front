@@ -360,3 +360,26 @@ textarea.parsley-error {
 .At2PopupContent {  padding:10px; }
 .ui-datepicker { z-index: 10000 !important; } /*Requis pour fonctionnement dans une popup*/
 .ui-front { z-index: 10000 !important; } /*Requis pour fonctionnement dans une popup de autocomplete*/
+
+/* Style for the taxonomy guide link (eye icon) */
+a.taxo-guide-link,
+a.taxo-guide-link:link,
+a.taxo-guide-link:visited {
+  text-decoration: none;
+  border-bottom: none;
+}
+
+a.taxo-guide-link:hover,
+a.taxo-guide-link:focus {
+  text-decoration: none; /* remove default underline on hover/focus */
+}
+
+/* Visual feedback on hover */
+a.taxo-guide-link .glyphicon {
+  transition: color 150ms ease, transform 150ms ease;
+}
+
+a.taxo-guide-link:hover .glyphicon {
+  color: #666 !important; /* slightly darker than the default inline #999 */
+  transform: scale(1.12);
+}
