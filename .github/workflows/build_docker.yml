@@ -25,6 +25,7 @@ jobs:
       - name: Build and push frontend
         uses: docker/build-push-action@v6
         with:
+          context: "{{defaultContext}}:docker"
           push: true
           tags: ecotaxa/ecotaxa_front:${{github.ref_name}}
-          file: ./docker/prod_image/Dockerfile
+          file: prod_image/Dockerfile
