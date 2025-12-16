@@ -1,4 +1,4 @@
-FROM ubuntu:20.04 as builder
+FROM ubuntu:20.04 AS builder
 
 MAINTAINER grololo06 <grololo06@users.noreply.github.com>
 
