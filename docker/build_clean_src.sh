@@ -11,5 +11,5 @@ rsync -avr \
   --exclude-from=not_in_git.lst \
   --delete-excluded \
   .. py/
-cp -ar ../docker/prod_image/*.* py
+rsync ./prod_image/*.* py/docker
 echo "Clean build source prepared in docker/py"
