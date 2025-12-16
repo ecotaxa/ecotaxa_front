@@ -34,6 +34,7 @@ class TaxaSearchRsp(object):
     """
     openapi_types = {
         'id': 'int',
+        'aphia_id': 'int',
         'renm_id': 'int',
         'text': 'str',
         'pr': 'int'
@@ -41,24 +42,28 @@ class TaxaSearchRsp(object):
 
     attribute_map = {
         'id': 'id',
+        'aphia_id': 'aphia_id',
         'renm_id': 'renm_id',
         'text': 'text',
         'pr': 'pr'
     }
 
-    def __init__(self, id=None, renm_id=None, text=None, pr=None, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, id=None, aphia_id=None, renm_id=None, text=None, pr=None, local_vars_configuration=None):  # noqa: E501
         """TaxaSearchRsp - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
         self.local_vars_configuration = local_vars_configuration
 
         self._id = None
+        self._aphia_id = None
         self._renm_id = None
         self._text = None
         self._pr = None
         self.discriminator = None
 
         self.id = id
+        if aphia_id is not None:
+            self.aphia_id = aphia_id
         if renm_id is not None:
             self.renm_id = renm_id
         self.text = text
@@ -88,6 +93,29 @@ class TaxaSearchRsp(object):
             raise ValueError("Invalid value for `id`, must not be `None`")  # noqa: E501
 
         self._id = id
+
+    @property
+    def aphia_id(self):
+        """Gets the aphia_id of this TaxaSearchRsp.  # noqa: E501
+
+        The Worms aphia_id of the taxon.  # noqa: E501
+
+        :return: The aphia_id of this TaxaSearchRsp.  # noqa: E501
+        :rtype: int
+        """
+        return self._aphia_id
+
+    @aphia_id.setter
+    def aphia_id(self, aphia_id):
+        """Sets the aphia_id of this TaxaSearchRsp.
+
+        The Worms aphia_id of the taxon.  # noqa: E501
+
+        :param aphia_id: The aphia_id of this TaxaSearchRsp.  # noqa: E501
+        :type: int
+        """
+
+        self._aphia_id = aphia_id
 
     @property
     def renm_id(self):

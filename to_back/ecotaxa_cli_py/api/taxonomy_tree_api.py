@@ -36,17 +36,19 @@ class TaxonomyTreeApi(object):
             api_client = ApiClient()
         self.api_client = api_client
 
-    def add_taxon_in_central(self, name, parent_id, taxotype, creator_email, **kwargs):  # noqa: E501
+    def add_taxon_in_central(self, name, aphia_id, rank, parent_id, taxotype, creator_email, **kwargs):  # noqa: E501
         """Add Taxon In Central  # noqa: E501
 
         **Create a taxon** on EcoTaxoServer.  🔒 Logged user must be manager (on any project) or application admin.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.add_taxon_in_central(name, parent_id, taxotype, creator_email, async_req=True)
+        >>> thread = api.add_taxon_in_central(name, aphia_id, rank, parent_id, taxotype, creator_email, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
         :param str name: The taxon/category verbatim name. (required)
+        :param int aphia_id: Worms Aphia Id (required)
+        :param str rank: The Worms rank (required)
         :param int parent_id: It's not possible to create a root taxon. (required)
         :param str taxotype: The taxon type, 'M' for Morpho or 'P' for Phylo. (required)
         :param str creator_email: The email of the taxo creator. (required)
@@ -64,19 +66,21 @@ class TaxonomyTreeApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.add_taxon_in_central_with_http_info(name, parent_id, taxotype, creator_email, **kwargs)  # noqa: E501
+        return self.add_taxon_in_central_with_http_info(name, aphia_id, rank, parent_id, taxotype, creator_email, **kwargs)  # noqa: E501
 
-    def add_taxon_in_central_with_http_info(self, name, parent_id, taxotype, creator_email, **kwargs):  # noqa: E501
+    def add_taxon_in_central_with_http_info(self, name, aphia_id, rank, parent_id, taxotype, creator_email, **kwargs):  # noqa: E501
         """Add Taxon In Central  # noqa: E501
 
         **Create a taxon** on EcoTaxoServer.  🔒 Logged user must be manager (on any project) or application admin.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.add_taxon_in_central_with_http_info(name, parent_id, taxotype, creator_email, async_req=True)
+        >>> thread = api.add_taxon_in_central_with_http_info(name, aphia_id, rank, parent_id, taxotype, creator_email, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
         :param str name: The taxon/category verbatim name. (required)
+        :param int aphia_id: Worms Aphia Id (required)
+        :param str rank: The Worms rank (required)
         :param int parent_id: It's not possible to create a root taxon. (required)
         :param str taxotype: The taxon type, 'M' for Morpho or 'P' for Phylo. (required)
         :param str creator_email: The email of the taxo creator. (required)
@@ -100,6 +104,8 @@ class TaxonomyTreeApi(object):
 
         all_params = [
             'name',
+            'aphia_id',
+            'rank',
             'parent_id',
             'taxotype',
             'creator_email',
@@ -127,6 +133,14 @@ class TaxonomyTreeApi(object):
         if self.api_client.client_side_validation and ('name' not in local_var_params or  # noqa: E501
                                                         local_var_params['name'] is None):  # noqa: E501
             raise ApiValueError("Missing the required parameter `name` when calling `add_taxon_in_central`")  # noqa: E501
+        # verify the required parameter 'aphia_id' is set
+        if self.api_client.client_side_validation and ('aphia_id' not in local_var_params or  # noqa: E501
+                                                        local_var_params['aphia_id'] is None):  # noqa: E501
+            raise ApiValueError("Missing the required parameter `aphia_id` when calling `add_taxon_in_central`")  # noqa: E501
+        # verify the required parameter 'rank' is set
+        if self.api_client.client_side_validation and ('rank' not in local_var_params or  # noqa: E501
+                                                        local_var_params['rank'] is None):  # noqa: E501
+            raise ApiValueError("Missing the required parameter `rank` when calling `add_taxon_in_central`")  # noqa: E501
         # verify the required parameter 'parent_id' is set
         if self.api_client.client_side_validation and ('parent_id' not in local_var_params or  # noqa: E501
                                                         local_var_params['parent_id'] is None):  # noqa: E501
@@ -147,6 +161,10 @@ class TaxonomyTreeApi(object):
         query_params = []
         if 'name' in local_var_params and local_var_params['name'] is not None:  # noqa: E501
             query_params.append(('name', local_var_params['name']))  # noqa: E501
+        if 'aphia_id' in local_var_params and local_var_params['aphia_id'] is not None:  # noqa: E501
+            query_params.append(('aphia_id', local_var_params['aphia_id']))  # noqa: E501
+        if 'rank' in local_var_params and local_var_params['rank'] is not None:  # noqa: E501
+            query_params.append(('rank', local_var_params['rank']))  # noqa: E501
         if 'parent_id' in local_var_params and local_var_params['parent_id'] is not None:  # noqa: E501
             query_params.append(('parent_id', local_var_params['parent_id']))  # noqa: E501
         if 'taxotype' in local_var_params and local_var_params['taxotype'] is not None:  # noqa: E501
@@ -173,6 +191,124 @@ class TaxonomyTreeApi(object):
 
         return self.api_client.call_api(
             '/taxon/central', 'PUT',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='object',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=local_var_params.get('async_req'),
+            _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501
+            _preload_content=local_var_params.get('_preload_content', True),
+            _request_timeout=local_var_params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def add_worms_taxon(self, taxo_worms_model, **kwargs):  # noqa: E501
+        """Add Worms Taxon  # noqa: E501
+
+        add worms taxon with or without lineage information  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.add_worms_taxon(taxo_worms_model, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool: execute request asynchronously
+        :param TaxoWormsModel taxo_worms_model: (required)
+        :param _preload_content: if False, the urllib3.HTTPResponse object will
+                                 be returned without reading/decoding response
+                                 data. Default is True.
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :return: object
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        return self.add_worms_taxon_with_http_info(taxo_worms_model, **kwargs)  # noqa: E501
+
+    def add_worms_taxon_with_http_info(self, taxo_worms_model, **kwargs):  # noqa: E501
+        """Add Worms Taxon  # noqa: E501
+
+        add worms taxon with or without lineage information  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.add_worms_taxon_with_http_info(taxo_worms_model, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool: execute request asynchronously
+        :param TaxoWormsModel taxo_worms_model: (required)
+        :param _return_http_data_only: response data without head status code
+                                       and headers
+        :param _preload_content: if False, the urllib3.HTTPResponse object will
+                                 be returned without reading/decoding response
+                                 data. Default is True.
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :return: tuple(object, status_code(int), headers(HTTPHeaderDict))
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        local_var_params = locals()
+
+        all_params = [
+            'taxo_worms_model'
+        ]
+        all_params.extend(
+            [
+                'async_req',
+                '_return_http_data_only',
+                '_preload_content',
+                '_request_timeout'
+            ]
+        )
+
+        for key, val in six.iteritems(local_var_params['kwargs']):
+            if key not in all_params:
+                raise ApiTypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method add_worms_taxon" % key
+                )
+            local_var_params[key] = val
+        del local_var_params['kwargs']
+        # verify the required parameter 'taxo_worms_model' is set
+        if self.api_client.client_side_validation and ('taxo_worms_model' not in local_var_params or  # noqa: E501
+                                                        local_var_params['taxo_worms_model'] is None):  # noqa: E501
+            raise ApiValueError("Missing the required parameter `taxo_worms_model` when calling `add_worms_taxon`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        if 'taxo_worms_model' in local_var_params:
+            body_params = local_var_params['taxo_worms_model']
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/json'])  # noqa: E501
+
+        # HTTP header `Content-Type`
+        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
+            ['application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = ['BearerOrCookieAuth']  # noqa: E501
+
+        return self.api_client.call_api(
+            '/addworms/', 'POST',
             path_params,
             query_params,
             header_params,
@@ -1298,6 +1434,120 @@ class TaxonomyTreeApi(object):
             post_params=form_params,
             files=local_var_files,
             response_type='list[TaxaSearchRsp]',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=local_var_params.get('async_req'),
+            _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501
+            _preload_content=local_var_params.get('_preload_content', True),
+            _request_timeout=local_var_params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def search_worms_name(self, name, **kwargs):  # noqa: E501
+        """Search Worms Name  # noqa: E501
+
+        Information about a single taxon in WoRMS reference, including its lineage.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.search_worms_name(name, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool: execute request asynchronously
+        :param str name: (required)
+        :param _preload_content: if False, the urllib3.HTTPResponse object will
+                                 be returned without reading/decoding response
+                                 data. Default is True.
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :return: list[object]
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        return self.search_worms_name_with_http_info(name, **kwargs)  # noqa: E501
+
+    def search_worms_name_with_http_info(self, name, **kwargs):  # noqa: E501
+        """Search Worms Name  # noqa: E501
+
+        Information about a single taxon in WoRMS reference, including its lineage.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.search_worms_name_with_http_info(name, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool: execute request asynchronously
+        :param str name: (required)
+        :param _return_http_data_only: response data without head status code
+                                       and headers
+        :param _preload_content: if False, the urllib3.HTTPResponse object will
+                                 be returned without reading/decoding response
+                                 data. Default is True.
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :return: tuple(list[object], status_code(int), headers(HTTPHeaderDict))
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        local_var_params = locals()
+
+        all_params = [
+            'name'
+        ]
+        all_params.extend(
+            [
+                'async_req',
+                '_return_http_data_only',
+                '_preload_content',
+                '_request_timeout'
+            ]
+        )
+
+        for key, val in six.iteritems(local_var_params['kwargs']):
+            if key not in all_params:
+                raise ApiTypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method search_worms_name" % key
+                )
+            local_var_params[key] = val
+        del local_var_params['kwargs']
+        # verify the required parameter 'name' is set
+        if self.api_client.client_side_validation and ('name' not in local_var_params or  # noqa: E501
+                                                        local_var_params['name'] is None):  # noqa: E501
+            raise ApiValueError("Missing the required parameter `name` when calling `search_worms_name`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+        if 'name' in local_var_params:
+            path_params['name'] = local_var_params['name']  # noqa: E501
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = ['BearerOrCookieAuth']  # noqa: E501
+
+        return self.api_client.call_api(
+            '/searchworms/{name}', 'GET',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='list[object]',  # noqa: E501
             auth_settings=auth_settings,
             async_req=local_var_params.get('async_req'),
             _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501

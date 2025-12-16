@@ -30,6 +30,8 @@
                     };
                 },
                 processResults: function (data, page) {
+                    // Worms always possible to add a category
+                    if (data.length) {data.push({id:0,text:'Create a category...'})}
                     // If a function was registered for call just after query, schedule it now
                     const todo = the_sel2.data('todo_after_ajax');
                     if (todo) {
@@ -45,14 +47,16 @@
             language: {
                 noResults: function () {
                     {% if g.TaxonCreator %}
-                        var msg = "<a href=\"javascript:PostDynForm('/taxo/browse/?fromprj={{ g.Projid }}')\" >Create category</a>";
+                        //var msg = "<a href=\"javascript:PostDynForm('/taxo/create/?fromprj={{ g.Projid }}')\" >Create category</a>";
+                        const term = the_sel2.data('select2').dropdown.$search.val() ;
+                        var msg ="<a href=\"javascript:At2PopupWaitOpenLoad(0,'/taxo/searchworms/"+term+"?fromprj={{ g.Projid }}','Create new taxon')\" >Create category</a>";
                     {% else %}
                         var msg = "<a href=\"mailto:{{ g.manager_mail }}\">Request category</a>";
                     {% endif %}
                     return $("<span>No recent/result found. " + msg + "</span>");
                 }
             }
-        }); // Select2 Ajax
+        });
     }
 
     function SetTaxolbValue(selector, taxoid, taxoname) {

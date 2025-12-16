@@ -257,9 +257,8 @@ import appli.project.emodnet
 import appli.jobs.views
 from appli.gui.commontools import new_ui_error
 
+
 # error handlers
-
-
 @app.errorhandler(404)
 def not_found(e):
     return new_ui_error(e)
@@ -335,11 +334,11 @@ def JinjaGetUsersManagerList(sujet=""):
     )
 
 
-ecotaxa_version = "2.8.5"
+ecotaxa_version = "2.8.6"
 
 
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version + ".2025-11-27"
+    return ecotaxa_version + ".2025-12-16"
 
 
 app.jinja_env.filters["datetime"] = JinjaFormatDateTime

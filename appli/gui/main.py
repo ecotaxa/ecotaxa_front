@@ -635,6 +635,9 @@ def utility_processor():
     def all_in_one() -> bool:
         return get_back_constants("ALL_IN_ONE")
 
+    def taxoserver_url() -> str:
+        return get_back_constants("TAXOSERVER_URL")
+
     return dict(
         message_translation=message_translation,
         unique_id=unique_id,
@@ -654,4 +657,5 @@ def utility_processor():
         days_to_live=days_to_live,
         upload_in_parts=upload_in_parts,
         all_in_one=all_in_one,
+        taxoserver_url=taxoserver_url,
     )

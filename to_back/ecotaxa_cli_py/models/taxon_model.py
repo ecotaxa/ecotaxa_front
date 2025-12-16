@@ -34,6 +34,7 @@ class TaxonModel(object):
     """
     openapi_types = {
         'id': 'int',
+        'aphia_id': 'int',
         'renm_id': 'int',
         'name': 'str',
         'type': 'str',
@@ -47,6 +48,7 @@ class TaxonModel(object):
 
     attribute_map = {
         'id': 'id',
+        'aphia_id': 'aphia_id',
         'renm_id': 'renm_id',
         'name': 'name',
         'type': 'type',
@@ -58,13 +60,14 @@ class TaxonModel(object):
         'children': 'children'
     }
 
-    def __init__(self, id=None, renm_id=None, name=None, type=None, nb_objects=None, nb_children_objects=None, display_name=None, lineage=None, id_lineage=None, children=None, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, id=None, aphia_id=None, renm_id=None, name=None, type=None, nb_objects=None, nb_children_objects=None, display_name=None, lineage=None, id_lineage=None, children=None, local_vars_configuration=None):  # noqa: E501
         """TaxonModel - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
         self.local_vars_configuration = local_vars_configuration
 
         self._id = None
+        self._aphia_id = None
         self._renm_id = None
         self._name = None
         self._type = None
@@ -77,6 +80,8 @@ class TaxonModel(object):
         self.discriminator = None
 
         self.id = id
+        if aphia_id is not None:
+            self.aphia_id = aphia_id
         if renm_id is not None:
             self.renm_id = renm_id
         self.name = name
@@ -112,6 +117,29 @@ class TaxonModel(object):
             raise ValueError("Invalid value for `id`, must not be `None`")  # noqa: E501
 
         self._id = id
+
+    @property
+    def aphia_id(self):
+        """Gets the aphia_id of this TaxonModel.  # noqa: E501
+
+        The Worms aphia_id of the taxon.  # noqa: E501
+
+        :return: The aphia_id of this TaxonModel.  # noqa: E501
+        :rtype: int
+        """
+        return self._aphia_id
+
+    @aphia_id.setter
+    def aphia_id(self, aphia_id):
+        """Sets the aphia_id of this TaxonModel.
+
+        The Worms aphia_id of the taxon.  # noqa: E501
+
+        :param aphia_id: The aphia_id of this TaxonModel.  # noqa: E501
+        :type: int
+        """
+
+        self._aphia_id = aphia_id
 
     @property
     def renm_id(self):

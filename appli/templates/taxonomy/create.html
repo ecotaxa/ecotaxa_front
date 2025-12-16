@@ -1,0 +1,110 @@
+{% import 'ht_macros.html' as ht %}
+              <style>
+                  #At2PopupWindow0 .At2PopupWindow {
+                      width: 1000px
+                             }
+              </style>
+
+<form id="formcreatetaxon" method="post" action="?"><div class="panel panel-default text-warning" style="padding: 5px; font-size:large">
+      Once created, a taxon can never be deleted. <br>
+      If you really want to create a new taxon, please carefully review the information below before submitting.<br>
+    </div>
+    <div><span>Create a Worms category
+        <i class="fas fa-info-circle"
+           data-content="Search taxon name"></i>
+      </span>{{ ht.InputText('taxosearchname', searchname ,
+                extrataginfo=("class=form-control maxlength=100  "
+                )|safe) }} <button type="button" onclick="const searchurl='{{url_for('routetaxosearchworms',name='')}}'+$('#taxosearchname').val();loadUrl(searchurl,'GET',null,null,{},'... requesting Worms API ...')" class="btn btn-blue"><i class="fa fa-search"></i> Search
+        </button></div>
+    <div><div id="resulttaxocentral"></div></div>
+    <div>{%-if taxons-%}
+    <p style="padding-bottom:8px">{{_('Select a Worms taxon name in the list to add it to the Taxonomy EcoTaxoServer.')}}<br>{{_('Taxons with an id already exists in EcoTaxoServer.')}}</p>
+        <ul>{%- for taxon in taxons -%}
+    <li>{%-if "id" in taxon -%}{{taxon["name"]}} (id:{{taxon["id"]}}) {%-else-%}<a onclick="createWormsTaxon(JSON.stringify({{taxon}}))")">{{taxon["name"]}} </a>{%-endif-%}
+    {%-for parent in taxon["lineage"].values()-%}&nbsp;&lt;&nbsp;{{parent["scientificname"]}}{%-endfor-%}  &nbsp;&lt;status: {{taxon["status"]}}&gt;</li>
+    {%-endfor-%}</ul>{%-else-%}{{_('No result')}}{%-endif-%}
+    <p><a href="#" onclick="loadUrl('{{url_for('route_add_taxon')}}')">{{_('Or create a non Worms taxon')}}</a></p>
+</div>
+    <div><button type="button" onclick="At2PopupClose(0);" class="btn btn-gris"><i class="fa fa-times"></i> Close
+        </button></div></form>
+    <script>
+        const restaxocentral= $('#resulttaxocentral');
+        const searchurl="{{url_for('routetaxosearch',name=searchname)}}";
+        console.log('searchurl',searchurl);
+        if (restaxocentral) {
+        loadUrl("{{url_for('routetaxodosync')}}","POST",restaxocentral,function() {  //do not load existing taxons - add datediff to limit the list - loadUrl(searchurl,"GET",restaxocentral,displaytaxons);
+        });
+        }
+
+         function createWormsTaxon(taxon) {
+            taxon=JSON.parse(taxon);
+            const formu = $("#formcreatetaxon");
+            formu.attr("action","{{url_for('addtaxoworms')}}");
+            const data= {taxon:JSON.stringify(taxon)};
+            $.post("{{url_for('addtaxoworms')}}",data).done(function(data) {
+                const response = $.parseJSON(data.responseJSON.body);
+                $('<h4>').attr('class','text-success').html(response.success).insertBefore(formu);
+                formu.remove();
+            }).fail(function(err) {
+                if (err.status !==422) $('<h4>').attr('class','text-danger').html('error '+ err.status +' - ' +err.statusText).insertBefore(formu);
+                else { const response = $.parseJSON(err.responseJSON.body);
+                $('<h4>').attr('class','text-danger').html(response.error).insertBefore(formu);}
+                });
+        }
+
+        function addtoselect2(id,name) {
+        sel2=$("#taxolbanno");
+        if (sel2) {
+                if (sel2.find("option[value='" + id + "']").length) {
+                    sel2.val(id).trigger('change');
+                } else {
+                    // Create a DOM Option and pre-select by default
+                    const newOption = new Option(name, id, true, true);
+                    // Append it to the select
+                    sel2.append(newOption).trigger('change');
+                }
+                // Select event in the dropdown
+                  AssignTaxoLbToSelection(id, name);
+                  // Keep memory of current val & text, as they will be erased at next opening, just above.
+                  sel2.data('saved_val', id);
+                  sel2.data('saved_text',name);
+                }
+        At2PopupClose(0);
+        }
+
+        function displaytaxons(data,element) {
+            data=JSON.parse(data);
+            if(data.length) $("<p>").append(document.createTextNode("{{_('Taxons in EcoTaxoServer')}}")).appendTo(element);
+            const items = [];
+            $.each( data, function( i,item ) {
+            if (item.aphia_id!==null) aphiaid=" ("+item.aphia_id+")";
+            else aphiaid='';
+            items.push( "<li onclick=\"addtoselect2("+item.id+",'"+item.name+"')\">" + item.name.replace('+','&lt;') + aphiaid + "</li>" );
+            });
+            $( "<ul/>", {
+            "class": "taxon-list",
+            html: items.join( "" )
+            }).appendTo( element );
+        }
+
+        function loadUrl(url,method='GET',element=null,callback=null,data={},wait="...") {
+            if (element===null) element = $('#At2PopupWindow0 .At2PopupContent');
+            $.ajax(url, {
+            data: data,
+            type: method,
+            beforeSend: function() {
+            if(element) element.html(wait);
+            },
+            error: function(err) {
+                if (element) element.html('');
+                if(element) element.append($('h4').addClass("text-danger").html('error '+ err.status +' - ' +err.statusText));
+            },
+            success: function(data) {
+                if (element) element.html('');
+                if(callback!==null) callback(data,element);
+                else if(element) element.html(data);
+            }
+            });
+        }
+
+    </script>

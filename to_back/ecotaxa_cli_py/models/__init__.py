@@ -96,6 +96,7 @@ from to_back.ecotaxa_cli_py.models.summary_export_quantities_options_enum import
 from to_back.ecotaxa_cli_py.models.summary_export_req import SummaryExportReq
 from to_back.ecotaxa_cli_py.models.summary_export_sum_options_enum import SummaryExportSumOptionsEnum
 from to_back.ecotaxa_cli_py.models.taxa_search_rsp import TaxaSearchRsp
+from to_back.ecotaxa_cli_py.models.taxo_worms_model import TaxoWormsModel
 from to_back.ecotaxa_cli_py.models.taxon_central import TaxonCentral
 from to_back.ecotaxa_cli_py.models.taxon_model import TaxonModel
 from to_back.ecotaxa_cli_py.models.taxon_usage_model import TaxonUsageModel

@@ -20,6 +20,7 @@ from appli.constants import (
     SortableObjectFields,
     MappableParentColumns,
     ClassifQual,
+    TaxoType,
 )
 from appli.project.widgets import ClassificationPageStats, PopoverPane
 from appli.search.leftfilters import getcommonfilters
@@ -518,6 +519,7 @@ def indexPrj(PrjId):
         leftb=filtertab,
         data=data,
         title="EcoTaxa " + ntcv(proj.title),
+        TaxoType=TaxoType,
     )
 
 

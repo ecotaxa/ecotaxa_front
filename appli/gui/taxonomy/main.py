@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from json import JSONEncoder
 from typing import List
-from flask import render_template, json, jsonify, request, make_response
+from flask import render_template, json, flash, request, make_response
 from flask_login import current_user, login_required
-from appli import app, gvg, gvp
+from appli import app, gvg, FAIcon
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py.api import TaxonomyTreeApi
 from to_back.ecotaxa_cli_py.models import TaxaSearchRsp, TaxonModel
@@ -114,3 +114,61 @@ def gui_taxonomy_graph():
 @app.route("/gui/taxonomy/worms")
 def gui_taxonomy_worms():
     return render_template("v2/taxonomy/worms.html")
+
+
+@app.route("/gui/taxo/browse/", methods=["GET", "POST"])
+@login_required
+def gui_taxo_browse():
+    """
+    Browse, i.e. display local taxa. This is a dynamic API-based table.
+    """
+    do_full_sync(do_flash=True)
+    fromurl = ""
+    fromtext = ""
+    if gvg("fromprj"):
+        fromurl = url_for("gui_prj_classif", projid=gvg("fromprj"))
+        fromtext = "Back to project %s" % gvg("fromprj")
+    elif gvg("fromtask"):
+        fromurl = url_for("gui_job_question", job_id=gvg("fromtask"))
+        fromtext = "Back to importation task %s" % gvg("fromtask")
+
+    return render_template(
+        "/v2/taxonomy/browse.html",
+        fromurl=fromurl,
+        fromtext=fromtext,
+        create_ok=is_admin_or_project_creator(),
+    )
+
+
+def is_admin_or_project_creator() -> bool:
+    user = current_user.api_user
+    return (1 in user.can_do) or (2 in user.can_do)
+
+
+def do_sync_stat_update():
+    """
+    Update EcoTaxoServer with statistics about current node usage.
+    """
+    with ApiClient(TaxonomyTreeApi, request) as api:
+        ret = api.push_taxa_stats_in_central()
+    return ret["msg"]
+
+
+def do_full_sync(do_flash: bool):
+    with ApiClient(TaxonomyTreeApi, request) as api:
+        ret = api.pull_taxa_update_from_central()
+    if ret["error"]:
+        msg = str(ret["error"])
+        if do_flash:
+            flash(msg, "error")
+    else:
+        ins, upd = ret["inserts"], ret["updates"]
+        if ins != 0 or upd != 0:
+            msg = "Taxonomy is now in sync, after {} addition(s) and {} update(s).".format(
+                ins, upd
+            )
+        else:
+            msg = "No update needed, Taxonomy was in sync already."
+        if do_flash:
+            flash(msg, "success")
+    return msg

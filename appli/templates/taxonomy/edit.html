@@ -57,6 +57,11 @@
       <th>Display Name</th>
       <td colspan="5">{{ taxon.display_name }}</td>
     </tr>
+    {%- if taxon and taxon.aphia_id-%}
+     <tr>
+      <th>Aphia ID</th>
+      <td colspan="5">{{ taxon.aphia_id }}</td>
+    </tr>{%-endif-%}
     <tr>
       <th>Parent</th>
       <td colspan="5">
@@ -163,7 +168,8 @@
 
 </style>
 <script>
-    $(".taxolbpop").select2({
+    const taxolbpop = $(".taxolbpop");
+    taxolbpop.select2({
         ajax: {
             url: "/search/taxo",
             dataType: 'json',
@@ -172,13 +178,38 @@
                 return {q: params.term, page: params.page};
             },
             processResults: function (data, page) {
+                if (data.length) {data.push({id:0,text:'Create a category...'})}
                 return {results: data};
             },
             cache: true
         },
-        minimumInputLength: 3
+        minimumInputLength: 3,
         /*,allowClear:true know bug on it #5394*/
-    }); // Select2 Ajax
+          language: {
+                noResults: function () {
+                    {% if g.TaxonCreator %}
+                        const term = taxolbpop.data('select2').dropdown.$search.val() ;
+                        var msg ="<a href=\"javascript:At2PopupWaitOpenLoad(0,'/taxo/searchworms/"+term+"?fromprj={{ g.Projid }}','Create new taxon')\" >Create category</a>";
+                    {% else %}
+                        var msg = "<a href=\"mailto:{{ g.manager_mail }}\">Request category</a>";
+                    {% endif %}
+                    return $("<span>No recent/result found. " + msg + "</span>");
+                }
+            }
+    });
+    var term=null;
+    taxolbpop.on('select2:selecting', function(e) {term = taxolbpop.data('select2').dropdown.$search.val() ;});
+    taxolbpop.on("select2:select", function (e) {
+                  // Chosen line
+                  const choice = e.params.data;
+                  // check if create category
+                  if(choice.id===0) {
+                  taxolbpop.val(null).trigger("change");
+                  At2PopupWaitOpenLoad(0,"/taxo/searchworms/"+term,"Create new taxon");
+                  return;}
+              });
+
+    // Select2 Ajax
     window.Parsley.addValidator('sourcedesc', {
         validateString: function (value) {
             if ($('#taxotype').val() != 'M') return true;

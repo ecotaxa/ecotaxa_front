@@ -236,7 +236,7 @@
                 <div class="input-group">
                   <!--suppress HtmlFormInputWithoutLabel -->
                   <select id="taxolbanno" name="taxolbanno" style="width: 185px" class='taxolb'
-                          autocomplete="off"> </select>
+                          autocomplete="off"></select>
                   <span class="input-group-btn">
                   <button class="btn btn-default btn-sm" type="button"
                           data-toggle="modal" data-target="#TaxoModal" data-mytargetid="taxolbanno"
@@ -1404,10 +1404,10 @@
           }
 
           $(document).ready(function () {
-
+               var term=null;
               {# Le fait de choisir un item fait l'assignation/CTRL+D #}
               const sel2 = $('#taxolbanno');
-              sel2.on("select2:opening", function () {
+              sel2.on("select2:opening", function (e) {
                   const selection = sel2.data('saved_text');
                   if (!selection) return;
                   // Clear the value. We clear because otherwise:
@@ -1419,9 +1419,15 @@
                   rdr.text(" " + selection);
                   rdr.title = selection;
               });
+              sel2.on('select2:selecting', function(e) {term = sel2.data('select2').dropdown.$search.val() ;});
               sel2.on("select2:select", function (e) {
                   // Chosen line
                   const choice = e.params.data;
+                  // check if create category
+                  if(choice.id===0) {
+                  sel2.val(null).trigger("change");
+                  At2PopupWaitOpenLoad(0,"/taxo/searchworms/"+term,"Create new taxon");
+                  return;}
                   // Select event in the dropdown
                   AssignTaxoLbToSelection(choice.id, choice.text);
                   // Keep memory of current val & text, as they will be erased at next opening, just above.
@@ -1564,5 +1570,4 @@
       });
 
   </script>
-
 {% endblock %}

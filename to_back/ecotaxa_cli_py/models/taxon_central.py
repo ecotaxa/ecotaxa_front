@@ -35,8 +35,9 @@ class TaxonCentral(object):
     openapi_types = {
         'id': 'int',
         'parent_id': 'int',
+        'aphia_id': 'int',
+        'rank': 'str',
         'name': 'str',
-        'id_source': 'str',
         'taxotype': 'str',
         'display_name': 'str',
         'lastupdate_datetime': 'datetime',
@@ -54,8 +55,9 @@ class TaxonCentral(object):
     attribute_map = {
         'id': 'id',
         'parent_id': 'parent_id',
+        'aphia_id': 'aphia_id',
+        'rank': 'rank',
         'name': 'name',
-        'id_source': 'id_source',
         'taxotype': 'taxotype',
         'display_name': 'display_name',
         'lastupdate_datetime': 'lastupdate_datetime',
@@ -70,7 +72,7 @@ class TaxonCentral(object):
         'nbrobjcum': 'nbrobjcum'
     }
 
-    def __init__(self, id=None, parent_id=None, name=None, id_source=None, taxotype=None, display_name=None, lastupdate_datetime=None, id_instance=None, taxostatus=None, rename_to=None, source_url=None, source_desc=None, creator_email=None, creation_datetime=None, nbrobj=None, nbrobjcum=None, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, id=None, parent_id=None, aphia_id=None, rank=None, name=None, taxotype=None, display_name=None, lastupdate_datetime=None, id_instance=None, taxostatus=None, rename_to=None, source_url=None, source_desc=None, creator_email=None, creation_datetime=None, nbrobj=None, nbrobjcum=None, local_vars_configuration=None):  # noqa: E501
         """TaxonCentral - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -78,8 +80,9 @@ class TaxonCentral(object):
 
         self._id = None
         self._parent_id = None
+        self._aphia_id = None
+        self._rank = None
         self._name = None
-        self._id_source = None
         self._taxotype = None
         self._display_name = None
         self._lastupdate_datetime = None
@@ -97,9 +100,11 @@ class TaxonCentral(object):
         self.id = id
         if parent_id is not None:
             self.parent_id = parent_id
+        if aphia_id is not None:
+            self.aphia_id = aphia_id
+        if rank is not None:
+            self.rank = rank
         self.name = name
-        if id_source is not None:
-            self.id_source = id_source
         self.taxotype = taxotype
         if display_name is not None:
             self.display_name = display_name
@@ -172,6 +177,52 @@ class TaxonCentral(object):
         self._parent_id = parent_id
 
     @property
+    def aphia_id(self):
+        """Gets the aphia_id of this TaxonCentral.  # noqa: E501
+
+        The unique numeric aphia_id of the taxon if in Worms.  # noqa: E501
+
+        :return: The aphia_id of this TaxonCentral.  # noqa: E501
+        :rtype: int
+        """
+        return self._aphia_id
+
+    @aphia_id.setter
+    def aphia_id(self, aphia_id):
+        """Sets the aphia_id of this TaxonCentral.
+
+        The unique numeric aphia_id of the taxon if in Worms.  # noqa: E501
+
+        :param aphia_id: The aphia_id of this TaxonCentral.  # noqa: E501
+        :type: int
+        """
+
+        self._aphia_id = aphia_id
+
+    @property
+    def rank(self):
+        """Gets the rank of this TaxonCentral.  # noqa: E501
+
+        The rank in Worms of the taxon.  # noqa: E501
+
+        :return: The rank of this TaxonCentral.  # noqa: E501
+        :rtype: str
+        """
+        return self._rank
+
+    @rank.setter
+    def rank(self, rank):
+        """Sets the rank of this TaxonCentral.
+
+        The rank in Worms of the taxon.  # noqa: E501
+
+        :param rank: The rank of this TaxonCentral.  # noqa: E501
+        :type: str
+        """
+
+        self._rank = rank
+
+    @property
     def name(self):
         """Gets the name of this TaxonCentral.  # noqa: E501
 
@@ -195,29 +246,6 @@ class TaxonCentral(object):
             raise ValueError("Invalid value for `name`, must not be `None`")  # noqa: E501
 
         self._name = name
-
-    @property
-    def id_source(self):
-        """Gets the id_source of this TaxonCentral.  # noqa: E501
-
-        The source ID.  # noqa: E501
-
-        :return: The id_source of this TaxonCentral.  # noqa: E501
-        :rtype: str
-        """
-        return self._id_source
-
-    @id_source.setter
-    def id_source(self, id_source):
-        """Sets the id_source of this TaxonCentral.
-
-        The source ID.  # noqa: E501
-
-        :param id_source: The id_source of this TaxonCentral.  # noqa: E501
-        :type: str
-        """
-
-        self._id_source = id_source
 
     @property
     def taxotype(self):
