@@ -40,7 +40,7 @@
                 </thead>
                 <tbody>
                 <tr>
-                    <td colspan="4">Search results appear here.</td>
+                    <td colspan="5">Search results appear here.</td>
                 </tr>
                 </tbody>
             </table>
@@ -76,6 +76,7 @@ $(document).ready(function() {
                     row_id = 'txo' + rsp[i].id;
                     row += '<tr id=' + row_id + '>';
                     row += '<td><a href="javascript:void(0);">'+rsp[i].id+'</a></td>';
+                    row += '<td>'+rsp[i].aphia_id+'</td>';
                     if (rsp[i].renm_id) {
                         row += '<td class="deprecated">' + rsp[i].text + '</td>';
                     } else {
@@ -97,8 +98,8 @@ $(document).ready(function() {
                             row_id = 'txo' + rspf[i].id;
                             lineage = rspf[i].lineage.reverse().join(" > ");
                             type = rspf[i].type;
-                            $("#"+ row_id + " :nth-child(3)").text(type);
-                            $("#"+ row_id + " :nth-child(4)").text(lineage);
+                            $("#"+ row_id + " :nth-child(4)").text(type);
+                            $("#"+ row_id + " :nth-child(5)").text(lineage);
                         }
                      }
                 });
