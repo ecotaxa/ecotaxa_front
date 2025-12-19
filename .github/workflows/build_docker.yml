@@ -8,6 +8,11 @@ jobs:
   docker_front:
     runs-on: ubuntu-latest
     steps:
+      - name: Check out
+        uses: actions/checkout@v4
+      - name: Prepare filtered build context (via build_clean_src.sh)
+        working-directory: docker
+        run: bash build_clean_src.sh
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:  
@@ -20,6 +25,7 @@ jobs:
       - name: Build and push frontend
         uses: docker/build-push-action@v6
         with:
+          context: ./docker/py
           push: true
           tags: ecotaxa/ecotaxa_front:${{github.ref_name}}
-          file: ./docker/prod_image/Dockerfile
+          file: docker/prod_image/Dockerfile
