@@ -80,7 +80,7 @@ def _copy_back_headers(response: HTTPResponse):
     """Copy response headers into relayed response"""
     excluded_headers = ()  # ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
     rsp_headers = [
-        (name.lower(), value.lower())
+        (name.lower(), value)
         for (name, value) in response.getheaders()
         if name.lower() not in excluded_headers
     ]
