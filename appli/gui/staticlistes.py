@@ -128,6 +128,7 @@ py_messages = dict(
             "error": _("ERROR:"),
             "maintenance": _("MAINTENANCE"),
         },
+        "notfound": _("User not found"),
     }
 )
 py_user = dict(

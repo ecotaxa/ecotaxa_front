@@ -22,6 +22,7 @@ from appli.constants import (
     ClassifQual,
     TaxoType,
 )
+from appli.project.taxo_guide import getGuideSheets
 from appli.project.widgets import ClassificationPageStats, PopoverPane
 from appli.search.leftfilters import getcommonfilters
 
@@ -1035,6 +1036,8 @@ def prjGetClassifTab(PrjId):
                 taxotree[taxon_id] = [taxon_id, taxon_name, prev_id]
             prev_id = taxon_id
 
+    guides = getGuideSheets(proj.instrument, [taxon.id for taxon in taxa])
+
     res_by_id: Dict = {}
     children_by_id: Dict = {}
     for taxon in taxa:
@@ -1054,6 +1057,7 @@ def prjGetClassifTab(PrjId):
             "name": taxon.name,
             "display_name": taxon.display_name,
             "deprecated": taxon.renm_id,
+            "guide": guides.get(str(taxon.id), 0),
         }
         stats_for_taxon = populated_taxa.get(taxon.id)
         if stats_for_taxon is not None:
