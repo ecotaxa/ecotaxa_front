@@ -34,63 +34,82 @@ class TaxonModel(object):
     """
     openapi_types = {
         'id': 'int',
-        'aphia_id': 'int',
-        'renm_id': 'int',
         'name': 'str',
         'type': 'str',
-        'nb_objects': 'int',
-        'nb_children_objects': 'int',
+        'status': 'str',
         'display_name': 'str',
         'lineage': 'list[str]',
         'id_lineage': 'list[int]',
+        'renm_id': 'int',
+        'nb_objects': 'int',
+        'nb_children_objects': 'int',
+        'aphia_id': 'int',
+        'rank': 'str',
+        'closest_worms': 'int',
+        'closest_phylo': 'int',
         'children': 'list[int]'
     }
 
     attribute_map = {
         'id': 'id',
-        'aphia_id': 'aphia_id',
-        'renm_id': 'renm_id',
         'name': 'name',
         'type': 'type',
-        'nb_objects': 'nb_objects',
-        'nb_children_objects': 'nb_children_objects',
+        'status': 'status',
         'display_name': 'display_name',
         'lineage': 'lineage',
         'id_lineage': 'id_lineage',
+        'renm_id': 'renm_id',
+        'nb_objects': 'nb_objects',
+        'nb_children_objects': 'nb_children_objects',
+        'aphia_id': 'aphia_id',
+        'rank': 'rank',
+        'closest_worms': 'closest_worms',
+        'closest_phylo': 'closest_phylo',
         'children': 'children'
     }
 
-    def __init__(self, id=None, aphia_id=None, renm_id=None, name=None, type=None, nb_objects=None, nb_children_objects=None, display_name=None, lineage=None, id_lineage=None, children=None, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, id=None, name=None, type=None, status=None, display_name=None, lineage=None, id_lineage=None, renm_id=None, nb_objects=None, nb_children_objects=None, aphia_id=None, rank=None, closest_worms=None, closest_phylo=None, children=None, local_vars_configuration=None):  # noqa: E501
         """TaxonModel - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
         self.local_vars_configuration = local_vars_configuration
 
         self._id = None
-        self._aphia_id = None
-        self._renm_id = None
         self._name = None
         self._type = None
-        self._nb_objects = None
-        self._nb_children_objects = None
+        self._status = None
         self._display_name = None
         self._lineage = None
         self._id_lineage = None
+        self._renm_id = None
+        self._nb_objects = None
+        self._nb_children_objects = None
+        self._aphia_id = None
+        self._rank = None
+        self._closest_worms = None
+        self._closest_phylo = None
         self._children = None
         self.discriminator = None
 
         self.id = id
-        if aphia_id is not None:
-            self.aphia_id = aphia_id
-        if renm_id is not None:
-            self.renm_id = renm_id
         self.name = name
         self.type = type
-        self.nb_objects = nb_objects
-        self.nb_children_objects = nb_children_objects
+        self.status = status
         self.display_name = display_name
         self.lineage = lineage
         self.id_lineage = id_lineage
+        if renm_id is not None:
+            self.renm_id = renm_id
+        self.nb_objects = nb_objects
+        self.nb_children_objects = nb_children_objects
+        if aphia_id is not None:
+            self.aphia_id = aphia_id
+        if rank is not None:
+            self.rank = rank
+        if closest_worms is not None:
+            self.closest_worms = closest_worms
+        if closest_phylo is not None:
+            self.closest_phylo = closest_phylo
         self.children = children
 
     @property
@@ -117,52 +136,6 @@ class TaxonModel(object):
             raise ValueError("Invalid value for `id`, must not be `None`")  # noqa: E501
 
         self._id = id
-
-    @property
-    def aphia_id(self):
-        """Gets the aphia_id of this TaxonModel.  # noqa: E501
-
-        The Worms aphia_id of the taxon.  # noqa: E501
-
-        :return: The aphia_id of this TaxonModel.  # noqa: E501
-        :rtype: int
-        """
-        return self._aphia_id
-
-    @aphia_id.setter
-    def aphia_id(self, aphia_id):
-        """Sets the aphia_id of this TaxonModel.
-
-        The Worms aphia_id of the taxon.  # noqa: E501
-
-        :param aphia_id: The aphia_id of this TaxonModel.  # noqa: E501
-        :type: int
-        """
-
-        self._aphia_id = aphia_id
-
-    @property
-    def renm_id(self):
-        """Gets the renm_id of this TaxonModel.  # noqa: E501
-
-        The advised replacement ID if the taxon/category is deprecated.  # noqa: E501
-
-        :return: The renm_id of this TaxonModel.  # noqa: E501
-        :rtype: int
-        """
-        return self._renm_id
-
-    @renm_id.setter
-    def renm_id(self, renm_id):
-        """Sets the renm_id of this TaxonModel.
-
-        The advised replacement ID if the taxon/category is deprecated.  # noqa: E501
-
-        :param renm_id: The renm_id of this TaxonModel.  # noqa: E501
-        :type: int
-        """
-
-        self._renm_id = renm_id
 
     @property
     def name(self):
@@ -215,54 +188,29 @@ class TaxonModel(object):
         self._type = type
 
     @property
-    def nb_objects(self):
-        """Gets the nb_objects of this TaxonModel.  # noqa: E501
+    def status(self):
+        """Gets the status of this TaxonModel.  # noqa: E501
 
-        How many objects are classified in this category.  # noqa: E501
+        The taxon/category status, 'D' for Deprecated, 'A' for Approved or 'N' for Notapproved.  # noqa: E501
 
-        :return: The nb_objects of this TaxonModel.  # noqa: E501
-        :rtype: int
+        :return: The status of this TaxonModel.  # noqa: E501
+        :rtype: str
         """
-        return self._nb_objects
+        return self._status
 
-    @nb_objects.setter
-    def nb_objects(self, nb_objects):
-        """Sets the nb_objects of this TaxonModel.
+    @status.setter
+    def status(self, status):
+        """Sets the status of this TaxonModel.
 
-        How many objects are classified in this category.  # noqa: E501
+        The taxon/category status, 'D' for Deprecated, 'A' for Approved or 'N' for Notapproved.  # noqa: E501
 
-        :param nb_objects: The nb_objects of this TaxonModel.  # noqa: E501
-        :type: int
+        :param status: The status of this TaxonModel.  # noqa: E501
+        :type: str
         """
-        if self.local_vars_configuration.client_side_validation and nb_objects is None:  # noqa: E501
-            raise ValueError("Invalid value for `nb_objects`, must not be `None`")  # noqa: E501
+        if self.local_vars_configuration.client_side_validation and status is None:  # noqa: E501
+            raise ValueError("Invalid value for `status`, must not be `None`")  # noqa: E501
 
-        self._nb_objects = nb_objects
-
-    @property
-    def nb_children_objects(self):
-        """Gets the nb_children_objects of this TaxonModel.  # noqa: E501
-
-        How many objects are classified in this category children (not itself).  # noqa: E501
-
-        :return: The nb_children_objects of this TaxonModel.  # noqa: E501
-        :rtype: int
-        """
-        return self._nb_children_objects
-
-    @nb_children_objects.setter
-    def nb_children_objects(self, nb_children_objects):
-        """Sets the nb_children_objects of this TaxonModel.
-
-        How many objects are classified in this category children (not itself).  # noqa: E501
-
-        :param nb_children_objects: The nb_children_objects of this TaxonModel.  # noqa: E501
-        :type: int
-        """
-        if self.local_vars_configuration.client_side_validation and nb_children_objects is None:  # noqa: E501
-            raise ValueError("Invalid value for `nb_children_objects`, must not be `None`")  # noqa: E501
-
-        self._nb_children_objects = nb_children_objects
+        self._status = status
 
     @property
     def display_name(self):
@@ -338,6 +286,171 @@ class TaxonModel(object):
             raise ValueError("Invalid value for `id_lineage`, must not be `None`")  # noqa: E501
 
         self._id_lineage = id_lineage
+
+    @property
+    def renm_id(self):
+        """Gets the renm_id of this TaxonModel.  # noqa: E501
+
+        The advised replacement ID if the taxon/category is deprecated.  # noqa: E501
+
+        :return: The renm_id of this TaxonModel.  # noqa: E501
+        :rtype: int
+        """
+        return self._renm_id
+
+    @renm_id.setter
+    def renm_id(self, renm_id):
+        """Sets the renm_id of this TaxonModel.
+
+        The advised replacement ID if the taxon/category is deprecated.  # noqa: E501
+
+        :param renm_id: The renm_id of this TaxonModel.  # noqa: E501
+        :type: int
+        """
+
+        self._renm_id = renm_id
+
+    @property
+    def nb_objects(self):
+        """Gets the nb_objects of this TaxonModel.  # noqa: E501
+
+        How many objects are classified in this category.  # noqa: E501
+
+        :return: The nb_objects of this TaxonModel.  # noqa: E501
+        :rtype: int
+        """
+        return self._nb_objects
+
+    @nb_objects.setter
+    def nb_objects(self, nb_objects):
+        """Sets the nb_objects of this TaxonModel.
+
+        How many objects are classified in this category.  # noqa: E501
+
+        :param nb_objects: The nb_objects of this TaxonModel.  # noqa: E501
+        :type: int
+        """
+        if self.local_vars_configuration.client_side_validation and nb_objects is None:  # noqa: E501
+            raise ValueError("Invalid value for `nb_objects`, must not be `None`")  # noqa: E501
+
+        self._nb_objects = nb_objects
+
+    @property
+    def nb_children_objects(self):
+        """Gets the nb_children_objects of this TaxonModel.  # noqa: E501
+
+        How many objects are classified in this category children (not itself).  # noqa: E501
+
+        :return: The nb_children_objects of this TaxonModel.  # noqa: E501
+        :rtype: int
+        """
+        return self._nb_children_objects
+
+    @nb_children_objects.setter
+    def nb_children_objects(self, nb_children_objects):
+        """Sets the nb_children_objects of this TaxonModel.
+
+        How many objects are classified in this category children (not itself).  # noqa: E501
+
+        :param nb_children_objects: The nb_children_objects of this TaxonModel.  # noqa: E501
+        :type: int
+        """
+        if self.local_vars_configuration.client_side_validation and nb_children_objects is None:  # noqa: E501
+            raise ValueError("Invalid value for `nb_children_objects`, must not be `None`")  # noqa: E501
+
+        self._nb_children_objects = nb_children_objects
+
+    @property
+    def aphia_id(self):
+        """Gets the aphia_id of this TaxonModel.  # noqa: E501
+
+        The WoRMS aphia_id of the taxon.  # noqa: E501
+
+        :return: The aphia_id of this TaxonModel.  # noqa: E501
+        :rtype: int
+        """
+        return self._aphia_id
+
+    @aphia_id.setter
+    def aphia_id(self, aphia_id):
+        """Sets the aphia_id of this TaxonModel.
+
+        The WoRMS aphia_id of the taxon.  # noqa: E501
+
+        :param aphia_id: The aphia_id of this TaxonModel.  # noqa: E501
+        :type: int
+        """
+
+        self._aphia_id = aphia_id
+
+    @property
+    def rank(self):
+        """Gets the rank of this TaxonModel.  # noqa: E501
+
+        The WoRMS rank of the taxon.  # noqa: E501
+
+        :return: The rank of this TaxonModel.  # noqa: E501
+        :rtype: str
+        """
+        return self._rank
+
+    @rank.setter
+    def rank(self, rank):
+        """Sets the rank of this TaxonModel.
+
+        The WoRMS rank of the taxon.  # noqa: E501
+
+        :param rank: The rank of this TaxonModel.  # noqa: E501
+        :type: str
+        """
+
+        self._rank = rank
+
+    @property
+    def closest_worms(self):
+        """Gets the closest_worms of this TaxonModel.  # noqa: E501
+
+        The id of the next WoRMS taxon.  # noqa: E501
+
+        :return: The closest_worms of this TaxonModel.  # noqa: E501
+        :rtype: int
+        """
+        return self._closest_worms
+
+    @closest_worms.setter
+    def closest_worms(self, closest_worms):
+        """Sets the closest_worms of this TaxonModel.
+
+        The id of the next WoRMS taxon.  # noqa: E501
+
+        :param closest_worms: The closest_worms of this TaxonModel.  # noqa: E501
+        :type: int
+        """
+
+        self._closest_worms = closest_worms
+
+    @property
+    def closest_phylo(self):
+        """Gets the closest_phylo of this TaxonModel.  # noqa: E501
+
+        The id of the closest parent Phylo taxon.  # noqa: E501
+
+        :return: The closest_phylo of this TaxonModel.  # noqa: E501
+        :rtype: int
+        """
+        return self._closest_phylo
+
+    @closest_phylo.setter
+    def closest_phylo(self, closest_phylo):
+        """Sets the closest_phylo of this TaxonModel.
+
+        The id of the closest parent Phylo taxon.  # noqa: E501
+
+        :param closest_phylo: The closest_phylo of this TaxonModel.  # noqa: E501
+        :type: int
+        """
+
+        self._closest_phylo = closest_phylo
 
     @property
     def children(self):
