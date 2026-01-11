@@ -46,8 +46,6 @@ class TaxonModel(object):
         'nb_children_objects': 'int',
         'aphia_id': 'int',
         'rank': 'str',
-        'closest_worms': 'int',
-        'closest_phylo': 'int',
         'children': 'list[int]'
     }
 
@@ -65,12 +63,10 @@ class TaxonModel(object):
         'nb_children_objects': 'nb_children_objects',
         'aphia_id': 'aphia_id',
         'rank': 'rank',
-        'closest_worms': 'closest_worms',
-        'closest_phylo': 'closest_phylo',
         'children': 'children'
     }
 
-    def __init__(self, id=None, name=None, type=None, status=None, display_name=None, lineage=None, id_lineage=None, lineage_status=None, renm_id=None, nb_objects=None, nb_children_objects=None, aphia_id=None, rank=None, closest_worms=None, closest_phylo=None, children=None, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, id=None, name=None, type=None, status=None, display_name=None, lineage=None, id_lineage=None, lineage_status=None, renm_id=None, nb_objects=None, nb_children_objects=None, aphia_id=None, rank=None, children=None, local_vars_configuration=None):  # noqa: E501
         """TaxonModel - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -89,8 +85,6 @@ class TaxonModel(object):
         self._nb_children_objects = None
         self._aphia_id = None
         self._rank = None
-        self._closest_worms = None
-        self._closest_phylo = None
         self._children = None
         self.discriminator = None
 
@@ -110,10 +104,6 @@ class TaxonModel(object):
             self.aphia_id = aphia_id
         if rank is not None:
             self.rank = rank
-        if closest_worms is not None:
-            self.closest_worms = closest_worms
-        if closest_phylo is not None:
-            self.closest_phylo = closest_phylo
         self.children = children
 
     @property
@@ -434,52 +424,6 @@ class TaxonModel(object):
         """
 
         self._rank = rank
-
-    @property
-    def closest_worms(self):
-        """Gets the closest_worms of this TaxonModel.  # noqa: E501
-
-        The id of the next WoRMS taxon.  # noqa: E501
-
-        :return: The closest_worms of this TaxonModel.  # noqa: E501
-        :rtype: int
-        """
-        return self._closest_worms
-
-    @closest_worms.setter
-    def closest_worms(self, closest_worms):
-        """Sets the closest_worms of this TaxonModel.
-
-        The id of the next WoRMS taxon.  # noqa: E501
-
-        :param closest_worms: The closest_worms of this TaxonModel.  # noqa: E501
-        :type: int
-        """
-
-        self._closest_worms = closest_worms
-
-    @property
-    def closest_phylo(self):
-        """Gets the closest_phylo of this TaxonModel.  # noqa: E501
-
-        The id of the closest parent Phylo taxon.  # noqa: E501
-
-        :return: The closest_phylo of this TaxonModel.  # noqa: E501
-        :rtype: int
-        """
-        return self._closest_phylo
-
-    @closest_phylo.setter
-    def closest_phylo(self, closest_phylo):
-        """Sets the closest_phylo of this TaxonModel.
-
-        The id of the closest parent Phylo taxon.  # noqa: E501
-
-        :param closest_phylo: The closest_phylo of this TaxonModel.  # noqa: E501
-        :type: int
-        """
-
-        self._closest_phylo = closest_phylo
 
     @property
     def children(self):
