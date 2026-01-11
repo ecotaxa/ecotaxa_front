@@ -38,6 +38,7 @@
   <input type="hidden" name="id" value="{{ taxon.id }}">
   {% if taxon.id == 0 %}
     <div class="panel panel-default text-warning" style="padding: 5px; font-size:large">
+      This form cannot create WoRMS taxa.<br>
       Once created, a taxon can never be deleted. <br>
       If you really want to create a new taxon, please carefully review the information below before submitting.<br>
     </div>
@@ -68,14 +69,14 @@
         <select id="parent_id" name="parent_id" class="taxolbpop" {{ "DISABLED" if taxon.id != 0 else "" }}
                 required>
           {% if taxon.lineage|length >1 %}
-            <option value="{{ taxon.id_lineage[1] }}">{{ taxon.lineage[1] }}</option>
+            <option value="{{ taxon.id_lineage[1] }}">{{ taxon.lineage[1]|striptags }}</option>
           {% endif %}
         </select>
       </td>
     </tr>
     <tr>
       <th>Lineage</th>
-      <td colspan="5">{{ " < ".join(taxon.lineage) }}</td>
+      <td colspan="5">{{ "".join(taxon.lineage) | safe }}</td>
     </tr>
 
     <tr>

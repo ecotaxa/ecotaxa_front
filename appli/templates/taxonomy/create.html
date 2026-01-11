@@ -9,7 +9,7 @@
       Once created, a taxon can never be deleted. <br>
       If you really want to create a new taxon, please carefully review the information below before submitting.<br>
     </div>
-    <div><span>Create a Worms category
+    <div><span>Create a WoRMS category
         <i class="fas fa-info-circle"
            data-content="Search taxon name"></i>
       </span>{{ ht.InputText('taxosearchname', searchname ,
@@ -18,12 +18,12 @@
         </button></div>
     <div><div id="resulttaxocentral"></div></div>
     <div>{%-if taxons-%}
-    <p style="padding-bottom:8px">{{_('Select a Worms taxon name in the list to add it to the Taxonomy EcoTaxoServer.')}}<br>{{_('Taxons with an id already exists in EcoTaxoServer.')}}</p>
+    <p style="padding-bottom:8px">{{_('Click a WoRMS taxon name in the list to add it to the Taxonomy EcoTaxoServer.')}}<br>{{_('Non-clickable entries already exist in EcoTaxoServer.')}}</p>
         <ul>{%- for taxon in taxons -%}
-    <li>{%-if "id" in taxon -%}{{taxon["name"]}} (id:{{taxon["id"]}}) {%-else-%}<a onclick="createWormsTaxon(JSON.stringify({{taxon}}))")">{{taxon["name"]}} </a>{%-endif-%}
+    <li>{%-if "id" in taxon -%}{{taxon["name"]}} (id:{{taxon["id"]}}) {%-else-%}<a onclick="createWoRMSTaxon({{taxon['aphia_id']}})">{{taxon["name"]}} </a>{%-endif-%}
     {%-for parent in taxon["lineage"].values()-%}&nbsp;&lt;&nbsp;{{parent["scientificname"]}}{%-endfor-%}  &nbsp;&lt;status: {{taxon["status"]}}&gt;</li>
     {%-endfor-%}</ul>{%-else-%}{{_('No result')}}{%-endif-%}
-    <p><a href="#" onclick="loadUrl('{{url_for('route_add_taxon')}}')">{{_('Or create a non Worms taxon')}}</a></p>
+    <p><a href="#" onclick="loadUrl('{{url_for('route_add_taxon')}}')">{{_('Or create a non WoRMS taxon')}}</a></p>
 </div>
     <div><button type="button" onclick="At2PopupClose(0);" class="btn btn-gris"><i class="fa fa-times"></i> Close
         </button></div></form>
@@ -36,18 +36,17 @@
         });
         }
 
-         function createWormsTaxon(taxon) {
-            taxon=JSON.parse(taxon);
+         function createWoRMSTaxon(aphia_id) {
             const formu = $("#formcreatetaxon");
             formu.attr("action","{{url_for('addtaxoworms')}}");
-            const data= {taxon:JSON.stringify(taxon)};
+            const data= {aphia_id:aphia_id};
             $.post("{{url_for('addtaxoworms')}}",data).done(function(data) {
-                const response = $.parseJSON(data.responseJSON.body);
+                const response = $.parseJSON(data.body);
                 $('<h4>').attr('class','text-success').html(response.success).insertBefore(formu);
                 formu.remove();
             }).fail(function(err) {
                 if (err.status !==422) $('<h4>').attr('class','text-danger').html('error '+ err.status +' - ' +err.statusText).insertBefore(formu);
-                else { const response = $.parseJSON(err.responseJSON.body);
+                else { const response = $.parseJSON(err.body);
                 $('<h4>').attr('class','text-danger').html(response.error).insertBefore(formu);}
                 });
         }
