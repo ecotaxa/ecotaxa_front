@@ -41,12 +41,12 @@
             formu.attr("action","{{url_for('addtaxoworms')}}");
             const data= {aphia_id:aphia_id};
             $.post("{{url_for('addtaxoworms')}}",data).done(function(data) {
-                const response = $.parseJSON(data.body);
+                const response = $.parseJSON(data);
                 $('<h4>').attr('class','text-success').html(response.success).insertBefore(formu);
                 formu.remove();
             }).fail(function(err) {
                 if (err.status !==422) $('<h4>').attr('class','text-danger').html('error '+ err.status +' - ' +err.statusText).insertBefore(formu);
-                else { const response = $.parseJSON(err.body);
+                else { const response = $.parseJSON(err.responseJSON.body);
                 $('<h4>').attr('class','text-danger').html(response.error).insertBefore(formu);}
                 });
         }
