@@ -133,12 +133,14 @@ def addtaxoworms():
         return PrintInCharte("Please login to access this page")
     if not is_admin_or_project_creator(user):
         return PrintInCharte("Insufficient rights")
-    taxon = gvp("taxon")
-    taxon = json.loads(taxon)
-    addtaxon = TaxoWormsModel(**taxon)
+    aphia_id = gvp("aphia_id")
+    addtaxon = AddWormsTaxonModel(aphia_id=int(aphia_id))
     with ApiClient(TaxonomyTreeApi, request) as api:
         rsp = api.add_worms_taxon(addtaxon)
-    return rsp
+    with ApiClient(TaxonomyTreeApi, request) as api:
+        # Ensure the new taxon flows to backend
+        api.pull_taxa_update_from_central()
+    return json.dumps(rsp)
 
 
 @app.route("/taxo/dosync", methods=["POST"])
