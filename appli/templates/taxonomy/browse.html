@@ -76,8 +76,8 @@ $(document).ready(function() {
                     row_id = 'txo' + rsp[i].id;
                     row += '<tr id=' + row_id + '>';
                     row += '<td><a href="javascript:void(0);">'+rsp[i].id+'</a></td>';
-                    row += '<td>'+rsp[i].aphia_id+'</td>';
-                    if (rsp[i].renm_id) {
+                    row += '<td>'+(rsp[i].aphia_id||'')+'</td>';
+                    if (rsp[i].status === 'D') {
                         row += '<td class="deprecated">' + rsp[i].text + '</td>';
                     } else {
                         row += '<td>' + rsp[i].text + '</td>';
@@ -96,10 +96,19 @@ $(document).ready(function() {
                             // {"id":4,"name":"Archaea","type":"M","nb_objects":0,"nb_children_objects":0,"display_name":"Archaea",
                             // "lineage":["Archaea","living"],"id_lineage":[4,1],"children":[332,325,334322]}]
                             row_id = 'txo' + rspf[i].id;
-                            lineage = rspf[i].lineage.reverse().join(" > ");
+                            var lin = [];
+                            for (var j in rspf[i].lineage) {
+                                var name = rspf[i].lineage[j];
+                                if (rspf[i].lineage_status[j] === 'D') {
+                                    lin.push('<span class="deprecated">' + name + '</span>');
+                                } else {
+                                    lin.push('<span>' + name + '</span>');
+                                }
+                            }
+                            lineage = lin.reverse().join(" > ");
                             type = rspf[i].type;
                             $("#"+ row_id + " :nth-child(4)").text(type);
-                            $("#"+ row_id + " :nth-child(5)").text(lineage);
+                            $("#"+ row_id + " :nth-child(5)").html(lineage);
                         }
                      }
                 });

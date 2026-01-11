@@ -10,17 +10,12 @@ from appli import app, PrintInCharte, gvg, gvp, FAIcon
 from appli.back_config import get_back_constants
 from appli.constants import TaxoType
 from appli.utils import ApiClient
+from to_back.ecotaxa_cli_py import AddWormsTaxonModel
 from to_back.ecotaxa_cli_py.api import TaxonomyTreeApi
-from to_back.ecotaxa_cli_py.models import (
-    UserModelWithRights,
-    TaxonModel,
-    TaxoWormsModel,
-)
-from flask_babel import _
+from to_back.ecotaxa_cli_py.models import UserModelWithRights, TaxonModel
 
 
 def get_taxoserver_url():
-    # TODO: Already a config on back-end side
     return get_back_constants("TAXOSERVER_URL")
 
 
@@ -208,6 +203,20 @@ def route_view_taxon(taxoid):
     with ApiClient(TaxonomyTreeApi, request) as api:
         usage = api.query_taxa_usage(taxon_id=taxoid)
         usage = usage[:20]
+    # Transform lineage into a list of HTML spans
+    lineage = taxon["lineage"]
+    lineage_status = taxon["lineage_status"]
+    new_lineage = []
+    sep = ''
+    for i in range(len(lineage)):
+        name = lineage[i]
+        depre = ""
+        if lineage_status[i] == "D":
+            depre = ' class="deprecated"'
+        new_lineage.append(f'{sep}<span{depre}>{name}</span>')
+        sep = " < "
+    taxon["lineage"] = new_lineage
+
     g.TaxoType = TaxoType
     return render_template("taxonomy/edit.html", taxon=taxon, usage=usage)
 
@@ -247,8 +256,11 @@ def route_save_taxon():
             "creator_email",
         ]:
             params[c] = gvp(c)
-        with ApiClient(TaxonomyTreeApi, request) as api:
-            crea_rsp = api.add_taxon_in_central(**params)
+        try:
+            with ApiClient(TaxonomyTreeApi, request) as api:
+                crea_rsp = api.add_taxon_in_central(**params)
+        except Exception as e:
+            crea_rsp = {"msg": str(e)}
         if crea_rsp["msg"] != "ok":
             return appli.ErrorFormat("settaxon Error :" + crea_rsp["msg"])
         txt = """<script> DoSync(); At2PopupClose(0); </script>"""

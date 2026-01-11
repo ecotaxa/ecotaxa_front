@@ -575,7 +575,7 @@ MAX_LEN_BEFORE_HYPHEN = 12
 
 # noinspection PyPep8Naming
 def FormatNameForVignetteDisplay(
-    category_name: Optional[str], hyphenator, cache: Dict[str, str]
+    category_name: Optional[str], taxostatus: Optional[str], hyphenator, cache: Dict[str, str]
 ) -> str:
     if category_name is None:
         category_name = ""
@@ -587,7 +587,10 @@ def FormatNameForVignetteDisplay(
     part0 = parts[0]
     if len(part0) >= MAX_LEN_BEFORE_HYPHEN:
         part0 = hyphenator.hyphenize(part0)
-    restxt: str = "<span class='cat_name'>{}</span>".format(part0)
+    depre = ''
+    if taxostatus == "D":
+        depre = ' deprecated'
+    restxt: str = f"<span class='cat_name{depre}'>{part0}</span>"
     if len(parts) > 1:
         restxt += "<span class='cat_ancestor'> &lt;&nbsp;{}</span>".format(
             " &lt;&nbsp;".join(parts[1:])
@@ -681,6 +684,7 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
         "img.file_name",
         "txo.name",
         "txo.display_name",
+        "txo.taxostatus"
     ]
     api_cols_to_display = OrderedDict()
 
@@ -804,6 +808,7 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
         thumbfilename: Optional[str] = dtl["img.thumb_file_name"]
         thumbwidth: Optional[int] = dtl["img.thumb_width"]
         display_name: Optional[str] = dtl["txo.display_name"]
+        taxostatus: Optional[int] = dtl["txo.taxostatus"]
         imgcount: int = dtl["obj.imgcount"]
         if (
             origwidth is None
@@ -924,7 +929,7 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
             "<b>!</b> " if dtl["obj.complement_info"] not in (None, "") else ""
         )
 
-        name_chunk = FormatNameForVignetteDisplay(display_name, hyphenator, categ_cache)
+        name_chunk = FormatNameForVignetteDisplay(display_name, taxostatus, hyphenator, categ_cache)
         if g.PublicViewMode:
             simsrch_btn = ""
         else:
