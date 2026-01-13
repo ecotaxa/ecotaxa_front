@@ -334,7 +334,7 @@ def JinjaGetUsersManagerList(sujet=""):
     )
 
 
-ecotaxa_version = "3.0"
+ecotaxa_version = "3.0.0"
 
 
 def JinjaGetEcotaxaVersionText():
