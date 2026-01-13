@@ -274,7 +274,7 @@ def _prj_import_taxo_api(
     lst = [str(tid) for tid in taxa_ids_for_all if tid != -1]
     with ApiClient(TaxonomyTreeApi, request) as api:
         res: List[TaxonModel] = api.query_taxa_set(ids=" ".join(lst))
-    taxo_map = {taxon_rec.id: taxon_rec.display_name for taxon_rec in res}
+    taxo_map = {taxon_rec.id: (taxon_rec.display_name , taxon_rec.lineage_status[0]) for taxon_rec in res}
     prjs_pojo = []
     for a_prj in prjs:
         # exclude current prj

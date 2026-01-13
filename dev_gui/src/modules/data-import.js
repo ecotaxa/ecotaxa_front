@@ -185,26 +185,36 @@ export class DataImport {
     return selectcells;
   }
 
-  populateImportZone(add, items) {
+  populateImportZone(add, items,what=null) {
     if (!this.importzone) return;
     const ts = this.importzone.tomselect;
     if (ts) {
+
       items = Object.entries(items);
       // sort items
-      items.sort((a, b) => {
-        let x = a[1];
-        let y = b[1];
-        return +(x > y) || -(y > x);
-      });
+       if(what===typeimport.taxo)  items.sort((a, b) => {
+            let x = a[1][0];
+            let y = b[1][0];
+            return +(x > y) || -(y > x);
+         });
+         else items.sort((a, b) => {
+            let x = a[1];
+            let y = b[1];
+            return +(x > y) || -(y > x);
+         });
       //  ts.clear();
       //ts.clearOptions();
       // add ts items
-      if (add) items.forEach(([key, text]) => {
+
+      if (add) items.forEach(([key, val]) => {
         if (ts.getItem(key) === null) {
           if (ts.getOption(key) === null) {
             let obj = {};
             obj[ts.settings.valueField] = key;
-            obj[ts.settings.labelField] = unescape_html(text.trim());
+           if(what===typeimport.taxo) {
+                obj[ts.settings.labelField] = unescape_html(val[0].trim());
+                obj[ts.settings.status] = unescape_html(val[1].trim());
+                } else obj[ts.settings.labelField] = unescape_html(val.trim());
             ts.addOption(obj);
           }
           ts.addItem(key);
@@ -274,7 +284,7 @@ export class DataImport {
             ts = this.importzone.tomselect;
             let taxons = celldata;
             if (taxons) {
-              this.populateImportZone(add, taxons);
+              this.populateImportZone(add, taxons,what);
               showbtns = (Object.keys(taxons).length > 0);
               taxons = null;
             }
@@ -350,7 +360,7 @@ export class DataImport {
               const label = (celllabel) ? this.getDataToImport(celllabel, datalabel) : data;
               const item = {};
               item[rowdata[this.tbl.getCellId(this.tbl.cellidname)]] = label;
-              this.populateImportZone(add, item);
+              this.populateImportZone(add, item,what);
             }
             if (add) this.filterByRecord(rowdata, rowindex);
             else this.resetFilter(rowdata,rowindex);
@@ -574,6 +584,7 @@ export class DataImport {
         el[ts.settings.valueField] = e;
         el[ts.settings.labelField] = unescape_html(options[e][ts.settings.labelField]);
         el[ts.settings.searchField] = unescape_html(options[e][ts.settings.labelField]);
+        if(ts.settings.status) el[ts.settings.status] = unescape_html(options[e][ts.settings.status]);
         if (ts.getOption(el[ts.settings.valueField]) === null) ts.addOption(el);
         if (ts.getItem(el[ts.settings.valueField]) === null) ts.addItem(el[ts.settings.valueField]);
       });

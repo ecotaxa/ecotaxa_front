@@ -67,7 +67,6 @@ def prj_stats(prjid: int, partial: bool):
         # format list for template
         for i, taxastat in enumerate(taxastats):
             n = list(filter(lambda x: (x[0] == taxastat["used_taxa"][0]), usedtaxa))
-            print('n---', n)
             if len(n) and len(n[0]):
                 name = n[0][1]
                 taxastats[i]["name"] = name
@@ -130,7 +129,6 @@ def prj_stats(prjid: int, partial: bool):
         py_project_rights,
         py_user_roles,
     )
-
     return render_template(
         "v2/project/_stats.html",
         partial=partial,

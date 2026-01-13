@@ -3,8 +3,10 @@
 <tr><td class="item font-normal {{'deprecated' if taxastat.status=='D'}}" data-id="{{taxastat.used_taxa[0]}}" >{{ taxastat.name if typerow == 'taxon' else taxastat.sampleid }}</td>
   <td>{%-if addon!=''-%}
       {%-if addon=='lineage'-%}
-      {%-for t in taxastat.lineage|reverse -%} {{loop.index}}
-      <span {{'class="deprecated"' if taxastat.lineage_status[]=='D'}}> {{t}}</span>&gt;
+      {%-set l=taxastat.lineage|length-%}
+      {%-for t in taxastat.lineage|reverse -%}
+      {%-set i=l-loop.index-1-%}
+      <span {{'class="deprecated"' if taxastat.lineage_status[i]=='D'}}> {{t}}</span>&gt;
       {%-endfor-%}
       {%-else-%}{{addon}}{%-endif-%}
       {%-endif-%}</td>
@@ -15,7 +17,7 @@
       {% else %}<span class="hidden">0</span>
       {%- endif -%}</td>
     {%- endfor -%}
-  </tr> ['D','A','A','N']
+  </tr>
 {%-endmacro%}
 {%macro taxo_th_row()-%}
 {% for header in [_('validated'),_('dubious'),_('predicted'),_('none')]-%}

@@ -8,7 +8,13 @@ export default function(state) {
       if (!Array.isArray(value)) td.childNodes = [];
       let html = [];
       value.forEach(v => {
-        html.push(v[1]);
+        if(v[1][1]=='D') html.push({
+          nodename: "SPAN",
+          attributes: {
+            "class": css.deprecated
+          },
+          childnodes: [state.setTextNode(v[1][0])]});
+        else  html.push(state.setTextNode(v[1][0]));
       });
       td.childnodes = [{
         nodename: 'DIV',
@@ -16,7 +22,7 @@ export default function(state) {
           class: css.component.table.tip,
           "data-num": html.length
         },
-        childnodes: [state.setTextNode(html.join(`, `))]
+        childnodes: html //[state.setTextNode(html.join(`, `))]
       }];
       return td;
     }

@@ -246,6 +246,7 @@ const funcselector='.js-autocomplete';
             valueField: 'id',
             labelField: 'text',
             searchField: 'text',
+            status: 'status',
             closeAfterSelect: true,
             onInitialize: () => {
               const wrapper = document.getElementById(id).nextElementSibling;
@@ -300,7 +301,7 @@ const funcselector='.js-autocomplete';
           valueField: 'id',
           labelField: 'text',
           searchField: 'id',
-          status:'data-status'}
+          status:'status'}
             url = option.url;
             //
             if (query.indexOf('_') == 0 && option.settings.addoption && query == option.settings.addoption[0]) {
@@ -353,7 +354,7 @@ const funcselector='.js-autocomplete';
           const optgroup = (el.hasOwnProperty('optgroup')) ? `data-optgroup=${el.optgroup}` : ``;
           const label = _get_label(el, option.settings.labelField);
           const itemprefix =(this.settings.itemprefix  && el[this.settings.valueField].length>this.settings.itemprefix.length)?((el[this.settings.valueField].substr(0,this.settings.itemprefix.length)===this.settings.itemprefix)?this.settings.itemprefix.replace('_',''):""):"";
-          return `<div class="py-2 flex  ${ ((multiple)?'inline-flex':'') } ${itemprefix} " ${optgroup} data-value="${el[option.settings.valueField]}">${ escape(label) }</div>`;
+          return `<div class="py-2 flex  ${ ((multiple)?'inline-flex':'') } ${itemprefix}  ${((el.status && el.status=='D')?'deprecated':'')} " ${optgroup}  data-value="${el[option.settings.valueField]}">${ escape(label) }</div>`;
         },
         item: function(el, escape) {
           if (el === undefined || el === null) return ``; // add optgroup
@@ -419,10 +420,10 @@ const funcselector='.js-autocomplete';
                }
 
           });
-          ts.on("load", (v,el) => {console.log('v----',v);console.log('el---',el);
+          ts.on("load", (v,el) => {
           v.forEach((taxon)=> {
             if (taxon[1].status==="D") {
-            if (item.dataset.hasOwnProperty('nodeprecated')) ts.removeOption(taxon[0]);
+            if (item.dataset.hasOwnProperty('nodeprecated'))  ts.removeOption(taxon[1].id);
             if (taxon[1].$id ) {
                 const opt=ts.wrapper.querySelector('#'+taxon[1].$id);
                 if (opt!==null) opt.classList.add(css.deprecated);
