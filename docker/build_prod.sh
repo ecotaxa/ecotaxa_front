@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSION=3.0
+VERSION=3.0.0
 # In case of doubt on the image sanity, uncomment below
 #NO_CACHE=--no-cache
 # Preliminary, log using ecotaxa docker account
