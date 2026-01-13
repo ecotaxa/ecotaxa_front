@@ -4,14 +4,12 @@
                       width: 1000px
                              }
               </style>
-
 <form id="formcreatetaxon" method="post" action="?"><div class="panel panel-default text-warning" style="padding: 5px; font-size:large">
       Once created, a taxon can never be deleted. <br>
       If you really want to create a new taxon, please carefully review the information below before submitting.<br>
     </div>
     <div><span>Create a WoRMS category
-        <i class="fas fa-info-circle"
-           data-content="Search taxon name"></i>
+        <i class="fas fa-info-circle" data-content="{{_('Type a taxon name, the name will be searched into the WoRMS database.')}}"></i>
       </span>{{ ht.InputText('taxosearchname', searchname ,
                 extrataginfo=("class=form-control maxlength=100  "
                 )|safe) }} <button type="button" onclick="const searchurl='{{url_for('routetaxosearchworms',name='')}}'+$('#taxosearchname').val();loadUrl(searchurl,'GET',null,null,{},'... requesting Worms API ...')" class="btn btn-blue"><i class="fa fa-search"></i> Search
@@ -105,5 +103,5 @@
             }
             });
         }
-
+          $('#formcreatetaxon .fa-info-circle').popover({trigger: 'hover', container: "body", placement: "top"})
     </script>

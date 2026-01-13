@@ -9,7 +9,7 @@
   <tbody>
     {%- if taxastats is iterable -%}
     {%-for taxastat in taxastats-%}
-{{taxo_row(taxastat,'taxon',taxastat.lineage|reverse|join('>'))}}
+{{taxo_row(taxastat,_('taxon'),'lineage')}}
 {%- endfor-%}
 {%-endif-%}</tbody><tfoot class="w-full max-w-full"><tr>
 <th class="text-left ml-2" scope="col">{{_('Total')}}</th><th class="hidden"></th>
@@ -31,7 +31,7 @@
 {% endfor %}
 {% for taxastat in taxastats%}
 <div class="w-full">
-<div class="item" data-id={{taxastats.id}}>{{ taxastat.name  }}</div>
+<div class="item {{'deprecated' if taxastat.status=='D'}}" data-id={{taxastats.id}}>{{ taxastat.name  }}</div>
   <div class="progress" style="width:{{(totals.value[loop.index-1]/maxtotal.value)*100|round(0)}}%">
   {% set i = loop.index-1%}
   {%- for type in ['validated','dubious','predicted','unclassified'] -%}

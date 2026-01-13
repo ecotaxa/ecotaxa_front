@@ -863,7 +863,10 @@ section.separate {@apply after:w-96 before:h-[0.5] w-full h-auto pb-8 pt-4 block
 .stat-info .progress data.progress-predicted {@apply text-predicted-dark after:bg-predicted-light }
 .stat-info label.rights {@apply font-semibold small-caps basis-1/12 }
 td .item {@apply after:content-[',_'] last:after:content-none}
-
+/********************************/
+/* taxonomy worms          */
+/*******************************/
+.deprecated {@apply line-through !important}
 /******************/
 /*  rights */
 /****************/

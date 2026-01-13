@@ -67,10 +67,13 @@ def prj_stats(prjid: int, partial: bool):
         # format list for template
         for i, taxastat in enumerate(taxastats):
             n = list(filter(lambda x: (x[0] == taxastat["used_taxa"][0]), usedtaxa))
+            print('n---', n)
             if len(n) and len(n[0]):
                 name = n[0][1]
                 taxastats[i]["name"] = name
                 taxastats[i]["lineage"] = n[0][2]
+                taxastats[i]["status"] = n[0][3][1]
+                taxastats[i]["lineage_status"] = n[0][3]
 
         from to_back.ecotaxa_cli_py.models import ProjectUserStatsModel
 

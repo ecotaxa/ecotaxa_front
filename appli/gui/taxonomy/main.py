@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from json import JSONEncoder
 from typing import List
-from flask import render_template, json, flash, request, make_response
+from flask import render_template, json, flash, request, make_response,url_for
 from flask_login import current_user, login_required
-from appli import app, gvg, FAIcon
+from appli import app, gvg
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py.api import TaxonomyTreeApi
-from to_back.ecotaxa_cli_py.models import TaxaSearchRsp, TaxonModel
+from to_back.ecotaxa_cli_py.models import TaxonModel
 
 
 @login_required
@@ -24,6 +24,7 @@ def gui_taxotree_root_json():
                 None,
                 r.nb_objects + r.nb_children_objects,
                 len(r.children) > 0,
+                r.status
             )
             for r in roots
         ]
@@ -47,6 +48,7 @@ def gui_taxotree_root_json():
                 parent,
                 r.nb_objects + r.nb_children_objects,
                 len(r.children) > 0,
+                r.status
             )
             for r in children
         ]
@@ -59,6 +61,7 @@ def gui_taxotree_root_json():
                 name=r[1],
                 num=r[3],
                 children=r[4],
+                status=r[5]
             )
             for r in res
         ]
