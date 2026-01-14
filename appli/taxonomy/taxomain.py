@@ -82,11 +82,11 @@ def routetaxosearch(name) -> List[Any]:
                 "id": r.id,
                 "aphia_id": r.aphia_id,
                 "name": r.text,
+                "status":r.status
             }
             for r in results
-            if r.renm_id == 0 or r.renm_id is None
+            if (r.renm_id == 0 or r.renm_id is None) and r.status !='D'
         ]
-
         def get_renames(arr, taxons):
             rsp = api.query_taxa_set(",".join(arr))
             rnmtaxons = [
@@ -96,7 +96,7 @@ def routetaxosearch(name) -> List[Any]:
                     "name": r.display_name,
                 }
                 for r in rsp
-                if r.renm_id is None
+                if r.renm_id is None and r.status !='D'
             ]
             renames = list(set([str(r.renm_id) for r in rsp if r.renm_id is not None]))
             taxons.extend(rnmtaxons)
@@ -122,7 +122,6 @@ def routetaxosearchworms(name=""):
             taxons = api.search_worms_name(name)
     else:
         taxons = []
-
     return render_template("taxonomy/create.html", searchname=name, taxons=taxons)
 
 

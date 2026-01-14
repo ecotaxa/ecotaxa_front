@@ -6,6 +6,7 @@
 
 .simple-tree ::-webkit-details-marker {@apply hidden}
 .simple-tree summary {@apply bg-stone-50 outline-none list-none bg-stone-50}
+.simple-tree summary.deprecated {@apply line-through}
 .simple-tree.dark summary {@apply bg-stone-500}
 .simple-tree details>:not(details),
 .simple-tree details {@apply relative before:content-[''] before:block before:w-4 before:absolute}

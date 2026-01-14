@@ -58,6 +58,7 @@ const jstreeOptions = {
 
 function EntryAction(entry, options) {
   const entryaction = new Entry(entry, options);
+  entryaction.status=entry.status;
   entryaction.eventnames = {
     attach: 'attach',
     detach: 'detach',
@@ -76,6 +77,7 @@ function EntryAction(entry, options) {
   }
   entryaction.setAttributes = function(entry) {
     entry.type = (entry.type) ? entry.type : ((entry.children === true) ? entryTypes.branch : entryTypes.node);
+
     entry.data = {
       parent: entry.parent
     };
@@ -83,7 +85,7 @@ function EntryAction(entry, options) {
     return entry;
 
   }
-
+  if (entry.status==='D') entryaction.container.classList.add(css.deprecated);
   return entryaction;
 }
 export function JsTree(parent, options = {}) {
@@ -241,6 +243,7 @@ export function JsTree(parent, options = {}) {
     activentry = entry;
   }
   function attachControls(entry) {
+  if(entry.status=='D') return;
     if (entrycontrols) entrycontrols.attachControls(entry);
     activentry = entry;
     ModuleEventEmitter.emit(eventnames.attach, {

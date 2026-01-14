@@ -1028,17 +1028,18 @@ def prjGetClassifTab(PrjId):
             taxon.id,
             taxon.name,
             (taxon.id_lineage[1] if len(taxon.id_lineage) > 1 else None),
+            taxon.status
         ]
         for taxon in taxa
     }
     # ...but not necessarily all the parents
     for a_taxon in taxa:
         prev_id = None
-        for taxon_id, taxon_name in zip(
-            reversed(a_taxon.id_lineage), reversed(a_taxon.lineage)
+        for taxon_id, taxon_name , taxon_status in zip(
+            reversed(a_taxon.id_lineage), reversed(a_taxon.lineage),reversed(a_taxon.lineage_status)
         ):
             if taxon_id not in taxotree:
-                taxotree[taxon_id] = [taxon_id, taxon_name, prev_id]
+                taxotree[taxon_id] = [taxon_id, taxon_name, prev_id, taxon_status]
             prev_id = taxon_id
 
     guides = getGuideSheets(proj.instrument, [taxon.id for taxon in taxa])
@@ -1133,9 +1134,8 @@ def prjGetClassifTab(PrjId):
             html_display_name = html_display_name.replace(deprec_tag, "(D)")
         line["htmldisplayname"] = html_display_name
         line["taxoparent"] = html_taxo_parent
-
     return render_template(
-        "project/classiftab.html", res=restree, taxotree=json.dumps(taxotree)
+        "project/classiftab.html", res=restree, taxotree=json.dumps(taxotree), projid=PrjId
     )
 
 

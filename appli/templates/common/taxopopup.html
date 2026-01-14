@@ -2,8 +2,9 @@
     // Care about initial setup of the taxonomy select + small utility
 
     function FormatTaxoItem(t) {
-        if (t.pr == 1)
+           if (t.pr == 1)
             return $("<u>" + XSSStrEscape(t.text) + "</u>")
+        else if (t.status=='D') { return $('<span class="deprecated" disable>' + XSSStrEscape(t.text) + '</span>')}
         else return t.text;
     }
 
@@ -49,7 +50,7 @@
                     {% if g.TaxonCreator %}
                         //var msg = "<a href=\"javascript:PostDynForm('/taxo/create/?fromprj={{ g.Projid }}')\" >Create category</a>";
                         const term = the_sel2.data('select2').dropdown.$search.val() ;
-                        var msg ="<a href=\"javascript:At2PopupWaitOpenLoad(0,'/taxo/searchworms/"+term+"?fromprj={{ g.Projid }}','Create new taxon')\" >Create category</a>";
+                        var msg ="<a href=\"javascript:At2PopupWaitOpenLoad(0,'/taxo/searchworms/"+term+"?fromprj={{ g.Projid }}','Create Category')\" >Create category</a>";
                     {% else %}
                         var msg = "<a href=\"mailto:{{ g.manager_mail }}\">Request category</a>";
                     {% endif %}

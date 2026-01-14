@@ -40,7 +40,7 @@
     <div class="panel panel-default text-warning" style="padding: 5px; font-size:large">
       This form cannot create WoRMS taxa.<br>
       Once created, a taxon can never be deleted. <br>
-      If you really want to create a new taxon, please carefully review the information below before submitting.<br>
+      If you really want to create a new taxon, please carefully review the information below.<br>
     </div>
   {% endif %}
   <table class=" " id="tblviewtaxon">
@@ -54,10 +54,12 @@
                 addemptyrow=True,extrataginfo="class=form-control required"+(" DISABLED" if taxon.id != 0 else "")) }}
       </td>
     </tr>
+    {% if taxon.id > 0 %}
     <tr>
       <th>Display Name</th>
       <td colspan="5">{{ taxon.display_name }}</td>
     </tr>
+    {% endif %}
     {%- if taxon and taxon.aphia_id-%}
      <tr>
       <th>Aphia ID</th>
@@ -74,11 +76,12 @@
         </select>
       </td>
     </tr>
+    {% if taxon.id > 0 %}
     <tr>
       <th>Lineage</th>
       <td colspan="5">{{ "".join(taxon.lineage) | safe }}</td>
     </tr>
-
+    {% endif %}
     <tr>
       <th>Source URL
         <i class="fas fa-info-circle"
@@ -113,6 +116,7 @@
                 extrataginfo=("class=form-control maxlength=250 data-parsley-type=email "
                 +("READONLY" if taxon.id != 0 else ""))|safe) }}
       </td>
+      {% if taxon.id > 0 %}
       <th>Creation date</th>
       <td>
         {{ ht.InputText('creation_datetime', taxon.creation_datetime ,
@@ -120,6 +124,7 @@
                 style='width:150px' READONLY"|safe) }}
       </td>
     </tr>
+    {% endif %}
 
 
   </table>

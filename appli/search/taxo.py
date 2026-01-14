@@ -30,7 +30,7 @@ def searchtaxo():
         res: List[TaxaSearchRsp] = api.search_taxa(query=term, project_id=prj_id)
     # TODO: temporary until the HTML goes to /api directly
     # Filter out taxa to rename
-    res = [a_taxon for a_taxon in res if a_taxon.renm_id is None]
+    res = [a_taxon for a_taxon in res if a_taxon.renm_id is None and a_taxon.status!='D']
     return json.dumps(res, cls=BackEndJSONEncoder)
 
 
