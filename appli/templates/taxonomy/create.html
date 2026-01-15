@@ -1,19 +1,19 @@
 {% import 'ht_macros.html' as ht %}
               <style>
-                  #At2PopupWindow0 .At2PopupWindow {
+                  #At2PopupWindow{{windex if windex else 20}} .At2PopupWindow {
                       width: 1000px
                              }
               </style>
 <form id="formcreatetaxon" method="post" action="?"><div class="panel panel-default text-warning" style="padding: 5px; font-size:large">
-      Once created, a taxon can never be deleted. <br>
+      Once created, a category can never be deleted. <br>
       If you really want to create a new taxon, please carefully review the information below.<br>
     </div>
     <div><span>Create a WoRMS taxon
         <i class="fas fa-info-circle" data-content="{{_('Type a taxon name, the name will be searched into the WoRMS database.')}}"></i>
       </span>{{ ht.InputText('taxosearchname', searchname ,
                 extrataginfo=("class=form-control maxlength=100  "
-                )|safe) }} <button type="button" onclick="const searchurl='{{url_for('routetaxosearchworms',name='')}}'+$('#taxosearchname').val();loadUrl(searchurl,'GET',null,null,{},'... requesting Worms API ...')" class="btn btn-blue"><i class="fa fa-search"></i> Search
-        </button></div>
+                )|safe) }} <button type="button" onclick="const searchurl='{{url_for('routetaxosearchworms')}}?q='+$('#taxosearchname').val();loadUrl(searchurl,'GET',null,null,{},'... requesting Worms API ...')" class="btn btn-blue"><i class="fa fa-search"></i> Search
+        </button>  </button></div>
     <div><div id="resulttaxocentral"></div></div>
     <div>{%-if taxons-%}
     <p style="padding-bottom:8px">{{_("Click a taxon name in the list to add it to EcoTaxa's taxonomy.")}} <em>({{_("non-clickable entries are already in EcoTaxa's taxonomy and displayed here for information.")}})</em></p>
@@ -23,15 +23,21 @@
     {%-endfor-%}</ul>{%-else-%}{{_('No result')}}{%-endif-%}
     <p><button  type="button" class="btn btn-info" onclick="loadUrl('{{url_for('route_add_taxon')}}')">{{_('Or create a non WoRMS category')}}</button></p>
 </div>
-   <!-- <div><button type="button" onclick="At2PopupClose(0);" class="btn btn-gris"><i class="fa fa-times"></i> Close
-        </button></div> //--></form>
+   </form>
     <script>
+        const windex={{windex if windex else 20}}
         const restaxocentral= $('#resulttaxocentral');
         const searchurl="{{url_for('routetaxosearch',name=searchname)}}";
         if (restaxocentral) {
         loadUrl("{{url_for('routetaxodosync')}}","POST",restaxocentral,function() {  //do not load existing taxons - add datediff to limit the list - loadUrl(searchurl,"GET",restaxocentral,displaytaxons);
         });
         }
+        $('#taxosearchname').on('input', function(e) {
+        var val =$(this).val();
+        if (val.length) return;
+        val=encodeURIComponent(val).replaceAll('%20','+');
+        const searchurl="{{url_for('routetaxosearchworms',q=val)}}";
+        loadUrl(searchurl,'GET',null,null,{},'... requesting Worms API ...');});
          function createWoRMSTaxon(aphia_id) {
             const formu = $("#formcreatetaxon");
             formu.attr("action","{{url_for('addtaxoworms')}}");
@@ -64,7 +70,7 @@
                   sel2.data('saved_val', id);
                   sel2.data('saved_text',name);
                 }
-        At2PopupClose(0);
+        At2PopupClose(windex);
         }
 
         function displaytaxons(data,element) {
@@ -83,7 +89,7 @@
         }
 
         function loadUrl(url,method='GET',element=null,callback=null,data={},wait="...") {
-            if (element===null) element = $('#At2PopupWindow0 .At2PopupContent');
+            if (element===null) element = $('#At2PopupWindow'+windex+' .At2PopupContent');
             $.ajax(url, {
             data: data,
             type: method,

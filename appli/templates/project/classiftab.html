@@ -35,5 +35,20 @@
 <script>
     // a dict with key=taxon id, value=a list containing [t.id, t.name, t.parent_id]
     var taxotree = {{ taxotree|safe }};
-
+    const projid={{projid}};
+      const fixcat=$('<span class="zindex-tooltip border border-light rounded shadow-sm p-4 mb-4 bg-info text-sm "><i class="fas fa-wrench"><a class="p-4 text-white" href="{{url_for('deprecation_management',prj_id=projid)}}">{{_('Fix deprecated categories')}}</a></i></span>').hide();
+     $('body').append(fixcat);
+      $('.deprecated').on( 'mouseover', function() {
+        var pos = $(this).offset(); console.log('pos',pos);
+        pos.top-= 18
+        pos.left-= 4
+        fixcat.css({
+            position: 'absolute',
+            top: parseInt(pos.top)+'px',
+            left: parseInt(pos.left)+'px',
+            }).show();
+        });
+    fixcat.on( 'mouseout', function() {
+        fixcat.hide();
+        });
 </script>

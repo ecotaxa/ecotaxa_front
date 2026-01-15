@@ -1,4 +1,6 @@
 <script>
+    const windex={{windex if windex else 20}}
+    let urlsearchworms="{{url_for('routetaxosearchworms')}}"
     // Care about initial setup of the taxonomy select + small utility
 
     function FormatTaxoItem(t) {
@@ -48,9 +50,9 @@
             language: {
                 noResults: function () {
                     {% if g.TaxonCreator %}
-                        //var msg = "<a href=\"javascript:PostDynForm('/taxo/create/?fromprj={{ g.Projid }}')\" >Create category</a>";
+                        //var msg = "<a href=\"javascript:PostDynForm('/taxo/create/?fromprj={{ g.Projid if g.Projid}}')\" >Create category</a>";
                         const term = the_sel2.data('select2').dropdown.$search.val() ;
-                        var msg ="<a href=\"javascript:At2PopupWaitOpenLoad(0,'/taxo/searchworms/"+term+"?fromprj={{ g.Projid }}','Create Category')\" >Create category</a>";
+                        var msg ="<a href=\"javascript:At2PopupWaitOpenLoad("+windex+",'"+urlsearchworms+"?q="+encodeURIComponent(term).replaceAll('%20', '+')+"&fromprj={{ g.Projid }}','Create a category')\" >Create category</a>";
                     {% else %}
                         var msg = "<a href=\"mailto:{{ g.manager_mail }}\">Request category</a>";
                     {% endif %}

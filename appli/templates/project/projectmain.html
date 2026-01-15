@@ -1405,6 +1405,8 @@
           }
 
           $(document).ready(function () {
+            const windex={{windex if windex else 20}}
+            const urlsearchworms="{{url_for('routetaxosearchworms')}}"
                var term=null;
               {# Le fait de choisir un item fait l'assignation/CTRL+D #}
               const sel2 = $('#taxolbanno');
@@ -1428,7 +1430,7 @@
                   // check if create category
                   if(choice.id===0) {
                   sel2.val(null).trigger("change");
-                  At2PopupWaitOpenLoad(0,"/taxo/searchworms/"+encodeURIComponent(term),"Create category");
+                  At2PopupWaitOpenLoad(windex,urlsearchworms+"?q="+encodeURIComponent(term),"Create a category");
                   return;} else if(choice.status=='D') { sel2.val(null).trigger("change");return }
                   // Select event in the dropdown
                   AssignTaxoLbToSelection(choice.id, choice.text);

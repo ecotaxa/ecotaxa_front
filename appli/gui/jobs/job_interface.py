@@ -285,8 +285,8 @@ def import_format_options(_type=None) -> dict:
     taxomapping = dict(
         {
             "taxo_mapping": {
-                "label": _("Mapping from present taxon to output replacement one "),
-                "comment": _(" Type '_discard_' to discard taxon"),
+                "label": _("Mapping from present category to output replacement one "),
+                "comment": _(" Type '_discard_' to discard category"),
                 "format": "taxoline",
                 "help": "help_import_summary_taxo_mapping",
                 "addoption": "_discard_,0",

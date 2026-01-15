@@ -69,8 +69,9 @@ def DoSyncStatUpdate():
     return ret["msg"]
 
 
-@app.route("/taxo/search/<name>", methods=["GET"])
-def routetaxosearch(name) -> List[Any]:
+@app.route("/taxo/search", methods=["GET"])
+def routetaxosearch() -> List[Any]:
+    name=gvg('q','').strip()
     user = get_login()
     if user is None:
         return PrintInCharte("Please login to access this page")
@@ -109,9 +110,9 @@ def routetaxosearch(name) -> List[Any]:
     return json.dumps(taxons)
 
 
-@app.route("/taxo/searchworms/", methods=["GET"])
-@app.route("/taxo/searchworms/<name>", methods=["GET"])
-def routetaxosearchworms(name=""):
+@app.route("/taxo/searchworms", methods=["GET"])
+def routetaxosearchworms():
+    name=gvg("q","").strip()
     user = get_login()
     if user is None:
         return PrintInCharte("Please login to access this page")
@@ -237,6 +238,10 @@ def route_add_taxon():
     # Create a blank taxon
     taxon = {"id": 0, "creator_email": user.email, "tree": "", "creation_datetime": ""}
     g.TaxoType = TaxoType
+    g.TaxonCreator = False
+    # current_user is either an ApiUserWrapper or an anonymous one from flask
+    if current_user.is_authenticated and hasattr(current_user, "api_user"):
+        g.TaxonCreator = 4 in current_user.api_user.can_do
     return render_template("taxonomy/edit.html", taxon=taxon)
 
 

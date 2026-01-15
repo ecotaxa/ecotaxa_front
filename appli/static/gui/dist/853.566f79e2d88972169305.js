@@ -1,2 +1,0 @@
-/*! For license information please see 853.566f79e2d88972169305.js.LICENSE.txt */
-"use strict";(self.webpackChunk=self.webpackChunk||[]).push([[853],{8853(e,t,s){s.r(t),s.d(t,{default:()=>d});var a=s(7114);function d(e){return{taxa:(t,s,d,n={})=>{Array.isArray(t)||(n.childNodes=[]);let r=[];return t.forEach(t=>{"D"==t[1][1]?r.push({nodename:"SPAN",attributes:{class:a.AH.deprecated},childnodes:[e.setTextNode(t[1][0])]}):r.push(e.setTextNode(t[1][0]))}),n.childnodes=[{nodename:"DIV",attributes:{class:a.AH.component.table.tip,"data-num":r.length},childnodes:r}],n}}}}}]);

@@ -28,19 +28,17 @@
         padding-left: 4px;
     }
 
-    #At2PopupWindow0 .At2PopupWindow {
+    #At2PopupWindow{{windex if windex else '20'}} .At2PopupWindow {
         width: 1000px;
     }
-
-
 </style>
 <form id="formedittaxon" method="post" action="?">
   <input type="hidden" name="id" value="{{ taxon.id }}">
   {% if taxon.id == 0 %}
     <div class="panel panel-default text-warning" style="padding: 5px; font-size:large">
       This form cannot create WoRMS taxa.<br>
-      Once created, a taxon can never be deleted. <br>
-      If you really want to create a new taxon, please carefully review the information below.<br>
+      Once created, a category can never be deleted. <br>
+      If you really want to create a new category, please carefully review the information below.<br>
     </div>
   {% endif %}
   <table class=" " id="tblviewtaxon">
@@ -132,13 +130,9 @@
     <tr>
       {% if taxon.id == 0 %}
         <td>
-          <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save Taxon</button>
+          <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save category</button>
         </td>
       {% endif %}
-      <td style="text-align: right">
-        <button type="button" onclick="At2PopupClose(0);" class="btn btn-gris"><i class="fa fa-times"></i> Close
-        </button>
-      </td>
     </tr>
   </table>
 </form>
@@ -162,7 +156,6 @@
     {{ a_usage.nb_validated }}&nbsp;objects&nbsp;in&nbsp;<a href="/prj/{{ a_usage.projid }}?taxo={{ taxon.id }}"
                                                             target="_blank">{{ a_usage.title }}</a>
     </span>
-    <span></span>
   {% endfor %}
 {% endif %}
 
@@ -171,9 +164,10 @@
         width: 400px;
     }
 
-
 </style>
 <script>
+    const windex={{windex if windex else 20}}
+    const urlsearchworms="{{url_for('routetaxosearchworms')}}"
     const taxolbpop = $(".taxolbpop");
     taxolbpop.select2({
         ajax: {
@@ -189,14 +183,15 @@
             },
             cache: true
         },
+        dropdownParent: taxolbpop.parent(),
         minimumInputLength: 3,
         /*,allowClear:true know bug on it #5394*/
           language: {
                 noResults: function () {
                     {% if g.TaxonCreator %}
                         const term = taxolbpop.data('select2').dropdown.$search.val() ;
-                        var msg ="<a href=\"javascript:At2PopupWaitOpenLoad(0,'/taxo/searchworms/"+term+"?fromprj={{ g.Projid }}','Create new taxon')\" >Create category</a>";
-                    {% else %}
+                        var msg ="<a href=\"javascript:At2PopupWaitOpenLoad("+windex+",'"+urlsearchworms+"?q="+encodeURIComponent(term).replaceAll('%20', '+')+"&fromprj={{ g.Projid }}','Create a category')\" >Create category</a>";
+                       {% else %}
                         var msg = "<a href=\"mailto:{{ g.manager_mail }}\">Request category</a>";
                     {% endif %}
                     return $("<span>No recent/result found. " + msg + "</span>");
@@ -211,7 +206,7 @@
                   // check if create category
                   if(choice.id===0) {
                   taxolbpop.val(null).trigger("change");
-                  At2PopupWaitOpenLoad(0,"/taxo/searchworms/"+term,"Create new taxon");
+                  At2PopupWaitOpenLoad(windex,urlsearchworms+"?q"+EncodeURIComponent(term),"Create a category");
                   return;}
               });
 

@@ -14,7 +14,7 @@ export default function(state) {
             "class": css.deprecated
           },
           childnodes: [state.setTextNode(v[1][0])]});
-        else  html.push(state.setTextNode(v[1][0]));
+        else  html.push(v[1][0]);
       });
       td.childnodes = [{
         nodename: 'DIV',
@@ -22,7 +22,7 @@ export default function(state) {
           class: css.component.table.tip,
           "data-num": html.length
         },
-        childnodes: html //[state.setTextNode(html.join(`, `))]
+        childnodes: [state.setTextNode(html.join(`, `))]
       }];
       return td;
     }
