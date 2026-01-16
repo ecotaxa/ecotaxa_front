@@ -23,8 +23,8 @@ function createJsTabs() {
       const ev = (item.dataset.event) ? item.dataset.event : 'click';
       btns.forEach((btn, index) => {
         const target = (btn.dataset.target) ? item.querySelector('#' + btn.dataset.target) : btn.closest(domselectors.component.tabs.tab);
+         if (!target) return;
         if (target.classList.contains(css.active)) idxactive=index;
-        if (!target) return;
         btn.style.left = l + 'px';
         l += parseInt(btn.offsetWidth) + 20;
         btn.addEventListener(ev, (e) => {

@@ -307,7 +307,7 @@ def render_samples_stats(
         if len(used_taxa) > 0:
             usedtaxa = dict({})
             for t in taxo_with_names(list(set(used_taxa))):
-                usedtaxa.update(dict({str(t[0]): t[1]}))
+                usedtaxa.update(dict({str(t[0]): (t[1],t[2])}))
             for i, sample in enumerate(samples):
                 taxa = []
                 for taxon in sample["used_taxa"]:

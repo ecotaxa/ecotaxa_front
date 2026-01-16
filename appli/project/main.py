@@ -20,6 +20,7 @@ from appli.constants import (
     SortableObjectFields,
     MappableParentColumns,
     ClassifQual,
+    TaxoType,
 )
 from appli.project.taxo_guide import getGuideSheets
 from appli.project.widgets import ClassificationPageStats, PopoverPane
@@ -519,6 +520,7 @@ def indexPrj(PrjId):
         leftb=filtertab,
         data=data,
         title="EcoTaxa " + ntcv(proj.title),
+        TaxoType=TaxoType,
     )
 
 
@@ -573,7 +575,7 @@ MAX_LEN_BEFORE_HYPHEN = 12
 
 # noinspection PyPep8Naming
 def FormatNameForVignetteDisplay(
-    category_name: Optional[str], hyphenator, cache: Dict[str, str]
+    category_name: Optional[str], taxostatus: Optional[str], hyphenator, cache: Dict[str, str]
 ) -> str:
     if category_name is None:
         category_name = ""
@@ -585,7 +587,10 @@ def FormatNameForVignetteDisplay(
     part0 = parts[0]
     if len(part0) >= MAX_LEN_BEFORE_HYPHEN:
         part0 = hyphenator.hyphenize(part0)
-    restxt: str = "<span class='cat_name'>{}</span>".format(part0)
+    depre = ''
+    if taxostatus == "D":
+        depre = ' deprecated'
+    restxt: str = f"<span class='cat_name{depre}'>{part0}</span>"
     if len(parts) > 1:
         restxt += "<span class='cat_ancestor'> &lt;&nbsp;{}</span>".format(
             " &lt;&nbsp;".join(parts[1:])
@@ -679,6 +684,7 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
         "img.file_name",
         "txo.name",
         "txo.display_name",
+        "txo.taxostatus"
     ]
     api_cols_to_display = OrderedDict()
 
@@ -802,6 +808,7 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
         thumbfilename: Optional[str] = dtl["img.thumb_file_name"]
         thumbwidth: Optional[int] = dtl["img.thumb_width"]
         display_name: Optional[str] = dtl["txo.display_name"]
+        taxostatus: Optional[int] = dtl["txo.taxostatus"]
         imgcount: int = dtl["obj.imgcount"]
         if (
             origwidth is None
@@ -922,7 +929,7 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
             "<b>!</b> " if dtl["obj.complement_info"] not in (None, "") else ""
         )
 
-        name_chunk = FormatNameForVignetteDisplay(display_name, hyphenator, categ_cache)
+        name_chunk = FormatNameForVignetteDisplay(display_name, taxostatus, hyphenator, categ_cache)
         if g.PublicViewMode:
             simsrch_btn = ""
         else:
@@ -1021,17 +1028,18 @@ def prjGetClassifTab(PrjId):
             taxon.id,
             taxon.name,
             (taxon.id_lineage[1] if len(taxon.id_lineage) > 1 else None),
+            taxon.status
         ]
         for taxon in taxa
     }
     # ...but not necessarily all the parents
     for a_taxon in taxa:
         prev_id = None
-        for taxon_id, taxon_name in zip(
-            reversed(a_taxon.id_lineage), reversed(a_taxon.lineage)
+        for taxon_id, taxon_name , taxon_status in zip(
+            reversed(a_taxon.id_lineage), reversed(a_taxon.lineage),reversed(a_taxon.lineage_status)
         ):
             if taxon_id not in taxotree:
-                taxotree[taxon_id] = [taxon_id, taxon_name, prev_id]
+                taxotree[taxon_id] = [taxon_id, taxon_name, prev_id, taxon_status]
             prev_id = taxon_id
 
     guides = getGuideSheets(proj.instrument, [taxon.id for taxon in taxa])
@@ -1126,9 +1134,8 @@ def prjGetClassifTab(PrjId):
             html_display_name = html_display_name.replace(deprec_tag, "(D)")
         line["htmldisplayname"] = html_display_name
         line["taxoparent"] = html_taxo_parent
-
     return render_template(
-        "project/classiftab.html", res=restree, taxotree=json.dumps(taxotree)
+        "project/classiftab.html", res=restree, taxotree=json.dumps(taxotree), projid=PrjId
     )
 
 

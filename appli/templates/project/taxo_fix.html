@@ -76,7 +76,7 @@ by overriding the block. #}
             <th>{{ a_ren.lineage | reverse | join(' &gt; ') | safe }}</th>
             <!-- The advised rename -->
             <tr>
-              <td colspan="2"><input type="radio" name="chc{{ a_ren.id }}" value="{{ a_ren.renm_id }}">
+              <td colspan="2"><input type="radio" checked=1 name="chc{{ a_ren.id }}" value="{{ a_ren.renm_id }}">
                 With (advised)&nbsp;:&nbsp;
                 {{ advised.name }}
               </td>

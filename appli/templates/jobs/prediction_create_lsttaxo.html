@@ -67,7 +67,7 @@
             <td><input type="checkbox" style="width: 1em;" value="Y" name="taxo{{ r[0] }}"
                        onchange="UpdateLSCount($(this));"
                        data-nbr="{{ r[2] }}" data-pct="{{ r[3] }}" {{ r[4] }}></td>
-            <td>{{ r[1] }}</td>
+            <td >{%-if r[5]=='D'-%}<span class="deprecated">{{ r[1] }}</span>{%-else-%}{{ r[1] }}{%-endif-%}</td>
             <td class="rightfixedfont" title="Click to select from top till here" style="cursor: s-resize;"
                 onclick="ApplyCountFilter({{ r[2] }});">{{ r[2] }}
             </td>
@@ -79,7 +79,7 @@
             <td>
               <div class="input-group">
                 <select id="taxolb{{ r[0] }}" name="taxolb{{ r[0] }}" data-taxoid="{{ r[0] }}"
-                        style="width: 10em" class='taxolb'>
+                        style="width: 10em" class="taxolb">
                 </select>
               </div>
             </td>
@@ -191,15 +191,16 @@
               url: "/api/taxon_set/query?ids=" + taxoid,
               success: function (rspf) {
                   // e.g. rsp: {"id":4,"name":"Archaea","type":"M","nb_objects":0,"nb_children_objects":0,"display_name":"Archaea",
-                  // "lineage":["Archaea","living"],"id_lineage":[4,1],"children":[332,325,334322]}]
+                  // "lineage":["Archaea","living"],"id_lineage":[4,1],"children":[332,325,334322],"lineage_status":['D','A']}]
                   const lineage = rspf[0].lineage;
                   const id_lineage = rspf[0].id_lineage;
+                  const lineage_status = rspf[0].lineage_status;
                   var click_lineage = lineage.map(function (txo, i) {
                       if (i > 0) {
-                          return "<a href='#' data-tgt='" + taxoid + "' data-txoid='" + id_lineage[i] + "' >" + txo + "</a>";
+                           return (lineage_status[i]=='D')?"<span class='deprecated'>"+txo+"</span>":"<a href='#' data-tgt='" + taxoid + "' data-txoid='" + id_lineage[i] + "' + cl >" + txo + "</a>";
                       } else {
                           // The base taxon itself, no use making it selectable
-                          return txo;
+                          return (lineage_status[i]=='D')?"<span class='deprecated'>"+txo+"</span>":txo;
                       }
                   });
                   const lin_html = click_lineage.join(" &lt; ");
@@ -251,9 +252,10 @@
                       return {q: params.term, page: params.page};
                   },
                   processResults: function (data, page) {
-                      return {results: data};
+                      const results=[];
+                      data.forEach((item) => {if (item.status!=='D') results.push(item);});
+                      return {results: results};
                   },
-                 
                   cache: true
               },
               placeholder: 'select category...',
@@ -267,7 +269,6 @@
           sel2.on("select2:close", function () {
               UnloadLineageHelper($(this));
           });
-
           $('#all_taxa').prop('indeterminate', true);
           UpdateAllLSCounts();
 

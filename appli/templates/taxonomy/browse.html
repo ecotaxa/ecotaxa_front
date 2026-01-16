@@ -32,6 +32,7 @@
                 <thead>
                 <tr>
                     <td>ID</td>
+                    <td>AphiaID</td>
                     <td>Name</td>
                     <td>Type</td>
                     <td>Lineage</td>
@@ -39,7 +40,7 @@
                 </thead>
                 <tbody>
                 <tr>
-                    <td colspan="4">Search results appear here.</td>
+                    <td colspan="5">Search results appear here.</td>
                 </tr>
                 </tbody>
             </table>
@@ -49,12 +50,13 @@
 </div>
 
 <script>
+const urlsearchworms="{{url_for('routetaxosearchworms')}}"
 function DoSync() {
   var params={};
   At2PopupWaitOpenLoad(1,"/taxo/dosync","EcotaxoServer Synchronisation",params);
 }
 function NewTaxon() {
-  At2PopupWaitOpenLoad(0,"/taxo/new","Create new taxon");
+  At2PopupWaitOpenLoad(0,urlsearchworms,"Create new taxon");
 }
 
 $(document).ready(function() {
@@ -75,7 +77,8 @@ $(document).ready(function() {
                     row_id = 'txo' + rsp[i].id;
                     row += '<tr id=' + row_id + '>';
                     row += '<td><a href="javascript:void(0);">'+rsp[i].id+'</a></td>';
-                    if (rsp[i].renm_id) {
+                    row += '<td>'+(rsp[i].aphia_id||'')+'</td>';
+                    if (rsp[i].status === 'D') {
                         row += '<td class="deprecated">' + rsp[i].text + '</td>';
                     } else {
                         row += '<td>' + rsp[i].text + '</td>';
@@ -94,10 +97,19 @@ $(document).ready(function() {
                             // {"id":4,"name":"Archaea","type":"M","nb_objects":0,"nb_children_objects":0,"display_name":"Archaea",
                             // "lineage":["Archaea","living"],"id_lineage":[4,1],"children":[332,325,334322]}]
                             row_id = 'txo' + rspf[i].id;
-                            lineage = rspf[i].lineage.reverse().join(" > ");
+                            var lin = [];
+                            for (var j in rspf[i].lineage) {
+                                var name = rspf[i].lineage[j];
+                                if (rspf[i].lineage_status[j] === 'D') {
+                                    lin.push('<span class="deprecated">' + name + '</span>');
+                                } else {
+                                    lin.push('<span>' + name + '</span>');
+                                }
+                            }
+                            lineage = lin.reverse().join(" > ");
                             type = rspf[i].type;
-                            $("#"+ row_id + " :nth-child(3)").text(type);
-                            $("#"+ row_id + " :nth-child(4)").text(lineage);
+                            $("#"+ row_id + " :nth-child(4)").text(type);
+                            $("#"+ row_id + " :nth-child(5)").html(lineage);
                         }
                      }
                 });

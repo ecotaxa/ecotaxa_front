@@ -349,7 +349,7 @@ class PredictionJob(Job):
 
         # Get the number of validated objects of each category in each source project
         total_validated = sum(validated_categ_count.values())
-        taxo_table = [[taxon_id, taxa_per_id[taxon_id].display_name, nbr_v]
+        taxo_table = [[taxon_id, taxa_per_id[taxon_id].display_name, nbr_v,taxa_per_id[taxon_id].status]
                       for taxon_id, nbr_v in validated_categ_count.items()]
         taxo_table.sort(key=lambda r: r[2], reverse=True)
         # There are < in display names which make them unbreakable during resize
@@ -366,7 +366,7 @@ class PredictionJob(Job):
             settings_taxo_set = {}
         g.TaxoList = [[r[0], r[1], r[2],
                        round(100 * r[2] / total_validated, 1),
-                       'checked' if len(settings_taxo_set) == 0 or r[0] in settings_taxo_set else '']
+                       'checked' if len(settings_taxo_set) == 0 or r[0] in settings_taxo_set else '',r[3]]
                       for r in taxo_table]  # Add object % and 'checked' or not
 
         src_prjs_str = ",&nbsp;".join(src_projs)

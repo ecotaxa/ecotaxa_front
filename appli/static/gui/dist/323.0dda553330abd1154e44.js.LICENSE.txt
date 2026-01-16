@@ -1,0 +1,183 @@
+/*! ./ */
+
+/*! ./Object.getPrototypeOf */
+
+/*! ./Reflect.getPrototypeOf */
+
+/*! ./actualApply */
+
+/*! ./functionApply */
+
+/*! ./functionCall */
+
+/*! ./gOPD */
+
+/*! ./implementation */
+
+/*! ./isArguments */
+
+/*! ./isNaN */
+
+/*! ./polyfill */
+
+/*! ./reflectApply */
+
+/*! ./shams */
+
+/*! ./shim */
+
+/*! ./util.inspect */
+
+/*! array-buffer-byte-length */
+
+/*! available-typed-arrays */
+
+/*! call-bind */
+
+/*! call-bind-apply-helpers */
+
+/*! call-bind-apply-helpers/applyBind */
+
+/*! call-bind-apply-helpers/functionApply */
+
+/*! call-bind-apply-helpers/functionCall */
+
+/*! call-bind/callBound */
+
+/*! call-bound */
+
+/*! define-data-property */
+
+/*! define-properties */
+
+/*! dunder-proto/get */
+
+/*! es-define-property */
+
+/*! es-errors */
+
+/*! es-errors/eval */
+
+/*! es-errors/range */
+
+/*! es-errors/ref */
+
+/*! es-errors/syntax */
+
+/*! es-errors/type */
+
+/*! es-errors/uri */
+
+/*! es-get-iterator */
+
+/*! es-object-atoms */
+
+/*! for-each */
+
+/*! function-bind */
+
+/*! functions-have-names */
+
+/*! get-intrinsic */
+
+/*! get-proto */
+
+/*! get-proto/Object.getPrototypeOf */
+
+/*! get-proto/Reflect.getPrototypeOf */
+
+/*! gopd */
+
+/*! has-bigints */
+
+/*! has-property-descriptors */
+
+/*! has-symbols */
+
+/*! has-symbols/shams */
+
+/*! has-tostringtag/shams */
+
+/*! hasown */
+
+/*! internal-slot */
+
+/*! is-arguments */
+
+/*! is-array-buffer */
+
+/*! is-bigint */
+
+/*! is-boolean-object */
+
+/*! is-callable */
+
+/*! is-date-object */
+
+/*! is-map */
+
+/*! is-number-object */
+
+/*! is-regex */
+
+/*! is-set */
+
+/*! is-shared-array-buffer */
+
+/*! is-string */
+
+/*! is-symbol */
+
+/*! is-weakmap */
+
+/*! is-weakset */
+
+/*! isarray */
+
+/*! math-intrinsics/abs */
+
+/*! math-intrinsics/floor */
+
+/*! math-intrinsics/max */
+
+/*! math-intrinsics/min */
+
+/*! math-intrinsics/pow */
+
+/*! math-intrinsics/round */
+
+/*! math-intrinsics/sign */
+
+/*! object-inspect */
+
+/*! object-is */
+
+/*! object-keys */
+
+/*! object.assign */
+
+/*! possible-typed-array-names */
+
+/*! regexp.prototype.flags */
+
+/*! safe-regex-test */
+
+/*! set-function-length */
+
+/*! set-function-name */
+
+/*! side-channel */
+
+/*! side-channel-list */
+
+/*! side-channel-map */
+
+/*! side-channel-weakmap */
+
+/*! stop-iteration-iterator */
+
+/*! which-boxed-primitive */
+
+/*! which-collection */
+
+/*! which-typed-array */

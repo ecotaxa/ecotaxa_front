@@ -1,0 +1,124 @@
+{% if not partial%}
+{% extends "./v2/layout.html" %}
+{% endif %}
+{% block body %}
+<div style="margin: 10px;">
+    <div class="panel panel-default " style="padding: 5px;">
+        This page allows you to browse the taxa tree, using below search box.<br>
+{% if create_ok %}
+        You can as well create a new taxon.<br>
+{% endif %}
+    </div>
+    <div class="panel">
+{% if create_ok %}
+        <button type="button" onclick="DoSync('Y')" class="btn btn-primary"><span
+                class="glyphicon glyphicon-refresh"></span> Synchronize with EcotaxoServer
+        </button>
+        <button type="button" onclick="NewTaxon()" class="btn btn-primary"><span
+                class="glyphicon glyphicon-plus"></span>
+            Create taxon
+        </button>
+{% endif %}
+        <a href="{{taxoserver_url()}}/browsetaxo/" class="btn btn-primary"><span
+                class="glyphicon glyphicon-link"></span>
+            Browse taxonomy on EcoTaxoServer</a>
+          <a href={{fromurl}} class='btn btn-default btn-primary'>{{fromtext}}</a>
+    </div>
+
+    <div class="panel panel-default " style="padding:5px">
+        <span class="input">Search:&nbsp;</span>
+        <input id="search" type="text" style="width: 210px">
+        <div>
+            <table id="tbl" class="table table-striped table-bordered">
+                <thead>
+                <tr>
+                    <td>ID</td>
+                    <td>Name</td>
+                    <td>Type</td>
+                    <td>Lineage</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td colspan="4">Search results appear here.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<!--
+<script>
+function DoSync() {
+  var params={};
+  At2PopupWaitOpenLoad(1,"/taxo/dosync","EcotaxoServer Synchronisation",params);
+}
+function NewTaxon() {
+  At2PopupWaitOpenLoad(0,"/taxo/new","Create new taxon");
+}
+
+$(document).ready(function() {
+
+    var srch = $('#search');
+
+    function do_search(qry) {
+         $.ajax({
+              type: "GET",
+              url: "/api/taxon_set/search?query="+qry,
+              success: function(rsp) {
+                // e.g. {"id":50328,"text":"Copelatus","pr":0}
+                body = $('#tbl > tbody');
+                body.html("");
+                row = ''; ids='';
+                for (var i in rsp) {
+                    ids += '|'+rsp[i].id;
+                    row_id = 'txo' + rsp[i].id;
+                    row += '<tr id=' + row_id + '>';
+                    row += '<td><a href="javascript:void(0);">'+rsp[i].id+'</a></td>';
+                    if (rsp[i].renm_id) {
+                        row += '<td class="deprecated">' + rsp[i].text + '</td>';
+                    } else {
+                        row += '<td>' + rsp[i].text + '</td>';
+                    }
+                    row += '<td></td>';
+                    row += '<td></td>';
+                    row += '</tr>';
+                    if (i > 50) break;
+                }
+                body.html(row);
+                $.ajax({
+                     type: "GET",
+                     url: "/api/taxon_set/query?ids="+ids,
+                     success: function(rspf) {
+                        for (var i in rspf) {
+                            // {"id":4,"name":"Archaea","type":"M","nb_objects":0,"nb_children_objects":0,"display_name":"Archaea",
+                            // "lineage":["Archaea","living"],"id_lineage":[4,1],"children":[332,325,334322]}]
+                            row_id = 'txo' + rspf[i].id;
+                            lineage = rspf[i].lineage.reverse().join(" > ");
+                            type = rspf[i].type;
+                            $("#"+ row_id + " :nth-child(3)").text(type);
+                            $("#"+ row_id + " :nth-child(4)").text(lineage);
+                        }
+                     }
+                });
+              },
+              error: function(jqXHR, textStatus, errorThrown) {
+                //$('#load_progress').html(textStatus+":"+errorThrown);
+              }
+            });
+        }
+
+    srch.keyup(function(evt) {
+        do_search(srch.val());
+    });
+
+    $('#tbl tbody').on('click','td:nth-child(1)',function () {
+      var taxoid=$(this).closest('tr').find('td:nth-child(1)').text();
+      At2PopupWaitOpenLoad(0,"/taxo/view/"+taxoid,"View taxon "+taxoid);
+    });
+
+});
+
+</script>//-->
+
+{% endblock %}

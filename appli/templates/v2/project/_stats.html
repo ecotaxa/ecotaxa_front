@@ -3,7 +3,7 @@
 {% macro taxo_list(taxa) -%}
 {%-if taxa is iterable-%}
 {%- for taxon in taxa -%}
-  <span class="item" data-id={{taxon[0]}}>{{ taxon[1] }}</span>
+  <span class="item {{'deprecated' if taxon[3][0]=='D'}}" data-id={{taxon[0]}}>{{ taxon[1] }}</span>
   {%-endfor-%}
   {%-endif-%}
   {%-endmacro%}

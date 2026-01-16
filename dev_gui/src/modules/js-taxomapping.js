@@ -61,7 +61,7 @@ export class TaxoMapping {
     // verify values not "" for select and replace inputs
     let cando = true;
     Object.values(this.linecontrols).forEach(input => {
-      const inputvalue = (input.tomselect) ? ((input.tomselect.items.length) ? input.tomselect.items[0] : '') : new String(input.value);
+      const inputvalue = (input.tomselect) ? ((input.tomselect.items.length) ? input.tomselect.items[0] : '') : input.value;
       cando = cando && (inputvalue.length > 0);
     });
     if (cando === false) {
@@ -84,7 +84,7 @@ export class TaxoMapping {
         keep.textContent = tsinput.textContent;
         keep.dataset[role] = this.numlines;
         input.tomselect.clear(true);
-      } else if (input.tagName.toLowerCase() === "select") {
+      } else if (input.tagName.toLowerCase() === "select" ) {
         keep.dataset.value = input.options[input.selectedIndex].value;
         keep.textContent = input.options[input.selectedIndex].text;
         newline.dataset.index = input.selectedIndex;

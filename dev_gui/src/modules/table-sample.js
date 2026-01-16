@@ -8,7 +8,13 @@ export default function(state) {
       if (!Array.isArray(value)) td.childNodes = [];
       let html = [];
       value.forEach(v => {
-        html.push(v[1]);
+        if(v[1][1]=='D') html.push({
+          nodename: "SPAN",
+          attributes: {
+            "class": css.deprecated
+          },
+          childnodes: [state.setTextNode(v[1][0])]});
+        else  html.push(v[1][0]);
       });
       td.childnodes = [{
         nodename: 'DIV',

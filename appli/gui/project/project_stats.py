@@ -71,6 +71,8 @@ def prj_stats(prjid: int, partial: bool):
                 name = n[0][1]
                 taxastats[i]["name"] = name
                 taxastats[i]["lineage"] = n[0][2]
+                taxastats[i]["status"] = n[0][3][1]
+                taxastats[i]["lineage_status"] = n[0][3]
 
         from to_back.ecotaxa_cli_py.models import ProjectUserStatsModel
 
@@ -127,7 +129,6 @@ def prj_stats(prjid: int, partial: bool):
         py_project_rights,
         py_user_roles,
     )
-
     return render_template(
         "v2/project/_stats.html",
         partial=partial,

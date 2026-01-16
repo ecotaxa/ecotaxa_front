@@ -246,6 +246,7 @@ const funcselector='.js-autocomplete';
             valueField: 'id',
             labelField: 'text',
             searchField: 'text',
+            status: 'status',
             closeAfterSelect: true,
             onInitialize: () => {
               const wrapper = document.getElementById(id).nextElementSibling;
@@ -296,6 +297,11 @@ const funcselector='.js-autocomplete';
             break;
           case models.instr:
           case models.taxo:
+          option.settings = {
+          valueField: 'id',
+          labelField: 'text',
+          searchField: 'id',
+          status:'status'}
             url = option.url;
             //
             if (query.indexOf('_') == 0 && option.settings.addoption && query == option.settings.addoption[0]) {
@@ -348,7 +354,7 @@ const funcselector='.js-autocomplete';
           const optgroup = (el.hasOwnProperty('optgroup')) ? `data-optgroup=${el.optgroup}` : ``;
           const label = _get_label(el, option.settings.labelField);
           const itemprefix =(this.settings.itemprefix  && el[this.settings.valueField].length>this.settings.itemprefix.length)?((el[this.settings.valueField].substr(0,this.settings.itemprefix.length)===this.settings.itemprefix)?this.settings.itemprefix.replace('_',''):""):"";
-          return `<div class="py-2 flex  ${ ((multiple)?'inline-flex':'') } ${itemprefix} " ${optgroup} data-value="${el[option.settings.valueField]}">${ escape(label) }</div>`;
+          return `<div class="py-2 flex  ${ ((multiple)?'inline-flex':'') } ${itemprefix}  ${((el.status && el.status=='D')?'deprecated':'')} " ${optgroup}  data-value="${el[option.settings.valueField]}">${ escape(label) }</div>`;
         },
         item: function(el, escape) {
           if (el === undefined || el === null) return ``; // add optgroup
@@ -357,7 +363,7 @@ const funcselector='.js-autocomplete';
           const cancel = ``;
           const label = _get_label(el, option.settings.labelField, true);
           const itemprefix =(this.settings.itemprefix && el[this.settings.valueField].length>this.settings.itemprefix.length)?((el[this.settings.valueField].substr(0,this.settings.itemprefix.length)===this.settings.itemprefix)?this.settings.itemprefix.replace('_',''):""):"";
-          return DOMPurify.sanitize(`<div class="${((multiple) ? `flex inline-flex ` : ``) } ${itemprefix} ${optgroup}"  data-value="${el[this.settings.valueField]}"  ${inlist}>${ escape(label) } ${ cancel }</div>`);
+          return DOMPurify.sanitize(`<div class="${((multiple) ? `flex inline-flex ` : ``) } ${itemprefix} ${optgroup} ${((el.status && el.status=='D')?'deprecated':'')}" data-value="${el[this.settings.valueField]}" ${inlist}>${ escape(label) } ${ cancel }</div>`);
         },
         no_results: function(data, escape) {
           return DOMPurify.sanitize('<div class="no-results">' + ((item.dataset.noresults) ? item.dataset.noresults : 'No result found for ') + escape(data.input) + '</div>');
@@ -405,9 +411,25 @@ const funcselector='.js-autocomplete';
       }
       switch (type) {
         case models.taxo:
+          const discarded=[]
           ts.on('item_add', (v, el) => {
-            if (el !== null) el.classList.add('new');
+            if (el !== null) {
+                el.classList.add('new');
+                const opt=ts.getOption(v);
+                if (opt!==null && opt.status && opt.status=='D') el.classList.add(css.deprecated);
+               }
+
           });
+          ts.on("load", (v,el) => {
+          v.forEach((taxon)=> {
+            if (taxon[1].status==="D") {
+            if (item.dataset.hasOwnProperty('nodeprecated'))  ts.removeOption(taxon[1].id);
+            if (taxon[1].$id ) {
+                const opt=ts.wrapper.querySelector('#'+taxon[1].$id);
+                if (opt!==null) opt.classList.add(css.deprecated);
+          }}
+          })
+          })
           //
           break;
         case models.project:
@@ -467,7 +489,6 @@ const funcselector='.js-autocomplete';
       }
       return ts;
     } else console.log('noid');
-
   }
 
   function getUserList() {

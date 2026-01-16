@@ -6,8 +6,8 @@
         {% if v['haschild'] %}
           <small><span style="width: 1em;" class="glyphicon glyphicon-triangle-bottom categexpander"></span></small>
         {% endif %}
-        <span class="{% if v['deprecated'] %}deprecated{% endif %} taxodrop {% if v['haschild'] %}haschild{% endif %}"
-              style="margin-left: {{ (0 if v['haschild'] else 1)+ v['dist']*0.9 }}em">
+        <span class="{% if v['deprecated']%}deprecated{% endif %} taxodrop {% if v['haschild'] %}haschild{% endif %}"
+              style="margin-left: {{ (0 if v['haschild'] else 1)+ v['dist']*0.9 }}em" >
     {{ v['htmldisplayname'] }}
 </span>
         <span class="taxoparent">{{ v['taxoparent']|safe }}</span>
@@ -35,4 +35,20 @@
 <script>
     // a dict with key=taxon id, value=a list containing [t.id, t.name, t.parent_id]
     var taxotree = {{ taxotree|safe }};
+    const projid={{projid}};
+      const fixcat=$('<span class="zindex-tooltip border border-light rounded shadow-sm p-4 mb-4 bg-info text-sm "><i class="fas fa-wrench p-4"><a class="text-white" href="{{url_for('deprecation_management',prj_id=projid)}}">{{_('Fix deprecated categories')}}</a></i></span>').hide();
+     $('body').append(fixcat);
+      $('.deprecated').on( 'mouseover', function() {
+        var pos = $(this).offset();
+        pos.top-= 18
+        pos.left-= 4
+        fixcat.css({
+            position: 'absolute',
+            top: parseInt(pos.top)+'px',
+            left: parseInt(pos.left)+'px',
+            }).show();
+        });
+    fixcat.on( 'mouseout', function() {
+        fixcat.hide();
+        });
 </script>

@@ -823,7 +823,7 @@ td.progress {@apply min-w-[96px] }
 .progress data {@apply relative before:bg-stone-200 before:h-0.5 before:left-0  before:bottom-0 overflow-x-visible before:block before:z-[2] block max-w-[64px] before:w-[64px]  before:max-w-[64px] before:absolute after:absolute after:bg-stone-700 after:h-0.5 after:block  after:left-0 after:bottom-0 after:z-[4] after:overflow-x-hidden bg-transparent after:w-full h-full}
 
 /* taxa list expand/shrink*/
-#table-import-projects-list td ,#table-import-projects-list td > .tip {@apply max-h-24 overflow-y-hidden}
+#table-import-projects-list td ,#table-import-projects-list td > .tip {@apply max-h-24 overflow-y-hidden }
 #table-import-projects-list td.showfull  {@apply max-h-fit overflow-y-auto }
 #table-import-projects-list td.showfull > .tip {@apply max-h-96 overflow-y-auto absolute p-4 bg-stone-50 drop-shadow}
 td div[data-num] {@apply before:font-normal cursor-pointer before:mr-1 before:bg-stone-600 before:rounded before:text-stone-50 before:text-xs before:px-1 before:content-[attr(data-num)] before:w-auto before:inline-block}
@@ -863,7 +863,10 @@ section.separate {@apply after:w-96 before:h-[0.5] w-full h-auto pb-8 pt-4 block
 .stat-info .progress data.progress-predicted {@apply text-predicted-dark after:bg-predicted-light }
 .stat-info label.rights {@apply font-semibold small-caps basis-1/12 }
 td .item {@apply after:content-[',_'] last:after:content-none}
-
+/********************************/
+/* taxonomy worms          */
+/*******************************/
+.deprecated {@apply line-through !important}
 /******************/
 /*  rights */
 /****************/

@@ -41,19 +41,20 @@ class ExportJob(Job):
         # if cls.EXPORT_TYPE == "summary" or cls.EXPORT_TYPE == None:
         from appli.gui.taxonomy.tools import project_used_taxa
 
+        print("cls target_type " + cls.EXPORT_TYPE, cls.TARGET_TYPE)
         if cls.TARGET_TYPE == "collection":
             idname = "collection_id"
-            if cls.EXPORT_TYPE in ["summary", "darwincore"]:
-                taxalist = formoptions[cls.EXPORT_TYPE]["taxo_mapping"]
-                if "datas" not in taxalist:
-                    taxalist["datas"] = []
-                for projid in target_obj.project_ids:
-                    taxalist["datas"] = list(
-                        set(taxalist["datas"] + project_used_taxa(projid))
-                    )
-        elif cls.EXPORT_TYPE == "summary":
-            formoptions[cls.EXPORT_TYPE]["taxo_mapping"]["datas"] = project_used_taxa(
+            ids = ",".join([str(pid) for pid in target_obj.project_ids])
+
+            taxalist = list(set(project_used_taxa(ids)))
+
+        else:
+            taxalist = project_used_taxa(
                 projid
+            )
+            print(
+                " ftttttvdqg-----",
+                taxalist,
             )
         # hack to have 3 types instead of one page by job export type
         return render_template(
@@ -66,6 +67,7 @@ class ExportJob(Job):
             projid=projid,
             collection_id=collection_id,
             idname=idname,
+            taxalist=taxalist,
             target_type=cls.TARGET_TYPE,
             target_obj=target_obj,
         )

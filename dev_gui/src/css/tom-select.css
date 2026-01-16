@@ -132,3 +132,5 @@ select[class*="ts-hidden"] {@apply hidden}
 .ts-wrapper.multi .ts-control > div.item.new {@apply bg-stone-50 font-normal text-stone-900 }
 /* import privileges */
 .ts-wrapper.multi .ts-control > div.item[data-inlist] {@apply before:underline  before:underline-offset-2 drop-shadow-none before:decoration-secondblue-500 font-normal bg-stone-50 shadow-none }
+/* taxonomy */
+.ts-wrapper .item.deprecated {@apply line-through !important}

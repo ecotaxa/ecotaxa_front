@@ -53,6 +53,8 @@ export const css = {
   hidevscroll: 'hidevscroll',
   tip: 'tip',
   tooltip:'tooltip',
+  worms:'worms',
+  deprecated:'deprecated',
   component: {
     tabs: {
       name: 'js-tabs'

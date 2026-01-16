@@ -28,7 +28,7 @@
     {% endfor %}
 </select>
 {%- endmacro %}
-{% macro selectinputdict_enriched(name, values, value='', addemptyrow=false ,extrataginfo='') -%}
+{% macro selectinputdict_enriched(name, values, value='', addemptyrow=False ,extrataginfo='') -%}
     <select name="{{ name }}" id="{{ name }}" {{ extrataginfo }}>
     {% if addemptyrow %}
       <option></option>

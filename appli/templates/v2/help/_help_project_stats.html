@@ -28,7 +28,8 @@
   {%-set anchor = 'help_proj_stats_license'%}
 {%- include('v2/help/_help_licenses.html')-%}
   <details id="help_proj_stats_used_taxa" ><summary>{{_('Used Taxa')}}</summary><div>
-  {{_('Taxa used in the projects. Sort by lineage or name . Option : export statistics as CSV.')}}
+  {{_('Taxa used in projects including ')}}<span class="deprecated">{{_('deprecated')}}</span> {{_('taxa')}} {{_('Sorted by lineage or name . Option : export statistics as CSV.')}}
+
   </div></details>
   <details id="help_proj_stats_users" ><summary>{{_('Users')}}</summary><div>
   {{_('All users - active or not -  who have annoted the project. Option : export statistics as CSV.')}}

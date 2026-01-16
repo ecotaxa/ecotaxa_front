@@ -236,7 +236,7 @@
                 <div class="input-group">
                   <!--suppress HtmlFormInputWithoutLabel -->
                   <select id="taxolbanno" name="taxolbanno" style="width: 185px" class='taxolb'
-                          autocomplete="off"> </select>
+                          autocomplete="off"></select>
                   <span class="input-group-btn">
                   <button class="btn btn-default btn-sm" type="button"
                           data-toggle="modal" data-target="#TaxoModal" data-mytargetid="taxolbanno"
@@ -1312,9 +1312,10 @@
                   drop: function (event, ui) {
                       var droptaxoid = $(this).data('taxoid');
                       var droptaxoname = $(this).data('dispname');
+                      var dropdeprecated =(taxotree[droptaxoid][3]=='D')?true:false;
                       // Not nice, but the whole TD is droppable so we cannot prevent the drop
-                      // DEPENDS ON LABEL, BAD AND FRAGILE
-                      if (droptaxoname.indexOf('(D') !== -1) {
+                      // DEPENDS ON td data-deprecated
+                      if (dropdeprecated) {
                           alert("Cannot assign to a deprecated category");
                           return;
                       }
@@ -1404,10 +1405,12 @@
           }
 
           $(document).ready(function () {
-
+            const windex={{windex if windex else 20}}
+            const urlsearchworms="{{url_for('routetaxosearchworms')}}"
+               var term=null;
               {# Le fait de choisir un item fait l'assignation/CTRL+D #}
               const sel2 = $('#taxolbanno');
-              sel2.on("select2:opening", function () {
+              sel2.on("select2:opening", function (e) {
                   const selection = sel2.data('saved_text');
                   if (!selection) return;
                   // Clear the value. We clear because otherwise:
@@ -1419,9 +1422,16 @@
                   rdr.text(" " + selection);
                   rdr.title = selection;
               });
+              sel2.on('select2:selecting', function(e) {term = sel2.data('select2').dropdown.$search.val() ;});
               sel2.on("select2:select", function (e) {
                   // Chosen line
                   const choice = e.params.data;
+
+                  // check if create category
+                  if(choice.id===0) {
+                  sel2.val(null).trigger("change");
+                  At2PopupWaitOpenLoad(windex,urlsearchworms+"?q="+encodeURIComponent(term),"Create a category");
+                  return;} else if(choice.status=='D') { sel2.val(null).trigger("change");return }
                   // Select event in the dropdown
                   AssignTaxoLbToSelection(choice.id, choice.text);
                   // Keep memory of current val & text, as they will be erased at next opening, just above.
@@ -1477,12 +1487,14 @@
                           {# Menu informatifs #}
                           var taxoid = parseInt(key.substr(1));
                           var taxoname = taxotree[taxoid][1];
+                          var deprecated = (taxotree[taxoid][3]=='D')?true:false;
                           if (prefix === 'f') {
                               {#          console.log("filter by ",taxoid,taxoname);#}
                               SetTaxoFilter(taxoid, taxoname, true);
                               LoadRightPane();
                           }
-                          if (prefix === 'o') {
+                          // deprecated cannot be assigned
+                          if (prefix === 'o' && !deprecated) {
                               // right-click menu, "-- CLASSIFY TO --"
                               SetTaxolbValue('#taxolbanno', taxoid, taxoname);
                               AssignTaxoLbToSelection(taxoid, taxoname);
@@ -1503,17 +1515,23 @@
                   }
                   Arr.unshift({key: "X2", name: "-- FILTER WITH CHILD -- "});
                   Arr.unshift({key: "X1", name: "_____________________"});
-
                   taxoid = $(e.currentTarget).data('taxoid');
                   taxoname = $(e.currentTarget).find(".taxodrop").text();
-                  Arr.unshift({key: "o" + taxoid, name: taxoname})
+                  var deprecated=(taxotree[taxoid][1])?true:false;
+                  if(!deprecated) Arr.unshift({key: "o" + taxoid, name: taxoname})
+                  var j = 0
                   for (i = 0; i < 50; i++) {
                       taxoid = taxotree[taxoid][2]; // Go to parent
                       if (taxoid == null) break;
                       taxoname = taxotree[taxoid][1];
-                      Arr.unshift({key: "o" + taxoid, name: taxoname})
+                      deprecated=(taxotree[taxoid][3]=='D')?true:false;
+                      if(!deprecated) {
+                        j++
+                        Arr.unshift({key: "o" + taxoid, name: taxoname})
+                        }
+
                   }
-                  Arr.unshift({key: "X3", name: "-- CLASSIFY TO -- "});
+                  if(j>0) Arr.unshift({key: "X3", name: "-- CLASSIFY TO -- "});
 
                   for (index = 0; index < Arr.length; index++)
                       res["items"][Arr[index]["key"]] = {name: Arr[index]["name"]}
@@ -1558,11 +1576,10 @@
           $("#PopupDetails .modal-content").load("/static/unsupervisedsearchhelp_20240224.html");
           $('#PopupDetails').modal({});
       }
-
+      // display info when trying to assign to a deprecated category
       $(document).ready(function () {
           RefreshClassifTab();
       });
 
   </script>
-
 {% endblock %}
