@@ -41,7 +41,6 @@ class ExportJob(Job):
         # if cls.EXPORT_TYPE == "summary" or cls.EXPORT_TYPE == None:
         from appli.gui.taxonomy.tools import project_used_taxa
 
-        print("cls target_type " + cls.EXPORT_TYPE, cls.TARGET_TYPE)
         if cls.TARGET_TYPE == "collection":
             idname = "collection_id"
             ids = ",".join([str(pid) for pid in target_obj.project_ids])
