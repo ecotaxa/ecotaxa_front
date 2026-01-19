@@ -255,11 +255,10 @@ const funcselector='.js-autocomplete';
               tags.forEach(tag => {
                 init_canceltag(tag);
               })
-            }
 
+            },
           }
         }
-
         break;
     }
     const default_settings = {
@@ -302,7 +301,7 @@ const funcselector='.js-autocomplete';
           labelField: 'text',
           searchField: 'id',
           status:'status'}
-            url = option.url;
+           url = option.url;
             //
             if (query.indexOf('_') == 0 && option.settings.addoption && query == option.settings.addoption[0]) {
               url = null;
@@ -313,6 +312,7 @@ const funcselector='.js-autocomplete';
             }
             //
             if (query) url += '?q=' + encodeURIComponent(query);
+            if (!item.dataset.hasOwnProperty('nodeprecated')) url+='&withdeprecated=true'
             break;
           case models.project:
             url = option.url;
@@ -343,13 +343,14 @@ const funcselector='.js-autocomplete';
           if (json.length && typeof json == 'object') json = Object.entries(json);
           return this.options + (callback)?callback(json):json;
         }).catch(err => {
-          console.log('tomselect-err', err);
+          console.log('tomselect-err ', err);
         });
       },
 
       render: {
         option: function(el, escape) {
           if (el === undefined || el === null) return ``;
+          if (el.$option && el.$option.classList && el.$option.classList.contains(css.deprecated)) el.status='D';
           // add optgroup
           const optgroup = (el.hasOwnProperty('optgroup')) ? `data-optgroup=${el.optgroup}` : ``;
           const label = _get_label(el, option.settings.labelField);
@@ -399,6 +400,7 @@ const funcselector='.js-autocomplete';
         };
       }
     }
+    if (item.dataset.noremote) option.settings.load=null;
     option.settings = Object.assign(default_settings, option.settings)
     if (id !== null ) {
       const ts = new TomSelect('#' + id, option.settings);

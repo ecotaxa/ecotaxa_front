@@ -48,7 +48,8 @@ function createJsTabs() {
           toggleTab(target, false);
         }
       });
-      if (idxactive!==null) btns[idxactive].dispatchEvent(new Event(ev));
+      idxactive=(idxactive===null)?0:idxactive;
+      btns[idxactive].dispatchEvent(new Event(ev));
       if (!item.dataset.toggle) toggleDisplayListener(item, btns);
       item.jstabs = true;
     }
@@ -66,7 +67,6 @@ function createJsTabs() {
             tab.querySelectorAll(domselectors.shared).forEach(shared => {
               const sharedcontent = tab.parentElement.querySelector('#' + shared.dataset.shared);
               sharedcontent.parent = sharedcontent.parentElement;
-
               if (show) {
                 sharedcontent.classList.remove(css.hide);
                 shared.append(sharedcontent);

@@ -22,6 +22,7 @@ class BackEndJSONEncoder(JSONEncoder):
 @app.route("/search/taxo")
 def searchtaxo():
     term = gvg("q")
+    withdeprecated=gvg("withdeprecated",False)
     prj_id = gvg("projid")
     if not prj_id:
         prj_id = -1
@@ -30,7 +31,10 @@ def searchtaxo():
         res: List[TaxaSearchRsp] = api.search_taxa(query=term, project_id=prj_id)
     # TODO: temporary until the HTML goes to /api directly
     # Filter out taxa to rename
-    res = [a_taxon for a_taxon in res if a_taxon.renm_id is None and a_taxon.status!='D']
+    if withdeprecated:
+        res = [a_taxon for a_taxon in res]
+    else:
+        res = [a_taxon for a_taxon in res if a_taxon.renm_id is None and a_taxon.status!='D' ]
     return json.dumps(res, cls=BackEndJSONEncoder)
 
 
