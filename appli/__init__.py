@@ -29,7 +29,7 @@ ecopart_url = app.config["ECOPART_URL"]
 # config and setup babel
 from appli.constants import KNOWN_LANGUAGES, TRANSLATION_PATH
 from flask_babel import Babel
-
+from appli.ecotaxa_version import ecotaxa_version
 app.config["BABEL_TRANSLATION_DIRECTORIES"] = TRANSLATION_PATH
 app.config["PREFERRED_URL_SCHEME"] = "https"
 babel = Babel(app)
@@ -334,11 +334,8 @@ def JinjaGetUsersManagerList(sujet=""):
     )
 
 
-ecotaxa_version = "3.0.0"
-
-
 def JinjaGetEcotaxaVersionText():
-    return ecotaxa_version + ".2026-01-15"
+    return ecotaxa_version["version"] + "." + ecotaxa_version["date"]
 
 
 app.jinja_env.filters["datetime"] = JinjaFormatDateTime
