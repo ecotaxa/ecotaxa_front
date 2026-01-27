@@ -96,7 +96,7 @@
           <em class="blockquote text-sm">{{_('Contact the')}} <a href="mailto:{{prjmanagermailto}}" class="text-secondblue-600">{{_('project manager')}}</a> {{_('to know where and how to upload your data.')}}
             {{_('Once the import is complete, all data folders/files can be safely erased on the server.')}}</em>
         </div></div></div>
-        <div id="import_taxo-mapping">
+        <div id="import_taxo-mapping" class="hide">
             {%-set name="taxo_mapping"-%}
         {%include('/v2/taxonomy/_import_taxo_mapping.html')%}
         </div>
