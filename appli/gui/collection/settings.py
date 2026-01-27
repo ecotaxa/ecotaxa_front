@@ -6,8 +6,8 @@ from appli.gui.staticlistes import py_messages
 
 ######################################################################################################################
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ApiException
-from to_back.ecotaxa_cli_py.api import CollectionsApi, ProjectsApi, UsersApi, GuestsApi
+from to_back.ecotaxa_cli_py import ApiException, OrganizationModel
+from to_back.ecotaxa_cli_py.api import CollectionsApi, ProjectsApi, UsersApi, GuestsApi,OrganizationsApi
 from to_back.ecotaxa_cli_py.models import (
     CollectionModel,
     MinUserModel,
@@ -41,18 +41,27 @@ def _user_format(uid: int) -> Union[MinUserModel, GuestModel]:
         with ApiClient(GuestsApi, request) as api:
             guest: GuestModel = api.get_guest(uid)
         return guest
-
+def _org_format(uid: int) -> OrganizationModel:
+    try:
+        with ApiClient(OrganizationsApi, request) as api:
+            org: OrganizationModel = api.get_organizations(ids=str(uid))
+        return org[0]
+    except ApiException:
+        pass
 
 def _set_persons(persons: list) -> Dict[str, list]:
     plist = {"users": [], "organisations": []}
-    for person in persons:
+    display = []
+    for i,person in enumerate(persons):
         if person[0 : len(orgprefix)] == orgprefix:
             orga = person[len(orgprefix) :]
             if len(orga.strip()):
-                plist["organisations"].append(int(orga))
+                plist["organisations"].append(_org_format(int(orga)))
+                display.append(orga+"_o")
         elif len(person.strip()):
             plist["users"].append(_user_format(int(person)))
-    return plist
+            display.append(person+"_u")
+    return plist,display
 
 
 def _prj_format(projid: int) -> dict:
@@ -134,7 +143,7 @@ def collection_create() -> str:
             "contact_user",
         ]:
             setattr(target_coll, key, gvp(key, ""))
-        persons = {}
+        # persons = {}
         # for prefix in ["creator", "associate"]:
         #    persons[prefix] = {"users": [], "organisations": []}
         #    for person in gvpm(prefix + "_persons[]"):
@@ -244,8 +253,6 @@ def collection_edit(collection_id: int, new: bool = False):
     from appli.gui.collection.staticlistes import py_messages
 
     collection = get_collection(collection_id)
-    # from appli.gui.collection.collist import collection
-
     if collection is None:
         flash(py_messages["selectothercollection"], "info")
         return redirect(url_for("gui_collection_noright", collection_id=collection_id))
@@ -254,6 +261,7 @@ def collection_edit(collection_id: int, new: bool = False):
     if gvp("save") == "Y":
         # Load posted variables
         varlist = dir(collection)
+        display_order={"creators":[],"associates":[]}
         for prefix in ["creator_", "associate_"]:
             varlist.remove(prefix + "users")
             varlist.remove(prefix + "organisations")
@@ -275,16 +283,20 @@ def collection_edit(collection_id: int, new: bool = False):
                     setattr(collection, a_var, gvp(a_var, ""))
             elif a_var[len(a_var) - 2 :] == "[]" and a_var[0:-2] in varlist:
                 if a_var[0:-2] in ["creator_persons", "associate_persons"]:
-                    plist = _set_persons(gvpm(a_var))
-
+                    plist, display = _set_persons(gvpm(a_var))
+                    display_order[a_var[0:-2].replace("_person","")]=display
                     for attrname in ["users", "organisations"]:
                         setattr(
                             collection,
                             a_var[0:-2].replace("persons", attrname),
                             plist[attrname],
                         )
+                    setattr(
+                        collection,
+                       "display_order",
+                        display_order,
+                    )
                 elif a_var[0:-2] in ["project_ids"]:
-
                     setattr(collection, a_var[0:-2], [int(p) for p in gvpm(a_var)])
                 else:
                     setattr(collection, a_var[0:-2], gvpm(a_var))
@@ -313,6 +325,10 @@ def collection_edit(collection_id: int, new: bool = False):
     projectlist = [_prj_format(int(p)) for p in collection.project_ids]
     published = _is_published(collection)
     aggregated = {}
+    creators = {str(creator.id)+"_u" : creator for creator in collection.creator_users}
+    creators.update({str(creator.id) +"_o": creator for creator in collection.creator_organisations})
+    associates = {str(associate.id)+"_u" : associate for associate in collection.associate_users}
+    associates.update({str(associate.id)+"_o" : associate for associate in collection.associate_organisations})
     return render_template(
         "v2/collection/settings.html",
         target_coll=collection,
@@ -322,6 +338,8 @@ def collection_edit(collection_id: int, new: bool = False):
         new=False,
         orgprefix=orgprefix,
         published=published,
+        creators=creators,
+        associates=associates,
         agg=aggregated,
         doi_url=doi_url,
     )

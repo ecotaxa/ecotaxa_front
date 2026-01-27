@@ -5,9 +5,11 @@ import TomSelect from 'tom-select/dist/js/tom-select.base.min.js';
 import TomSelect_remove_button from 'tom-select/dist/js/plugins/remove_button.js';
 import TomSelect_clear_button from 'tom-select/dist/js/plugins/clear_button.js';
 import TomSelect_caret_position from 'tom-select/dist/js/plugins/caret_position.js';
+import TomSelect_drag_drop from 'tom-select/dist/js/plugins/drag_drop.js';
 TomSelect.define('remove_button', TomSelect_remove_button);
 TomSelect.define('clear_button', TomSelect_clear_button);
 TomSelect.define('caret_position', TomSelect_caret_position);
+TomSelect.define('drag_drop', TomSelect_drag_drop);
 import {
   fetchSettings, create_box
 } from '../modules/utils.js';
@@ -37,11 +39,12 @@ function _get_label(el, labelfield, item = false) {
 }
 // settings for autocomplete select component - users , instruments , taxons
 function createJsTomSelect() {
-const funcselector='.js-autocomplete';
+  const funcselector='.js-autocomplete';
   function applyTo(item, settings = {}, siblings = null) {
     const id = item.getAttribute('id');
     const multiple = item.hasAttribute('multiple');
     const type = item.dataset.type;
+    const orderitems=(item.dataset.hasOwnProperty('orderitems'))?true:false;
     let option = {
         url: '',
         settings: settings
@@ -400,8 +403,13 @@ const funcselector='.js-autocomplete';
         };
       }
     }
+    if (item.dataset.orderitems) option.settings.plugins = { ...option.settings.plugins,
+          ...{
+            'drag_drop': {}
+          }
+        };
+    option.settings = Object.assign(default_settings, option.settings);
     if (item.dataset.noremote) option.settings.load=null;
-    option.settings = Object.assign(default_settings, option.settings)
     if (id !== null ) {
       const ts = new TomSelect('#' + id, option.settings);
       ts.wrapper.classList.remove(domselectors.component.tomselect.ident);
@@ -420,7 +428,6 @@ const funcselector='.js-autocomplete';
                 const opt=ts.getOption(v);
                 if (opt!==null && opt.status && opt.status=='D') el.classList.add(css.deprecated);
                }
-
           });
           ts.on("load", (v,el) => {
           v.forEach((taxon)=> {

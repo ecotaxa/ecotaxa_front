@@ -46,7 +46,8 @@ class CollectionReq(object):
         'creator_users': 'list[AnyOfintegerAnyType]',
         'associate_users': 'list[AnyOfintegerAnyType]',
         'creator_organisations': 'list[AnyOfintegerAnyType]',
-        'associate_organisations': 'list[AnyOfintegerAnyType]'
+        'associate_organisations': 'list[AnyOfintegerAnyType]',
+        'display_order': 'object'
     }
 
     attribute_map = {
@@ -63,10 +64,11 @@ class CollectionReq(object):
         'creator_users': 'creator_users',
         'associate_users': 'associate_users',
         'creator_organisations': 'creator_organisations',
-        'associate_organisations': 'associate_organisations'
+        'associate_organisations': 'associate_organisations',
+        'display_order': 'display_order'
     }
 
-    def __init__(self, external_id=None, title=None, short_title=None, provider_user=None, contact_user=None, project_ids=None, license=None, citation=None, abstract=None, description=None, creator_users=None, associate_users=None, creator_organisations=None, associate_organisations=None, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, external_id=None, title=None, short_title=None, provider_user=None, contact_user=None, project_ids=None, license=None, citation=None, abstract=None, description=None, creator_users=None, associate_users=None, creator_organisations=None, associate_organisations=None, display_order=None, local_vars_configuration=None):  # noqa: E501
         """CollectionReq - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -86,6 +88,7 @@ class CollectionReq(object):
         self._associate_users = None
         self._creator_organisations = None
         self._associate_organisations = None
+        self._display_order = None
         self.discriminator = None
 
         if external_id is not None:
@@ -116,6 +119,8 @@ class CollectionReq(object):
             self.creator_organisations = creator_organisations
         if associate_organisations is not None:
             self.associate_organisations = associate_organisations
+        if display_order is not None:
+            self.display_order = display_order
 
     @property
     def external_id(self):
@@ -438,6 +443,29 @@ class CollectionReq(object):
         """
 
         self._associate_organisations = associate_organisations
+
+    @property
+    def display_order(self):
+        """Gets the display_order of this CollectionReq.  # noqa: E501
+
+        display order of creators and asosciates (users and organizations) needed to publish  # noqa: E501
+
+        :return: The display_order of this CollectionReq.  # noqa: E501
+        :rtype: object
+        """
+        return self._display_order
+
+    @display_order.setter
+    def display_order(self, display_order):
+        """Sets the display_order of this CollectionReq.
+
+        display order of creators and asosciates (users and organizations) needed to publish  # noqa: E501
+
+        :param display_order: The display_order of this CollectionReq.  # noqa: E501
+        :type: object
+        """
+
+        self._display_order = display_order
 
     def to_dict(self):
         """Returns the model properties as a dict"""

@@ -12,6 +12,8 @@
 
 /*! tom-select/dist/js/plugins/clear_button.js */
 
+/*! tom-select/dist/js/plugins/drag_drop.js */
+
 /*! tom-select/dist/js/plugins/remove_button.js */
 
 /*! tom-select/dist/js/tom-select.base.min.js */

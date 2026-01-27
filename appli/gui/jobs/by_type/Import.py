@@ -2,7 +2,6 @@
 import time
 from pathlib import Path
 from typing import ClassVar
-from werkzeug.exceptions import UnprocessableEntity
 from flask import render_template, redirect, request, url_for
 from appli import gvp, app
 from appli.gui.jobs.Job import Job
@@ -20,8 +19,7 @@ from to_back.ecotaxa_cli_py.models import (
     JobModel,
 )
 from appli.gui.jobs.job_interface import import_format_options
-from appli.back_config import get_back_constants
-from flask_babel import _
+
 
 
 class ImportJob(Job):
@@ -46,7 +44,7 @@ class ImportJob(Job):
             return render_template(cls.NOOBJ_TEMPLATE, projid=projid)
         # Get stored last server path value for this project, if any
         with ApiClient(UsersApi, request) as uapi:
-            server_path = uapi.get_current_user_prefs(projid, "cwd")
+            _ = uapi.get_current_user_prefs(projid, "cwd")
         formdatas, formoptions, import_links = import_format_options()
         return render_template(
             cls.STEP0_TEMPLATE,
