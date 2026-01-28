@@ -40,7 +40,6 @@ class ExportJob(Job):
         )
         # if cls.EXPORT_TYPE == "summary" or cls.EXPORT_TYPE == None:
         from appli.gui.taxonomy.tools import project_used_taxa
-
         if cls.TARGET_TYPE == "collection":
             idname = "collection_id"
             ids = ",".join([str(pid) for pid in target_obj.project_ids])
@@ -50,10 +49,6 @@ class ExportJob(Job):
         else:
             taxalist = project_used_taxa(
                 projid
-            )
-            print(
-                " ftttttvdqg-----",
-                taxalist,
             )
         # hack to have 3 types instead of one page by job export type
         return render_template(
