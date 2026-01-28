@@ -329,9 +329,6 @@ def collection_edit(collection_id: int, new: bool = False):
     creators.update({str(creator.id) +"_o": creator for creator in collection.creator_organisations})
     associates = {str(associate.id)+"_u" : associate for associate in collection.associate_users}
     associates.update({str(associate.id)+"_o" : associate for associate in collection.associate_organisations})
-    print('creators',creators)
-    print('associates',associates)
-    print('orderi',collection.display_order)
     return render_template(
         "v2/collection/settings.html",
         target_coll=collection,
