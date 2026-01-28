@@ -125,7 +125,8 @@ def objectdetails(objid):
     if obj.classif_id:
         with ApiClient(TaxonomyTreeApi, request) as api:
             taxon: TaxonModel = api.query_taxa(taxon_id=obj.classif_id)
-        page.append("<br>&emsp;<b>%s</b>" % XSSEscape(taxon.display_name))
+        taxon_name = taxon.display_name
+        page.append("<br>&emsp;<b>%s</b>" % XSSEscape(taxon_name))
         page.append(
             "<br>&emsp;" + (" &lt; ".join(taxon.lineage)) + " (id=%s)" % obj.classif_id
         )
