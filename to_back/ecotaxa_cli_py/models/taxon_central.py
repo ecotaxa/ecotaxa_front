@@ -203,7 +203,7 @@ class TaxonCentral(object):
     def rank(self):
         """Gets the rank of this TaxonCentral.  # noqa: E501
 
-        The rank in Worms of the taxon.  # noqa: E501
+        The WoRMS rank of the taxon.  # noqa: E501
 
         :return: The rank of this TaxonCentral.  # noqa: E501
         :rtype: str
@@ -214,7 +214,7 @@ class TaxonCentral(object):
     def rank(self, rank):
         """Sets the rank of this TaxonCentral.
 
-        The rank in Worms of the taxon.  # noqa: E501
+        The WoRMS rank of the taxon.  # noqa: E501
 
         :param rank: The rank of this TaxonCentral.  # noqa: E501
         :type: str

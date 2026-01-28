@@ -19,7 +19,7 @@
       {%-endif%}
       {%-endfor%}
 {% set disabled = namespace(value=" class=disabled disabled=disabled") %}
-  <li>
+  <!--<li>
       <a href="{{ url_for('indexPrj',PrjId=targetcoll.id)}}">
         {{_('Annotate') if targetcoll.status!='ExploreOnly' and privilege.value!="View" and  privilege.value!="" else _("View")}}
       </a>
@@ -27,7 +27,7 @@
     <li>
       <a href="{{url_for("jobCreate",job_type="Prediction",collectionid=targetcoll.id) }}" >
         {{_('Predict')}}
-      </a></li>
+      </a></li>-->
       {% endif %}
 
 <li><div>{{_('Export')}}</div><ul aria-expanded=false><li>

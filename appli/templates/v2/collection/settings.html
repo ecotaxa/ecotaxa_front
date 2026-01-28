@@ -41,23 +41,29 @@
                           </div>
             <div class="form-box"  id="section-creators" class="w-full tab" data-u="{{ current_user.id|string() }}" data-alert="true">
             <label for="creator_persons">{{_('Creator users  and organisations')}}<i data-for="help_collection_creator" data-request="help"></i></label>
-              <select id='creator_persons' class="form-multiselect js js-autocomplete liste" name="creator_persons[]" data-type="person"  data-prefix="{{orgprefix}}" data-create=true data-importfield="creator_persons" placeholder="{{_('select a user or organisation')}}" multiple autocomplete="off"><option value="0"></option>
-              {%-if target_coll-%}{%- for creator_user in target_coll.creator_users -%}
-              <option value="{{creator_user.id}}" selected="selected">
-              {{creator_user.name}} &lt;{{creator_user.email}}&gt;</option>
-              {%- endfor -%}{%- for org in target_coll.creator_organisations -%}
-              <option value="{{orgprefix}}{{org.id}}" selected="selected">{{org.name}}</option>
-              {%- endfor -%}{%-endif-%}
+              <select id='creator_persons' class="form-multiselect js js-autocomplete liste" data-orderitems=true name="creator_persons[]" data-type="person"  data-prefix="{{orgprefix}}" data-create=true data-importfield="creator_persons" placeholder="{{_('select a user or organisation')}}" multiple autocomplete="off"><option value="0"></option>
+               {%-if target_coll-%}{%-for val in target_coll.display_order["creators"] -%}
+                {%-if val[-1]=="u"-%}
+                <option value="{{creators[val].id}}" selected="selected">
+                {{creators[val].name}} &lt;{{creators[val].email}}&gt;</option>
+                {%-else -%}
+                <option value="{{orgprefix}}{{creators[val].id}}" selected="selected">{{creators[val].name}}</option>
+                {%-endif-%}
+              {%- endfor -%}
+               {%-endif-%}
                 </select>
                </div> <div class="form-box">
             <label for="associate_persons">{{_('Associate users and organisations')}}<i data-for="help_collection_associate" data-request="help"></i></label>
-            <select id='associate_persons' class="form-multiselect js js-autocomplete liste" name="associate_persons[]" data-type="person" data-prefix="{{orgprefix}}" data-create=true  data-importfield="associate_persons"  placeholder="{{_('select a user or organisation')}}" multiple autocomplete="off">
-             {% for associate_user in target_coll.associate_users %}
-             <option value="{{associate_user.id}}" selected="selected">{{associate_user.name}} &lt;{{associate_user.email}}&gt;</option>
-              {% endfor %}
-                 {% for org in target_coll.associate_organisations %}
-                 <option value="{{orgprefix}}{{org.id}}" selected="selected">{{ org.name }}</option>
-            {% endfor %}
+            <select id='associate_persons' class="form-multiselect js js-autocomplete liste" data-orderitems=true name="associate_persons[]" data-type="person" data-prefix="{{orgprefix}}" data-create=true  data-importfield="associate_persons"  placeholder="{{_('select a user or organisation')}}" multiple autocomplete="off">
+             {%-if target_coll-%}{%-for val in target_coll.display_order["associates"] -%}
+                {%-if val[-1]=="u"-%}
+                <option value="{{associates[val].id}}" selected="selected">
+                {{associates[val].name}} &lt;{{associates[val].email}}&gt;</option>
+                {%-else -%}
+                <option value="{{orgprefix}}{{associates[val].id}}" selected="selected">{{associates[val].name}}</option>
+                {%-endif-%}
+              {%- endfor -%}
+               {%-endif-%}
             </select>
         </div></div><div class="w-full md:w-1/2"><div class="form-box">
                         <label for="citation">{{ _('Citation')}}<i data-for="help_collection_citation" data-request="help"></i></label>

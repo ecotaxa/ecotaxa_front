@@ -213,7 +213,7 @@ export function JsImport(container, options = {}) {
         action: 'import',
         class:["control-select"],
         exclude:exclude,
-        typentries: (typentries) ? typentries : [entryTypes.branch],
+        typentries: (typentries) ? typentries : [entryTypes.branch,entryTypes.node],
         text: (options.toselect)?(options.toselect):'select to import',
         callback: add_remove_import
       }

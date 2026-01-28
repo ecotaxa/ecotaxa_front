@@ -48,7 +48,8 @@ class CollectionModel(object):
         'creator_users': 'list[MinUserModel]',
         'creator_organisations': 'list[OrganizationModel]',
         'associate_users': 'list[MinUserModel]',
-        'associate_organisations': 'list[OrganizationModel]'
+        'associate_organisations': 'list[OrganizationModel]',
+        'display_order': 'object'
     }
 
     attribute_map = {
@@ -67,10 +68,11 @@ class CollectionModel(object):
         'creator_users': 'creator_users',
         'creator_organisations': 'creator_organisations',
         'associate_users': 'associate_users',
-        'associate_organisations': 'associate_organisations'
+        'associate_organisations': 'associate_organisations',
+        'display_order': 'display_order'
     }
 
-    def __init__(self, id=None, external_id=None, external_id_system=None, title=None, short_title=None, citation=None, license=None, abstract=None, description=None, project_ids=None, provider_user=None, contact_user=None, creator_users=[], creator_organisations=[], associate_users=[], associate_organisations=[], local_vars_configuration=None):  # noqa: E501
+    def __init__(self, id=None, external_id=None, external_id_system=None, title=None, short_title=None, citation=None, license=None, abstract=None, description=None, project_ids=None, provider_user=None, contact_user=None, creator_users=[], creator_organisations=[], associate_users=[], associate_organisations=[], display_order=None, local_vars_configuration=None):  # noqa: E501
         """CollectionModel - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -92,6 +94,7 @@ class CollectionModel(object):
         self._creator_organisations = None
         self._associate_users = None
         self._associate_organisations = None
+        self._display_order = None
         self.discriminator = None
 
         self.id = id
@@ -121,6 +124,8 @@ class CollectionModel(object):
             self.associate_users = associate_users
         if associate_organisations is not None:
             self.associate_organisations = associate_organisations
+        if display_order is not None:
+            self.display_order = display_order
 
     @property
     def id(self):
@@ -412,7 +417,7 @@ class CollectionModel(object):
     def creator_users(self):
         """Gets the creator_users of this CollectionModel.  # noqa: E501
 
-        All people who         are responsible for the creation of the collection. Data creators should receive credit         for their work and should therefore be included in the citation.  # noqa: E501
+        All people who         are responsible for the creation of the collection. Data creators should receive credit         for their work and should therefore be included in the citation. (with display order)  # noqa: E501
 
         :return: The creator_users of this CollectionModel.  # noqa: E501
         :rtype: list[MinUserModel]
@@ -423,7 +428,7 @@ class CollectionModel(object):
     def creator_users(self, creator_users):
         """Sets the creator_users of this CollectionModel.
 
-        All people who         are responsible for the creation of the collection. Data creators should receive credit         for their work and should therefore be included in the citation.  # noqa: E501
+        All people who         are responsible for the creation of the collection. Data creators should receive credit         for their work and should therefore be included in the citation. (with display order)  # noqa: E501
 
         :param creator_users: The creator_users of this CollectionModel.  # noqa: E501
         :type: list[MinUserModel]
@@ -435,7 +440,7 @@ class CollectionModel(object):
     def creator_organisations(self):
         """Gets the creator_organisations of this CollectionModel.  # noqa: E501
 
-        All         organisations who are responsible for the creation of the collection. Data creators should         receive credit for their work and should therefore be included in the citation.  # noqa: E501
+        All         organisations who are responsible for the creation of the collection. Data creators should         receive credit for their work and should therefore be included in the citation. (with display order)  # noqa: E501
 
         :return: The creator_organisations of this CollectionModel.  # noqa: E501
         :rtype: list[OrganizationModel]
@@ -446,7 +451,7 @@ class CollectionModel(object):
     def creator_organisations(self, creator_organisations):
         """Sets the creator_organisations of this CollectionModel.
 
-        All         organisations who are responsible for the creation of the collection. Data creators should         receive credit for their work and should therefore be included in the citation.  # noqa: E501
+        All         organisations who are responsible for the creation of the collection. Data creators should         receive credit for their work and should therefore be included in the citation. (with display order)  # noqa: E501
 
         :param creator_organisations: The creator_organisations of this CollectionModel.  # noqa: E501
         :type: list[OrganizationModel]
@@ -458,7 +463,7 @@ class CollectionModel(object):
     def associate_users(self):
         """Gets the associate_users of this CollectionModel.  # noqa: E501
 
-        Other person(s)         associated with the collection.  # noqa: E501
+        Other person(s)         associated with the collection (with display order).  # noqa: E501
 
         :return: The associate_users of this CollectionModel.  # noqa: E501
         :rtype: list[MinUserModel]
@@ -469,7 +474,7 @@ class CollectionModel(object):
     def associate_users(self, associate_users):
         """Sets the associate_users of this CollectionModel.
 
-        Other person(s)         associated with the collection.  # noqa: E501
+        Other person(s)         associated with the collection (with display order).  # noqa: E501
 
         :param associate_users: The associate_users of this CollectionModel.  # noqa: E501
         :type: list[MinUserModel]
@@ -481,7 +486,7 @@ class CollectionModel(object):
     def associate_organisations(self):
         """Gets the associate_organisations of this CollectionModel.  # noqa: E501
 
-        Other         organisation(s) associated with the collection.  # noqa: E501
+        Other         organisation(s) associated with the collection (with display order) .  # noqa: E501
 
         :return: The associate_organisations of this CollectionModel.  # noqa: E501
         :rtype: list[OrganizationModel]
@@ -492,13 +497,36 @@ class CollectionModel(object):
     def associate_organisations(self, associate_organisations):
         """Sets the associate_organisations of this CollectionModel.
 
-        Other         organisation(s) associated with the collection.  # noqa: E501
+        Other         organisation(s) associated with the collection (with display order) .  # noqa: E501
 
         :param associate_organisations: The associate_organisations of this CollectionModel.  # noqa: E501
         :type: list[OrganizationModel]
         """
 
         self._associate_organisations = associate_organisations
+
+    @property
+    def display_order(self):
+        """Gets the display_order of this CollectionModel.  # noqa: E501
+
+        display order of creators and asosciates (users and organizations) needed to publish  # noqa: E501
+
+        :return: The display_order of this CollectionModel.  # noqa: E501
+        :rtype: object
+        """
+        return self._display_order
+
+    @display_order.setter
+    def display_order(self, display_order):
+        """Sets the display_order of this CollectionModel.
+
+        display order of creators and asosciates (users and organizations) needed to publish  # noqa: E501
+
+        :param display_order: The display_order of this CollectionModel.  # noqa: E501
+        :type: object
+        """
+
+        self._display_order = display_order
 
     def to_dict(self):
         """Returns the model properties as a dict"""
