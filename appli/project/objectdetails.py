@@ -122,13 +122,10 @@ def objectdetails(objid):
 
     page.append("</p><p>Classification :")
     taxon_name = None
-    taxon_type = None
     if obj.classif_id:
         with ApiClient(TaxonomyTreeApi, request) as api:
             taxon: TaxonModel = api.query_taxa(taxon_id=obj.classif_id)
-        taxon_name = XSSEscape(taxon.display_name)
-        taxon_type = taxon.type
-        page.append("<br>&emsp;<b>%s</b>" % taxon_name)
+        page.append("<br>&emsp;<b>%s</b>" % XSSEscape(taxon.display_name))
         page.append(
             "<br>&emsp;" + (" &lt; ".join(taxon.lineage)) + " (id=%s)" % obj.classif_id
         )
