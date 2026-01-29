@@ -19,6 +19,7 @@ from to_back.ecotaxa_cli_py.models import (
     JobModel,
 )
 from appli.gui.jobs.job_interface import import_format_options
+from flask_babel import _
 
 
 
@@ -44,7 +45,7 @@ class ImportJob(Job):
             return render_template(cls.NOOBJ_TEMPLATE, projid=projid)
         # Get stored last server path value for this project, if any
         with ApiClient(UsersApi, request) as uapi:
-            _ = uapi.get_current_user_prefs(projid, "cwd")
+            _unused = uapi.get_current_user_prefs(projid, "cwd")
         formdatas, formoptions, import_links = import_format_options()
         return render_template(
             cls.STEP0_TEMPLATE,
