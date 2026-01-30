@@ -1,7 +1,7 @@
 {% extends "./v2/layout.html" %}
 {% from "./v2/project/macros.html" import header_project_job with context %}
 {%block body%}
-<div class="container mx-auto px-4 block mb-24  js js-tabs" data-block="project_editdatamass" >
+<div class="container mx-auto px-4 block mb-24 " data-block="project_editdatamass" >
   <div class="w-100 mx-auto py-4 block text-left relative" id="project-editdatamass-header">
     {% set data = {'file':'_help_project_editdatamass'} %}
     {{header_project_job(_('Project Mass data edition'),data, _('Mass data edition'))}}

@@ -2,7 +2,7 @@
 {% from "./v2/macros/macros.html" import inputdict , alertbox with context %}
 {% from "./v2/project/macros.html" import header_project_job with context %}
 {%block body%}
-<div class="container mx-auto px-4 block mb-24  js js-tabs" data-block="project_massannotation" >
+<div class="container mx-auto px-4 block mb-24 " data-block="project_massannotation" >
   <div class="w-100 mx-auto py-4 block text-left relative" id="project-massannotation-header">
     {% set data = {'file':'_help_project_massannotation'} %}
     {{header_project_job(_('Project Edit / Erase annotation massively'),data, _('Mass annotation'))}}
