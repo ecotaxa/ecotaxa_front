@@ -172,7 +172,8 @@ def html_to_text(html: str) -> str:
 
 # recursive to_dict
 def todict(obj):
-    import enum, collections
+    import enum
+    from collections.abc import Iterable # Deprecated since 3.3 but dropped in 3.10
 
     if isinstance(obj, str):
         return obj
@@ -180,7 +181,7 @@ def todict(obj):
         return str(obj)
     elif isinstance(obj, dict):
         return dict((key, todict(val)) for key, val in obj.items())
-    elif isinstance(obj, collections.Iterable):
+    elif isinstance(obj, Iterable):
         return [todict(val) for val in obj]
     elif hasattr(obj, "__slots__"):
         return todict(
