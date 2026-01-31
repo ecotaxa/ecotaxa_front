@@ -15,6 +15,7 @@ function createJsTabs() {
         btns = item.querySelectorAll(((item.dataset.selector) ? item.dataset.selector : 'legend'));
 
       }
+      if (btns.length===0) return;
       toggledisable = (item.dataset.toggledisable) ? true : false;
       togglewhat = (item.dataset.togglewhat) ? item.dataset.togglewhat : null;
       toggleshared = (item.dataset.toggleshared) ? true : false;
