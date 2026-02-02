@@ -4,10 +4,10 @@ hyphenator
 # (venv)$ pip install -r requirements.txt
 
 # Web
-Flask==2.0.3
-Werkzeug==2.0.3
-Flask-Babel==2.0.0
-Flask-Login==0.5.0
+Flask==3.1.2
+Werkzeug==3.1.2
+Flask-Babel==4.0.0
+Flask-Login==0.6.3
 # For json parsing in generated to_back/* code.
 python-dateutil==2.8.2
 # For speedup in booster.py
@@ -22,10 +22,10 @@ types-certifi
 types-requests
 types-six
 # QA & compilation
-mypy==0.940
-mypy_extensions==0.4.3
+mypy==1.19.1
+mypy_extensions==1.1.0
 # Auth validation
-itsdangerous==2.0.1
+itsdangerous==2.2.0
 #markupsafe
-markupsafe
+markupsafe==3.0.3
 

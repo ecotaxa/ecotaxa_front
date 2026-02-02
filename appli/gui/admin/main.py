@@ -5,9 +5,9 @@ from flask import (
     render_template,
     redirect,
     flash,
-    escape,
     make_response,
 )
+from markupsafe import escape
 from werkzeug.exceptions import Forbidden
 from flask_login import current_user, login_required
 from flask_babel import _
