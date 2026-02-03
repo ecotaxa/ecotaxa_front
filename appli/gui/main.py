@@ -1,17 +1,23 @@
 # -*- coding: utf-8 -*-
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
-import os
 import json
+import os
 import urllib
+from datetime import timedelta
 from typing import List
-from flask import request, url_for, render_template, redirect, flash
-from flask_login import current_user, login_required
-from appli import app, gvg, gvp
+
+from flask import make_response
+from flask import request, url_for, render_template, redirect, flash, session
+from flask_login import current_user, login_required, login_user
+from requests import Response
+
+from appli import app, gvg, gvp, ApiClient
+from appli.back_config import get_back_constants, bytes_to_human_readable
 from appli.gui.commontools import is_partial_request
 from appli.gui.staticlistes import py_messages, py_user
-from appli.back_config import get_back_constants, bytes_to_human_readable
-from flask import make_response
+from appli.security_on_backend import ApiUserWrapper
+from to_back.ecotaxa_cli_py import UsersApi, UserModelWithRights
 from to_back.ecotaxa_cli_py.models import DirectoryModel, DirectoryEntryModel
 
 login_required.login_view = "gui/login"
@@ -35,7 +41,81 @@ def gui_logout():
     from flask_login import logout_user
 
     logout_user()
-    return redirect(url_for("gui_login"))
+    resp = redirect(url_for("gui_login"))
+    if '_id_token' in session:
+        from appli import backend_url
+        import requests
+        r = requests.get(backend_url + "/openid/logout", allow_redirects=False,
+                         cookies={"id_token": session.get("_id_token")})
+        if r.status_code in [302, 303, 307]:
+            resp = redirect(r.headers["Location"])
+        session.pop('_id_token')
+    return resp
+
+
+@app.route("/openid/login")
+def openid_login():
+    from appli import backend_url
+    import requests
+    r = requests.get(backend_url + "/openid/login", allow_redirects=False, cookies=request.cookies)
+    # The backend should return a redirect to the OpenID provider
+    if r.status_code in [302, 303, 307]:
+        resp = redirect(r.headers["Location"])
+        copy_cookies(r, resp)
+        return resp
+    else:
+        # If it's not a redirect, it's an error
+        flash("OpenID login error: " + r.text, "error")
+        resp = redirect(url_for("gui_login"))
+        resp.delete_cookie("session")
+        resp.delete_cookie("oid_session")
+        return resp
+
+
+@app.route("/openid/callback")
+def openid_callback():
+    from appli import backend_url
+    import requests
+    # Forward callback with query string & cookies to backend
+    url = backend_url + "/openid/callback"
+    qs = request.query_string.decode() if request.query_string else ""
+    if qs:
+        url = url + "?" + qs
+    r = requests.get(url, allow_redirects=False, cookies=request.cookies)
+    if r.status_code in [302, 303, 307, 200]:
+        if r.status_code != 200:  # If backend asks to redirect, follow it
+            location = r.headers.get("Location", HOMEPAGE)
+        else:
+            location = HOMEPAGE
+        resp = redirect(location)
+        copy_cookies(r, resp)
+        # Build flask cookie in session from auth information received from the backend
+        token = r.cookies.get("token")
+        with ApiClient(UsersApi, token) as api:
+            curr_user: UserModelWithRights = api.show_current_user()
+        LOGIN_DURATION = timedelta(days=30)
+        login_user(
+            ApiUserWrapper(curr_user),
+            remember=True,
+            duration=LOGIN_DURATION,
+        )
+        # Add a marker that this session comes from OpenID
+        id_token = r.cookies.get("id_token")
+        session["_id_token"] = id_token
+        return resp
+
+    # Otherwise, surface error and go back to login
+    flash("OpenID callback error: " + r.text, "error")
+    resp = redirect(url_for("gui_login"))
+    resp.delete_cookie("session")
+    resp.delete_cookie("oid_session")
+    return resp
+
+
+def copy_cookies(from_rsp: Response, to_rsp: Response):
+    for h, v in from_rsp.headers.items():
+        if h.lower() == "set-cookie":
+            to_rsp.headers.add("Set-Cookie", v)
 
 
 @app.route("/gui/login", methods=["GET", "POST"])
