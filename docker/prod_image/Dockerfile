@@ -1,43 +1,73 @@
-FROM ubuntu:20.04 AS builder
+# Builder stage
+FROM ubuntu:22.04 AS builder
 
-MAINTAINER grololo06 <grololo06@users.noreply.github.com>
+LABEL maintainer="grololo06 <grololo06@users.noreply.github.com>"
 
-RUN apt-get update
+ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get install \
-    vim \
-    uwsgi uwsgi-plugin-python3 \
-    python3.8 python3.8-venv \
-    --no-install-recommends --yes
+RUN apt-get update && \
+    apt-get install -y software-properties-common && \
+    add-apt-repository -y ppa:deadsnakes/ppa && \
+    apt-get update && \
+    apt-get install -y \
+    curl ca-certificates \
+    build-essential gcc \
+    python3.14 python3.14-dev python3.14-venv
 
-# Get source
-WORKDIR /app/
-COPY . ./
+# Install pip specifically for Python 3.14
+RUN curl -sS https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
+    python3.14 get-pip.py
 
-# Create venv
-RUN python3.8 -m venv /venv
-# Install wheel & upgrade pip
-RUN PATH=/venv/bin pip3 install --upgrade pip wheel
-RUN PATH=/venv/bin:$PATH pip3 install -r requirements.txt
+# Create venv and install dependencies
+RUN python3.14 -m venv /venv
+RUN /venv/bin/pip install --no-cache-dir --upgrade pip wheel
+RUN /venv/bin/pip install --no-cache-dir uwsgi
 
-# Strip a bit...
+WORKDIR /build
+COPY py/requirements.txt ./
+RUN /venv/bin/pip install --no-cache-dir -r requirements.txt
+
+# Strip unnecessary files from venv
 RUN find /venv -name "*.pyc" -delete && \
-rm -rf /venv/share/* && \
-find /venv -name tests -type d -exec rm -rf {} + && \
-find /venv/lib/python3.8/site-packages -name "*.exe" -delete
+    rm -rf /venv/share/* && \
+    find /venv -name tests -type d -exec rm -rf {} + && \
+    find /venv/lib/python3.14/site-packages -name "*.exe" -delete
 
-# Get starting script and fixed config
-COPY docker/prod_image/start.sh /app
-COPY docker/prod_image/uwsgi.ini /app
+# Runner stage
+FROM ubuntu:22.04
 
-## For /app/*.log and **/__pycache__, allow non-root user to create inside dirs
-## and fix startup script rights
+LABEL maintainer="grololo06 <grololo06@users.noreply.github.com>"
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && \
+    apt-get install -y software-properties-common && \
+    add-apt-repository -y ppa:deadsnakes/ppa && \
+    apt-get update && \
+    apt-get install -y \
+    python3.14 \
+    libpython3.14 \
+    libxml2 \
+    libpq5 \
+    && apt-get purge -y --auto-remove software-properties-common \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy venv and app
+COPY --from=builder /venv /venv
+WORKDIR /app/
+COPY py ./
+COPY prod_image/start.sh /app/
+COPY prod_image/uwsgi.ini /app/
+
+# For /app/*.log and **/__pycache__, allow non-root user to create inside dirs
+# and fix startup script rights
 RUN find /venv /app -type d -exec chmod a+w {} \; && \
-chmod +x /app/start.sh
+    chmod +x /app/start.sh
 
 # uwsgi port
 EXPOSE 3030
 
-WORKDIR /app/
+# Ensure uwsgi from venv is used
+ENV PATH="/venv/bin:$PATH"
 
 CMD ["./start.sh"]

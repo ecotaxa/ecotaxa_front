@@ -7,9 +7,12 @@ import math
 import sys
 import traceback
 import urllib.parse
+from logging import INFO, WARNING
 from typing import List, Optional
-from flask import Flask, render_template, Markup, request, g
+from flask import Flask, render_template, request, g
 from flask_login import current_user, LoginManager
+
+from appli.env_config import augment_from_env
 from appli.utils import ApiClient, ntcv
 from to_back.ecotaxa_cli_py import UsersApi, MinUserModel
 from appli.security_on_backend import user_from_api
@@ -17,7 +20,8 @@ from to_back.ecotaxa_cli_py import ApiException
 
 app = Flask("appli")
 app.config.from_pyfile("../config/config.cfg")
-app.logger.setLevel(10)
+augment_from_env(app.config)
+app.logger.setLevel(INFO if app.config["DEBUG"] else WARNING)
 
 # Read more config
 backend_url = app.config["BACKEND_URL"]
@@ -30,9 +34,15 @@ ecopart_url = app.config["ECOPART_URL"]
 from appli.constants import KNOWN_LANGUAGES, TRANSLATION_PATH
 from flask_babel import Babel
 from appli.ecotaxa_version import ecotaxa_version
+
+
+def get_locale():
+    return request.accept_languages.best_match(KNOWN_LANGUAGES)
+
+
 app.config["BABEL_TRANSLATION_DIRECTORIES"] = TRANSLATION_PATH
 app.config["PREFERRED_URL_SCHEME"] = "https"
-babel = Babel(app)
+babel = Babel(app, locale_selector=get_locale)
 # set up login manager
 login_manager = LoginManager()
 login_manager.login_view = "gui_login"
@@ -42,11 +52,6 @@ login_manager.init_app(app)
 @login_manager.user_loader
 def load_user(user_id):
     return user_from_api(user_id)
-
-
-@babel.localeselector
-def get_locale():
-    return request.accept_languages.best_match(KNOWN_LANGUAGES)
 
 
 def XSSEscape(txt):

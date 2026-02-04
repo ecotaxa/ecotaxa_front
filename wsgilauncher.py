@@ -1,26 +1,26 @@
 # -*- coding: utf-8 -*-
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
-# Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
-import sys,os
-import logging,sys
+# Copyright (C) 2015-2024  Picheral, Colin, Irisson (UPMC-CNRS)
+import logging
 import logging.handlers
-from pathlib import Path
-# on fait le activate avant de lancer apache car sinon il trouve pas python 3.4 car sur mon PC default = 2.7
-# #activate_this = R'D:\dev\_Client\LOV\EcoTaxa\Python\Scripts\activate_this.py'
-#execfile(activate_this, dict(__file__=activate_this))
-#exec(open(activate_this).read())
-if sys.platform.startswith('win32'):
-    sys.path.insert(0,os.path.normpath(os.path.dirname(os.path.realpath(__file__))))
-    os.chdir(os.path.normpath(os.path.dirname(os.path.realpath(__file__))))
-    sys.path.insert(0,os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), R"..\Python\Lib\site-packages")))
-    sys.path.insert(0,os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), R"..\Python\Lib\site-packages\psycopg2-2.6-py3.4-win32.egg")))
+import os
+import sys
 
-#Le from doit être aprés la modification du path et du chdir
+# Ensure the application directory is in the path for WSGI
+app_dir = os.path.dirname(os.path.realpath(__file__))
+if app_dir not in sys.path:
+    sys.path.insert(0, app_dir)
+os.chdir(app_dir)
+
 from appli import app as application
 
-handler = logging.handlers.RotatingFileHandler('Ecotaxa.log', maxBytes=1000000, backupCount=2)
-#handler.setLevel(logging.INFO) loggue tout par defaut.
-LoggingFormat = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-handler.setFormatter(logging.Formatter(LoggingFormat))
+# Configure logging
+log_file = os.path.join(app_dir, 'Ecotaxa.log')
+handler = logging.handlers.RotatingFileHandler(log_file, maxBytes=1_000_000, backupCount=2)
+handler.setLevel(logging.INFO)
+logging_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+handler.setFormatter(logging.Formatter(logging_format))
+
+application.logger.setLevel(logging.INFO)
 application.logger.addHandler(handler)
 application.logger.info("App WSGI Startup")

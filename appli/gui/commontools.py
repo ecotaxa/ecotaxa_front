@@ -7,8 +7,8 @@ from flask import (
     request,
     redirect,
     flash,
-    Markup,
 )
+from markupsafe import Markup
 from flask_login import current_user
 
 from appli.utils import ApiClient
