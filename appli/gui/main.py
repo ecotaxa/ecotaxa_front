@@ -13,7 +13,7 @@ from flask_login import current_user, login_required, login_user
 from requests import Response
 
 from appli import app, gvg, gvp, ApiClient
-from appli.back_config import get_back_constants, bytes_to_human_readable
+from appli.back_config import get_back_constants, bytes_to_human_readable, get_user_constants
 from appli.gui.commontools import is_partial_request
 from appli.gui.staticlistes import py_messages, py_user
 from appli.security_on_backend import ApiUserWrapper
@@ -151,7 +151,18 @@ def gui_login():
 
     if referer in [url_for("gui_login"), url_for("gui_index")]:
         referer = ""
-    return render_template("v2/login.html", next=referer, bg=True)
+    (
+        ApiUserStatus,
+        ApiUserType,
+        API_PASSWORD_REGEXP,
+        API_EMAIL_VERIFICATION,
+        API_ACCOUNT_VALIDATION,
+        SHORT_TOKEN_AGE,
+        PROFILE_TOKEN_AGE,
+        RECAPTCHAID,
+        OPENID_CONFIGURED
+    ) = get_user_constants()
+    return render_template("v2/login.html", next=referer, bg=True, OPENID_CONFIGURED=OPENID_CONFIGURED)
 
 
 @app.route("/gui/register", defaults={"token": None}, methods=["GET", "POST"])

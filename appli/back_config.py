@@ -43,6 +43,7 @@ def get_back_constants(_type):
                 consts.short_token_age,
                 consts.profile_token_age,
                 consts.recaptchaid,
+                consts.openid_configured
             )
         elif _type == "ACCESS":
             current_app.config["API_" + _type + "_CONSTANTS"] = consts.access

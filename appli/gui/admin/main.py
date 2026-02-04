@@ -178,6 +178,7 @@ def gui_user_activate(usrid: int, status_name: str = ""):
         SHORT_TOKEN_AGE,
         PROFILE_TOKEN_AGE,
         RECAPTCHAID,
+        OPENID_CONFIGURED
     ) = get_user_constants()
     if request.method == "GET" and status_name != ApiUserStatus["active"]:
         user = api_get_user(usrid)

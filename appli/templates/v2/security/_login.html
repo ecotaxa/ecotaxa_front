@@ -19,6 +19,8 @@
 <input type="hidden" name="next" value="{{next if next != None else ''}}">
 <div class="submit-box">
     <button class="button is-primary text-center font-semibold w-full" type="submit" id="is-login"><i class="icon icon-check invert mr-2.5"></i>{{ _('Log in') }}</button>
+    {% if OPENID_CONFIGURED %}
     <a class="button is-action text-center font-semibold w-full mt-2" id="openid-login" href="{{ url_for('openid_login') }}">{{ _('OpenID login') }}</a>
+    {% endif %}
     </div>
 </form>

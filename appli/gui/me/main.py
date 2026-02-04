@@ -79,6 +79,7 @@ def gui_me_activate(token: str):
         SHORT_TOKEN_AGE,
         PROFILE_TOKEN_AGE,
         RECAPTCHAID,
+        OPENID_CONFIGURED
     ) = get_user_constants()
     if request.method == "POST":
 
@@ -162,6 +163,7 @@ def gui_me_forgotten(token: str = ""):
         SHORT_TOKEN_AGE,
         PROFILE_TOKEN_AGE,
         RECAPTCHAID,
+        OPENID_CONFIGURED
     ) = get_user_constants()
     if request.method == "POST":
         partial = True
