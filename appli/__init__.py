@@ -10,6 +10,8 @@ import urllib.parse
 from typing import List, Optional
 from flask import Flask, render_template, Markup, request, g
 from flask_login import current_user, LoginManager
+
+from appli.env_config import augment_from_env
 from appli.utils import ApiClient, ntcv
 from to_back.ecotaxa_cli_py import UsersApi, MinUserModel
 from appli.security_on_backend import user_from_api
@@ -17,6 +19,7 @@ from to_back.ecotaxa_cli_py import ApiException
 
 app = Flask("appli")
 app.config.from_pyfile("../config/config.cfg")
+augment_from_env(app.config)
 app.logger.setLevel(10)
 
 # Read more config
