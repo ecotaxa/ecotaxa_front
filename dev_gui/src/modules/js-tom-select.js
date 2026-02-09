@@ -315,7 +315,7 @@ function createJsTomSelect() {
             }
             //
             if (query) url += '?q=' + encodeURIComponent(query);
-            if (!item.dataset.hasOwnProperty('nodeprecated')) url+='&withdeprecated=true'
+            if (!item.dataset.hasOwnProperty('nodeprecated') && type==models.taxo) url+='&withdeprecated=true';
             break;
           case models.project:
             url = option.url;
@@ -432,7 +432,7 @@ function createJsTomSelect() {
           ts.on("load", (v,el) => {
           v.forEach((taxon)=> {
             if (taxon[1].status==="D") {
-            if (item.dataset.hasOwnProperty('nodeprecated'))  ts.removeOption(taxon[1].id);
+            if (item.dataset.hasOwnProperty('nodeprecated') )  ts.removeOption(taxon[1].id);
             if (taxon[1].$id ) {
                 const opt=ts.wrapper.querySelector('#'+taxon[1].$id);
                 if (opt!==null) opt.classList.add(css.deprecated);
