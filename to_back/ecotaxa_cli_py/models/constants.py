@@ -51,7 +51,8 @@ class Constants(object):
         'max_upload_size': 'int',
         'time_to_live': 'str',
         'all_in_one': 'bool',
-        'taxoserver_url': 'str'
+        'taxoserver_url': 'str',
+        'recast_operation': 'dict(str, str)'
     }
 
     attribute_map = {
@@ -73,12 +74,13 @@ class Constants(object):
         'max_upload_size': 'max_upload_size',
         'time_to_live': 'time_to_live',
         'all_in_one': 'all_in_one',
-        'taxoserver_url': 'taxoserver_url'
+        'taxoserver_url': 'taxoserver_url',
+        'recast_operation': 'recast_operation'
     }
 
     def __init__(self, license_texts=None, access=None, app_manager=["",""], countries=[], people_organization_directories=None, user_status=None, user_type=None, password_regexp='^(?:(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#?%^&*-+])).{8,20}$', email_verification=True, account_validation=False, short_token_age=1, profile_token_age=24, recaptchaid=False, formulae='''subsample_coef: 1/ssm.sub_part
 total_water_volume: sam.tot_vol/1000
-individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)**3''', default_project_access='1', max_upload_size=681574400, time_to_live=None, all_in_one=False, taxoserver_url='https://ecotaxoserver.obs-vlfr.fr/', local_vars_configuration=None):  # noqa: E501
+individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)**3''', default_project_access='1', max_upload_size=681574400, time_to_live=None, all_in_one=False, taxoserver_url='https://ecotaxoserver.obs-vlfr.fr/', recast_operation=None, local_vars_configuration=None):  # noqa: E501
         """Constants - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -103,6 +105,7 @@ individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)*
         self._time_to_live = None
         self._all_in_one = None
         self._taxoserver_url = None
+        self._recast_operation = None
         self.discriminator = None
 
         if license_texts is not None:
@@ -143,6 +146,8 @@ individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)*
             self.all_in_one = all_in_one
         if taxoserver_url is not None:
             self.taxoserver_url = taxoserver_url
+        if recast_operation is not None:
+            self.recast_operation = recast_operation
 
     @property
     def license_texts(self):
@@ -580,6 +585,29 @@ individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)*
         """
 
         self._taxoserver_url = taxoserver_url
+
+    @property
+    def recast_operation(self):
+        """Gets the recast_operation of this Constants.  # noqa: E501
+
+        Taxonomy recast operation name  # noqa: E501
+
+        :return: The recast_operation of this Constants.  # noqa: E501
+        :rtype: dict(str, str)
+        """
+        return self._recast_operation
+
+    @recast_operation.setter
+    def recast_operation(self, recast_operation):
+        """Sets the recast_operation of this Constants.
+
+        Taxonomy recast operation name  # noqa: E501
+
+        :param recast_operation: The recast_operation of this Constants.  # noqa: E501
+        :type: dict(str, str)
+        """
+
+        self._recast_operation = recast_operation
 
     def to_dict(self):
         """Returns the model properties as a dict"""

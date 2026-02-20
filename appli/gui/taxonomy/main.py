@@ -69,51 +69,6 @@ def gui_taxotree_root_json():
 
 
 @login_required
-@app.route("/gui/taxonomy/graph")
-def gui_taxonomy_graph():
-    import csv
-    from pathlib import Path
-
-    dirpath = "appli/static/gui/data/"
-    csvpath = dirpath + "worms.csv"
-    jsonpath = dirpath + "graphsmall_worms.json"
-
-    if not Path(jsonpath).is_file():
-        nodes = []
-        data = {"nodes": [], "edges": []}
-        {
-            "nodes": [{"id": "node1"}, {"id": "node2"}],
-            "edges": [{"source": "node1", "target": "node2"}],
-        }
-        with open(csvpath, encoding="utf-8") as csvf:
-            csvreader = csv.DictReader(csvf)
-            i = 0
-            for rows in csvreader:
-                key = rows["aphia_id"]
-                data["nodes"].append({"id": key, "name": rows["name"]})
-                i = i + 1
-                nodes.append(key)
-                if i == 10000:
-                    break
-            for rows in csvreader:
-                key = rows["aphia_id"]
-                if rows["parent_aphia_id"] != "NA" and key in nodes:
-                    data["edges"].append(
-                        {"source": key, "target": rows["parent_aphia_id"]}
-                    )
-
-        with open(jsonpath, "w", encoding="utf-8") as jsonf:
-            jsonf.write(json.dumps(data, indent=4))
-    with open(jsonpath, encoding="utf-8") as json_file:
-        content = json_file.read()
-    response = make_response(content)
-    response.headers["Content-length"] = len(content)
-    response.headers["Content-Encoding"] = "utf-8"
-    response.headers["Content-Type"] = "application/json"
-    return response
-
-
-@login_required
 @app.route("/gui/taxonomy/worms")
 def gui_taxonomy_worms():
     return render_template("v2/taxonomy/worms.html")
@@ -139,22 +94,14 @@ def gui_taxo_browse():
         "/v2/taxonomy/browse.html",
         fromurl=fromurl,
         fromtext=fromtext,
-        create_ok=is_admin_or_project_creator(),
+        create_ok=_admin_or_project_creator(),
     )
 
 
-def is_admin_or_project_creator() -> bool:
+def _admin_or_project_creator() -> bool:
     user = current_user.api_user
     return (1 in user.can_do) or (2 in user.can_do)
 
-
-def do_sync_stat_update():
-    """
-    Update EcoTaxoServer with statistics about current node usage.
-    """
-    with ApiClient(TaxonomyTreeApi, request) as api:
-        ret = api.push_taxa_stats_in_central()
-    return ret["msg"]
 
 
 def do_full_sync(do_flash: bool):

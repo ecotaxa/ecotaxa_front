@@ -419,6 +419,130 @@ class TaxonomyTreeApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
+    def get_taxonomy_recast(self, target_id, **kwargs):  # noqa: E501
+        """Get Taxonomy Recast  # noqa: E501
+
+        **Read the collection or project taxonomy recast**.  Note: The data is returned only if manageable.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_taxonomy_recast(target_id, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool: execute request asynchronously
+        :param int target_id: Internal, the unique numeric id of this collection. (required)
+        :param str operation: One of RecastOperation enum value
+        :param bool is_collection: target_id refers to a collection_id or not
+        :param _preload_content: if False, the urllib3.HTTPResponse object will
+                                 be returned without reading/decoding response
+                                 data. Default is True.
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :return: TaxoRecastRsp
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        return self.get_taxonomy_recast_with_http_info(target_id, **kwargs)  # noqa: E501
+
+    def get_taxonomy_recast_with_http_info(self, target_id, **kwargs):  # noqa: E501
+        """Get Taxonomy Recast  # noqa: E501
+
+        **Read the collection or project taxonomy recast**.  Note: The data is returned only if manageable.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.get_taxonomy_recast_with_http_info(target_id, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool: execute request asynchronously
+        :param int target_id: Internal, the unique numeric id of this collection. (required)
+        :param str operation: One of RecastOperation enum value
+        :param bool is_collection: target_id refers to a collection_id or not
+        :param _return_http_data_only: response data without head status code
+                                       and headers
+        :param _preload_content: if False, the urllib3.HTTPResponse object will
+                                 be returned without reading/decoding response
+                                 data. Default is True.
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :return: tuple(TaxoRecastRsp, status_code(int), headers(HTTPHeaderDict))
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        local_var_params = locals()
+
+        all_params = [
+            'target_id',
+            'operation',
+            'is_collection'
+        ]
+        all_params.extend(
+            [
+                'async_req',
+                '_return_http_data_only',
+                '_preload_content',
+                '_request_timeout'
+            ]
+        )
+
+        for key, val in six.iteritems(local_var_params['kwargs']):
+            if key not in all_params:
+                raise ApiTypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method get_taxonomy_recast" % key
+                )
+            local_var_params[key] = val
+        del local_var_params['kwargs']
+        # verify the required parameter 'target_id' is set
+        if self.api_client.client_side_validation and ('target_id' not in local_var_params or  # noqa: E501
+                                                        local_var_params['target_id'] is None):  # noqa: E501
+            raise ApiValueError("Missing the required parameter `target_id` when calling `get_taxonomy_recast`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+
+        query_params = []
+        if 'target_id' in local_var_params and local_var_params['target_id'] is not None:  # noqa: E501
+            query_params.append(('target_id', local_var_params['target_id']))  # noqa: E501
+        if 'operation' in local_var_params and local_var_params['operation'] is not None:  # noqa: E501
+            query_params.append(('operation', local_var_params['operation']))  # noqa: E501
+        if 'is_collection' in local_var_params and local_var_params['is_collection'] is not None:  # noqa: E501
+            query_params.append(('is_collection', local_var_params['is_collection']))  # noqa: E501
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = ['BearerOrCookieAuth']  # noqa: E501
+
+        return self.api_client.call_api(
+            '/taxo_recast', 'GET',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='TaxoRecastRsp',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=local_var_params.get('async_req'),
+            _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501
+            _preload_content=local_var_params.get('_preload_content', True),
+            _request_timeout=local_var_params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
     def pull_taxa_update_from_central(self, **kwargs):  # noqa: E501
         """Pull Taxa Update From Central  # noqa: E501
 
@@ -1635,6 +1759,238 @@ class TaxonomyTreeApi(object):
             post_params=form_params,
             files=local_var_files,
             response_type='TaxonomyTreeStatus',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=local_var_params.get('async_req'),
+            _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501
+            _preload_content=local_var_params.get('_preload_content', True),
+            _request_timeout=local_var_params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def update_taxonomy_recast(self, taxonomy_recast_req, **kwargs):  # noqa: E501
+        """Update Taxonomy Recast  # noqa: E501
+
+        **Create or Update the collection or project taxonomy recast**.  Note: The recast is updated only if manageable.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.update_taxonomy_recast(taxonomy_recast_req, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool: execute request asynchronously
+        :param TaxonomyRecastReq taxonomy_recast_req: (required)
+        :param _preload_content: if False, the urllib3.HTTPResponse object will
+                                 be returned without reading/decoding response
+                                 data. Default is True.
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :return: object
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        return self.update_taxonomy_recast_with_http_info(taxonomy_recast_req, **kwargs)  # noqa: E501
+
+    def update_taxonomy_recast_with_http_info(self, taxonomy_recast_req, **kwargs):  # noqa: E501
+        """Update Taxonomy Recast  # noqa: E501
+
+        **Create or Update the collection or project taxonomy recast**.  Note: The recast is updated only if manageable.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.update_taxonomy_recast_with_http_info(taxonomy_recast_req, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool: execute request asynchronously
+        :param TaxonomyRecastReq taxonomy_recast_req: (required)
+        :param _return_http_data_only: response data without head status code
+                                       and headers
+        :param _preload_content: if False, the urllib3.HTTPResponse object will
+                                 be returned without reading/decoding response
+                                 data. Default is True.
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :return: tuple(object, status_code(int), headers(HTTPHeaderDict))
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        local_var_params = locals()
+
+        all_params = [
+            'taxonomy_recast_req'
+        ]
+        all_params.extend(
+            [
+                'async_req',
+                '_return_http_data_only',
+                '_preload_content',
+                '_request_timeout'
+            ]
+        )
+
+        for key, val in six.iteritems(local_var_params['kwargs']):
+            if key not in all_params:
+                raise ApiTypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method update_taxonomy_recast" % key
+                )
+            local_var_params[key] = val
+        del local_var_params['kwargs']
+        # verify the required parameter 'taxonomy_recast_req' is set
+        if self.api_client.client_side_validation and ('taxonomy_recast_req' not in local_var_params or  # noqa: E501
+                                                        local_var_params['taxonomy_recast_req'] is None):  # noqa: E501
+            raise ApiValueError("Missing the required parameter `taxonomy_recast_req` when calling `update_taxonomy_recast`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        if 'taxonomy_recast_req' in local_var_params:
+            body_params = local_var_params['taxonomy_recast_req']
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/json'])  # noqa: E501
+
+        # HTTP header `Content-Type`
+        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
+            ['application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = ['BearerOrCookieAuth']  # noqa: E501
+
+        return self.api_client.call_api(
+            '/taxo_recast', 'PUT',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='object',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=local_var_params.get('async_req'),
+            _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501
+            _preload_content=local_var_params.get('_preload_content', True),
+            _request_timeout=local_var_params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def wormsification_taxa_set(self, ids, **kwargs):  # noqa: E501
+        """Wormsification Taxa Set  # noqa: E501
+
+        Returns **information about several taxa**, including their lineage.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.wormsification_taxa_set(ids, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool: execute request asynchronously
+        :param str ids: The separator between numbers is arbitrary non-digit, e.g. ':', '|' or ','. (required)
+        :param _preload_content: if False, the urllib3.HTTPResponse object will
+                                 be returned without reading/decoding response
+                                 data. Default is True.
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :return: dict(str, TaxonModel)
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        return self.wormsification_taxa_set_with_http_info(ids, **kwargs)  # noqa: E501
+
+    def wormsification_taxa_set_with_http_info(self, ids, **kwargs):  # noqa: E501
+        """Wormsification Taxa Set  # noqa: E501
+
+        Returns **information about several taxa**, including their lineage.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.wormsification_taxa_set_with_http_info(ids, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool: execute request asynchronously
+        :param str ids: The separator between numbers is arbitrary non-digit, e.g. ':', '|' or ','. (required)
+        :param _return_http_data_only: response data without head status code
+                                       and headers
+        :param _preload_content: if False, the urllib3.HTTPResponse object will
+                                 be returned without reading/decoding response
+                                 data. Default is True.
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :return: tuple(dict(str, TaxonModel), status_code(int), headers(HTTPHeaderDict))
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        local_var_params = locals()
+
+        all_params = [
+            'ids'
+        ]
+        all_params.extend(
+            [
+                'async_req',
+                '_return_http_data_only',
+                '_preload_content',
+                '_request_timeout'
+            ]
+        )
+
+        for key, val in six.iteritems(local_var_params['kwargs']):
+            if key not in all_params:
+                raise ApiTypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method wormsification_taxa_set" % key
+                )
+            local_var_params[key] = val
+        del local_var_params['kwargs']
+        # verify the required parameter 'ids' is set
+        if self.api_client.client_side_validation and ('ids' not in local_var_params or  # noqa: E501
+                                                        local_var_params['ids'] is None):  # noqa: E501
+            raise ApiValueError("Missing the required parameter `ids` when calling `wormsification_taxa_set`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+
+        query_params = []
+        if 'ids' in local_var_params and local_var_params['ids'] is not None:  # noqa: E501
+            query_params.append(('ids', local_var_params['ids']))  # noqa: E501
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = ['BearerOrCookieAuth']  # noqa: E501
+
+        return self.api_client.call_api(
+            '/taxon_set/wormsification', 'GET',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='dict(str, TaxonModel)',  # noqa: E501
             auth_settings=auth_settings,
             async_req=local_var_params.get('async_req'),
             _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501

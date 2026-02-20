@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
+import json as json_module
 from json import JSONEncoder
 from typing import List
-
 from flask import render_template, json, jsonify, request
-
+from flask_login import login_required
 from appli import app, gvg, gvp
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py.api import TaxonomyTreeApi
-from to_back.ecotaxa_cli_py.models import TaxaSearchRsp, TaxonModel
+from to_back.ecotaxa_cli_py.models import TaxaSearchRsp, TaxonModel, TaxoRecastRsp
 
 
 # Specialize an encoder for serializing directly the back-end response
@@ -22,20 +22,36 @@ class BackEndJSONEncoder(JSONEncoder):
 @app.route("/search/taxo")
 def searchtaxo():
     term = gvg("q")
-    withdeprecated=gvg("withdeprecated",False)
+    withdeprecated = gvg("withdeprecated", False)
+    wormsonly = gvg("worms", False)
     prj_id = gvg("projid")
     if not prj_id:
         prj_id = -1
     # Relay to back-end
     with ApiClient(TaxonomyTreeApi, request) as api:
         res: List[TaxaSearchRsp] = api.search_taxa(query=term, project_id=prj_id)
+
     # TODO: temporary until the HTML goes to /api directly
-    # Filter out taxa to rename
-    if withdeprecated:
-        res = [a_taxon for a_taxon in res]
+    # Filter out taxa
+    if wormsonly:
+        ids = [
+            str(a_taxon.id)
+            for a_taxon in res
+            if a_taxon.aphia_id is not None
+            and a_taxon.renm_id is None
+            and a_taxon.status != "D"
+        ]
+        with ApiClient(TaxonomyTreeApi, request) as api:
+            ret: List[TaxonModel] = api.query_taxa_set(ids=",".join(ids))
+    elif withdeprecated:
+        ret = [a_taxon for a_taxon in res]
     else:
-        res = [a_taxon for a_taxon in res if a_taxon.renm_id is None and a_taxon.status!='D' ]
-    return json.dumps(res, cls=BackEndJSONEncoder)
+        ret = [
+            a_taxon
+            for a_taxon in res
+            if a_taxon.renm_id is None and a_taxon.status != "D"
+        ]
+    return json_module.dumps(ret, cls=BackEndJSONEncoder)
 
 
 @app.route("/search/taxotree")
@@ -115,3 +131,35 @@ def taxoresolve():
     nodes.sort(key=lambda r: r.display_name.lower())
     taxomap = {a_node.id: a_node.display_name for a_node in nodes}
     return jsonify(taxomap)
+
+
+@app.route("/gui/get_taxo_recast", methods=["GET"])
+@login_required
+def gui_get_taxo_recast():
+    is_collection = gvg("is_collection")
+    target_id = gvg("target_id")
+    operation = gvg("operation")
+    from appli.gui.taxonomy.tools import read_taxo_recast
+
+    return read_taxo_recast(
+        target_id=int(target_id), operation=operation, is_collection=is_collection
+    )
+
+
+@app.route("/gui/update_taxo_recast", methods=["POST"])
+@login_required
+def gui_update_taxo_recast():
+    from appli.gui.taxonomy.tools import update_taxo_recast
+
+    is_collection = gvg("is_collection")
+    target_id = gvg("target_id")
+    operation = gvp("operation")
+    from_to = gvp("from_to")
+    doc = gvp("doc", {})
+    taxonomy_recast = TaxoRecastRsp(from_to=from_to, doc=doc)
+    return update_taxo_recast(
+        target_id=int(target_id),
+        recast=taxonomy_recast,
+        operation=operation,
+        is_collection=is_collection,
+    )

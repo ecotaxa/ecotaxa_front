@@ -5,7 +5,6 @@ const css = {
   cancel: 'cancel-line',
 };
 export class TaxoMapping {
-  // animation and specific display on accordions list / details tag open
   numlines = 0;
 
   constructor(line) {

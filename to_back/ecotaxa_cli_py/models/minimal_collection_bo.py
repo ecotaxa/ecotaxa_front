@@ -73,7 +73,8 @@ class MinimalCollectionBO(object):
         self.title = title
         if short_title is not None:
             self.short_title = short_title
-        self.provider_user = provider_user
+        if provider_user is not None:
+            self.provider_user = provider_user
         if contact_user is not None:
             self.contact_user = contact_user
         self.project_ids = project_ids
@@ -184,8 +185,6 @@ class MinimalCollectionBO(object):
         :param provider_user: The provider_user of this MinimalCollectionBO.  # noqa: E501
         :type: int
         """
-        if self.local_vars_configuration.client_side_validation and provider_user is None:  # noqa: E501
-            raise ValueError("Invalid value for `provider_user`, must not be `None`")  # noqa: E501
 
         self._provider_user = provider_user
 

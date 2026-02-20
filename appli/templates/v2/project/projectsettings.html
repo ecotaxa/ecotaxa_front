@@ -127,10 +127,15 @@
           </div></div>
           </fieldset>
           {%-if target_proj-%}
+        <fieldset class="w-full tab"><legend class="tab-control">{{_('Taxonomy mapping')}}</legend><div class="tab-content flex flex-wrap">
+        <a id="refresh_taxo_recast" data-href="{{url_for('gui_get_taxo_recast',target_id=target_proj.prjid,operation=recast_operation,is_collection=False)}}" data-request="href" class="btn-small text-base text-mainblue-700 hover:text-secondblue-400 ">{{_('Edit Taxonomy mapping')}} <i data-for="help_collection_taxo_recast" data-request="help"></i></a>
+        </div></fieldset>
           <fieldset id="section-freecols" class="w-full tab" >
             <legend class="tab-control">{{_('Mapping')}}</legend>
           <div class="tab-content"><div>Imported columns and their column identifier <i data-for="help_project_mapping" data-request="help"></i> {{badge('success',_('new'),True)}}</div>{{display_freecols(freecols) if freecols }}</div>
-          </fieldset>{%-endif-%}
+          </fieldset>
+
+        {%-endif-%}
     </div>
 
 <div class="w-full text-left my-8"> <input type="hidden" name="save" value="Y">

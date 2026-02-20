@@ -35,22 +35,22 @@ class TaxaSearchRsp(object):
     openapi_types = {
         'id': 'int',
         'status': 'str',
-        'aphia_id': 'int',
-        'renm_id': 'int',
         'text': 'str',
-        'pr': 'int'
+        'pr': 'int',
+        'aphia_id': 'int',
+        'renm_id': 'int'
     }
 
     attribute_map = {
         'id': 'id',
         'status': 'status',
-        'aphia_id': 'aphia_id',
-        'renm_id': 'renm_id',
         'text': 'text',
-        'pr': 'pr'
+        'pr': 'pr',
+        'aphia_id': 'aphia_id',
+        'renm_id': 'renm_id'
     }
 
-    def __init__(self, id=None, status=None, aphia_id=None, renm_id=None, text=None, pr=None, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, id=None, status=None, text=None, pr=None, aphia_id=None, renm_id=None, local_vars_configuration=None):  # noqa: E501
         """TaxaSearchRsp - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -58,20 +58,20 @@ class TaxaSearchRsp(object):
 
         self._id = None
         self._status = None
-        self._aphia_id = None
-        self._renm_id = None
         self._text = None
         self._pr = None
+        self._aphia_id = None
+        self._renm_id = None
         self.discriminator = None
 
         self.id = id
         self.status = status
+        self.text = text
+        self.pr = pr
         if aphia_id is not None:
             self.aphia_id = aphia_id
         if renm_id is not None:
             self.renm_id = renm_id
-        self.text = text
-        self.pr = pr
 
     @property
     def id(self):
@@ -124,52 +124,6 @@ class TaxaSearchRsp(object):
         self._status = status
 
     @property
-    def aphia_id(self):
-        """Gets the aphia_id of this TaxaSearchRsp.  # noqa: E501
-
-        The Worms aphia_id of the taxon.  # noqa: E501
-
-        :return: The aphia_id of this TaxaSearchRsp.  # noqa: E501
-        :rtype: int
-        """
-        return self._aphia_id
-
-    @aphia_id.setter
-    def aphia_id(self, aphia_id):
-        """Sets the aphia_id of this TaxaSearchRsp.
-
-        The Worms aphia_id of the taxon.  # noqa: E501
-
-        :param aphia_id: The aphia_id of this TaxaSearchRsp.  # noqa: E501
-        :type: int
-        """
-
-        self._aphia_id = aphia_id
-
-    @property
-    def renm_id(self):
-        """Gets the renm_id of this TaxaSearchRsp.  # noqa: E501
-
-        The advised replacement ID if the taxon/category is deprecated.  # noqa: E501
-
-        :return: The renm_id of this TaxaSearchRsp.  # noqa: E501
-        :rtype: int
-        """
-        return self._renm_id
-
-    @renm_id.setter
-    def renm_id(self, renm_id):
-        """Sets the renm_id of this TaxaSearchRsp.
-
-        The advised replacement ID if the taxon/category is deprecated.  # noqa: E501
-
-        :param renm_id: The renm_id of this TaxaSearchRsp.  # noqa: E501
-        :type: int
-        """
-
-        self._renm_id = renm_id
-
-    @property
     def text(self):
         """Gets the text of this TaxaSearchRsp.  # noqa: E501
 
@@ -218,6 +172,52 @@ class TaxaSearchRsp(object):
             raise ValueError("Invalid value for `pr`, must not be `None`")  # noqa: E501
 
         self._pr = pr
+
+    @property
+    def aphia_id(self):
+        """Gets the aphia_id of this TaxaSearchRsp.  # noqa: E501
+
+        The WoRMS aphia_id of the taxon.  # noqa: E501
+
+        :return: The aphia_id of this TaxaSearchRsp.  # noqa: E501
+        :rtype: int
+        """
+        return self._aphia_id
+
+    @aphia_id.setter
+    def aphia_id(self, aphia_id):
+        """Sets the aphia_id of this TaxaSearchRsp.
+
+        The WoRMS aphia_id of the taxon.  # noqa: E501
+
+        :param aphia_id: The aphia_id of this TaxaSearchRsp.  # noqa: E501
+        :type: int
+        """
+
+        self._aphia_id = aphia_id
+
+    @property
+    def renm_id(self):
+        """Gets the renm_id of this TaxaSearchRsp.  # noqa: E501
+
+        The advised replacement ID if the taxon/category is deprecated.  # noqa: E501
+
+        :return: The renm_id of this TaxaSearchRsp.  # noqa: E501
+        :rtype: int
+        """
+        return self._renm_id
+
+    @renm_id.setter
+    def renm_id(self, renm_id):
+        """Sets the renm_id of this TaxaSearchRsp.
+
+        The advised replacement ID if the taxon/category is deprecated.  # noqa: E501
+
+        :param renm_id: The renm_id of this TaxaSearchRsp.  # noqa: E501
+        :type: int
+        """
+
+        self._renm_id = renm_id
 
     def to_dict(self):
         """Returns the model properties as a dict"""

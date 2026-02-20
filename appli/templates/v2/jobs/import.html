@@ -75,7 +75,6 @@
     </div></fieldset>{%-endfor-%}
     <!--files to import -->
     {%- set name="source" -%}
-
     <div id="shared" class="hide w-full">
       <div id="import-files" class="hide w-full">
       <div class="form-box js js-accordion" data-detail="[data-summary]"><div class="flex flex-row">
@@ -84,7 +83,6 @@
       {%- endfor -%}</div>
       <!-- from myfiles -->
     <div class="form-box hide" id="{{name}}_myfiles">{{import_comments()}}
-
     {%include('/v2/my_files/_list.html')%}
       <!--<div id="dirlist" class="w-full " data-ended="{{_('upload')}}" data-browse="directory,file" data-textbrowsedirectory="{{_('Browse directories')}}" data-textbrowsefile="{{_('Browse files')}}" data-textdrop="{{_('or Drop Files or Directories Here')}}" data-label="{{_('My Files')}}" data-upload-label="{{_('Add entire folder(s) or compressed folder(s)')}}"></div>-->
       </div>
@@ -97,8 +95,8 @@
             {{_('Once the import is complete, all data folders/files can be safely erased on the server.')}}</em>
         </div></div></div>
         <div id="import_taxo-mapping" class="hide">
-            {%-set name="taxo_mapping"-%}
-        {%include('/v2/taxonomy/_import_taxo_mapping.html')%}
+        {%-set name="taxo_mapping"-%}
+        {%- include('/v2/taxonomy/_import_taxo_mapping.html') -%}
         </div>
         </div>
     <!-- end files to import -->

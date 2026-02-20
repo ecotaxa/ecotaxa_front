@@ -58,26 +58,17 @@ function createJsTomSelect() {
           }
         })
       }
-    if (item.dataset.create && item.dataset.create === 'true') {
-      //  option.settings.create = true;
-      //  option.settings.createOnBlur = true;
+    if (item.dataset.hasOwnProperty('create') && item.dataset.create === 'true') {
       option.settings.create = true;
       option.settings.addPrecedence = true;
     }
-    if (item.dataset.empty && item.dataset.empty === 'true') {
+    if (item.dataset.hasOwnProperty('empty') && item.dataset.empty === 'true') {
       option.settings.allowEmptyOption = true;
     }
-    if (item.dataset.maxitems) {
-      option.settings.maxItems = parseInt(item.dataset.maxitems);
-    }
-    if (item.dataset.addoption) {
-      option.settings.addoption = item.dataset.addoption.split(',');
-    };
-
+    option.settings.maxItems =(item.dataset.hasOwnProperty('maxitems'))? parseInt(item.dataset.maxitems):(multiple) ? null : 1;
     switch (type) {
       case models.project:
         // for top navigation search and collections
-        const maxitems = (multiple) ? null : 1;
         option.url = "/gui/prjlist/";
         option.settings = { ...option.settings,
           ...{
@@ -85,11 +76,10 @@ function createJsTomSelect() {
             searchField: 'text',
             labelField: 'text',
             openOnFocus: false,
-            maxItems: maxitems,
+            maxItems: option.settings.maxItems,
             allowEmptyOption: false,
           }
         };
-
         break;
       case models.organisation:
         option.url = "/api/organizations/search?name=";
@@ -102,7 +92,6 @@ function createJsTomSelect() {
             allowEmptyOption: false,
           }
         };
-
         break;
       case models.person:
         option.url = "/gui/search_persons?name=";
@@ -239,11 +228,11 @@ function createJsTomSelect() {
         };
         break;
       case models.taxo:
+        option.url = "/search/taxo";
         TomSelect.define('no_close', () => {
           this.close = () => {};
         });
 
-        option.url = "/search/taxo";
         option.settings = { ...option.settings,
           ...{
             valueField: 'id',
@@ -251,6 +240,7 @@ function createJsTomSelect() {
             searchField: 'text',
             status: 'status',
             closeAfterSelect: true,
+            persist: false,
             onInitialize: () => {
               const wrapper = document.getElementById(id).nextElementSibling;
               if (!wrapper.classList.contains('ts-wrapper')) return;
@@ -262,6 +252,10 @@ function createJsTomSelect() {
             },
           }
         }
+        if (item.dataset.hasOwnProperty("worms"))
+        option.settings = { ...option.settings,
+          ...{labelField: 'display_name',
+            searchField: 'display_name'}} //,lineage:"lineage",id_lineage:"id_lineage"
         break;
     }
     const default_settings = {
@@ -290,40 +284,26 @@ function createJsTomSelect() {
           callback();
           return;
         }
-        let url = '';
+        let url = option.url;
         switch (type) {
           case models.user:
           case models.organisation:
           case models.person:
-            url = option.url + encodeURIComponent('%' + query + '%');
-            break;
-          case models.instr:
+            url += encodeURIComponent('%' + query + '%');
+          break;
           case models.taxo:
-          option.settings = {
-          valueField: 'id',
-          labelField: 'text',
-          searchField: 'id',
-          status:'status'}
-           url = option.url;
-            //
-            if (query.indexOf('_') == 0 && option.settings.addoption && query == option.settings.addoption[0]) {
-              url = null;
-              return callback(Object.entries([{
-                text: option.settings.addoption[0],
-                id: option.settings.addoption[1]
-              }]));
-            }
+          case models.instr:
             //
             if (query) url += '?q=' + encodeURIComponent(query);
-            if (!item.dataset.hasOwnProperty('nodeprecated') && type==models.taxo) url+='&withdeprecated=true';
+            if (type==models.taxo) {
+                if (item.dataset.hasOwnProperty('worms')) url+='&worms=true';
+                else  if (!item.dataset.hasOwnProperty('nodeprecated')) url+='&withdeprecated=true';
+            }
             break;
           case models.project:
-            url = option.url;
-
             if (query) url += '?filt_title=' + encodeURIComponent(query); //+ '&filt_instrum=' + encodeURIComponent(query);
             break;
         }
-
         if (url !== null) fetch(url, fetchSettings()).then(response => response.json()).then(json => {
           if (type === models.project) {
             if (json.data && json.data.length) json = json.data.map(row => {
@@ -375,7 +355,7 @@ function createJsTomSelect() {
 
       }
     }
-    if (item.getAttribute('readonly') === null) {
+    if (item.getAttribute('readonly') === null ) {
       option.settings.plugins = {
         'clear_button': {
           title: (item.dataset.clear) ? item.dataset.clear : 'Clear all',
@@ -439,6 +419,42 @@ function createJsTomSelect() {
           }}
           })
           })
+          if(item.dataset.hasOwnProperty("discard")) {
+            const discard=item.dataset.discard;
+            ts.on('change', function() {
+                const line=ts.wrapper.closest(domselectors.component.tomselect.line);
+                if (line!==null)  {
+                    let notused =0;
+                    const sellines = line.querySelectorAll('[data-discard]');
+                    sellines.forEach(l => { if (l.value==discard) notused+=1});
+                    if (notused==sellines.length) line.classList.add(css.notused);
+                    else line.classList.remove(css.notused);
+                }
+            });
+           // ts.on("clear",()=>{console.log('ts', ts.settings.maxItems);ts.addItem('0');});
+          }
+          if(item.dataset.hasOwnProperty("selattr")) {
+            const selattr=item.dataset.selattr;
+            const idselattr=(item.dataset["id_"+selattr])?item.dataset["id_"+selattr].split(','):item.dataset[selattr].split(',');
+            const nodelineage = document.createElement('ul');
+            nodelineage.classList.add('lineage-list');
+            nodelineage.classList.add(css.hide);
+            ts.wrapper.appendChild(nodelineage);
+            item.dataset[selattr].split(',').forEach((attr,i) => {
+                    const nodeattr=document.createElement('li');
+                    nodeattr.dataset.id=idselattr[i];
+                    const nodeid=nodeattr.dataset.id;
+                    nodeattr.textContent=attr;
+                    nodelineage.appendChild(nodeattr);
+                    if (i>0) nodeattr.addEventListener('click', (e)=> {
+                    if (ts.getOption(nodeid)===null) ts.addOption({display_name:attr, id:nodeid});
+                        nodelineage.classList.add(css.hide);
+                        ts.addItem(nodeid);
+                    })
+                });
+            ts.on("focus", () => { nodelineage.classList.remove('hide');});
+            ['type'].forEach((evt) =>  {ts.on(evt, () => { nodelineage.classList.add(css.hide);})} );
+            }
           //
           break;
         case models.project:

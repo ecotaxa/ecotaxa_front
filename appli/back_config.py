@@ -68,6 +68,8 @@ def get_back_constants(_type):
             current_app.config["API_" + _type + "_CONSTANTS"] = consts.all_in_one
         elif _type == "TAXOSERVER_URL":
             current_app.config["API_" + _type + "_CONSTANTS"] = consts.taxoserver_url
+        elif _type == "RECAST_OPERATION":
+            current_app.config["API_" + _type + "_CONSTANTS"] = consts.recast_operation
     return current_app.config["API_" + _type + "_CONSTANTS"]
 
 
