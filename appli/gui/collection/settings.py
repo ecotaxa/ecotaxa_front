@@ -323,13 +323,13 @@ def collection_edit(collection_id: int, new: bool = False):
                 taxonomy_recast: Dict[str, TaxoRecastRsp] = posted_taxo_recast()
                 update_taxo_recast(
                     target_id=collection_id,
-                    taxonomy_recast=taxonomy_recast["worms"],
+                    taxonomy_recast=taxonomy_recast["occurrence"],
                     operation=recast_operation["overwrite_auto"],
                     is_collection=True,
                 )
                 update_taxo_recast(
                     target_id=collection_id,
-                    taxonomy_recast=taxonomy_recast["final"],
+                    taxonomy_recast=taxonomy_recast["concentration"],
                     operation=recast_operation["settings"],
                     is_collection=True,
                 )

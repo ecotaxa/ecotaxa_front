@@ -12,7 +12,7 @@
     {%-endfor-%}
   {%-else -%}
   {%- if option.format=="checkbox" and "options" not in option.keys() -%}<label for="{{name+'_'+type_export}}" class="inline-block">{{option.label}} {%-if "help" in option -%}<i class="icon-help" data-for="{{'help_export_'+type_export+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%} <input type="checkbox" id="{{name+'_'+type_export}}" name="{{name}}" class="form-checkbox ml-2" value=1></label>
-  {%-elif "options" in option.keys() -%}<div class="label inline-block mr-2 w-auto">{{option.label}} {%-if "help" in option -%}<i class="icon-help" data-for="{{'help_export_'+type_export+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%}</div><div class="form-group inline-block w-auto" {{'data-action=discard data-trigger='+name+' data-target='+option.discard if "discard" in option else ''}}>
+  {%-elif "options" in option.keys() -%}<div class="label inline-block mr-2 w-auto">{{option.label}} {%-if "help" in option -%}<i class="icon-help" data-for="{{'help_export_'+type_export+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%}</div><div class="form-group inline-block w-auto" {{'data-action=discard data-trigger='+name+' data-target='+option.discard if 'discard' in option}}>
     {%-if "options" in option.keys() -%} {%- for opt in option.options -%}
       {%- set extra =' data-checked=true' if opt.value== datas[name] else '' -%}
       {{ form_group_radio(name+'_'+type_export+'_'+loop.index|string(),name,opt.value,opt.label,datas[name][0],required=(loop.index==1),help='',extra=extra,radio= option.format=="radio")}}
@@ -45,11 +45,12 @@
       <div class="tab-content {{'pt-8' if export_type==None}}" id="{{type_export}}"  data-path="{{formdata.path}}"><em class="pb-4 block">{{formdata.legend}} <i data-for="help_export_{{type_export}}" data-request="help" data-what="help"></i></em>
       {{make_part_form(type_export,formdata.datas)}}
     </div></fieldset>{%-endfor-%}
-         <div id="{{shared}}" class="hide">{%include('/v2/taxonomy/_import_taxo_mapping.html')%}</div>
+        {%-set target_id=collection_id if target_type=="collection" else projid %}
+        <div id="{{shared}}" class="hide"><a id="refresh_taxo_recast" data-href="{{url_for('gui_get_taxo_recast',target_id=target_id,operation='settings',is_collection=(target_type=='collection'))}}" data-request="href" class="btn-small text-base text-mainblue-700 hover:text-secondblue-400 ">{{_('Edit Taxonomy mapping')}} <i data-for="help_collection_taxo_recast" data-request="help"></i></a></div>
   </div>
       <div class="form-box mb-8 w-auto float-left clear-right">
           <button type="submit" class="button is-primary ">{{_('Start Task')}}</button>
-          <a href ="{{url_for("gui_collection_classify",collection_id=collection_id) if collection_id|string!="0" else  url_for("gui_prj_classify",projid=projid)}}" class="button is-secondary inverse">{{_('Cancel')}}</a>
+          <a href ="{{url_for('gui_collection_classify',collection_id=collection_id) if collection_id|string!='0' else  url_for('gui_prj_classify',projid=projid)}}" class="button is-secondary inverse">{{_('Cancel')}}</a>
             </div>
         </form>
         </div>

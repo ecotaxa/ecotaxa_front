@@ -37,7 +37,7 @@ class SummaryExportReq(object):
         'project_id': 'AnyOfintegerstring',
         'quantity': 'SummaryExportQuantitiesOptionsEnum',
         'summarise_by': 'SummaryExportSumOptionsEnum',
-        'taxo_mapping': 'dict(str, int)',
+        'taxo_mapping': 'dict(str, dict(str, int))',
         'formulae': 'dict(str, str)',
         'out_to_ftp': 'bool'
     }
@@ -179,10 +179,10 @@ class SummaryExportReq(object):
     def taxo_mapping(self):
         """Gets the taxo_mapping of this SummaryExportReq.  # noqa: E501
 
-        Mapping from present taxon (key) to output replacement one (value). Use a 0 replacement to _discard_ the present taxon.  # noqa: E501
+        For 'ABO', 'CNC' and 'BIV' types types, mapping from present taxon (key) to output replacement one (value). Use a null replacement to _discard_ the present taxon.  # noqa: E501
 
         :return: The taxo_mapping of this SummaryExportReq.  # noqa: E501
-        :rtype: dict(str, int)
+        :rtype: dict(str, dict(str, int))
         """
         return self._taxo_mapping
 
@@ -190,10 +190,10 @@ class SummaryExportReq(object):
     def taxo_mapping(self, taxo_mapping):
         """Sets the taxo_mapping of this SummaryExportReq.
 
-        Mapping from present taxon (key) to output replacement one (value). Use a 0 replacement to _discard_ the present taxon.  # noqa: E501
+        For 'ABO', 'CNC' and 'BIV' types types, mapping from present taxon (key) to output replacement one (value). Use a null replacement to _discard_ the present taxon.  # noqa: E501
 
         :param taxo_mapping: The taxo_mapping of this SummaryExportReq.  # noqa: E501
-        :type: dict(str, int)
+        :type: dict(str, dict(str, int))
         """
 
         self._taxo_mapping = taxo_mapping

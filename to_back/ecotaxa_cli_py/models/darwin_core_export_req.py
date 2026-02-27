@@ -38,7 +38,7 @@ class DarwinCoreExportReq(object):
         'include_predicted': 'bool',
         'with_absent': 'bool',
         'with_computations': 'list[SciExportTypeEnum]',
-        'computations_pre_mapping': 'dict(str, int)',
+        'computations_pre_mapping': 'dict(str, dict(str, int))',
         'formulae': 'dict(str, str)',
         'extra_xml': 'list[str]'
     }
@@ -207,10 +207,10 @@ class DarwinCoreExportReq(object):
     def computations_pre_mapping(self):
         """Gets the computations_pre_mapping of this DarwinCoreExportReq.  # noqa: E501
 
-        Mapping from present taxon (key) to output replacement one (value), during computations. Use a 0 replacement to _discard_ the objects with present taxon. Note: These are EcoTaxa categories, WoRMS mapping happens after, whatever.  # noqa: E501
+        For 'ABO', 'CNC' and 'BIV' types types, mapping from present taxon (key) to output replacement one (value). Use a null replacement to _discard_ the present taxon.  # noqa: E501
 
         :return: The computations_pre_mapping of this DarwinCoreExportReq.  # noqa: E501
-        :rtype: dict(str, int)
+        :rtype: dict(str, dict(str, int))
         """
         return self._computations_pre_mapping
 
@@ -218,10 +218,10 @@ class DarwinCoreExportReq(object):
     def computations_pre_mapping(self, computations_pre_mapping):
         """Sets the computations_pre_mapping of this DarwinCoreExportReq.
 
-        Mapping from present taxon (key) to output replacement one (value), during computations. Use a 0 replacement to _discard_ the objects with present taxon. Note: These are EcoTaxa categories, WoRMS mapping happens after, whatever.  # noqa: E501
+        For 'ABO', 'CNC' and 'BIV' types types, mapping from present taxon (key) to output replacement one (value). Use a null replacement to _discard_ the present taxon.  # noqa: E501
 
         :param computations_pre_mapping: The computations_pre_mapping of this DarwinCoreExportReq.  # noqa: E501
-        :type: dict(str, int)
+        :type: dict(str, dict(str, int))
         """
 
         self._computations_pre_mapping = computations_pre_mapping
