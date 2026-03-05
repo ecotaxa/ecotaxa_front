@@ -55,6 +55,7 @@ export const css = {
   tooltip:'tooltip',
   worms:'worms',
   deprecated:'deprecated',
+  notused:'notused',
   component: {
     tabs: {
       name: 'js-tabs'
@@ -98,7 +99,8 @@ export const domselectors = {
       name: 'tom-select',
       ident: 'js-autocomplete',
       item: '.item',
-      tsdelet: '.ts-delet'
+      tsdelet: '.ts-delet',
+      line:'.ts-line'
     },
     privileges: {
       ident: 'js-privileges',

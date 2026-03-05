@@ -3,11 +3,23 @@ from flask import render_template, flash, request, redirect, url_for
 from flask_login import current_user
 from appli import gvp, gvpm
 from appli.gui.staticlistes import py_messages
+from appli.gui.taxonomy.tools import posted_taxo_recast, update_taxo_recast
+from appli.back_config import get_back_constants
 
 ######################################################################################################################
 from appli.utils import ApiClient
-from to_back.ecotaxa_cli_py import ApiException, OrganizationModel
-from to_back.ecotaxa_cli_py.api import CollectionsApi, ProjectsApi, UsersApi, GuestsApi,OrganizationsApi
+from to_back.ecotaxa_cli_py import (
+    ApiException,
+    OrganizationModel,
+    TaxoRecastRsp,
+)
+from to_back.ecotaxa_cli_py.api import (
+    CollectionsApi,
+    ProjectsApi,
+    UsersApi,
+    GuestsApi,
+    OrganizationsApi,
+)
 from to_back.ecotaxa_cli_py.models import (
     CollectionModel,
     MinUserModel,
@@ -26,7 +38,6 @@ from appli.gui.commontools import (
     new_ui_error,
 )
 
-
 ###############################################common for create && edit  #######################################################################
 orgprefix = "org_"
 doi_url = "https://doi.org/"
@@ -41,6 +52,8 @@ def _user_format(uid: int) -> Union[MinUserModel, GuestModel]:
         with ApiClient(GuestsApi, request) as api:
             guest: GuestModel = api.get_guest(uid)
         return guest
+
+
 def _org_format(uid: int) -> OrganizationModel:
     try:
         with ApiClient(OrganizationsApi, request) as api:
@@ -49,19 +62,20 @@ def _org_format(uid: int) -> OrganizationModel:
     except ApiException:
         pass
 
+
 def _set_persons(persons: list) -> Dict[str, list]:
     plist = {"users": [], "organisations": []}
     display = []
-    for i,person in enumerate(persons):
+    for i, person in enumerate(persons):
         if person[0 : len(orgprefix)] == orgprefix:
             orga = person[len(orgprefix) :]
             if len(orga.strip()):
                 plist["organisations"].append(_org_format(int(orga)))
-                display.append(orga+"_o")
+                display.append(orga + "_o")
         elif len(person.strip()):
             plist["users"].append(_user_format(int(person)))
-            display.append(person+"_u")
-    return plist,display
+            display.append(person + "_u")
+    return plist, display
 
 
 def _prj_format(projid: int) -> dict:
@@ -94,7 +108,7 @@ def get_collection(collection_id) -> Optional[CollectionModel]:
             return None
 
 
-def collection_about(collection_id, partial: bool = True) -> Optional[CollectionModel]:
+def collection_about(collection_id, partial: bool = True):
     collection = get_collection(collection_id)
     return render_template(
         "v2/collection/about.html", target_coll=collection, partial=partial
@@ -103,11 +117,6 @@ def collection_about(collection_id, partial: bool = True) -> Optional[Collection
 
 def collection_create() -> str:
     # who has the right to create a collection
-    if not True:
-        from werkzeug.exceptions import Forbidden
-        from appli.gui.staticlistes import py_user
-
-        raise Forbidden(py_user["notauthorized"])
     to_save = gvp("save")
     title = ""
     project_ids = []
@@ -173,11 +182,6 @@ def collection_create() -> str:
 
 def collection_aggregated(project_ids: str, simulate: str = "") -> dict:
     # who has the right to create a collection
-    if not True:
-        from werkzeug.exceptions import Forbidden
-        from appli.gui.staticlistes import py_user
-
-        raise Forbidden(py_user["notauthorized"])
     if len(project_ids) == 0:
         return {}
     if simulate == "y":
@@ -258,10 +262,11 @@ def collection_edit(collection_id: int, new: bool = False):
         return redirect(url_for("gui_collection_noright", collection_id=collection_id))
     # Reconstitute members list with privs
     # data structure used in both display & submit
+    recast_operation = get_back_constants("RECAST_OPERATION")
     if gvp("save") == "Y":
         # Load posted variables
         varlist = dir(collection)
-        display_order={"creators":[],"associates":[]}
+        display_order = {"creators": [], "associates": []}
         for prefix in ["creator_", "associate_"]:
             varlist.remove(prefix + "users")
             varlist.remove(prefix + "organisations")
@@ -284,7 +289,7 @@ def collection_edit(collection_id: int, new: bool = False):
             elif a_var[len(a_var) - 2 :] == "[]" and a_var[0:-2] in varlist:
                 if a_var[0:-2] in ["creator_persons", "associate_persons"]:
                     plist, display = _set_persons(gvpm(a_var))
-                    display_order[a_var[0:-2].replace("_person","")]=display
+                    display_order[a_var[0:-2].replace("_person", "")] = display
                     for attrname in ["users", "organisations"]:
                         setattr(
                             collection,
@@ -293,7 +298,7 @@ def collection_edit(collection_id: int, new: bool = False):
                         )
                     setattr(
                         collection,
-                       "display_order",
+                        "display_order",
                         display_order,
                     )
                 elif a_var[0:-2] in ["project_ids"]:
@@ -314,10 +319,23 @@ def collection_edit(collection_id: int, new: bool = False):
                     message + " " + collection.title,
                     "success",
                 )
+                # taxo_recast
+                taxonomy_recast: Dict[str, TaxoRecastRsp] = posted_taxo_recast()
+                update_taxo_recast(
+                    target_id=collection_id,
+                    taxonomy_recast=taxonomy_recast["worms"],
+                    operation=recast_operation["overwrite_auto"],
+                    is_collection=True,
+                )
+                update_taxo_recast(
+                    target_id=collection_id,
+                    taxonomy_recast=taxonomy_recast["final"],
+                    operation=recast_operation["settings"],
+                    is_collection=True,
+                )
             return redirect(request.referrer)
         except ApiException as ae:
             new_ui_error(ae)
-
     licenses = possible_licenses()
     # licenses[0] licenses texts , licenses[1] licenses restriction
     from appli.gui.commontools import crsf_token
@@ -325,10 +343,22 @@ def collection_edit(collection_id: int, new: bool = False):
     projectlist = [_prj_format(int(p)) for p in collection.project_ids]
     published = _is_published(collection)
     aggregated = {}
-    creators = {str(creator.id)+"_u" : creator for creator in collection.creator_users}
-    creators.update({str(creator.id) +"_o": creator for creator in collection.creator_organisations})
-    associates = {str(associate.id)+"_u" : associate for associate in collection.associate_users}
-    associates.update({str(associate.id)+"_o" : associate for associate in collection.associate_organisations})
+    creators = {str(creator.id) + "_u": creator for creator in collection.creator_users}
+    creators.update(
+        {
+            str(creator.id) + "_o": creator
+            for creator in collection.creator_organisations
+        }
+    )
+    associates = {
+        str(associate.id) + "_u": associate for associate in collection.associate_users
+    }
+    associates.update(
+        {
+            str(associate.id) + "_o": associate
+            for associate in collection.associate_organisations
+        }
+    )
     return render_template(
         "v2/collection/settings.html",
         target_coll=collection,
@@ -342,6 +372,7 @@ def collection_edit(collection_id: int, new: bool = False):
         associates=associates,
         agg=aggregated,
         doi_url=doi_url,
+        recast_operation=recast_operation["settings"],
     )
 
 

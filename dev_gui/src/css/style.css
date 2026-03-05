@@ -827,6 +827,10 @@ td.progress {@apply min-w-[96px] }
 #table-import-projects-list td.showfull  {@apply max-h-fit overflow-y-auto }
 #table-import-projects-list td.showfull > .tip {@apply max-h-96 overflow-y-auto absolute p-4 bg-stone-50 drop-shadow}
 td div[data-num] {@apply before:font-normal cursor-pointer before:mr-1 before:bg-stone-600 before:rounded before:text-stone-50 before:text-xs before:px-1 before:content-[attr(data-num)] before:w-auto before:inline-block}
+/* lineage */
+ul.lineage-list {@apply flex flex-row absolute w-auto  bg-stone-50 rounded p-4 shadow-sm text-xs z-[1000] -mt-2}
+ul.lineage-list > li {@apply before:inline before:content-['<'] before:mx-1 before:w-auto before:text-xs  first:before:content-none cursor-pointer text-secondblue-700 first:text-stone-600 first:cursor-default}
+.notused {@apply bg-stone-50 italic}
 /* samples select */
 .absinput {@apply absolute z-10 ml-8 -mt-6}
 /*********************************/

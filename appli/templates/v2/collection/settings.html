@@ -16,7 +16,7 @@
       <fieldset class="w-full md:flex md:flex-wrap tab">
         <legend class="tab-control">{{_('collection') + ' ' + target_coll.id|string() if target_coll.id else _('new collection')}}</legend>
         <div class=" w-full md:flex  md:flex-wrap tab-content">
-        <div class="w-full md:w-1/2 md:pr-6 ">
+        <div class="w-full md:w-1/2 md:pr-6">
           <div class="form-box">
             <label for="title">{{_('Title')}}</label>
             <input type="text" id="title" name="title" class="form-input" value="{{ target_coll.title }}" required {{'data-action=normalize data-target=short_title' if not published }} data-required="{{_('a title is required')}}"  placeholder="Records of the kraken communities in the strait of Antlantis"></div>
@@ -95,9 +95,13 @@
               </select>
           </div>
         </div>
-      </fieldset><div class="w-full tab {{'hide' if new}}"><fieldset><legend class="tab-control">{{_('Aggregated projects properties')}}</legend><div class="tab-content flex flex-wrap">
+      </fieldset>{%-if target_coll-%}<div class="w-full  {{'hide' if new}}"><fieldset class="w-full md:flex md:flex-wrap tab"><legend class="tab-control">{{_('Taxonomy mapping')}}</legend><div class="tab-content md:flex md:flex-wrap w-full ">
+        <a id="refresh_taxo_recast" data-href="{{url_for('gui_get_taxo_recast',target_id=target_coll.id,operation=recast_operation,is_collection=True)}}" data-request="href" class="btn-small text-base text-mainblue-700 hover:text-secondblue-400 ">{{_('Edit Taxonomy mapping')}} <i data-for="help_collection_taxo_recast" data-request="help"></i></a>
+        </div></fieldset>
+    <fieldset  class="w-full tab"><legend class="tab-control">{{_('Aggregated projects properties')}}</legend><div class="tab-content flex flex-wrap">
          <a id="refresh_aggregated" data-href="{{url_for('gui_collection_aggregated',project_ids=target_coll.project_ids|join(','))}}" data-request="href" class="btn-small text-base text-mainblue-700 hover:text-secondblue-400 ">{{_('Display aggregated projects properties')}} <i data-for="help_collection_aggregated_properties" data-request="help"></i></a>
-    </div></fieldset></div></div>
+    </div></fieldset>
+    </div>{%-endif%}</div>
 <div class="w-full text-left my-8"> <input type="hidden" name="save" value="Y">
   <button type="submit" data-target="#formu" class="button is-primary">{{_('Save')}}</button> <a href="{{url_for('gui_collection', collection_id= target_coll.id) if target_coll }}" class="button is-secondary inverse" data-title="{{ _('Cancel, back to collection list ') }}">{{ _('Cancel') }}</a>
 </div>

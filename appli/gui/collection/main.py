@@ -4,7 +4,6 @@ from appli import app, gvg
 from appli.gui.commontools import is_partial_request
 from appli.gui.collection.settings import collection_about
 
-
 @app.route("/gui/collection/noright/<int:collection_id>")
 # TODO - fresh_login_required
 @login_required
@@ -85,7 +84,6 @@ def gui_collection_aggregated():
         return render_template(
             "v2/collection/_settings_aggregated.html", agg=aggregated, partial=partial
         )
-
 
 @app.route("/gui/collection/edit/<int:collection_id>", methods=["GET", "POST"])
 # TODO - fresh_login_required
