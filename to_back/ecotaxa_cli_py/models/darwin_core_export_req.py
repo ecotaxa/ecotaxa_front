@@ -38,7 +38,8 @@ class DarwinCoreExportReq(object):
         'include_predicted': 'bool',
         'with_absent': 'bool',
         'with_computations': 'list[SciExportTypeEnum]',
-        'computations_pre_mapping': 'dict(str, dict(str, int))',
+        'rename_occurrence': 'dict(str, int)',
+        'rename_emof': 'dict(str, int)',
         'formulae': 'dict(str, str)',
         'extra_xml': 'list[str]'
     }
@@ -49,12 +50,13 @@ class DarwinCoreExportReq(object):
         'include_predicted': 'include_predicted',
         'with_absent': 'with_absent',
         'with_computations': 'with_computations',
-        'computations_pre_mapping': 'computations_pre_mapping',
+        'rename_occurrence': 'rename_occurrence',
+        'rename_emof': 'rename_emof',
         'formulae': 'formulae',
         'extra_xml': 'extra_xml'
     }
 
-    def __init__(self, collection_id=None, dry_run=False, include_predicted=False, with_absent=False, with_computations=[], computations_pre_mapping=None, formulae=None, extra_xml=[], local_vars_configuration=None):  # noqa: E501
+    def __init__(self, collection_id=None, dry_run=False, include_predicted=False, with_absent=False, with_computations=[], rename_occurrence=None, rename_emof=None, formulae=None, extra_xml=[], local_vars_configuration=None):  # noqa: E501
         """DarwinCoreExportReq - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -65,7 +67,8 @@ class DarwinCoreExportReq(object):
         self._include_predicted = None
         self._with_absent = None
         self._with_computations = None
-        self._computations_pre_mapping = None
+        self._rename_occurrence = None
+        self._rename_emof = None
         self._formulae = None
         self._extra_xml = None
         self.discriminator = None
@@ -79,8 +82,10 @@ class DarwinCoreExportReq(object):
             self.with_absent = with_absent
         if with_computations is not None:
             self.with_computations = with_computations
-        if computations_pre_mapping is not None:
-            self.computations_pre_mapping = computations_pre_mapping
+        if rename_occurrence is not None:
+            self.rename_occurrence = rename_occurrence
+        if rename_emof is not None:
+            self.rename_emof = rename_emof
         if formulae is not None:
             self.formulae = formulae
         if extra_xml is not None:
@@ -204,27 +209,50 @@ class DarwinCoreExportReq(object):
         self._with_computations = with_computations
 
     @property
-    def computations_pre_mapping(self):
-        """Gets the computations_pre_mapping of this DarwinCoreExportReq.  # noqa: E501
+    def rename_occurrence(self):
+        """Gets the rename_occurrence of this DarwinCoreExportReq.  # noqa: E501
 
-        For 'ABO', 'CNC' and 'BIV' types types, mapping from present taxon (key) to output replacement one (value). Use a null replacement to _discard_ the present taxon.  # noqa: E501
+        Taxonomy renaming  for occurrencesfrom present taxon (key) to output replacement one (value). Use a null replacement to _discard_ the present taxon.  # noqa: E501
 
-        :return: The computations_pre_mapping of this DarwinCoreExportReq.  # noqa: E501
-        :rtype: dict(str, dict(str, int))
+        :return: The rename_occurrence of this DarwinCoreExportReq.  # noqa: E501
+        :rtype: dict(str, int)
         """
-        return self._computations_pre_mapping
+        return self._rename_occurrence
 
-    @computations_pre_mapping.setter
-    def computations_pre_mapping(self, computations_pre_mapping):
-        """Sets the computations_pre_mapping of this DarwinCoreExportReq.
+    @rename_occurrence.setter
+    def rename_occurrence(self, rename_occurrence):
+        """Sets the rename_occurrence of this DarwinCoreExportReq.
 
-        For 'ABO', 'CNC' and 'BIV' types types, mapping from present taxon (key) to output replacement one (value). Use a null replacement to _discard_ the present taxon.  # noqa: E501
+        Taxonomy renaming  for occurrencesfrom present taxon (key) to output replacement one (value). Use a null replacement to _discard_ the present taxon.  # noqa: E501
 
-        :param computations_pre_mapping: The computations_pre_mapping of this DarwinCoreExportReq.  # noqa: E501
-        :type: dict(str, dict(str, int))
+        :param rename_occurrence: The rename_occurrence of this DarwinCoreExportReq.  # noqa: E501
+        :type: dict(str, int)
         """
 
-        self._computations_pre_mapping = computations_pre_mapping
+        self._rename_occurrence = rename_occurrence
+
+    @property
+    def rename_emof(self):
+        """Gets the rename_emof of this DarwinCoreExportReq.  # noqa: E501
+
+        For  'ABO', 'CNC' and 'BIV' types, grouping from present taxon (key) to output replacement one (value). Use a null replacement to _discard_ the present taxon.  # noqa: E501
+
+        :return: The rename_emof of this DarwinCoreExportReq.  # noqa: E501
+        :rtype: dict(str, int)
+        """
+        return self._rename_emof
+
+    @rename_emof.setter
+    def rename_emof(self, rename_emof):
+        """Sets the rename_emof of this DarwinCoreExportReq.
+
+        For  'ABO', 'CNC' and 'BIV' types, grouping from present taxon (key) to output replacement one (value). Use a null replacement to _discard_ the present taxon.  # noqa: E501
+
+        :param rename_emof: The rename_emof of this DarwinCoreExportReq.  # noqa: E501
+        :type: dict(str, int)
+        """
+
+        self._rename_emof = rename_emof
 
     @property
     def formulae(self):

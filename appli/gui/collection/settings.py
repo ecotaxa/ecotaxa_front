@@ -324,13 +324,13 @@ def collection_edit(collection_id: int, new: bool = False):
                 update_taxo_recast(
                     target_id=collection_id,
                     taxonomy_recast=taxonomy_recast["occurrence"],
-                    operation=recast_operation["overwrite_auto"],
+                    operation=recast_operation["dwca_export_occurrence"],
                     is_collection=True,
                 )
                 update_taxo_recast(
                     target_id=collection_id,
-                    taxonomy_recast=taxonomy_recast["concentration"],
-                    operation=recast_operation["settings"],
+                    taxonomy_recast=taxonomy_recast["emof"],
+                    operation=recast_operation["dwca_export_emof"],
                     is_collection=True,
                 )
             return redirect(request.referrer)
@@ -372,7 +372,7 @@ def collection_edit(collection_id: int, new: bool = False):
         associates=associates,
         agg=aggregated,
         doi_url=doi_url,
-        recast_operation=recast_operation["settings"],
+        recast_operation=recast_operation["dwca_export_emof"],
     )
 
 

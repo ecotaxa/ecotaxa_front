@@ -47,7 +47,7 @@ class ExportReq(object):
         'with_types_row': 'bool',
         'only_first_image': 'bool',
         'sum_subtotal': 'SummaryExportGroupingEnum',
-        'pre_mapping': 'dict(str, dict(str, int))',
+        'pre_mapping': 'dict(str, int)',
         'formulae': 'dict(str, str)',
         'out_to_ftp': 'bool'
     }
@@ -460,10 +460,10 @@ class ExportReq(object):
     def pre_mapping(self):
         """Gets the pre_mapping of this ExportReq.  # noqa: E501
 
-        For 'ABO', 'CNC' and 'BIV' types types, mapping from present taxon (key) to output replacement one (value). Use a null replacement to _discard_ the present taxon.  # noqa: E501
+        For 'ABO', 'CNC' and 'BIV' types types, grouping from present taxon (key) to output replacement one (value). Use a null replacement to _discard_ the present taxon.  # noqa: E501
 
         :return: The pre_mapping of this ExportReq.  # noqa: E501
-        :rtype: dict(str, dict(str, int))
+        :rtype: dict(str, int)
         """
         return self._pre_mapping
 
@@ -471,10 +471,10 @@ class ExportReq(object):
     def pre_mapping(self, pre_mapping):
         """Sets the pre_mapping of this ExportReq.
 
-        For 'ABO', 'CNC' and 'BIV' types types, mapping from present taxon (key) to output replacement one (value). Use a null replacement to _discard_ the present taxon.  # noqa: E501
+        For 'ABO', 'CNC' and 'BIV' types types, grouping from present taxon (key) to output replacement one (value). Use a null replacement to _discard_ the present taxon.  # noqa: E501
 
         :param pre_mapping: The pre_mapping of this ExportReq.  # noqa: E501
-        :type: dict(str, dict(str, int))
+        :type: dict(str, int)
         """
 
         self._pre_mapping = pre_mapping

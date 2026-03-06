@@ -46,7 +46,7 @@
       {{make_part_form(type_export,formdata.datas)}}
     </div></fieldset>{%-endfor-%}
         {%-set target_id=collection_id if target_type=="collection" else projid %}
-        <div id="{{shared}}" class="hide"><a id="refresh_taxo_recast" data-href="{{url_for('gui_get_taxo_recast',target_id=target_id,operation='settings',is_collection=(target_type=='collection'))}}" data-request="href" class="btn-small text-base text-mainblue-700 hover:text-secondblue-400 ">{{_('Edit Taxonomy mapping')}} <i data-for="help_collection_taxo_recast" data-request="help"></i></a></div>
+        <div id="{{shared}}" class="hide"><a id="refresh_taxo_recast" data-href="{{url_for('gui_get_taxo_recast',target_id=target_id,operation='settings',is_collection=(target_type=='collection'))}}" data-request="href" class="btn-small text-base text-mainblue-700 hover:text-secondblue-400 ">{{_('Taxonomy mapping')}} <i data-for="help_collection_taxo_recast" data-request="help"></i></a><div class="w-full"></div></div>
   </div>
       <div class="form-box mb-8 w-auto float-left clear-right">
           <button type="submit" class="button is-primary ">{{_('Start Task')}}</button>

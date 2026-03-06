@@ -32,11 +32,10 @@ class ExportDarwinCoreJob(ExportJob):
         formulae_dict = {var.strip(): val.strip() for var, val in formulae_list}
         extra_xml = gvp("extra_xml" or "")
         # taxo_recast
-        recast: TaxoRecastRsp = posted_taxo_recast()
-        print("recast========", recast)
-        computations_pre_mapping: Dict[str, Dict[int, Optional[int]]] = {
-            str(k): v.from_to for k, v in recast.items()
-        }
+        recast: Dict[str, TaxoRecastRsp] = posted_taxo_recast()
+        computations_pre_mapping: Dict[str, Dict[str, Optional[int]]] = {}
+        for key, value in recast.items():
+            computations_pre_mapping[key]: Dict[str, Optional[int]] = value.from_to
         print("compuattion_prem============= ", computations_pre_mapping)
         if extra_xml == "":
             extra_xml = []
@@ -46,7 +45,8 @@ class ExportDarwinCoreJob(ExportJob):
             include_predicted=include_predicted,
             with_absent=with_absent,
             with_computations=with_computations,
-            computations_pre_mapping=computations_pre_mapping,
+            rename_occurrence=computations_pre_mapping["recast_occurrence"],
+            rename_emof=computations_pre_mapping["recast_emof"],
             formulae=formulae_dict,
             extra_xml=extra_xml,
         )
