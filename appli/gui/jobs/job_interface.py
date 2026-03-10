@@ -85,6 +85,7 @@ def export_format_options(_type=None, target: Optional[str] = "project"):
                     "with_types_row": (0, False),
                     "only_annotations": (0, False),
                     "out_to_ftp": (0, False),
+                    "taxo_mapping": ({}, False),
                 },
             },
             "backup": {
