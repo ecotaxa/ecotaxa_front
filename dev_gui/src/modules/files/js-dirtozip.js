@@ -637,6 +637,8 @@ async function listStorage(entry = null,name=null) {
       endpoint: options.tusuploadurl,
       retryDelays: [0, 3000, 5000, 10000, 20000],
       chunkSize: 64*1024*1024, // TODO: Some config
+      storeFingerprintForResumableUploads: false,
+      removeFingerprintOnSuccess: true,
       metadata: {
         filename: file.name,
         filetype: file.type,
