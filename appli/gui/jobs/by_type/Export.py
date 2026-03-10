@@ -15,6 +15,7 @@ class ExportJob(Job):
     STEP0_TEMPLATE: ClassVar = "/v2/jobs/export.html"
     FINAL_TEMPLATE: ClassVar = "/v2/jobs/_final_download.html"
     EXPORT_TYPE: ClassVar = None
+    RECAST_OPERATION: ClassVar = None
 
     @classmethod
     def initial_dialog(cls):
@@ -38,18 +39,6 @@ class ExportJob(Job):
         formdatas, formoptions, export_links = export_format_options(
             target=cls.TARGET_TYPE
         )
-        # if cls.EXPORT_TYPE == "summary" or cls.EXPORT_TYPE == None:
-        from appli.gui.taxonomy.tools import project_used_taxa
-        if cls.TARGET_TYPE == "collection":
-            idname = "collection_id"
-            ids = ",".join([str(pid) for pid in target_obj.project_ids])
-
-            taxalist = list(set(project_used_taxa(ids)))
-
-        else:
-            taxalist = project_used_taxa(
-                projid
-            )
         # hack to have 3 types instead of one page by job export type
         return render_template(
             cls.STEP0_TEMPLATE,
@@ -61,9 +50,9 @@ class ExportJob(Job):
             projid=projid,
             collection_id=collection_id,
             idname=idname,
-            taxalist=taxalist,
             target_type=cls.TARGET_TYPE,
             target_obj=target_obj,
+            recast_operation=cls.RECAST_OPERATION,
         )
 
     @classmethod

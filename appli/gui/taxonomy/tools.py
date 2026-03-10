@@ -82,79 +82,105 @@ def get_taxo_recast(
 
 
 def read_taxo_recast(target_id: int, operation: str, is_collection: bool):
-    project_ids = []
-    if is_collection:
+    project_ids = ""
+    if is_collection == True:
         try:
             with ApiClient(CollectionsApi, request) as api:
                 collection = api.get_collection(collection_id=target_id)
             project_ids = ",".join([str(pid) for pid in collection.project_ids])
         except ApiException as ae:
             new_ui_error(ae)
+
     else:
         project_ids = str(target_id)
+
     taxalist, taxaids = get_taxostats(project_ids)
-    taxo_doc = {}
-    # get automatic worms taxo
-    with ApiClient(TaxonomyTreeApi, request) as api:
-        ids = api.get_taxonomy_worms(taxa_ids=",".join(taxaids))
-    autoids = {str(k): str(v) for k, v in ids.items()}
-    # get modified automatic worms taxo
-    recast_operation = get_back_constants("RECAST_OPERATION")
-    res = get_taxo_recast(
-        target_id, recast_operation["dwca_export_occurrence"], is_collection
-    )
-    if res is not None:
-        wormsids = {str(k): str(v) for k, v in res.from_to.items()}
-        taxo_doc = res.doc
-    else:
-        wormsids = autoids
-    res = get_taxo_recast(target_id, operation, is_collection)
-    if res is not None:
-        recastids = {str(k): str(v) for k, v in res.from_to.items()}
-        if taxo_doc == {}:
-            taxo_doc = res.doc
-    else:
-        recastids = wormsids
-    # search worms ids and recast ids in one request
-    reqids = ",".join(
-        list(
-            set(
-                list(wormsids.values())
-                + list(recastids.values())
-                + list(autoids.values())
-            )
-        )
-    )
-    with ApiClient(TaxonomyTreeApi, request) as api:
-        recastitems = api.wormsification_taxa_set(reqids)
-    keys = recastitems.keys()
-
-    def taxa_wormsification(ids: List[str]):
-        taxos = {}
-        for k, vk in ids.items():
-            if vk != "0" and vk in keys:
-                v = recastitems[vk]
-                if v != "0":
-                    taxos.update({str(k): v})
-        return taxos
-
-    taxo_worms = taxa_wormsification(wormsids)
-    taxo_auto = taxa_wormsification(autoids)
-    taxo_recast = taxa_wormsification(recastids)
     # sort taxalist on lineage
     taxalist.sort(
         key=lambda t: (",".join(t.lineage[::-1]) if t.lineage is not None else ""),
         reverse=False,
     )
+    recastres = get_taxo_recast(target_id, operation, is_collection)
+    if recastres is not None:
+        recastids = {str(k): str(v) for k, v in recastres.from_to.items()}
+        taxo_doc = recastres.doc
+    else:
+        recastids = {}
+        taxo_doc = {}
 
-    return render_template(
-        "v2/taxonomy/_taxo_recast.html",
-        taxo_auto=taxo_auto,
-        taxo_recast=taxo_recast,
-        taxalist=taxalist,
-        taxo_worms=taxo_worms,
-        taxo_doc=taxo_doc,
-    )
+    def taxa_populate(
+        _ids: Dict[str, str], _keys: List[str], _recastitems: Dict[str, TaxonModel]
+    ):
+        taxos = {}
+        for k, vk in _ids.items():
+            if vk != "0" and vk in _keys:
+                v = _recastitems[vk]
+                if v != "0":
+                    taxos.update({str(k): v})
+        return taxos
+
+    recast_operation = get_back_constants("RECAST_OPERATION")
+    if operation == recast_operation["dwca_export_emof"]:
+        taxo_doc = {}
+        # get automatic worms taxo
+        with ApiClient(TaxonomyTreeApi, request) as api:
+            ids = api.get_taxonomy_worms(taxa_ids=",".join(taxaids))
+        autoids = {str(k): str(v) for k, v in ids.items()}
+        # get modified automatic worms taxo
+        res = get_taxo_recast(
+            target_id, recast_operation["dwca_export_occurrence"], is_collection
+        )
+        if res is not None:
+            wormsids = {str(k): str(v) for k, v in res.from_to.items()}
+            if taxo_doc == {}:
+                taxo_doc = res.doc
+        else:
+            wormsids = autoids
+        if recastres is None:
+            recastids = wormsids
+        # search worms ids and recast ids in one request
+        reqids = ",".join(
+            list(
+                set(
+                    list(wormsids.values())
+                    + list(recastids.values())
+                    + list(autoids.values())
+                )
+            )
+        )
+        with ApiClient(TaxonomyTreeApi, request) as api:
+            recastitems = api.wormsification_taxa_set(reqids)
+        keys = recastitems.keys()
+        taxo_worms = taxa_populate(wormsids, keys, recastitems)
+        taxo_auto = taxa_populate(autoids, keys, recastitems)
+        taxo_recast = taxa_populate(recastids, keys, recastitems)
+        return render_template(
+            "v2/taxonomy/_dwca_taxo_recast.html",
+            taxo_auto=taxo_auto,
+            taxo_recast=taxo_recast,
+            taxalist=taxalist,
+            taxo_worms=taxo_worms,
+            taxo_doc=taxo_doc,
+            operation=operation,
+        )
+    else:
+        taxo_auto = {str(t.id): t for t in taxalist}
+        recastvals = recastids.values()
+        reqids = ",".join(list(recastvals))
+        if len(recastvals) > 0:
+            with ApiClient(TaxonomyTreeApi, request) as api:
+                recasts = api.query_taxa_set(reqids)
+            taxo_recast = {str(t.id): t for t in recasts}
+        else:
+            taxo_recast = taxo_auto
+        return render_template(
+            "v2/taxonomy/_taxo_recast.html",
+            taxo_auto=taxo_auto,
+            taxo_recast=taxo_recast,
+            taxalist=taxalist,
+            taxo_doc=taxo_doc,
+            operation=operation,
+        )
 
 
 def update_taxo_recast(
@@ -192,10 +218,8 @@ def get_taxostats(project_ids: str):
     return taxalist, taxaids
 
 
-def posted_taxo_recast() -> Dict[str, TaxoRecastRsp]:
-
+def posted_dwca_taxo_recast() -> Dict[str, TaxoRecastRsp]:
     taxanum = gvp("taxanum", "0")
-
     from_to_worms = {}
     from_to_final = {}
     doc_worms = {}
@@ -208,7 +232,6 @@ def posted_taxo_recast() -> Dict[str, TaxoRecastRsp]:
         todoc = gvp("item-doc-" + str(idx), "")
         if toworms == "" or toworms == "0":
             toworms = "0"
-            tofinal = "0"
         if tofinal == "" or tofinal == "0":
             tofinal = "0"
         if tofinal != "0" or toworms != "0":
@@ -223,3 +246,19 @@ def posted_taxo_recast() -> Dict[str, TaxoRecastRsp]:
             "emof": TaxoRecastRsp(from_to=from_to_final, doc=doc_final),
         }
     )
+
+
+def posted_taxo_recast() -> TaxoRecastRsp:
+    taxanum = gvp("simple-taxanum", "0")
+    from_to_final = {}
+    doc_final = {}
+    idx = 1
+    while idx <= int(taxanum):
+        frm = gvp("item-from-" + str(idx))
+        tofinal = gvp("simple-item-to-" + str(idx), "")
+        todoc = gvp("simple-item-doc-" + str(idx), "")
+        if tofinal != "" and tofinal != "0":
+            from_to_final[frm] = int(tofinal)
+            doc_final[frm] = todoc
+        idx += 1
+    return TaxoRecastRsp(from_to=from_to_final, doc=doc_final)

@@ -23,9 +23,9 @@
   <textarea class="form-textarea" name="{{name}}" placeholder="{{opt.placeholder if 'placeholder' in option}}" rows="4">{%- if (name=="formulae" and target_obj  and target_obj.formulae is defined and target_obj.formulae!="" and target_obj.formulae!=None) -%}
 {{target_obj.formulae}}
 {%-else-%}{{datas[name][0] if name in datas}}{%-endif-%}</textarea>
-  {%- elif option.format=='taxoline'-%}
-{%-set comment = option.comment if "comment" in option else None-%}
-<div data-shared="{{shared}}"></div>
+  {%- elif name=="taxo_mapping" -%}
+ {%- set target_id=collection_id if collection_id|string!='0' else projid -%}
+<div data-notshared="{{shared}}"><a id="refresh_taxo_recast-{{option.recast_operation}}" data-href="{{url_for('gui_get_taxo_recast',target_id=target_id,operation=option.recast_operation,is_collection=(target_type=='collection'))}}" data-request="href" class="btn-small text-base text-mainblue-700 hover:text-secondblue-400 ">{{option.label}} <i data-for="{{option.help}}" data-request="help"></i></a><div class="w-full"></div></div>
  {%-endif-%}{%-endif-%}
 </div>{%-endif-%}{%-endfor%}
 {%-endmacro-%}
@@ -46,7 +46,7 @@
       {{make_part_form(type_export,formdata.datas)}}
     </div></fieldset>{%-endfor-%}
         {%-set target_id=collection_id if target_type=="collection" else projid %}
-        <div id="{{shared}}" class="hide"><a id="refresh_taxo_recast" data-href="{{url_for('gui_get_taxo_recast',target_id=target_id,operation='settings',is_collection=(target_type=='collection'))}}" data-request="href" class="btn-small text-base text-mainblue-700 hover:text-secondblue-400 ">{{_('Taxonomy mapping')}} <i data-for="help_collection_taxo_recast" data-request="help"></i></a><div class="w-full"></div></div>
+        <div id="{{shared}}"  class="hide"></div>
   </div>
       <div class="form-box mb-8 w-auto float-left clear-right">
           <button type="submit" class="button is-primary ">{{_('Start Task')}}</button>

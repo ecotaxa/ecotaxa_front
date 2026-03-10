@@ -20,6 +20,7 @@ class ExportSummaryJob(ExportJob):
 
     UI_NAME: ClassVar = "SummaryExport"
     EXPORT_TYPE: ClassVar = "summary"
+    RECAST_OPERATION: ClassVar = "project_export"
 
     @classmethod
     def job_req(cls):
@@ -31,14 +32,18 @@ class ExportSummaryJob(ExportJob):
         taxo_mapping = json.loads(gvp("taxo_mapping", "{}"))
         formulae = gvp("formulae")
         out_to_ftp = gvp("out_to_ftp") == "1"
-        formulae_list = [a_line.strip().split(":") for a_line in formulae.splitlines()]
-        formulae_dict = {var.strip(): val.strip() for var, val in formulae_list}
+        if formulae is None:
+            formulae_dict = {}
+        else:
+            formulae_list = [
+                a_line.strip().split(":") for a_line in formulae.splitlines()
+            ]
+            formulae_dict = {var.strip(): val.strip() for var, val in formulae_list}
         req = SummaryExportReq(
             collection_id=collid,
             project_id=projid,
             quantity=quantity,
             summarise_by=summarise_by,
-            taxo_mapping=taxo_mapping,
             formulae=formulae_dict,
             out_to_ftp=out_to_ftp,
         )

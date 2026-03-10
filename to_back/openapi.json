@@ -5939,10 +5939,14 @@
             "required":false,
             "schema":{
               "title":"Operation name",
-              "type":"string",
+              "allOf":[
+                {
+                  "$ref":"#/components/schemas/RecastOperation"
+                }
+              ],
               "description":"One of RecastOperation enum value"
             },
-            "example":"settings",
+            "example":"dwca_export_occurrence",
             "name":"operation",
             "in":"query"
           },
@@ -6011,6 +6015,58 @@
               "application/json":{
                 "schema":{},
                 "example":{}
+              }
+            }
+          },
+          "422":{
+            "description":"Validation Error",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security":[
+          {
+            "BearerOrCookieAuth":[]
+          }
+        ]
+      }
+    },
+    "/taxo_worms":{
+      "get":{
+        "tags":[
+          "Taxonomy Tree"
+        ],
+        "summary":"Get Taxonomy Worms",
+        "description":"**Read the collection or project taxonomy recast**.\n Note: The data is returned only if manageable.",
+        "operationId":"get_taxonomy_worms",
+        "parameters":[
+          {
+            "description":"taxon id separated by ,",
+            "required":false,
+            "schema":{
+              "title":"Taxa Ids",
+              "type":"string",
+              "description":"taxon id separated by ,",
+              "default":""
+            },
+            "example":"all",
+            "name":"taxa_ids",
+            "in":"query"
+          }
+        ],
+        "responses":{
+          "200":{
+            "description":"Successful Response",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "title":"Response Get Taxonomy Worms Taxo Worms Get"
+                }
               }
             }
           },
@@ -8001,15 +8057,15 @@
             "default":{
               "prediction_input":"pre_predict",
               "prediction_output":"post_predict",
-              "dwca_export":"dwca_export",
-              "summary_export":"summary_export",
-              "overwrite_auto":"overwrite_auto",
-              "settings":"settings"
+              "project_export":"project_export",
+              "collection_export":"collection_export",
+              "dwca_export_occurrence":"dwca_export_occurrence",
+              "dwca_export_emof":"dwca_export_emof"
             },
             "example":{
               "prediction_input":"pre_predict",
-              "settings":"settings",
-              "dwca_export":"dwca_export"
+              "dwca_export_occurrence":"dwca_export_occurrence",
+              "dwca_export_emof":"dwca_export_emof"
             }
           }
         },
@@ -8127,20 +8183,6 @@
             "example":[
               "ABO"
             ]
-          },
-          "computations_pre_mapping":{
-            "title":"Computation mapping",
-            "type":"object",
-            "additionalProperties":{
-              "type":"integer"
-            },
-            "description":"Mapping from present taxon (key) to output replacement one (value), during computations. Use a 0 replacement to _discard_ the objects with present taxon. Note: These are EcoTaxa categories, WoRMS mapping happens after, whatever.",
-            "default":{},
-            "example":{
-              "456":956,
-              "2456":213,
-              "93672":0
-            }
           },
           "formulae":{
             "title":"Computation formulas",
@@ -8361,19 +8403,6 @@
             "description":"For 'SUM', 'ABO', 'CNC' and 'BIV' types, if computations should be combined. Per A(cquisition) or S(ample) or <Empty>(just taxa).",
             "default":"",
             "example":"A"
-          },
-          "pre_mapping":{
-            "title":"Categories mapping",
-            "type":"object",
-            "additionalProperties":{
-              "type":"integer"
-            },
-            "description":"For 'ABO', 'CNC' and 'BIV' types types, mapping from present taxon (key) to output replacement one (value). Use a null replacement to _discard_ the present taxon.",
-            "default":{},
-            "example":{
-              "456":956,
-              "2456":213
-            }
           },
           "formulae":{
             "title":"Computation formulas",
@@ -10584,10 +10613,10 @@
         "enum":[
           "pre_predict",
           "post_predict",
-          "dwca_export",
-          "summary_export",
-          "overwrite_auto",
-          "settings"
+          "project_export",
+          "collection_export",
+          "dwca_export_occurrence",
+          "dwca_export_emof"
         ],
         "type":"string",
         "description":"An enumeration."
@@ -10948,7 +10977,7 @@
         "description":"An enumeration."
       },
       "SummaryExportReq":{
-        "title":"Summary Export request Model",
+        "title":"SummaryExportReq",
         "required":[
           "project_id"
         ],
@@ -10994,20 +11023,6 @@
             "description":"Computations aggregation level.",
             "default":"sample",
             "example":"acquisition"
-          },
-          "taxo_mapping":{
-            "title":"Categories mapping",
-            "type":"object",
-            "additionalProperties":{
-              "type":"integer"
-            },
-            "description":"Mapping from present taxon (key) to output replacement one (value). Use a 0 replacement to _discard_ the present taxon.",
-            "default":{},
-            "example":{
-              "456":956,
-              "2456":213,
-              "7153":0
-            }
           },
           "formulae":{
             "title":"Computation formulas",
@@ -11424,8 +11439,7 @@
               }
             ],
             "description":"Recast operation name.",
-            "default":"settings",
-            "example":"overwrite_auto"
+            "example":"dwca_export_emof"
           },
           "is_collection":{
             "title":"Is collection",

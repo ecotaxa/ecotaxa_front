@@ -430,7 +430,7 @@ class TaxonomyTreeApi(object):
 
         :param async_req bool: execute request asynchronously
         :param int target_id: Internal, the unique numeric id of this collection. (required)
-        :param str operation: One of RecastOperation enum value
+        :param RecastOperation operation: One of RecastOperation enum value
         :param bool is_collection: target_id refers to a collection_id or not
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
@@ -457,7 +457,7 @@ class TaxonomyTreeApi(object):
 
         :param async_req bool: execute request asynchronously
         :param int target_id: Internal, the unique numeric id of this collection. (required)
-        :param str operation: One of RecastOperation enum value
+        :param RecastOperation operation: One of RecastOperation enum value
         :param bool is_collection: target_id refers to a collection_id or not
         :param _return_http_data_only: response data without head status code
                                        and headers

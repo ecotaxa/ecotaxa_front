@@ -95,9 +95,7 @@
               </select>
           </div>
         </div>
-      </fieldset>{%-if target_coll-%}<div class="w-full  {{'hide' if new}}"><fieldset class="w-full md:flex md:flex-wrap tab"><legend class="tab-control">{{_('Taxonomy mapping')}}</legend><div class="tab-content md:flex md:flex-wrap w-full ">
-        <a id="refresh_taxo_recast" data-href="{{url_for('gui_get_taxo_recast',target_id=target_coll.id,operation=recast_operation,is_collection=True)}}" data-request="href" class="btn-small text-base text-mainblue-700 hover:text-secondblue-400 ">{{_('Edit Taxonomy mapping')}} <i data-for="help_collection_taxo_recast" data-request="help"></i></a>
-        </div></fieldset>
+      </fieldset>{%-if target_coll-%}<div class="w-full  {{'hide' if new}}">
     <fieldset  class="w-full tab"><legend class="tab-control">{{_('Aggregated projects properties')}}</legend><div class="tab-content flex flex-wrap">
          <a id="refresh_aggregated" data-href="{{url_for('gui_collection_aggregated',project_ids=target_coll.project_ids|join(','))}}" data-request="href" class="btn-small text-base text-mainblue-700 hover:text-secondblue-400 ">{{_('Display aggregated projects properties')}} <i data-for="help_collection_aggregated_properties" data-request="help"></i></a>
     </div></fieldset>

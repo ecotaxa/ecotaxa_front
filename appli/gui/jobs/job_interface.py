@@ -8,7 +8,9 @@ from to_back.ecotaxa_cli_py.api import UsersApi
 from to_back.ecotaxa_cli_py.models import JobModel
 
 
-def export_format_options(_type=None, target="project"):
+def export_format_options(_type=None, target: Optional[str] = "project"):
+    if target is None:
+        target = "project"
     out_to_ftp = {
         "out_to_ftp": {
             "label": _(
@@ -50,15 +52,13 @@ def export_format_options(_type=None, target="project"):
                     ],
                     "format": "radio",
                 },
-                # "taxo_mapping": {
-                #    "label": _(
-                #        "Mapping from present taxon (key) to output replacement one (value)"
-                #    ),
-                #    "comment": _(
-                #        "Use a null replacement to _discard_ the present taxon"
-                #    ),
-                #    "format": "textarea",
-                # },
+                "taxo_mapping": {
+                    "id": "general_taxo_mapping",
+                    "label": _("Optional taxonomy mapping"),
+                    "format": "taxoline",
+                    "help": "help_export_general_taxo_mapping",
+                    "recast_operation": target + "_export",
+                },
                 "split_by": {
                     "label": _("Separate (in ZIP sub-directories) output by"),
                     "options": [
@@ -153,11 +153,10 @@ def export_format_options(_type=None, target="project"):
             },
             "taxo_mapping": {
                 "id": "summary_taxo_mapping",
-                "label": _("Mapping from present taxon to output replacement one "),
-                "comment": _(" Type '_discard_' to discard taxon"),
+                "label": _("Optional taxonomy mapping"),
                 "format": "taxoline",
                 "help": "help_export_summary_taxo_mapping",
-                "addoption": "_discard_,0",
+                "recast_operation": target + "_export",
             },
             "formulae": {
                 "label": _("Formulae"),
@@ -213,12 +212,11 @@ def export_format_options(_type=None, target="project"):
                         "help": "help_export_darwincore_quantity",
                     },
                     "taxo_mapping": {
-                        "id": "darwincore_taxo_mapping",
-                        "label": _("Computations pre mapping"),
-                        "comment": _(" Type '_discard_' to discard taxon"),
+                        "id": "dwca_taxo_mapping",
+                        "label": _("Taxonomy mapping"),
                         "format": "taxoline",
-                        "help": "help_export_darwincore_taxo_mapping",
-                        "addoption": "_discard_,0",
+                        "help": "help_export_dwca_taxo_mapping",
+                        "recast_operation": "dwca_export_emof",
                     },
                     "formulae": {
                         "label": _("Formulae"),

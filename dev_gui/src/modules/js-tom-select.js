@@ -37,7 +37,7 @@ function _get_label(el, labelfield, item = false) {
   }
   return label.join(` `);
 }
-// settings for autocomplete select component - users , instruments , taxons
+
 function createJsTomSelect() {
   const funcselector='.js-autocomplete';
   function applyTo(item, settings = {}, siblings = null) {
@@ -252,8 +252,7 @@ function createJsTomSelect() {
             },
           }
         }
-        if (item.dataset.hasOwnProperty("worms"))
-        option.settings = { ...option.settings,
+        if (item.dataset.hasOwnProperty("worms") || item.dataset.hasOwnProperty("taxonomy"))  option.settings = { ...option.settings,
           ...{labelField: 'display_name',
             searchField: 'display_name'}} //,lineage:"lineage",id_lineage:"id_lineage"
         break;
@@ -296,7 +295,7 @@ function createJsTomSelect() {
             //
             if (query) url += '?q=' + encodeURIComponent(query);
             if (type==models.taxo) {
-                if (item.dataset.hasOwnProperty('worms')) url+='&worms=true';
+                if (item.dataset.hasOwnProperty('worms') ) url+='&worms=true';
                 else  if (!item.dataset.hasOwnProperty('nodeprecated')) url+='&withdeprecated=true';
             }
             break;
@@ -421,12 +420,13 @@ function createJsTomSelect() {
           })
           if(item.dataset.hasOwnProperty("discard")) {
             const discard=item.dataset.discard;
+            const discard_target=(item.dataset.hasOwnProperty("discard_target"))?item.dataset.discard_target:null;
             ts.on('change',  function() {
                 const line=ts.wrapper.closest(domselectors.component.tomselect.line);
                 if (line!==null)  {
                     let notused =0;
                     const sellines = line.querySelectorAll('[data-discard]');
-                    sellines.forEach(l => { if (l.value==discard) notused+=1});
+                    sellines.forEach(l => { if (l.value==discard) {notused+=1; if (discard_target!==null) {document.getElementById(discard_target).tomselect.addItem("");}}});
                     if (notused==sellines.length) line.classList.add(css.notused);
                     else line.classList.remove(css.notused);
                 }});
@@ -453,7 +453,8 @@ function createJsTomSelect() {
             ts.on("focus", () => { nodelineage.classList.remove('hide');});
             ['type','blur'].forEach((evt) =>  {ts.on(evt, () => { nodelineage.classList.add(css.hide);})} );
             }
-          //
+
+
           //  ts.on('clear', () =>{ console.log('clear', ts.items);} )
           break;
         case models.project:

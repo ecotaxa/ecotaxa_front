@@ -20,6 +20,7 @@ class ExportGeneralJob(ExportJob):
 
     UI_NAME: ClassVar = "GeneralExport"
     EXPORT_TYPE: ClassVar = "general"
+    RECAST_OPERATION: ClassVar = "project_export"
 
     @classmethod
     def job_req(cls):
@@ -29,8 +30,8 @@ class ExportGeneralJob(ExportJob):
         with_internal_ids = gvp("with_internal_ids") == "1"
         with_types_row = gvp("with_types_row") == "1"
         only_annotations = "0"
-        # taxo_mapping = gvp("taxo_mapping")
         out_to_ftp = gvp("out_to_ftp") == "1"
+
         req = GeneralExportReq(
             collection_id=collid,
             project_id=projid,
@@ -39,7 +40,6 @@ class ExportGeneralJob(ExportJob):
             with_internal_ids=with_internal_ids,
             only_annotations=only_annotations,
             with_types_row=with_types_row,
-            # taxo_mapping=taxo_mapping,
             out_to_ftp=out_to_ftp,
         )
         return req
