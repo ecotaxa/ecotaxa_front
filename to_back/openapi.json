@@ -6065,7 +6065,11 @@
             "content":{
               "application/json":{
                 "schema":{
-                  "title":"Response Get Taxonomy Worms Taxo Worms Get"
+                  "title":"Response Get Taxonomy Worms Taxo Worms Get",
+                  "type":"object",
+                  "additionalProperties":{
+                    "type":"integer"
+                  }
                 }
               }
             }
@@ -11421,6 +11425,7 @@
         "title":"TaxonomyRecastReq",
         "required":[
           "target_id",
+          "operation",
           "recast"
         ],
         "type":"object",

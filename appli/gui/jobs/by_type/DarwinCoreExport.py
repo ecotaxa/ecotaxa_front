@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from typing import ClassVar, Dict, List, Union, Optional
+from typing import ClassVar, Dict, List, Union
 from flask import request
 from appli import gvp, gvpm
 from appli.gui.jobs.by_type.Export import ExportJob
@@ -22,7 +22,6 @@ class ExportDarwinCoreJob(ExportJob):
 
     @classmethod
     def job_req(cls):
-        import json
 
         projid, collection_id = cls.get_target_id()
         dry_run = gvp("dry_run") == "1"
