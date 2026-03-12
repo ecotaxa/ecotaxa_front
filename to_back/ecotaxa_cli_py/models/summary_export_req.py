@@ -37,7 +37,6 @@ class SummaryExportReq(object):
         'project_id': 'AnyOfintegerstring',
         'quantity': 'SummaryExportQuantitiesOptionsEnum',
         'summarise_by': 'SummaryExportSumOptionsEnum',
-        'taxo_rename': 'dict(str, int)',
         'formulae': 'dict(str, str)',
         'out_to_ftp': 'bool'
     }
@@ -47,12 +46,11 @@ class SummaryExportReq(object):
         'project_id': 'project_id',
         'quantity': 'quantity',
         'summarise_by': 'summarise_by',
-        'taxo_rename': 'taxo_rename',
         'formulae': 'formulae',
         'out_to_ftp': 'out_to_ftp'
     }
 
-    def __init__(self, collection_id=None, project_id=None, quantity=None, summarise_by=None, taxo_rename=None, formulae=None, out_to_ftp=False, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, collection_id=None, project_id=None, quantity=None, summarise_by=None, formulae=None, out_to_ftp=False, local_vars_configuration=None):  # noqa: E501
         """SummaryExportReq - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -62,7 +60,6 @@ class SummaryExportReq(object):
         self._project_id = None
         self._quantity = None
         self._summarise_by = None
-        self._taxo_rename = None
         self._formulae = None
         self._out_to_ftp = None
         self.discriminator = None
@@ -74,8 +71,6 @@ class SummaryExportReq(object):
             self.quantity = quantity
         if summarise_by is not None:
             self.summarise_by = summarise_by
-        if taxo_rename is not None:
-            self.taxo_rename = taxo_rename
         if formulae is not None:
             self.formulae = formulae
         if out_to_ftp is not None:
@@ -174,29 +169,6 @@ class SummaryExportReq(object):
         """
 
         self._summarise_by = summarise_by
-
-    @property
-    def taxo_rename(self):
-        """Gets the taxo_rename of this SummaryExportReq.  # noqa: E501
-
-        For 'ABO', 'CNC' and 'BIV' types types, renaming from present taxon (key) to output replacement one (value). Use a null replacement to _discard_ the present taxon.  # noqa: E501
-
-        :return: The taxo_rename of this SummaryExportReq.  # noqa: E501
-        :rtype: dict(str, int)
-        """
-        return self._taxo_rename
-
-    @taxo_rename.setter
-    def taxo_rename(self, taxo_rename):
-        """Sets the taxo_rename of this SummaryExportReq.
-
-        For 'ABO', 'CNC' and 'BIV' types types, renaming from present taxon (key) to output replacement one (value). Use a null replacement to _discard_ the present taxon.  # noqa: E501
-
-        :param taxo_rename: The taxo_rename of this SummaryExportReq.  # noqa: E501
-        :type: dict(str, int)
-        """
-
-        self._taxo_rename = taxo_rename
 
     @property
     def formulae(self):

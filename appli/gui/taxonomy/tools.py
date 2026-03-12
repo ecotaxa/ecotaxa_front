@@ -124,7 +124,7 @@ def read_taxo_recast(target_id: int, operation: str, is_collection: bool):
         taxo_doc = {}
         # get automatic worms taxo
         with ApiClient(TaxonomyTreeApi, request) as api:
-            ids = api.get_taxonomy_worms(taxa_ids=",".join(taxaids))
+            ids = api.get_taxonomy_worms(taxaids=",".join(taxaids))
         autoids = {str(k): str(v) for k, v in ids.items()}
         # get modified automatic worms taxo
         res = get_taxo_recast(
@@ -208,6 +208,7 @@ def update_taxo_recast(
 
 def get_taxostats(project_ids: str):
     with ApiClient(ProjectsApi, request) as api:
+
         taxa = api.project_set_get_stats(ids=project_ids)
     used_taxa = []
     for res in taxa:

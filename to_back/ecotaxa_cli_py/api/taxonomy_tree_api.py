@@ -553,7 +553,7 @@ class TaxonomyTreeApi(object):
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
-        :param str taxa_ids: taxon id separated by ,
+        :param str taxaids: taxon id separated by ,
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
@@ -561,7 +561,7 @@ class TaxonomyTreeApi(object):
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :return: object
+        :return: dict(str, int)
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -578,7 +578,7 @@ class TaxonomyTreeApi(object):
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
-        :param str taxa_ids: taxon id separated by ,
+        :param str taxaids: taxon id separated by ,
         :param _return_http_data_only: response data without head status code
                                        and headers
         :param _preload_content: if False, the urllib3.HTTPResponse object will
@@ -588,7 +588,7 @@ class TaxonomyTreeApi(object):
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
                                  (connection, read) timeouts.
-        :return: tuple(object, status_code(int), headers(HTTPHeaderDict))
+        :return: tuple(dict(str, int), status_code(int), headers(HTTPHeaderDict))
                  If the method is called asynchronously,
                  returns the request thread.
         """
@@ -596,7 +596,7 @@ class TaxonomyTreeApi(object):
         local_var_params = locals()
 
         all_params = [
-            'taxa_ids'
+            'taxaids'
         ]
         all_params.extend(
             [
@@ -621,8 +621,8 @@ class TaxonomyTreeApi(object):
         path_params = {}
 
         query_params = []
-        if 'taxa_ids' in local_var_params and local_var_params['taxa_ids'] is not None:  # noqa: E501
-            query_params.append(('taxa_ids', local_var_params['taxa_ids']))  # noqa: E501
+        if 'taxaids' in local_var_params and local_var_params['taxaids'] is not None:  # noqa: E501
+            query_params.append(('taxaids', local_var_params['taxaids']))  # noqa: E501
 
         header_params = {}
 
@@ -645,7 +645,7 @@ class TaxonomyTreeApi(object):
             body=body_params,
             post_params=form_params,
             files=local_var_files,
-            response_type='object',  # noqa: E501
+            response_type='dict(str, int)',  # noqa: E501
             auth_settings=auth_settings,
             async_req=local_var_params.get('async_req'),
             _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501

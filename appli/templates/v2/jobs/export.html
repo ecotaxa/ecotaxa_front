@@ -26,7 +26,8 @@
 {%-else-%}{{datas[name][0] if name in datas}}{%-endif-%}</textarea>
   {%- elif option.format=='taxoline' -%}
  {%- set target_id=collection_id if collection_id|string!='0' else projid -%}
-<div data-notshared="{{shared}}"><a id="refresh_taxo_recast-{{option.recast_operation}}" data-href="{{url_for('gui_get_taxo_recast',target_id=target_id,operation=option.recast_operation,is_collection=(target_type=='collection'))}}" data-request="href" class="btn-small text-base text-mainblue-700 hover:text-secondblue-400 ">{{option.label}} <i data-for="{{option.help}}" data-request="help"></i></a><div class="w-full"></div></div>
+{%- set is_collection=1 if target_type=='collection' else 0 -%}
+<div data-notshared="{{shared}}"><a id="refresh_taxo_recast-{{option.recast_operation}}" data-href="{{url_for('gui_get_taxo_recast',target_id=target_id,operation=option.recast_operation,is_collection=is_collection)}}" data-request="href" class="btn-small text-base text-mainblue-700 hover:text-secondblue-400 ">{{option.label}} <i data-for="{{option.help}}" data-request="help"></i></a><div class="w-full"></div></div>
  {%-endif-%}{%-endif-%}
 </div>{%-endif-%}{%-endfor%}
 {%-endmacro-%}

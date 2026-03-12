@@ -59,8 +59,7 @@ class TaxonomyRecastReq(object):
         self.discriminator = None
 
         self.target_id = target_id
-        if operation is not None:
-            self.operation = operation
+        self.operation = operation
         if is_collection is not None:
             self.is_collection = is_collection
         self.recast = recast
@@ -110,6 +109,8 @@ class TaxonomyRecastReq(object):
         :param operation: The operation of this TaxonomyRecastReq.  # noqa: E501
         :type: RecastOperation
         """
+        if self.local_vars_configuration.client_side_validation and operation is None:  # noqa: E501
+            raise ValueError("Invalid value for `operation`, must not be `None`")  # noqa: E501
 
         self._operation = operation
 

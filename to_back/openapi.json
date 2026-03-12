@@ -6055,7 +6055,7 @@
               "default":""
             },
             "example":"all",
-            "name":"taxa_ids",
+            "name":"taxaids",
             "in":"query"
           }
         ],
