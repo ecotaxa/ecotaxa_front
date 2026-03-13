@@ -69,11 +69,11 @@
                         <label for="citation">{{ _('Citation')}}<i data-for="help_collection_citation" data-request="help"></i></label>
                         <textarea id="citation" name="citation" class="form-textarea" placeholder="Doe, John (2010) Records of the kraken communities in the strait of Antlantis" rows="4">{{ target_coll.citation|default('',true) }}</textarea>
                       </div><div class="form-box">
-                        <label for="coll_abstract">{{_('Abstract')}} <i data-for="help_collection_abstract" data-request="help"></i></label>
+                        <label for="coll_abstract">{{_('Description')}} <i data-for="help_collection_abstract" data-request="help"></i></label>
                         <textarea id="coll_abstract" name="abstract" class="form-textarea" placeholder="abstract" rows="5" maxlength="1000">{{ target_coll.abstract|default('',true) }}</textarea>
                       </div>
                       <div class="form-box">
-                        <label for="coll_description">{{_('Description')}} <i data-for="help_collection_description" data-request="help"></i></label>
+                        <label for="coll_description">{{_('Additional Information')}} <i data-for="help_collection_description" data-request="help"></i></label>
                         <textarea id="coll_description" name="description" class="form-textarea" placeholder="description" rows="8">{{ target_coll.description|default('',true) }}</textarea>
                       </div><div class="form-box">
                         <div class="label">{{ _('License') }}<i data-for="help_collection_license" data-request="help"></i></div>

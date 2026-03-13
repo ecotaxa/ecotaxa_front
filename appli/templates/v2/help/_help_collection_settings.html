@@ -11,23 +11,24 @@
   For EcoTaxa to be most efficient, projects should contain from 10,000 to a million objects, which usually means many samples.')}}</p><p>
   {{_('A project must therefore contain images taken with the same instrument,  with the same list of metadata fields.<br> It typically corresponds to  deployments of the same sampling or imaging device on a scientific  cruise or along a time series. Within the project, objects are further  grouped in samples, identified in the imported data; samples typically  correspond to a station or a time point in a time series.')}}
   </p></div></details>
+   <details id="help_collection_title" ><summary>{{_('Title')}}</summary><div>
+{{_(' The name of your dataset. The dataset does not yet have a name please consider folowing guideline: 'Ideally the title should give an idea of the content of the dataset; the time period and the region of sampling')}}
+   </div>div></details>
      <details id="help_collection_short-title" ><summary>{{_('Short title')}}</summary><div>{{ _('The short title will be used as the universal and permanent url of the collection. As many other fields, it cannot be changed once the collection is published and a Digital Object Identifier is added.') }} </div>
           </details> <details id="help_collection_external_id"><summary>{{_('Digital Object Identifier')}}</summary><div>{{_('Once you publish your collection, you can get a Digital Object Identifier (GBIF provides them for example). Once you have one and fill it here, some aspects of the collection will be locked to ensure that it can always be found and continues to match the DOI.')}}</div>
   </details>
-
-  <details id="help_collection_provider_user" ><summary>{{_('Metadata provider')}}</summary><div>{{ _('Person who is responsible for the content of this metadata record.') }} </div>
+     <details id="help_collection_provider_user" ><summary>{{_('Metadata provider')}}</summary><div>{{ _('Person who is responsible for the content of this metadata record.') }} </div>
   </details>
-  <details id="help_collection_contact_user" ><summary>{{_('Contact user')}}</summary><div>{{ _(' Name of the person that should be contacted by a user of the data to obtain more information about the dataset.') }} </div>
+  <details id="help_collection_contact_user" ><summary>{{_('Contact user')}}</summary><div>{{ _(' Name of the person that should be contacted by a USER of the data to obtain more information about the dataset.') }} </div>
   </details>
 
   <details id="help_collection_citation" ><summary>{{_('Citation')}}</summary><div>{{_('Any technical, practical details that need to be shared with other users able to access this target_proj.')}}</div>
   </details>
-  <details id="help_collection_abstract" ><summary>{{_('Abstract')}}</summary><div>{{ _('SCN Network used for prediction, if you change it, existing features computed with this network will be
-    erased.
-    <br>New features will be recomputed during the next automatic classification.') | safe }} </div>
+  <details id="help_collection_abstract" ><summary>{{_('Description')}}</summary><div>{{ _('Provide a short (max 1000 characters) abstract aout the content of the dataset.')}}
+     </div>
   </details>
 
-  <details id="help_collection_description" ><summary>{{_('Description')}}</summary><div>{{_('Any technical, practical details that need to be shared with other users able to access this target_proj.')}}</div>
+  <details id="help_collection_description" ><summary>{{_('Additional information')}}</summary><div>{{_('A larger description about the context of the dataset. May include project information, sampling protocols, ....')}}</div>
   </details>
    <details id="help_collection_license" ><summary>{{_('License')}}</summary><div>{%if args and "licenses" in args%}<ul>{%-for key,license in args.licenses.items()-%}<li><strong>{{key}}</strong><p>{{ license | safe }}</p></li>{%-endfor-%}</ul>{%-endif-%}</div>
   </details>
