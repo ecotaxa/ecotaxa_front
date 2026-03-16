@@ -122,6 +122,7 @@ class ExportJob(Job):
                 projid=projid,
                 collection_id=collid,
                 target_type=cls.TARGET_TYPE,
+                export_type=cls.EXPORT_TYPE,
             )
         else:
             return ""

@@ -18,7 +18,7 @@
         <div class=" w-full md:flex  md:flex-wrap tab-content">
         <div class="w-full md:w-1/2 md:pr-6">
           <div class="form-box">
-            <label for="title">{{_('Title')}}</label>
+            <label for="title">{{_('Title')}}<i data-for="help_collection_title" data-request="help"></i></label>
             <input type="text" id="title" name="title" class="form-input" value="{{ target_coll.title }}" required {{'data-action=normalize data-target=short_title' if not published }} data-required="{{_('a title is required')}}"  placeholder="Records of the kraken communities in the strait of Antlantis"></div>
         <div class="form-box">
           <label for="short_title">{{_('Short title')}}<i data-for="help_collection_short-title" data-request="help"></i></label>

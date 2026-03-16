@@ -12,8 +12,8 @@
   {{_('A project must therefore contain images taken with the same instrument,  with the same list of metadata fields.<br> It typically corresponds to  deployments of the same sampling or imaging device on a scientific  cruise or along a time series. Within the project, objects are further  grouped in samples, identified in the imported data; samples typically  correspond to a station or a time point in a time series.')}}
   </p></div></details>
    <details id="help_collection_title" ><summary>{{_('Title')}}</summary><div>
-{{_(' The name of your dataset. The dataset does not yet have a name please consider folowing guideline: 'Ideally the title should give an idea of the content of the dataset; the time period and the region of sampling')}}
-   </div>div></details>
+{{_('The name of your dataset. The dataset does not yet have a name please consider following guideline: Ideally the title should give an idea of the content of the dataset; the time period and the region of sampling')}}
+   </div></details>
      <details id="help_collection_short-title" ><summary>{{_('Short title')}}</summary><div>{{ _('The short title will be used as the universal and permanent url of the collection. As many other fields, it cannot be changed once the collection is published and a Digital Object Identifier is added.') }} </div>
           </details> <details id="help_collection_external_id"><summary>{{_('Digital Object Identifier')}}</summary><div>{{_('Once you publish your collection, you can get a Digital Object Identifier (GBIF provides them for example). Once you have one and fill it here, some aspects of the collection will be locked to ensure that it can always be found and continues to match the DOI.')}}</div>
   </details>
@@ -33,10 +33,10 @@
    <details id="help_collection_license" ><summary>{{_('License')}}</summary><div>{%if args and "licenses" in args%}<ul>{%-for key,license in args.licenses.items()-%}<li><strong>{{key}}</strong><p>{{ license | safe }}</p></li>{%-endfor-%}</ul>{%-endif-%}</div>
   </details>
 <details  id="help_collection_creator"><summary>{{_('Creator')}}</summary>
-  <div>{{_('Name of persons or organisations who are responsible for the creation / maintenance of the dataset. These persons will be mentioned in the citation.')}}</div>
+  <div>{{_('Name of persons or organizations who are responsible for the creation / maintenance of the dataset. These persons will be mentioned in the citation.')}}</div>
   </details>
   <details  id="help_collection_associate"><summary>{{_('Associate')}}</summary>
-  <div>{{_('Name of persons or organisations who are responsible for the creation / maintenance of the dataset but to an extent that does not justify their inclusions as authors. These persons will not be mentioned in the citation.')}}</div>
+  <div>{{_('Name of persons or organizations who are responsible for the creation / maintenance of the dataset but to an extent that does not justify their inclusions as authors. These persons will not be mentioned in the citation.')}}</div>
   </details><details id="help_collection_projects"><summary>{{_('Projects')}}</summary><div>{{_('List of projects id. The collection projects share somme common properties:')}}
   <ul><li>{{_('The creator or editor has to be a manager of all the projects of the collection.')}}</li>
   <li>{{_('The projects have the same instrument.')}}</li><li>{{_('The projects share the same access property.')}}</li></ul></div>
