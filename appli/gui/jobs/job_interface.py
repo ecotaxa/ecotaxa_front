@@ -54,7 +54,7 @@ def export_format_options(_type=None, target: Optional[str] = "project"):
                 },
                 "taxo_mapping": {
                     "id": "general_taxo_mapping",
-                    "label": _("Optional taxonomy mapping"),
+                    "label": _("Taxonomy renames"),
                     "format": "taxoline",
                     "help": "help_export_general_taxo_mapping",
                     "recast_operation": target + "_export",
@@ -154,7 +154,7 @@ def export_format_options(_type=None, target: Optional[str] = "project"):
             },
             "taxo_mapping": {
                 "id": "summary_taxo_mapping",
-                "label": _("Optional taxonomy mapping"),
+                "label": _("Taxonomy renames"),
                 "format": "taxoline",
                 "help": "help_export_summary_taxo_mapping",
                 "recast_operation": target + "_export",
