@@ -111,6 +111,12 @@ function createJsTabs() {
               additionalInformation: 'Updated by jsTabs'
             }, document.title, window.location.origin + tabcontent.dataset.path + window.location.search);
           }
+          const ontab=tab.querySelector('[data-ontab]');
+          if(ontab!==null) {
+            const evt=new Event(ontab.dataset.ontab);
+            if(ontab.dataset.hasOwnProperty('request')) {ontab.addEventListener('request',(e) => {ontab.dispatchEvent(evt);delete ontab.dataset.ontab;});}
+            else {ontab.dispatchEvent(evt);delete ontab.dataset.ontab;}
+          }
         }
       }
     });

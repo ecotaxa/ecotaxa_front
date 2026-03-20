@@ -7597,13 +7597,13 @@
           "abstract":{
             "title":"Abstract",
             "type":"string",
-            "description":"The collection abstract.",
+            "description":"The collection abstract. It appears in the IPT under the description label",
             "example":""
           },
           "description":{
             "title":"Description",
             "type":"string",
-            "description":"The collection description.",
+            "description":"The collection description. It appears in the EMLMeta fields as the additional_info field and in the IPT under the additional info label.",
             "example":""
           },
           "project_ids":{
@@ -11123,7 +11123,7 @@
             "additionalProperties":{
               "type":"integer"
             },
-            "description":"Mapping from seen taxon (key) to output replacement one (value). Use a null replacement to _discard_ the present taxon. Note: keys are strings.",
+            "description":"Mapping from seen taxon (key) to output replacement one (value). Use a null replacement to _discard_ the present taxon. Note: keys are strings. Every",
             "example":{
               "456":956,
               "2456":213

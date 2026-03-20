@@ -218,6 +218,7 @@ def export_format_options(_type=None, target: Optional[str] = "project"):
                         "format": "taxoline",
                         "help": "help_export_dwca_taxo_mapping",
                         "recast_operation": "dwca_export_emof",
+                        "show_recast": True,
                     },
                     "formulae": {
                         "label": _("Formulae"),

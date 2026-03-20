@@ -24,6 +24,7 @@ function createActivRequest() {
         if (item.tagName.toLowerCase() === "a") e.preventDefault();
         await makeRequest(item);
       });
+      if(item.dataset.hasOwnProperty("ontab")) item.dispatchEvent(new Event('request'));
     });
 
   }
