@@ -72,9 +72,6 @@ function createJsTabs() {
                 sharedcontent.classList.remove(css.hide);
                 shared.append(sharedcontent);
                 replaceLabels(shared, sharedcontent);
-                if (replace) {
-
-                }
               } else {
                 sharedcontent.classList.add(css.hide);
                 if (sharedcontent.parent) {

@@ -11453,7 +11453,7 @@
             "default":false
           },
           "recast":{
-            "title":"Recast mapping and react doc",
+            "title":"Recast mapping and doc",
             "allOf":[
               {
                 "$ref":"#/components/schemas/TaxoRecastRsp"
