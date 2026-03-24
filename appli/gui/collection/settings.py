@@ -3,8 +3,6 @@ from flask import render_template, flash, request, redirect, url_for
 from flask_login import current_user
 from appli import gvp, gvpm
 from appli.gui.staticlistes import py_messages
-from appli.gui.taxonomy.tools import posted_taxo_recast, update_taxo_recast
-from appli.back_config import get_back_constants
 
 ######################################################################################################################
 from appli.utils import ApiClient
@@ -260,9 +258,7 @@ def collection_edit(collection_id: int, new: bool = False):
     if collection is None:
         flash(py_messages["selectothercollection"], "info")
         return redirect(url_for("gui_collection_noright", collection_id=collection_id))
-    # Reconstitute members list with privs
     # data structure used in both display & submit
-    recast_operation = get_back_constants("RECAST_OPERATION")
     if gvp("save") == "Y":
         # Load posted variables
         varlist = dir(collection)
@@ -319,20 +315,7 @@ def collection_edit(collection_id: int, new: bool = False):
                     message + " " + collection.title,
                     "success",
                 )
-                # taxo_recast
-                taxonomy_recast: Dict[str, TaxoRecastRsp] = posted_taxo_recast()
-                update_taxo_recast(
-                    target_id=collection_id,
-                    taxonomy_recast=taxonomy_recast["worms"],
-                    operation=recast_operation["overwrite_auto"],
-                    is_collection=True,
-                )
-                update_taxo_recast(
-                    target_id=collection_id,
-                    taxonomy_recast=taxonomy_recast["final"],
-                    operation=recast_operation["settings"],
-                    is_collection=True,
-                )
+
             return redirect(request.referrer)
         except ApiException as ae:
             new_ui_error(ae)
@@ -372,7 +355,6 @@ def collection_edit(collection_id: int, new: bool = False):
         associates=associates,
         agg=aggregated,
         doi_url=doi_url,
-        recast_operation=recast_operation["settings"],
     )
 
 

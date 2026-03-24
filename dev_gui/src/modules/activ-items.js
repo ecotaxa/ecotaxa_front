@@ -184,7 +184,7 @@ function createActivItems() {
           });
           item.classList.add(css.disabled);
           break;
-        case 'discard':
+        case 'discardone':
           const inputs = (item.dataset.target) ? item.dataset.target.split(',') : null;
           if (inputs === null) return;
           const triggers = (item.dataset.trigger) ? item.parentElement.querySelectorAll('[name="' + item.dataset.trigger + '"]') : null;
@@ -216,6 +216,40 @@ function createActivItems() {
             });
           }));
           break;
+        case 'reset_ts':
+            // settings for autocomplete taxons reset to automatic worms values
+            const resetaction = document.querySelector('[data-reset]');
+            if (resetaction) {
+                const target=(resetaction.dataset.hasOwnProperty('resettarget'))?resetaction.dataset.resettarget:'data-worms';
+                resetaction.addEventListener('click', (e) => {
+                e.preventDefault();
+                const btntxt=e.target.textContent;
+                e.target.innerHTML = (e.target.dataset.wait)?e.target.dataset.wait:'Please wait ...';
+                    document.querySelectorAll(domselectors.component.tomselect.line).forEach(line=> {
+                    const auto = line.querySelector('[data-'+resetaction.dataset.reset+']') ;
+                    if (auto!==null && auto.dataset.auto!=='') {
+                    const values = auto.dataset.auto.split('|'); // id, display_name, lineage, id_lineage
+                    const obj= {id:values[0],display_name:values[1],lineage:values[2],id_lineage:values[3]};
+                    line.querySelectorAll('['+target+']').forEach(el=> {
+                    if (el.tomselect.items.length>0  && values[0]!=el.tomselect.items[0]) {
+                       let opt =el.tomselect.getOption(values[0]);
+                       if (!opt) el.tomselect.addOption(obj);
+                       el.tomselect.addItem(values[0]);}
+                    })
+                    }
+                });
+                setTimeout( () => {e.target.innerHTML=btntxt;},1000)
+                });
+                }
+          break;
+        case "no_mapping":
+        if (item.dataset.hasOwnProperty('backref')) {
+            const hrefbox = document.getElementById(item.dataset.backref);
+            if (hrefbox!==null && hrefbox.dataset.hasOwnProperty('href')) {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                hrefbox.nextElementSibling.remove();hrefbox.classList.remove(css.hide);});}}
+        break;
         case 'confirm':
           item.addEventListener((item.dataset.event) ? item.dataset.event : 'click', async (e) => {
             e.preventDefault();

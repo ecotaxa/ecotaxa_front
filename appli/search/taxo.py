@@ -136,7 +136,7 @@ def taxoresolve():
 @app.route("/gui/get_taxo_recast", methods=["GET"])
 @login_required
 def gui_get_taxo_recast():
-    is_collection = gvg("is_collection")
+    is_collection = bool(gvg("is_collection", 0))
     target_id = gvg("target_id")
     operation = gvg("operation")
     from appli.gui.taxonomy.tools import read_taxo_recast
