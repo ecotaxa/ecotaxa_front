@@ -71,15 +71,12 @@ def PrintInCharte(txt: str, title: Optional[str] = None):
 
 
 def ErrorFormat(txt: str) -> str:
-    return (
-        """
+    return """
 <div class='cell panel ' style='background-color: #f2dede; margin: 15px;'><div class='body' >
 				<table style='background-color: #f2dede'><tr><td width='50px' style='color: red;font-size: larger'> <span class='glyphicon glyphicon-exclamation-sign'></span></td>
 				<td style='color: red;font-size: larger;vertical-align: middle;'><B>%s</B></td>
 				</tr></table></div></div>
-    """
-        % txt
-    )
+    """ % txt
 
 
 def AddJobsSummaryForTemplate() -> None:

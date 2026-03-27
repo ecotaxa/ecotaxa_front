@@ -244,7 +244,9 @@ function createActivItems() {
           break;
         case "no_mapping":
         if (item.dataset.hasOwnProperty('backref')) {
-            const hrefbox = document.getElementById(item.dataset.backref);
+            const tab=item.closest(domselectors.component.tabs.tabcontent)
+            const backref=(tab!==null)? item.dataset.backref+'-'+tab.id:item.dataset.backref;
+            const hrefbox = document.getElementById(backref);
             if (hrefbox!==null && hrefbox.dataset.hasOwnProperty('href')) {
             item.addEventListener('click', (e) => {
                 e.preventDefault();

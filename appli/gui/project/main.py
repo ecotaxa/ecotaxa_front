@@ -783,15 +783,6 @@ def gui_deprecation_management(projid):
         )
 
 
-@app.route("/gui/prj/get_taxo_recast/<int:project_id>", methods=["GET"])
-@login_required
-def gui_prj_get_taxo_recast(project_id: int):
-    from appli.gui.taxonomy.tools import read_taxo_recast
-
-    recast_operation = gvg("recast_operation")
-    return read_taxo_recast(operation=recast_operation, target_id=project_id)
-
-
 #######################Project set##########################################
 @app.route("/gui/projectset/projects", methods=["GET"])
 # TODO - fresh_login_required

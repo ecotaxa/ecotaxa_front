@@ -11,6 +11,7 @@ from to_back.ecotaxa_cli_py.models import (
     SummaryExportReq,
     ExportRsp,
 )
+from appli.gui.taxonomy.tools import posted_modified_recast
 
 
 class ExportSummaryJob(ExportJob):
@@ -24,14 +25,21 @@ class ExportSummaryJob(ExportJob):
 
     @classmethod
     def job_req(cls):
-        import json
 
         projid, collid = cls.get_target_id()
         quantity = gvp("quantity")
         summarise_by = gvp("summarise_by")
-        taxo_mapping = json.loads(gvp("taxo_mapping", "{}"))
         formulae = gvp("formulae")
         out_to_ftp = gvp("out_to_ftp") == "1"
+        modifiedrecast: bool = posted_modified_recast(False)
+        if modifiedrecast:
+            if collid > 0:
+                is_collection = True
+                target_id = collid
+            else:
+                is_collection = False
+                target_id = projid
+            cls.make_recast(target_id, is_collection)
         if formulae is None:
             formulae_dict = {}
         else:

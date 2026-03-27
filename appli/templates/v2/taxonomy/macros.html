@@ -1,0 +1,7 @@
+ {%-macro make_histo(taxo,doc=False)-%}
+   {%-set result={} -%}
+   {%-for k,v in taxo.items() -%}
+   {%-set result= result.update({k|string:v.id if doc==False else v})-%}
+   {%-endfor-%}
+   {{result|safe}}
+ {%-endmacro-%}
