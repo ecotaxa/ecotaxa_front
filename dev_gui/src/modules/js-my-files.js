@@ -157,6 +157,9 @@ export class JsMyFiles {
                 path: e.path,
               });
               break;
+            case this.eventnames.progress:
+              self.showControl(key, e);
+              break;
             case this.eventnames.follow:
             case this.eventnames.complete:
               if (!e || !e.hasOwnProperty("name") || e.name === "") {
@@ -680,8 +683,17 @@ export class JsMyFiles {
         if(btn.previousElementSibling && btn.previousElementSibling.tagName.toLowerCase()!=="svg")  btn.insertAdjacentHTML('beforebegin', html_spinner('text-stone-200 ml-1 mr-2 align-text-bottom inline-block'));
         return;
         break;
+      case this.eventnames.progress:
+        if (parseFloat(opts.percentage) >= 100) {
+          btn.textContent = ` Decompressing...`;
+        } else {
+          btn.textContent = ` Uploading ` + ((target !== 'zip') ? ' big file' : '') + ` ${opts.percentage}%`;
+        }
+        btn.disabled = true;
+        message = {};
+        break;
       case this.eventnames.pending:
-        btn.textContent = ` Uploading ` + ((target !== 'zip') ? ' big file' : '');
+        btn.textContent = ` Decompressing...`;
         btn.disabled = true;
         message = {};
         break;
