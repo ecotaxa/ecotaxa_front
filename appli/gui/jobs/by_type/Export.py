@@ -1,9 +1,15 @@
 # -*- coding: utf-8 -*-
-from typing import ClassVar
+from typing import ClassVar, Dict
 from flask import render_template, redirect, flash, url_for
 from appli.gui.jobs.Job import Job
-from to_back.ecotaxa_cli_py.models import JobModel, ExportRsp
+from to_back.ecotaxa_cli_py.models import JobModel, ExportRsp, TaxoRecastRsp
 from appli.gui.jobs.job_interface import export_format_options
+from appli.back_config import get_back_constants
+from appli.gui.taxonomy.tools import (
+    posted_dwca_taxo_recast,
+    posted_taxo_recast,
+    update_taxo_recast,
+)
 
 
 class ExportJob(Job):
@@ -98,6 +104,28 @@ class ExportJob(Job):
             export_req = {"filters": filters, "request": req}
             rsp: ExportRsp = cls.api_job_call(export_req)
             return redirect(url_for("gui_job_show", job_id=rsp.job_id))
+
+    @classmethod
+    def make_recast(cls, target_id: int, is_collection: bool):
+        recast_operation = get_back_constants("RECAST_OPERATION")
+        if cls.EXPORT_TYPE == "darwincore":
+            recasts: Dict[str, TaxoRecastRsp] = posted_dwca_taxo_recast(
+                recast_operation
+            )
+        else:
+            recast: TaxoRecastRsp = posted_taxo_recast()
+            if is_collection:
+                operation = recast_operation["collection_export"]
+            else:
+                operation = recast_operation["project_export"]
+            recasts = {operation: recast}
+        for operation, recast in recasts.items():
+            update_taxo_recast(
+                target_id=target_id,
+                taxonomy_recast=recast,
+                operation=operation,
+                is_collection=is_collection,
+            )
 
     # noinspection PyUnresolvedReferences
     @classmethod

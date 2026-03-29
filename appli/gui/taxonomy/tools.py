@@ -1,7 +1,7 @@
+import json
 from typing import List, Dict, Optional
 from flask import request, render_template
 from appli.back_config import get_back_constants
-
 from appli import gvp
 from appli.utils import ApiClient
 from appli.gui.commontools import new_ui_error
@@ -219,7 +219,9 @@ def get_taxostats(project_ids: str):
     return taxalist, taxaids
 
 
-def posted_dwca_taxo_recast() -> Dict[str, TaxoRecastRsp]:
+def posted_dwca_taxo_recast(
+    recast_operation: Dict[str, str],
+) -> Dict[str, TaxoRecastRsp]:
     taxanum = gvp("taxanum", "0")
     from_to_worms = {}
     from_to_final = {}
@@ -231,20 +233,23 @@ def posted_dwca_taxo_recast() -> Dict[str, TaxoRecastRsp]:
         toworms = gvp("item-worms-" + str(idx), "")
         tofinal = gvp("item-to-" + str(idx), "")
         todoc = gvp("item-doc-" + str(idx), "")
-        if toworms == "" or toworms == "0":
+        if toworms == "":
             toworms = "0"
-        if tofinal == "" or tofinal == "0":
+        if tofinal == "":
             tofinal = "0"
-        if tofinal != "0" or toworms != "0":
-            from_to_worms[frm] = int(toworms)
-            doc_worms[frm] = todoc
-            from_to_final[frm] = int(tofinal)
-            doc_final[frm] = todoc
+        from_to_worms[frm] = int(toworms)
+        doc_worms[frm] = todoc
+        from_to_final[frm] = int(tofinal)
+        doc_final[frm] = todoc
         idx += 1
     return dict(
         {
-            "occurrence": TaxoRecastRsp(from_to=from_to_worms, doc=doc_worms),
-            "emof": TaxoRecastRsp(from_to=from_to_final, doc=doc_final),
+            recast_operation["dwca_export_occurrence"]: TaxoRecastRsp(
+                from_to=from_to_worms, doc=doc_worms
+            ),
+            recast_operation["dwca_export_emof"]: TaxoRecastRsp(
+                from_to=from_to_final, doc=doc_final
+            ),
         }
     )
 
@@ -255,11 +260,47 @@ def posted_taxo_recast() -> TaxoRecastRsp:
     doc_final = {}
     idx = 1
     while idx <= int(taxanum):
-        frm = gvp("item-from-" + str(idx))
-        tofinal = gvp("simple-item-to-" + str(idx), "")
+        frm = gvp("simple-item-from-" + str(idx))
+        tofinal = gvp("simple-item-recast-" + str(idx), "")
         todoc = gvp("simple-item-doc-" + str(idx), "")
-        if tofinal != "" and tofinal != "0":
-            from_to_final[frm] = int(tofinal)
-            doc_final[frm] = todoc
+        if tofinal == "":
+            tofinal = "0"
+        from_to_final[frm] = int(tofinal)
+        doc_final[frm] = todoc
         idx += 1
     return TaxoRecastRsp(from_to=from_to_final, doc=doc_final)
+
+
+def posted_modified_recast(dwca: bool) -> bool:
+    modified = 0
+    if dwca:
+        taxanum = gvp("taxanum", "0")
+        histo_worms = gvp("histo-worms", "{}")
+        histo_recast = gvp("histo-recast", "{}")
+        histo_doc = gvp("histo-doc", {})
+        prefix = ""
+        histo = {"worms": histo_worms, "recast": histo_recast, "doc": histo_doc}
+    else:
+        removerecast = gvp("remove-recast", "")
+        taxanum = gvp("simple-taxanum", "0")
+        histo_recast = gvp("simple-histo-recast", "{}")
+        histo_doc = gvp("simple-histo-doc", "{}")
+        prefix = "simple-"
+        histo = {"recast": histo_recast, "doc": histo_doc}
+    if taxanum != "0" or removerecast == "remove":
+        return True
+    for k, v in histo.items():
+        idx = 1
+        data = json.loads(v)
+        while idx <= int(taxanum):
+            to = gvp(prefix + "item-" + k + "-" + str(idx))
+            frm = gvp(prefix + "item-from-" + str(idx))
+            print(" to=" + to + " from=", frm)
+            if frm in data:
+                keep = data[frm]
+                if str(to) != str(keep):
+                    modified += 1
+            else:
+                modified += 1
+            idx += 1
+    return modified > 0
