@@ -54,7 +54,7 @@ export function JsDirToZip(options = {}) {
   let trydelete=0;
   const defaultOptions = {
     uploadurl: '/gui/files/upload',
-    tusuploadurl: '/api/big_files/upload',
+    tusuploadurl: '/api/user_files/upload',
     largefile: MAXSIZE,
     accept: accept.split(',')
   }
@@ -636,7 +636,7 @@ async function listStorage(entry = null,name=null) {
     const upload = new tus.Upload(file, {
       endpoint: options.tusuploadurl,
       retryDelays: [0, 3000, 5000, 10000, 20000],
-      chunkSize: 64*1024*1024, // TODO: Some config
+      chunkSize: 128*1024*1024, // TODO: Some config
       storeFingerprintForResumableUploads: false,
       removeFingerprintOnSuccess: true,
       metadata: {
