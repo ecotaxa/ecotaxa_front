@@ -54,7 +54,7 @@ export function JsDirToZip(options = {}) {
   let trydelete=0;
   const defaultOptions = {
     uploadurl: '/gui/files/upload',
-    tusuploadurl: '/api/user_files/upload',
+    tusuploadurl: window.location.origin + '/api/user_files/upload',
     largefile: MAXSIZE,
     accept: accept.split(',')
   }
