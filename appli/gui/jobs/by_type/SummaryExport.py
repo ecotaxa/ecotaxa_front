@@ -11,6 +11,7 @@ from to_back.ecotaxa_cli_py.models import (
     SummaryExportReq,
     ExportRsp,
 )
+from appli.gui.taxonomy.tools import posted_modified_recast
 
 
 class ExportSummaryJob(ExportJob):
@@ -20,25 +21,37 @@ class ExportSummaryJob(ExportJob):
 
     UI_NAME: ClassVar = "SummaryExport"
     EXPORT_TYPE: ClassVar = "summary"
+    RECAST_OPERATION: ClassVar = "project_export"
 
     @classmethod
     def job_req(cls):
-        import json
 
         projid, collid = cls.get_target_id()
         quantity = gvp("quantity")
         summarise_by = gvp("summarise_by")
-        taxo_mapping = json.loads(gvp("taxo_mapping", "{}"))
         formulae = gvp("formulae")
         out_to_ftp = gvp("out_to_ftp") == "1"
-        formulae_list = [a_line.strip().split(":") for a_line in formulae.splitlines()]
-        formulae_dict = {var.strip(): val.strip() for var, val in formulae_list}
+        modifiedrecast: bool = posted_modified_recast(False)
+        if modifiedrecast:
+            if collid > 0:
+                is_collection = True
+                target_id = collid
+            else:
+                is_collection = False
+                target_id = projid
+            cls.make_recast(target_id, is_collection)
+        if formulae is None:
+            formulae_dict = {}
+        else:
+            formulae_list = [
+                a_line.strip().split(":") for a_line in formulae.splitlines()
+            ]
+            formulae_dict = {var.strip(): val.strip() for var, val in formulae_list}
         req = SummaryExportReq(
             collection_id=collid,
             project_id=projid,
             quantity=quantity,
             summarise_by=summarise_by,
-            taxo_mapping=taxo_mapping,
             formulae=formulae_dict,
             out_to_ftp=out_to_ftp,
         )

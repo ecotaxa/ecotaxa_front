@@ -18,6 +18,7 @@ import {
 } from '../../modules/module-event-emitter.js';
 import { detect } from 'detect-browser';
 import {AlertBox} from '../../modules/alert-box.js';
+import * as tus from 'tus-js-client';
 const already_compressed = new Set([
   'zip', 'gz', 'png', 'jpg', 'jpeg', 'pdf', 'doc', 'docx', 'ppt', 'pptx',
   'xls', 'xlsx', 'heic', 'heif', '7z', 'bz2', 'rar', 'gif', 'webp', 'webm',
@@ -40,6 +41,7 @@ export function JsDirToZip(options = {}) {
     bigfile: 'bigfile',
     terminate: 'terminate',
     pending: 'pending',
+    progress: 'progress',
     errorfile: 'errorfile',
     counter: 'counter',
     reject: 'reject',
@@ -52,6 +54,7 @@ export function JsDirToZip(options = {}) {
   let trydelete=0;
   const defaultOptions = {
     uploadurl: '/gui/files/upload',
+    tusuploadurl: window.location.origin + '/api/user_files/upload',
     largefile: MAXSIZE,
     accept: accept.split(',')
   }
@@ -622,6 +625,65 @@ async function listStorage(entry = null,name=null) {
     return file;
   }
   async function sendZipFile(file, path, callbackchunk = null, bigfile = false) {
+    if (properties.counter.error > 0) return endProcess();
+    const message = {
+      name: eventnames.pending,
+      bigfile: bigfile,
+      path: path
+    }
+    path = path + ((path.slice(-1) === dirseparator) ? `` : dirseparator) + file.name;
+    message.path = path;
+    const upload = new tus.Upload(file, {
+      endpoint: options.tusuploadurl,
+      retryDelays: [0, 3000, 5000, 10000, 20000],
+      chunkSize: 128*1024*1024, // TODO: Some config
+      storeFingerprintForResumableUploads: false,
+      removeFingerprintOnSuccess: true,
+      metadata: {
+        filename: file.name,
+        filetype: file.type,
+        path: path
+      },
+      onError: async (error) => {
+        properties.follow = null;
+        await endFetch(message);
+        properties.counter.error += 1;
+        onError(eventnames.errorfile, message);
+        if (bigfile || properties.hashandlers) endProcess();
+      },
+      onProgress: (bytesUploaded, bytesTotal) => {
+        const percentage = (bytesUploaded / bytesTotal * 100).toFixed();
+        ModuleEventEmitter.emit(eventnames.progress, {
+          name: eventnames.progress,
+          percentage: percentage,
+          path: path
+        }, _listener);
+      },
+      onSuccess: async () => {
+        if (callbackchunk) {
+          await callbackchunk();
+        } else {
+          if (!bigfile || !properties.hashandlers) await endFetch(message);
+          if (bigfile) {
+            message.name = eventnames.follow;
+            ModuleEventEmitter.emit(eventnames.follow, message, _listener);
+          }
+        }
+      }
+    });
+
+    // Check if there are any previous uploads to continue.
+    upload.findPreviousUploads().then(function (previousUploads) {
+      // Found previous uploads so we select the first one.
+      if (previousUploads.length) {
+        upload.resumeFromPreviousUpload(previousUploads[0]);
+      }
+      // Start the upload
+      upload.start();
+    });
+  }
+  
+  async function sendZipFile_old(file, path, callbackchunk = null, bigfile = false) {
   if(properties.counter.error>0) return endProcess();
     const message = {
       name: eventnames.pending,

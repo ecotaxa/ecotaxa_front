@@ -1,9 +1,15 @@
 # -*- coding: utf-8 -*-
-from typing import ClassVar
+from typing import ClassVar, Dict
 from flask import render_template, redirect, flash, url_for
 from appli.gui.jobs.Job import Job
-from to_back.ecotaxa_cli_py.models import JobModel, ExportRsp
+from to_back.ecotaxa_cli_py.models import JobModel, ExportRsp, TaxoRecastRsp
 from appli.gui.jobs.job_interface import export_format_options
+from appli.back_config import get_back_constants
+from appli.gui.taxonomy.tools import (
+    posted_dwca_taxo_recast,
+    posted_taxo_recast,
+    update_taxo_recast,
+)
 
 
 class ExportJob(Job):
@@ -15,6 +21,7 @@ class ExportJob(Job):
     STEP0_TEMPLATE: ClassVar = "/v2/jobs/export.html"
     FINAL_TEMPLATE: ClassVar = "/v2/jobs/_final_download.html"
     EXPORT_TYPE: ClassVar = None
+    RECAST_OPERATION: ClassVar = None
 
     @classmethod
     def initial_dialog(cls):
@@ -38,18 +45,6 @@ class ExportJob(Job):
         formdatas, formoptions, export_links = export_format_options(
             target=cls.TARGET_TYPE
         )
-        # if cls.EXPORT_TYPE == "summary" or cls.EXPORT_TYPE == None:
-        from appli.gui.taxonomy.tools import project_used_taxa
-        if cls.TARGET_TYPE == "collection":
-            idname = "collection_id"
-            ids = ",".join([str(pid) for pid in target_obj.project_ids])
-
-            taxalist = list(set(project_used_taxa(ids)))
-
-        else:
-            taxalist = project_used_taxa(
-                projid
-            )
         # hack to have 3 types instead of one page by job export type
         return render_template(
             cls.STEP0_TEMPLATE,
@@ -61,9 +56,9 @@ class ExportJob(Job):
             projid=projid,
             collection_id=collection_id,
             idname=idname,
-            taxalist=taxalist,
             target_type=cls.TARGET_TYPE,
             target_obj=target_obj,
+            recast_operation=cls.RECAST_OPERATION,
         )
 
     @classmethod
@@ -110,6 +105,28 @@ class ExportJob(Job):
             rsp: ExportRsp = cls.api_job_call(export_req)
             return redirect(url_for("gui_job_show", job_id=rsp.job_id))
 
+    @classmethod
+    def make_recast(cls, target_id: int, is_collection: bool):
+        recast_operation = get_back_constants("RECAST_OPERATION")
+        if cls.EXPORT_TYPE == "darwincore":
+            recasts: Dict[str, TaxoRecastRsp] = posted_dwca_taxo_recast(
+                recast_operation
+            )
+        else:
+            recast: TaxoRecastRsp = posted_taxo_recast()
+            if is_collection:
+                operation = recast_operation["collection_export"]
+            else:
+                operation = recast_operation["project_export"]
+            recasts = {operation: recast}
+        for operation, recast in recasts.items():
+            update_taxo_recast(
+                target_id=target_id,
+                taxonomy_recast=recast,
+                operation=operation,
+                is_collection=is_collection,
+            )
+
     # noinspection PyUnresolvedReferences
     @classmethod
     def final_action(cls, job: JobModel):
@@ -133,6 +150,7 @@ class ExportJob(Job):
                 projid=projid,
                 collection_id=collid,
                 target_type=cls.TARGET_TYPE,
+                export_type=cls.EXPORT_TYPE,
             )
         else:
             return ""

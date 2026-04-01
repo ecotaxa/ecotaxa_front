@@ -11,3 +11,5 @@
 /*! fflate */
 
 /*! import() */
+
+/*! tus-js-client */

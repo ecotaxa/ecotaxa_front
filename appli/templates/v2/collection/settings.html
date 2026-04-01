@@ -18,7 +18,7 @@
         <div class=" w-full md:flex  md:flex-wrap tab-content">
         <div class="w-full md:w-1/2 md:pr-6">
           <div class="form-box">
-            <label for="title">{{_('Title')}}</label>
+            <label for="title">{{_('Title')}}<i data-for="help_collection_title" data-request="help"></i></label>
             <input type="text" id="title" name="title" class="form-input" value="{{ target_coll.title }}" required {{'data-action=normalize data-target=short_title' if not published }} data-required="{{_('a title is required')}}"  placeholder="Records of the kraken communities in the strait of Antlantis"></div>
         <div class="form-box">
           <label for="short_title">{{_('Short title')}}<i data-for="help_collection_short-title" data-request="help"></i></label>
@@ -69,11 +69,11 @@
                         <label for="citation">{{ _('Citation')}}<i data-for="help_collection_citation" data-request="help"></i></label>
                         <textarea id="citation" name="citation" class="form-textarea" placeholder="Doe, John (2010) Records of the kraken communities in the strait of Antlantis" rows="4">{{ target_coll.citation|default('',true) }}</textarea>
                       </div><div class="form-box">
-                        <label for="coll_abstract">{{_('Abstract')}} <i data-for="help_collection_abstract" data-request="help"></i></label>
+                        <label for="coll_abstract">{{_('Description')}} <i data-for="help_collection_abstract" data-request="help"></i></label>
                         <textarea id="coll_abstract" name="abstract" class="form-textarea" placeholder="abstract" rows="5" maxlength="1000">{{ target_coll.abstract|default('',true) }}</textarea>
                       </div>
                       <div class="form-box">
-                        <label for="coll_description">{{_('Description')}} <i data-for="help_collection_description" data-request="help"></i></label>
+                        <label for="coll_description">{{_('Additional Information')}} <i data-for="help_collection_description" data-request="help"></i></label>
                         <textarea id="coll_description" name="description" class="form-textarea" placeholder="description" rows="8">{{ target_coll.description|default('',true) }}</textarea>
                       </div><div class="form-box">
                         <div class="label">{{ _('License') }}<i data-for="help_collection_license" data-request="help"></i></div>
@@ -95,9 +95,7 @@
               </select>
           </div>
         </div>
-      </fieldset>{%-if target_coll-%}<div class="w-full  {{'hide' if new}}"><fieldset class="w-full md:flex md:flex-wrap tab"><legend class="tab-control">{{_('Taxonomy mapping')}}</legend><div class="tab-content md:flex md:flex-wrap w-full ">
-        <a id="refresh_taxo_recast" data-href="{{url_for('gui_get_taxo_recast',target_id=target_coll.id,operation=recast_operation,is_collection=True)}}" data-request="href" class="btn-small text-base text-mainblue-700 hover:text-secondblue-400 ">{{_('Edit Taxonomy mapping')}} <i data-for="help_collection_taxo_recast" data-request="help"></i></a>
-        </div></fieldset>
+      </fieldset>{%-if target_coll-%}<div class="w-full  {{'hide' if new}}">
     <fieldset  class="w-full tab"><legend class="tab-control">{{_('Aggregated projects properties')}}</legend><div class="tab-content flex flex-wrap">
          <a id="refresh_aggregated" data-href="{{url_for('gui_collection_aggregated',project_ids=target_coll.project_ids|join(','))}}" data-request="href" class="btn-small text-base text-mainblue-700 hover:text-secondblue-400 ">{{_('Display aggregated projects properties')}} <i data-for="help_collection_aggregated_properties" data-request="help"></i></a>
     </div></fieldset>

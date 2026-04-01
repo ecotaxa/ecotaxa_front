@@ -28,7 +28,7 @@
 <li>biovolume: {{_(' if chosen ')}}</li></ul></p>{%-if target_type=="collection"-%}<p>{{_('Collection summary export produces a single TSV file.')}}</p>{%-endif-%}
             <ul> <li id="help_export_summary_quantity"><p><strong>{{_('Quantity to compute')}}</strong><br>{{_('Abundance is always possible.')}}</p></li>
               <li><details id="help_export_summary_formulae"><summary>{{_('Formulae')}}</summary><p>{% include 'v2/help/_help_detail_project_formulae.html'%}</p></details></li>
-                <li id="help_export_summary_taxo_mapping"><p><strong>{{_('Mapping from present taxon (key) to output replacement one (value)')}}</strong><br>{{_('Use a 0 replacement to _discard_ the present taxon.')}}</li></ul>
+                <li id="help_export_summary_taxo_mapping"><p><strong>{{_('Mapping from present taxon (key) to output replacement one (value)')}}</strong><br>{{_('Use a _notused_ replacement to discard the present taxon.')}}</li></ul>
               </div></details>
               <details id="help_export_identification"><summary>{{_('Classification Export')}}</summary>
                 <p>
@@ -39,9 +39,21 @@
      <div>
        <p>{{_('Export data ready to be published in DarwinCore archive format, OBIS or GBIF.')}}</p>
        <ul><li id="help_export_darwincore_with_absent"><p><strong>{{_('With absent')}}</strong><br>{{_('Export taxa with zero occurences (default).')}}</p></li>
-         <li id="help_export_darwincore_quantity"><p><strong>{{_('Quantity to compute')}}</strong><br>{{_('Abundance is always possible.')}}</p></li>
+         <li id="help_export_darwincore_quantity"><p><strong>{{_('With computation')}}</strong><br>{{_('Choose which computations to perform for each sample:')}}</p><ul>
+<li>{{_('Abundance corresponds to the “Count” measurement in the EMOF file.')}}</li>
+<li>{{_('Concentration corresponds to the “Abundance” measurement in the EMOF file.')}}</li>
+<li>{{_('Biovolume corresponds to the “Biovolume” measurement in the EMOF file.')}}</li>
+</ul></li>
               <li><details id="help_export_darwincore_formulae"><summary>{{_('Formulae')}}</summary><p>{% include 'v2/help/_help_detail_project_formulae.html'%}</p></details></li>
-                <li id="help_export_darwincore_taxo_mapping"><p><strong>{{_('Mapping from present taxon (key) to output replacement one (value)')}}</strong><br>{{_('Use a 0 replacement to _discard_ the present taxon.')}}</li></ul>
+                <li id="help_export_darwincore_taxo_mapping"><p><strong>{{_('Taxonomy mapping')}}</strong><br>{{_('If objects in your collection are classified under a category that does not have an AphiaID (i.e. a morphotaxon or a taxon that does not match a WoRMS taxon) the objects will be remapped to the first parent taxon that matches WoRMS.')}}<br>
+                  {{_('If some taxa are still in a deprecated category, you can select the option “Fix deprecated category” in the relevant project; otherwise, objects in this category will be remapped to the “rename_to” category.')}}<br>
+                  {{_('Examples:')}}<br>
+                  {{_('Rematch to first parent with an aphia id:')}}<br>
+                  {{_('objects classified in ecotaxa_id 85069 Biota>other>othertocheck will be considered as Biota.')}}
+                  {{_('Rematch to the target taxa')}}
+                  {{_('objects classified in the deprecated ecotaxa_id 85706 Biota>Chromista>Harosa>... >Ceratiaceae>Neoceratium>Neoceratium tripos will be remapped in ecotaxa_id 92614 Biota>Chromista>Harosa>... >Ceratiaceae>Tripos>Tripos muelleri')}}
+                  {{_('You can manually select the WoRMS category you want to remap to.')}}<br>{{_('The list of taxa in WoRMS name will be the list of taxa in the occurrence file of your DarwinCoreArchive.')}}<br>
+                  {{_('If needed, you can also remap your taxa in the “Grouping for concentration”. By remapping  a taxa in another category, abundance, concentrations and biovolumes will be computed on those groups. For instance, you want the information of the presence/absence of Calanoida and Cyclopoida but abundance and concentration of the Copepods you need to remap Calanoida in Copepoda and Cyclopoida in Copepoda.')}}</li></ul>
      </div>
         </details>
 </article>

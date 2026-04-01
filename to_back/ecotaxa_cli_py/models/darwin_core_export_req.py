@@ -38,7 +38,6 @@ class DarwinCoreExportReq(object):
         'include_predicted': 'bool',
         'with_absent': 'bool',
         'with_computations': 'list[SciExportTypeEnum]',
-        'computations_pre_mapping': 'dict(str, int)',
         'formulae': 'dict(str, str)',
         'extra_xml': 'list[str]'
     }
@@ -49,12 +48,11 @@ class DarwinCoreExportReq(object):
         'include_predicted': 'include_predicted',
         'with_absent': 'with_absent',
         'with_computations': 'with_computations',
-        'computations_pre_mapping': 'computations_pre_mapping',
         'formulae': 'formulae',
         'extra_xml': 'extra_xml'
     }
 
-    def __init__(self, collection_id=None, dry_run=False, include_predicted=False, with_absent=False, with_computations=[], computations_pre_mapping=None, formulae=None, extra_xml=[], local_vars_configuration=None):  # noqa: E501
+    def __init__(self, collection_id=None, dry_run=False, include_predicted=False, with_absent=False, with_computations=[], formulae=None, extra_xml=[], local_vars_configuration=None):  # noqa: E501
         """DarwinCoreExportReq - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -65,7 +63,6 @@ class DarwinCoreExportReq(object):
         self._include_predicted = None
         self._with_absent = None
         self._with_computations = None
-        self._computations_pre_mapping = None
         self._formulae = None
         self._extra_xml = None
         self.discriminator = None
@@ -79,8 +76,6 @@ class DarwinCoreExportReq(object):
             self.with_absent = with_absent
         if with_computations is not None:
             self.with_computations = with_computations
-        if computations_pre_mapping is not None:
-            self.computations_pre_mapping = computations_pre_mapping
         if formulae is not None:
             self.formulae = formulae
         if extra_xml is not None:
@@ -202,29 +197,6 @@ class DarwinCoreExportReq(object):
         """
 
         self._with_computations = with_computations
-
-    @property
-    def computations_pre_mapping(self):
-        """Gets the computations_pre_mapping of this DarwinCoreExportReq.  # noqa: E501
-
-        Mapping from present taxon (key) to output replacement one (value), during computations. Use a 0 replacement to _discard_ the objects with present taxon. Note: These are EcoTaxa categories, WoRMS mapping happens after, whatever.  # noqa: E501
-
-        :return: The computations_pre_mapping of this DarwinCoreExportReq.  # noqa: E501
-        :rtype: dict(str, int)
-        """
-        return self._computations_pre_mapping
-
-    @computations_pre_mapping.setter
-    def computations_pre_mapping(self, computations_pre_mapping):
-        """Sets the computations_pre_mapping of this DarwinCoreExportReq.
-
-        Mapping from present taxon (key) to output replacement one (value), during computations. Use a 0 replacement to _discard_ the objects with present taxon. Note: These are EcoTaxa categories, WoRMS mapping happens after, whatever.  # noqa: E501
-
-        :param computations_pre_mapping: The computations_pre_mapping of this DarwinCoreExportReq.  # noqa: E501
-        :type: dict(str, int)
-        """
-
-        self._computations_pre_mapping = computations_pre_mapping
 
     @property
     def formulae(self):

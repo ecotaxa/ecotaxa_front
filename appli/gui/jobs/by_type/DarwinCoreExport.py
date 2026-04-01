@@ -6,6 +6,7 @@ from appli.gui.jobs.by_type.Export import ExportJob
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py.api import CollectionsApi
 from to_back.ecotaxa_cli_py.models import DarwinCoreExportReq, ExportRsp
+from appli.gui.taxonomy.tools import posted_modified_recast
 
 
 class ExportDarwinCoreJob(ExportJob):
@@ -16,23 +17,30 @@ class ExportDarwinCoreJob(ExportJob):
     UI_NAME: ClassVar = "DarwinCoreExport"
     EXPORT_TYPE: ClassVar = "darwincore"
     TARGET_TYPE: ClassVar = "collection"
+    EXPORT_OPERATION: ClassVar = "dwca_export_emof"
 
     @classmethod
     def job_req(cls):
-        import json
 
         projid, collection_id = cls.get_target_id()
         dry_run = gvp("dry_run") == "1"
         include_predicted = gvp("include_predicted") == "1"
         with_absent = gvp("with_types_row") == "1"
         with_computations = gvpm("with_computations" or [])
-        computations_pre_mapping = json.loads(gvp("taxo_mapping" or {}))
-        if computations_pre_mapping == "{}":
-            computations_pre_mapping = {}
         formulae = gvp("formulae" or "")
         formulae_list = [a_line.strip().split(":") for a_line in formulae.splitlines()]
         formulae_dict = {var.strip(): val.strip() for var, val in formulae_list}
         extra_xml = gvp("extra_xml" or "")
+        # taxo_recast
+        modifiedrecast: bool = posted_modified_recast(True)
+        if modifiedrecast:
+            if int(collection_id) > 0:
+                is_collection = True
+                target_id = collection_id
+            else:
+                is_collection = False
+                target_id = projid
+            cls.make_recast(target_id, is_collection)
         if extra_xml == "":
             extra_xml = []
         req = DarwinCoreExportReq(
@@ -41,7 +49,6 @@ class ExportDarwinCoreJob(ExportJob):
             include_predicted=include_predicted,
             with_absent=with_absent,
             with_computations=with_computations,
-            computations_pre_mapping=computations_pre_mapping,
             formulae=formulae_dict,
             extra_xml=extra_xml,
         )

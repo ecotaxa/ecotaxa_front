@@ -24,6 +24,7 @@ function createActivRequest() {
         if (item.tagName.toLowerCase() === "a") e.preventDefault();
         await makeRequest(item);
       });
+      if(item.dataset.hasOwnProperty("ontab")) item.dispatchEvent(new Event('request'));
     });
 
   }
@@ -91,13 +92,14 @@ function createActivRequest() {
 
           callback = async (html) => {
             const modalcontent = modal.setContent(html);
-            if (!dynamics.JsComponents) {
+           /* if (!dynamics.JsComponents) {
               const {
                 JsComponents
               } = await import('../modules/js-components.js');
               dynamics.JsComponents = JsComponents;
             }
-            dynamics.JsComponents.applyTo(modalcontent);
+            dynamics.JsComponents.applyTo(modalcontent);*/
+            await activateContent(item,modalcontent);
 
           }
         } else {
@@ -149,20 +151,10 @@ function createActivRequest() {
         break;
       case "taxolineage":
         url = "/api/taxon_set/query?ids=" + item.dataset.value;
-
         callback = (response) => {
           const lineage = response[0].lineage;
           const id_lineage = response[0].id_lineage;
-          /* var click_lineage = lineage.map(function (txo, i) {
-               if (i > 0) {
-                   return "<a href='#' data-tgt='" + taxoid + "' data-txoid='" + id_lineage[i] + "' >" + txo + "</a>";
-               } else {
-                   // The base taxon itself, no use making it selectable
-                   return txo;
-               }
-           });*/
         }
-
         break;
       case 'privacy':
         url = '/setprivacy/Y';
@@ -187,11 +179,22 @@ function createActivRequest() {
             else content.innerHTML="";
             content.classList.add(css.wait);
             const tab=item.closest(domselectors.component.tabs.tab);
-          callback = async (html) => {
+            callback = async (html) => {
             content.classList.remove(css.wait);
             content.innerHTML = html;
              if(tab) tab.classList.remove(css.hide);
-              if (!dynamics.JsComponents) {
+             await activateContent(item,content)
+        }
+        }
+        break;
+
+    }
+
+    fetchRequest(format, url, callback);
+  }
+
+  async function activateContent(item,content) {
+    if (!dynamics.JsComponents) {
               const {
                 JsComponents
               } = await import('../modules/js-components.js');
@@ -199,12 +202,25 @@ function createActivRequest() {
             }
              dynamics.JsComponents.applyTo(content);
              item.classList.add(css.hide);
-        }}
-        break;
+             /* fetch request -modal - contextual help */
+            ActivRequest.applyTo(content);
+            /*** activate data-action  **/
+           if (!dynamics.ActivItems) {
+            const {
+                ActivItems
+              } = await import('../modules/activ-items.js');
+              dynamics.ActivItems = ActivItems;
+           }
+            dynamics.ActivItems.applyTo(content);
 
-    }
-
-    fetchRequest(format, url, callback);
+            // global alert dialog system
+              if (!dynamics.AlertBox) {
+            const {
+                AlertBox
+              } = await import('../modules/alert-box.js');
+              dynamics.AlertBox = AlertBox;
+           }
+            dynamics.AlertBox.applyTo(content);
   }
 
   function makeCloseRequest(item) {

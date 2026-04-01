@@ -19,7 +19,7 @@ from appli import app, backend_url
 # noinspection HttpUrlsUsage
 
 
-@app.route("/api/<path:path>", methods=["GET", "POST", "DELETE", "PUT"])
+@app.route("/api/<path:path>", methods=["GET", "POST", "DELETE", "PUT", "PATCH"])
 def proxy_request(path):
     start = time.time()
     # Prepare request data
@@ -39,6 +39,8 @@ def proxy_request(path):
     elif method == "DELETE":
         params = request.args
     elif method == "PUT":
+        params = request.args
+    elif method == "PATCH":
         params = request.args
     else:
         return "Not implemented"
@@ -68,6 +70,18 @@ def _copy_headers_and_session(req_headers):
     """Copy incoming headers into relayed request"""
     # Clone headers as they are immutable
     ret = {name: value for (name, value) in req_headers.items()}
+    # Signal that we are proxying
+    ret["X-Proxy-By"] = "Ecotaxa-Front"
+    # Mimic Nginx's proxy_set_header directives
+    ret["Host"] = request.host
+    ret["X-Real-IP"] = request.remote_addr
+    # Append the remote address to any existing X-Forwarded-For header
+    xfwd = request.headers.get("X-Forwarded-For")
+    if xfwd:
+        ret["X-Forwarded-For"] = f"{xfwd}, {request.remote_addr}"
+    else:
+        ret["X-Forwarded-For"] = request.remote_addr
+    ret["X-Forwarded-Proto"] = request.scheme
     # If there is a session cookie then transform it into a security bearer,
     # to authenticate GETs from browsers also connected to main site.
     session_cookie = request.cookies.get("session")

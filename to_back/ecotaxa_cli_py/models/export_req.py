@@ -47,7 +47,6 @@ class ExportReq(object):
         'with_types_row': 'bool',
         'only_first_image': 'bool',
         'sum_subtotal': 'SummaryExportGroupingEnum',
-        'pre_mapping': 'dict(str, int)',
         'formulae': 'dict(str, str)',
         'out_to_ftp': 'bool'
     }
@@ -67,12 +66,11 @@ class ExportReq(object):
         'with_types_row': 'with_types_row',
         'only_first_image': 'only_first_image',
         'sum_subtotal': 'sum_subtotal',
-        'pre_mapping': 'pre_mapping',
         'formulae': 'formulae',
         'out_to_ftp': 'out_to_ftp'
     }
 
-    def __init__(self, collection_id=None, project_id=None, exp_type=None, use_latin1=False, tsv_entities='', only_annotations=False, split_by='', coma_as_separator=False, format_dates_times=True, with_images=False, with_internal_ids=False, with_types_row=False, only_first_image=False, sum_subtotal=None, pre_mapping=None, formulae=None, out_to_ftp=False, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, collection_id=None, project_id=None, exp_type=None, use_latin1=False, tsv_entities='', only_annotations=False, split_by='', coma_as_separator=False, format_dates_times=True, with_images=False, with_internal_ids=False, with_types_row=False, only_first_image=False, sum_subtotal=None, formulae=None, out_to_ftp=False, local_vars_configuration=None):  # noqa: E501
         """ExportReq - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -92,7 +90,6 @@ class ExportReq(object):
         self._with_types_row = None
         self._only_first_image = None
         self._sum_subtotal = None
-        self._pre_mapping = None
         self._formulae = None
         self._out_to_ftp = None
         self.discriminator = None
@@ -123,8 +120,6 @@ class ExportReq(object):
             self.only_first_image = only_first_image
         if sum_subtotal is not None:
             self.sum_subtotal = sum_subtotal
-        if pre_mapping is not None:
-            self.pre_mapping = pre_mapping
         if formulae is not None:
             self.formulae = formulae
         if out_to_ftp is not None:
@@ -455,29 +450,6 @@ class ExportReq(object):
         """
 
         self._sum_subtotal = sum_subtotal
-
-    @property
-    def pre_mapping(self):
-        """Gets the pre_mapping of this ExportReq.  # noqa: E501
-
-        For 'ABO', 'CNC' and 'BIV' types types, mapping from present taxon (key) to output replacement one (value). Use a null replacement to _discard_ the present taxon.  # noqa: E501
-
-        :return: The pre_mapping of this ExportReq.  # noqa: E501
-        :rtype: dict(str, int)
-        """
-        return self._pre_mapping
-
-    @pre_mapping.setter
-    def pre_mapping(self, pre_mapping):
-        """Sets the pre_mapping of this ExportReq.
-
-        For 'ABO', 'CNC' and 'BIV' types types, mapping from present taxon (key) to output replacement one (value). Use a null replacement to _discard_ the present taxon.  # noqa: E501
-
-        :param pre_mapping: The pre_mapping of this ExportReq.  # noqa: E501
-        :type: dict(str, int)
-        """
-
-        self._pre_mapping = pre_mapping
 
     @property
     def formulae(self):
