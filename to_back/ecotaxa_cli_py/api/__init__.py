@@ -17,6 +17,7 @@ from to_back.ecotaxa_cli_py.api.jobs_api import JobsApi
 from to_back.ecotaxa_cli_py.api.misc_api import MiscApi
 from to_back.ecotaxa_cli_py.api.object_api import ObjectApi
 from to_back.ecotaxa_cli_py.api.objects_api import ObjectsApi
+from to_back.ecotaxa_cli_py.api.openid_api import OpenidApi
 from to_back.ecotaxa_cli_py.api.organizations_api import OrganizationsApi
 from to_back.ecotaxa_cli_py.api.processes_api import ProcessesApi
 from to_back.ecotaxa_cli_py.api.projects_api import ProjectsApi
