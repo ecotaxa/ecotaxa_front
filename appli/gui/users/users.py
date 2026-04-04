@@ -25,6 +25,7 @@ from appli.back_config import get_user_constants, get_back_constants
     SHORT_TOKEN_AGE,
     PROFILE_TOKEN_AGE,
     RECAPTCHAID,
+    OPENID_CONFIGURED
 ) = get_user_constants()
 ALL_IN_ONE = get_back_constants("ALL_IN_ONE")
 ACCOUNT_USER_CREATE = "create"

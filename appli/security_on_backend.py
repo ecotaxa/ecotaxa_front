@@ -129,6 +129,7 @@ def user_from_api(user_id):
         SHORT_TOKEN_AGE,
         PROFILE_TOKEN_AGE,
         RECAPTCHAID,
+        OPENID_CONFIGURED
     ) = get_user_constants()
     try:
         with ApiClient(UsersApi, request) as api:
@@ -159,6 +160,7 @@ def login_validate(email: str, password: str, remember: bool = False):
         SHORT_TOKEN_AGE,
         PROFILE_TOKEN_AGE,
         RECAPTCHAID,
+        OPENID_CONFIGURED
     ) = get_user_constants()
     req = LoginReq(username=email, password=password)
 
