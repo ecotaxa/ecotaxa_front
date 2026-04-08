@@ -50,6 +50,8 @@ class Constants(object):
         'default_project_access': 'str',
         'max_upload_size': 'int',
         'time_to_live': 'str',
+        'accepted_mime_types': 'list[str]',
+        'archive_extensions': 'list[str]',
         'all_in_one': 'bool',
         'taxoserver_url': 'str',
         'openid_configured': 'bool',
@@ -74,6 +76,8 @@ class Constants(object):
         'default_project_access': 'default_project_access',
         'max_upload_size': 'max_upload_size',
         'time_to_live': 'time_to_live',
+        'accepted_mime_types': 'accepted_mime_types',
+        'archive_extensions': 'archive_extensions',
         'all_in_one': 'all_in_one',
         'taxoserver_url': 'taxoserver_url',
         'openid_configured': 'openid_configured',
@@ -82,7 +86,7 @@ class Constants(object):
 
     def __init__(self, license_texts=None, access=None, app_manager=["",""], countries=[], people_organization_directories=None, user_status=None, user_type=None, password_regexp='^(?:(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#?%^&*-+])).{8,20}$', email_verification=True, account_validation=False, short_token_age=1, profile_token_age=24, recaptchaid=False, formulae='''subsample_coef: 1/ssm.sub_part
 total_water_volume: sam.tot_vol/1000
-individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)**3''', default_project_access='1', max_upload_size=681574400, time_to_live=None, all_in_one=False, taxoserver_url='https://ecotaxoserver.obs-vlfr.fr/', openid_configured=False, recast_operation=None, local_vars_configuration=None):  # noqa: E501
+individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)**3''', default_project_access='1', max_upload_size=681574400, time_to_live=None, accepted_mime_types=[], archive_extensions=[], all_in_one=False, taxoserver_url='https://ecotaxoserver.obs-vlfr.fr/', openid_configured=False, recast_operation=None, local_vars_configuration=None):  # noqa: E501
         """Constants - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -105,6 +109,8 @@ individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)*
         self._default_project_access = None
         self._max_upload_size = None
         self._time_to_live = None
+        self._accepted_mime_types = None
+        self._archive_extensions = None
         self._all_in_one = None
         self._taxoserver_url = None
         self._openid_configured = None
@@ -145,6 +151,10 @@ individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)*
             self.max_upload_size = max_upload_size
         if time_to_live is not None:
             self.time_to_live = time_to_live
+        if accepted_mime_types is not None:
+            self.accepted_mime_types = accepted_mime_types
+        if archive_extensions is not None:
+            self.archive_extensions = archive_extensions
         if all_in_one is not None:
             self.all_in_one = all_in_one
         if taxoserver_url is not None:
@@ -544,6 +554,52 @@ individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)*
         """
 
         self._time_to_live = time_to_live
+
+    @property
+    def accepted_mime_types(self):
+        """Gets the accepted_mime_types of this Constants.  # noqa: E501
+
+        File import and My Files, list of accepted mime types  # noqa: E501
+
+        :return: The accepted_mime_types of this Constants.  # noqa: E501
+        :rtype: list[str]
+        """
+        return self._accepted_mime_types
+
+    @accepted_mime_types.setter
+    def accepted_mime_types(self, accepted_mime_types):
+        """Sets the accepted_mime_types of this Constants.
+
+        File import and My Files, list of accepted mime types  # noqa: E501
+
+        :param accepted_mime_types: The accepted_mime_types of this Constants.  # noqa: E501
+        :type: list[str]
+        """
+
+        self._accepted_mime_types = accepted_mime_types
+
+    @property
+    def archive_extensions(self):
+        """Gets the archive_extensions of this Constants.  # noqa: E501
+
+        File import and My Files, list of accepted archive extensions  # noqa: E501
+
+        :return: The archive_extensions of this Constants.  # noqa: E501
+        :rtype: list[str]
+        """
+        return self._archive_extensions
+
+    @archive_extensions.setter
+    def archive_extensions(self, archive_extensions):
+        """Sets the archive_extensions of this Constants.
+
+        File import and My Files, list of accepted archive extensions  # noqa: E501
+
+        :param archive_extensions: The archive_extensions of this Constants.  # noqa: E501
+        :type: list[str]
+        """
+
+        self._archive_extensions = archive_extensions
 
     @property
     def all_in_one(self):

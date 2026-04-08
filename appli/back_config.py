@@ -33,6 +33,7 @@ def get_back_constants(_type):
     if not "API_" + _type + "_CONSTANTS" in current_app.config:
         with ApiClient(MiscApi, request) as api:
             consts: Constants = api.used_constants()
+        print("consts___", consts)
         if _type == "USER":
             current_app.config["API_" + _type + "_CONSTANTS"] = (
                 consts.user_status,
@@ -43,7 +44,7 @@ def get_back_constants(_type):
                 consts.short_token_age,
                 consts.profile_token_age,
                 consts.recaptchaid,
-                consts.openid_configured
+                consts.openid_configured,
             )
         elif _type == "ACCESS":
             current_app.config["API_" + _type + "_CONSTANTS"] = consts.access
@@ -71,6 +72,15 @@ def get_back_constants(_type):
             current_app.config["API_" + _type + "_CONSTANTS"] = consts.taxoserver_url
         elif _type == "RECAST_OPERATION":
             current_app.config["API_" + _type + "_CONSTANTS"] = consts.recast_operation
+        elif _type == "ACCEPTED_MIME_TYPES":
+            current_app.config["API_" + _type + "_CONSTANTS"] = (
+                consts.accepted_mime_types
+            )
+
+        elif _type == "ARCHIVE_EXTENSIONS":
+            current_app.config["API_" + _type + "_CONSTANTS"] = (
+                consts.archive_extensions
+            )
     return current_app.config["API_" + _type + "_CONSTANTS"]
 
 
