@@ -237,7 +237,7 @@ def _prj_import_taxo_api(
     for an_instrument in qry_filt_instrum:
         with ApiClient(ProjectsApi, request) as apiproj:
             url = (
-                apiproj.api_client.configuration.host + "/projects/search/"
+                apiproj.api_client.configuration.host + "/projects/search"
             )  # endpoint is nowhere available as a const :(
             token = apiproj.api_client.configuration.access_token
             headers = {
