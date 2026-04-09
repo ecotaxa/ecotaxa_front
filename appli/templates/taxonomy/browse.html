@@ -53,10 +53,10 @@
 const urlsearchworms="{{url_for('routetaxosearchworms')}}"
 function DoSync() {
   var params={};
-  At2PopupWaitOpenLoad(1,"/taxo/dosync","EcotaxoServer Synchronisation",params);
+  At2PopupWaitOpenLoad(21,"/taxo/dosync","EcotaxoServer Synchronisation",params);
 }
 function NewTaxon() {
-  At2PopupWaitOpenLoad(0,urlsearchworms,"Create new taxon");
+  At2PopupWaitOpenLoad(20,urlsearchworms,"Create new taxon");
 }
 
 $(document).ready(function() {

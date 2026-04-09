@@ -13,6 +13,7 @@ from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import AddWormsTaxonModel
 from to_back.ecotaxa_cli_py.api import TaxonomyTreeApi
 from to_back.ecotaxa_cli_py.models import UserModelWithRights, TaxonModel
+from flask_babel import _
 
 
 def get_taxoserver_url():
@@ -71,7 +72,7 @@ def DoSyncStatUpdate():
 
 @app.route("/taxo/search", methods=["GET"])
 def routetaxosearch() -> List[Any]:
-    name=gvg('q','').strip()
+    name = gvg("q", "").strip()
     user = get_login()
     if user is None:
         return PrintInCharte("Please login to access this page")
@@ -79,15 +80,11 @@ def routetaxosearch() -> List[Any]:
         results = api.search_taxa(name + "*")
         renames = list(set([str(r.renm_id) for r in results if r.renm_id is not None]))
         taxons = [
-            {
-                "id": r.id,
-                "aphia_id": r.aphia_id,
-                "name": r.text,
-                "status":r.status
-            }
+            {"id": r.id, "aphia_id": r.aphia_id, "name": r.text, "status": r.status}
             for r in results
-            if (r.renm_id == 0 or r.renm_id is None) and r.status !='D'
+            if (r.renm_id == 0 or r.renm_id is None) and r.status != "D"
         ]
+
         def get_renames(arr, taxons):
             rsp = api.query_taxa_set(",".join(arr))
             rnmtaxons = [
@@ -97,7 +94,7 @@ def routetaxosearch() -> List[Any]:
                     "name": r.display_name,
                 }
                 for r in rsp
-                if r.renm_id is None and r.status !='D'
+                if r.renm_id is None and r.status != "D"
             ]
             renames = list(set([str(r.renm_id) for r in rsp if r.renm_id is not None]))
             taxons.extend(rnmtaxons)
@@ -112,7 +109,7 @@ def routetaxosearch() -> List[Any]:
 
 @app.route("/taxo/searchworms", methods=["GET"])
 def routetaxosearchworms():
-    name=gvg("q","").strip()
+    name = gvg("q", "").strip()
     user = get_login()
     if user is None:
         return PrintInCharte("Please login to access this page")
@@ -121,9 +118,16 @@ def routetaxosearchworms():
     if len(name) > 3:
         with ApiClient(TaxonomyTreeApi, request) as api:
             taxons = api.search_worms_name(name)
+        message = ""
     else:
         taxons = []
-    return render_template("taxonomy/create.html", searchname=name, taxons=taxons)
+        if len(name) > 0:
+            message = _("Search string length must be > 3")
+        else:
+            message = ""
+    return render_template(
+        "taxonomy/create.html", searchname=name, taxons=taxons, message=message
+    )
 
 
 @app.route("/taxo/addworms/", methods=["POST"])
@@ -209,13 +213,13 @@ def route_view_taxon(taxoid):
     lineage = taxon["lineage"]
     lineage_status = taxon["lineage_status"]
     new_lineage = []
-    sep = ''
+    sep = ""
     for i in range(len(lineage)):
         name = lineage[i]
         depre = ""
         if lineage_status[i] == "D":
             depre = ' class="deprecated"'
-        new_lineage.append(f'{sep}<span{depre}>{name}</span>')
+        new_lineage.append(f"{sep}<span{depre}>{name}</span>")
         sep = " < "
     taxon["lineage"] = new_lineage
 
