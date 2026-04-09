@@ -8073,7 +8073,7 @@
             "title":"Password regexp",
             "type":"string",
             "description":"8 char. minimum, at least one uppercase, one lowercase, one number and one special char in '#?!@%^&*-+' ",
-            "default":"^(?:(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#?%^&*-+])).{8,20}$"
+            "default":"^(?:(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#?%^&+*-])).{8,20}$"
           },
           "email_verification":{
             "title":"Account email verification",

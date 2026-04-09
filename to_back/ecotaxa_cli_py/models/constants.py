@@ -84,7 +84,7 @@ class Constants(object):
         'recast_operation': 'recast_operation'
     }
 
-    def __init__(self, license_texts=None, access=None, app_manager=["",""], countries=[], people_organization_directories=None, user_status=None, user_type=None, password_regexp='^(?:(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#?%^&*-+])).{8,20}$', email_verification=True, account_validation=False, short_token_age=1, profile_token_age=24, recaptchaid=False, formulae='''subsample_coef: 1/ssm.sub_part
+    def __init__(self, license_texts=None, access=None, app_manager=["",""], countries=[], people_organization_directories=None, user_status=None, user_type=None, password_regexp='^(?:(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#?%^&+*-])).{8,20}$', email_verification=True, account_validation=False, short_token_age=1, profile_token_age=24, recaptchaid=False, formulae='''subsample_coef: 1/ssm.sub_part
 total_water_volume: sam.tot_vol/1000
 individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)**3''', default_project_access='1', max_upload_size=681574400, time_to_live=None, accepted_mime_types=[], archive_extensions=[], all_in_one=False, taxoserver_url='https://ecotaxoserver.obs-vlfr.fr/', openid_configured=False, recast_operation=None, local_vars_configuration=None):  # noqa: E501
         """Constants - a model defined in OpenAPI"""  # noqa: E501

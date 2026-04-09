@@ -38,6 +38,7 @@ from to_back.ecotaxa_cli_py.models.collection_req import CollectionReq
 from to_back.ecotaxa_cli_py.models.constants import Constants
 from to_back.ecotaxa_cli_py.models.create_collection_req import CreateCollectionReq
 from to_back.ecotaxa_cli_py.models.create_project_req import CreateProjectReq
+from to_back.ecotaxa_cli_py.models.db_job_state_enum import DBJobStateEnum
 from to_back.ecotaxa_cli_py.models.darwin_core_export_req import DarwinCoreExportReq
 from to_back.ecotaxa_cli_py.models.directory_entry_model import DirectoryEntryModel
 from to_back.ecotaxa_cli_py.models.directory_model import DirectoryModel

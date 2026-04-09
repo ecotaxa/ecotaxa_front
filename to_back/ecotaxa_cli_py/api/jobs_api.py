@@ -497,17 +497,19 @@ class JobsApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def list_jobs(self, for_admin, **kwargs):  # noqa: E501
+    def list_jobs(self, **kwargs):  # noqa: E501
         """List Jobs  # noqa: E501
 
-        **Return the jobs** for current user, or all of them if admin is asked for.  # noqa: E501
+        **Return the jobs** for current user, or all of them if admin is asked for. Optional filters on type and status can be provided.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.list_jobs(for_admin, async_req=True)
+        >>> thread = api.list_jobs(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
-        :param bool for_admin: If FALSE return the jobs for current user, else return all of them. (required)
+        :param bool for_admin: If FALSE return the jobs for current user, else return all of them.
+        :param str job_type: The job type, e.g. FileImport, BackupExport, Prediction...
+        :param DBJobStateEnum job_status: The job status: P(ending), R(unning), A(sking), E(rror), F(inished).
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
@@ -520,19 +522,21 @@ class JobsApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.list_jobs_with_http_info(for_admin, **kwargs)  # noqa: E501
+        return self.list_jobs_with_http_info(**kwargs)  # noqa: E501
 
-    def list_jobs_with_http_info(self, for_admin, **kwargs):  # noqa: E501
+    def list_jobs_with_http_info(self, **kwargs):  # noqa: E501
         """List Jobs  # noqa: E501
 
-        **Return the jobs** for current user, or all of them if admin is asked for.  # noqa: E501
+        **Return the jobs** for current user, or all of them if admin is asked for. Optional filters on type and status can be provided.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.list_jobs_with_http_info(for_admin, async_req=True)
+        >>> thread = api.list_jobs_with_http_info(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
-        :param bool for_admin: If FALSE return the jobs for current user, else return all of them. (required)
+        :param bool for_admin: If FALSE return the jobs for current user, else return all of them.
+        :param str job_type: The job type, e.g. FileImport, BackupExport, Prediction...
+        :param DBJobStateEnum job_status: The job status: P(ending), R(unning), A(sking), E(rror), F(inished).
         :param _return_http_data_only: response data without head status code
                                        and headers
         :param _preload_content: if False, the urllib3.HTTPResponse object will
@@ -550,7 +554,9 @@ class JobsApi(object):
         local_var_params = locals()
 
         all_params = [
-            'for_admin'
+            'for_admin',
+            'job_type',
+            'job_status'
         ]
         all_params.extend(
             [
@@ -569,10 +575,6 @@ class JobsApi(object):
                 )
             local_var_params[key] = val
         del local_var_params['kwargs']
-        # verify the required parameter 'for_admin' is set
-        if self.api_client.client_side_validation and ('for_admin' not in local_var_params or  # noqa: E501
-                                                        local_var_params['for_admin'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `for_admin` when calling `list_jobs`")  # noqa: E501
 
         collection_formats = {}
 
@@ -581,6 +583,10 @@ class JobsApi(object):
         query_params = []
         if 'for_admin' in local_var_params and local_var_params['for_admin'] is not None:  # noqa: E501
             query_params.append(('for_admin', local_var_params['for_admin']))  # noqa: E501
+        if 'job_type' in local_var_params and local_var_params['job_type'] is not None:  # noqa: E501
+            query_params.append(('job_type', local_var_params['job_type']))  # noqa: E501
+        if 'job_status' in local_var_params and local_var_params['job_status'] is not None:  # noqa: E501
+            query_params.append(('job_status', local_var_params['job_status']))  # noqa: E501
 
         header_params = {}
 
