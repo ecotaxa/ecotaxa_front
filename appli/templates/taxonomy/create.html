@@ -12,7 +12,7 @@
         <i class="fas fa-info-circle" data-content="{{_('Type a taxon name, the name will be searched into the WoRMS database.')}}"></i>
       </span>{{ ht.InputText('taxosearchname', searchname ,
                 extrataginfo=("class=form-control maxlength=100  "
-                )|safe) }} <button type="button" onclick="const searchurl='{{url_for('routetaxosearchworms')}}?q='+$('#taxosearchname').val();loadUrl(searchurl,'GET',null,null,{},'... requesting Worms API ...')" class="btn btn-blue"><i class="fa fa-search"></i> Search
+                )|safe) }} <button type="button" onclick="const val=$('#taxosearchname').val();const searchurl='{{url_for('routetaxosearchworms')}}?q='+encodeURIComponent(val).replaceAll('%20','+');loadUrl(searchurl,'GET',null,null,{},'... requesting Worms API ...')" class="btn btn-blue"><i class="fa fa-search"></i> Search
         </button>  </button></div>
     <div><div id="resulttaxocentral"></div></div>
     <div>{%-if taxons-%}
@@ -20,24 +20,24 @@
         <ul>{%- for taxon in taxons -%}
     <li>{%-if "id" in taxon -%}{{taxon["name"]}} (id:{{taxon["id"]}}) {%-else-%}<a onclick="createWoRMSTaxon({{taxon['aphia_id']}})">{{taxon["name"]}} </a>{%-endif-%}
     {%-for parent in taxon["lineage"].values()-%}&nbsp;&lt;&nbsp;{{parent["scientificname"]}}{%-endfor-%}  &nbsp;&lt;status: {{taxon["status"]}}&gt;</li>
-    {%-endfor-%}</ul>{%-else-%}{{_('No result')}}{%-endif-%}
+    {%-endfor-%}</ul>{%-else-%}<p>{{message}}</p>{%-endif-%}
     <p><button  type="button" class="btn btn-info" onclick="loadUrl('{{url_for('route_add_taxon')}}')">{{_('Or create a non WoRMS category')}}</button></p>
 </div>
    </form>
     <script>
         const windex={{windex if windex else 20}}
         const restaxocentral= $('#resulttaxocentral');
-        const searchurl="{{url_for('routetaxosearch',name=searchname)}}";
         if (restaxocentral) {
-        loadUrl("{{url_for('routetaxodosync')}}","POST",restaxocentral,function() {  //do not load existing taxons - add datediff to limit the list - loadUrl(searchurl,"GET",restaxocentral,displaytaxons);
+        loadUrl("{{url_for('routetaxodosync')}}","POST",restaxocentral,function(data,element) {  element.html("{{_('Taxonomy is in sync with EcoTaxoServer')}}");
         });
         }
-        $('#taxosearchname').on('input', function(e) {
+        /*$('#taxosearchname').on('input', function(e) {
         var val =$(this).val();
-        if (val.length) return;
+        val = val.trim();
+        if (val.length ===0) return;
         val=encodeURIComponent(val).replaceAll('%20','+');
-        const searchurl="{{url_for('routetaxosearchworms',q=val)}}";
-        loadUrl(searchurl,'GET',null,null,{},'... requesting Worms API ...');});
+        const searchurl="/taxo/searchworms?q="+val;
+        loadUrl(searchurl,'GET',null,null,{},'... requesting Worms API ...');});*/
          function createWoRMSTaxon(aphia_id) {
             const formu = $("#formcreatetaxon");
             formu.attr("action","{{url_for('addtaxoworms')}}");
