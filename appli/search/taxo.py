@@ -136,13 +136,15 @@ def taxoresolve():
 @app.route("/gui/get_taxo_recast", methods=["GET"])
 @login_required
 def gui_get_taxo_recast():
-    is_collection = gvg("is_collection", False)
+    is_collection = gvg("is_collection", "0")
     target_id = gvg("target_id")
     operation = gvg("operation")
     from appli.gui.taxonomy.tools import read_taxo_recast
 
     return read_taxo_recast(
-        target_id=int(target_id), operation=operation, is_collection=is_collection
+        target_id=int(target_id),
+        operation=operation,
+        is_collection=(is_collection == "1"),
     )
 
 
@@ -151,7 +153,7 @@ def gui_get_taxo_recast():
 def gui_update_taxo_recast():
     from appli.gui.taxonomy.tools import update_taxo_recast
 
-    is_collection = gvg("is_collection")
+    is_collection = gvg("is_collection", "0")
     target_id = gvg("target_id")
     operation = gvp("operation")
     from_to = gvp("from_to")
@@ -161,5 +163,5 @@ def gui_update_taxo_recast():
         target_id=int(target_id),
         recast=taxonomy_recast,
         operation=operation,
-        is_collection=is_collection,
+        is_collection=(is_collection == "1"),
     )

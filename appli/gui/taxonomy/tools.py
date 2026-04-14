@@ -83,7 +83,7 @@ def get_taxo_recast(
 
 def read_taxo_recast(target_id: int, operation: str, is_collection: bool):
     project_ids = ""
-    if is_collection == True:
+    if is_collection:
         try:
             with ApiClient(CollectionsApi, request) as api:
                 collection = api.get_collection(collection_id=target_id)
@@ -154,6 +154,7 @@ def read_taxo_recast(target_id: int, operation: str, is_collection: bool):
         taxo_worms = taxa_populate(wormsids, keys, recastitems)
         taxo_auto = taxa_populate(autoids, keys, recastitems)
         taxo_recast = taxa_populate(recastids, keys, recastitems)
+        print("taxalist----", taxalist)
         return render_template(
             "v2/taxonomy/_dwca_taxo_recast.html",
             taxo_auto=taxo_auto,
@@ -208,7 +209,6 @@ def update_taxo_recast(
 
 def get_taxostats(project_ids: str):
     with ApiClient(ProjectsApi, request) as api:
-
         taxa = api.project_set_get_stats(ids=project_ids)
     used_taxa = []
     for res in taxa:
