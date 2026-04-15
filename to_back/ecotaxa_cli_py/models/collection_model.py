@@ -49,7 +49,8 @@ class CollectionModel(object):
         'creator_organisations': 'list[OrganizationModel]',
         'associate_users': 'list[MinUserModel]',
         'associate_organisations': 'list[OrganizationModel]',
-        'display_order': 'object'
+        'display_order': 'object',
+        'is_private': 'bool'
     }
 
     attribute_map = {
@@ -69,10 +70,11 @@ class CollectionModel(object):
         'creator_organisations': 'creator_organisations',
         'associate_users': 'associate_users',
         'associate_organisations': 'associate_organisations',
-        'display_order': 'display_order'
+        'display_order': 'display_order',
+        'is_private': 'is_private'
     }
 
-    def __init__(self, id=None, external_id=None, external_id_system=None, title=None, short_title=None, citation=None, license=None, abstract=None, description=None, project_ids=None, provider_user=None, contact_user=None, creator_users=[], creator_organisations=[], associate_users=[], associate_organisations=[], display_order=None, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, id=None, external_id=None, external_id_system=None, title=None, short_title=None, citation=None, license=None, abstract=None, description=None, project_ids=None, provider_user=None, contact_user=None, creator_users=[], creator_organisations=[], associate_users=[], associate_organisations=[], display_order=None, is_private=False, local_vars_configuration=None):  # noqa: E501
         """CollectionModel - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -95,6 +97,7 @@ class CollectionModel(object):
         self._associate_users = None
         self._associate_organisations = None
         self._display_order = None
+        self._is_private = None
         self.discriminator = None
 
         self.id = id
@@ -126,6 +129,8 @@ class CollectionModel(object):
             self.associate_organisations = associate_organisations
         if display_order is not None:
             self.display_order = display_order
+        if is_private is not None:
+            self.is_private = is_private
 
     @property
     def id(self):
@@ -527,6 +532,29 @@ class CollectionModel(object):
         """
 
         self._display_order = display_order
+
+    @property
+    def is_private(self):
+        """Gets the is_private of this CollectionModel.  # noqa: E501
+
+        The most restrictive access among the projects in the collection  # noqa: E501
+
+        :return: The is_private of this CollectionModel.  # noqa: E501
+        :rtype: bool
+        """
+        return self._is_private
+
+    @is_private.setter
+    def is_private(self, is_private):
+        """Sets the is_private of this CollectionModel.
+
+        The most restrictive access among the projects in the collection  # noqa: E501
+
+        :param is_private: The is_private of this CollectionModel.  # noqa: E501
+        :type: bool
+        """
+
+        self._is_private = is_private
 
     def to_dict(self):
         """Returns the model properties as a dict"""
