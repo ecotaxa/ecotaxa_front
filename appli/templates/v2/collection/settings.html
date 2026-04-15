@@ -41,7 +41,7 @@
                           </div>
             <div class="form-box"  id="section-creators" class="w-full tab" data-u="{{ current_user.id|string() }}" data-alert="true">
             <label for="creator_persons">{{_('Creator users  and organisations')}}<i data-for="help_collection_creator" data-request="help"></i></label>
-              <select id='creator_persons' class="form-multiselect js js-autocomplete liste" data-orderitems=true name="creator_persons[]" data-type="person"  data-prefix="{{orgprefix}}" data-create=true data-importfield="creator_persons" placeholder="{{_('select a user or organisation')}}" multiple autocomplete="off"><option value="0"></option>
+              <select id='creator_persons' class="form-multiselect js js-autocomplete liste" data-orderitems=true name="creator_persons[]" data-type="person"  data-prefix="{{orgprefix}}" data-create=true placeholder="{{_('select a user or organisation')}}" multiple autocomplete="off"><option value="0"></option>
                {%-if target_coll-%}{%-for val in target_coll.display_order["creators"] -%}
                 {%-if val[-1]=="u"-%}
                 <option value="{{creators[val].id}}" selected="selected">
@@ -54,7 +54,7 @@
                 </select>
                </div> <div class="form-box">
             <label for="associate_persons">{{_('Associate users and organisations')}}<i data-for="help_collection_associate" data-request="help"></i></label>
-            <select id='associate_persons' class="form-multiselect js js-autocomplete liste" data-orderitems=true name="associate_persons[]" data-type="person" data-prefix="{{orgprefix}}" data-create=true  data-importfield="associate_persons"  placeholder="{{_('select a user or organisation')}}" multiple autocomplete="off">
+            <select id='associate_persons' class="form-multiselect js js-autocomplete liste" data-orderitems=true name="associate_persons[]" data-type="person" data-prefix="{{orgprefix}}" data-create=true  placeholder="{{_('select a user or organisation')}}" multiple autocomplete="off">
              {%-if target_coll-%}{%-for val in target_coll.display_order["associates"] -%}
                 {%-if val[-1]=="u"-%}
                 <option value="{{associates[val].id}}" selected="selected">
@@ -82,7 +82,9 @@
                           {% set label='not choosen' if k=='' else k %}
                           {{form_group_radio('license_'+ loop.index|string(),'license',k,label,target_coll.license, required=(loop.index==1) )}}
                           {% endfor %}</div>
-                      </div></div></div>
+                      </div>{%- if target_coll and target_coll.is_private -%}<div class="form-box">
+                        <div class="label">{{_('Private access')}} </div><em>{{_('One or more projet of the collection has a private access. The collection cannot be exported.')}}</em></div>{%-endif-%}
+        </div></div>
         </fieldset><fieldset class="w-full md:flex md:flex-wrap tab">
               <legend class="tab-control">{{_('Projects')}} </legend>
               <div class="w-full tab-content mt-0">

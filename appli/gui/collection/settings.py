@@ -9,7 +9,6 @@ from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import (
     ApiException,
     OrganizationModel,
-    TaxoRecastRsp,
 )
 from to_back.ecotaxa_cli_py.api import (
     CollectionsApi,
@@ -267,39 +266,54 @@ def collection_edit(collection_id: int, new: bool = False):
             varlist.remove(prefix + "users")
             varlist.remove(prefix + "organisations")
         varlist.extend(["creator_persons", "associate_persons"])
+        print("form", request.form)
         for a_var in request.form:
             if a_var in varlist:
                 if a_var in ["provider_user", "contact_user"]:
                     u = gvp(a_var, "")
-                    if u != "":
+                    if u != "" and getattr(collection, a_var) != _user_format(int(u)):
                         setattr(collection, a_var, _user_format(int(u)))
                 elif a_var == "short_title":
                     short_title = gvp(a_var, "")
                     if short_title.strip() != "":
                         old_short_title = gvp("old_short_title")
                         # TODO - check why "None" is set for short_title
-                        if old_short_title.strip() == "" and short_title != "None":
+                        if (
+                            old_short_title.strip() == ""
+                            and short_title != "None"
+                            and getattr(collection, a_var) != short_title
+                        ):
                             setattr(collection, "short_title", short_title)
                 elif a_var != "id":
-                    setattr(collection, a_var, gvp(a_var, ""))
-            elif a_var[len(a_var) - 2 :] == "[]" and a_var[0:-2] in varlist:
-                if a_var[0:-2] in ["creator_persons", "associate_persons"]:
-                    plist, display = _set_persons(gvpm(a_var))
-                    display_order[a_var[0:-2].replace("_person", "")] = display
-                    for attrname in ["users", "organisations"]:
+                    val = gvp(a_var, "")
+                    if getattr(collection, a_var) != val:
+                        setattr(collection, a_var, val)
+        # for lists [] request.form does not return the var when it is empty
+        for a_var in ["creator_persons[]", "associate_persons[]", "project_ids[]"]:
+            if a_var[0:-2] in ["creator_persons", "associate_persons"]:
+                plist, display = _set_persons(gvpm(a_var))
+                display_order[a_var[0:-2].replace("_person", "")] = display
+                for attrname in ["users", "organisations"]:
+                    varname = a_var[0:-2].replace("persons", attrname)
+                    if getattr(collection, varname) != plist[attrname]:
                         setattr(
                             collection,
                             a_var[0:-2].replace("persons", attrname),
                             plist[attrname],
                         )
+                if getattr(collection, "display_order") != display_order:
                     setattr(
                         collection,
                         "display_order",
                         display_order,
                     )
-                elif a_var[0:-2] in ["project_ids"]:
-                    setattr(collection, a_var[0:-2], [int(p) for p in gvpm(a_var)])
-                else:
+            elif a_var[0:-2] == "project_ids":
+                val = [int(p) for p in gvpm(a_var)]
+                if getattr(collection, a_var[0:-2]) != val:
+                    setattr(collection, a_var[0:-2], val)
+            else:
+                val = gvpm(a_var)
+                if getattr(collection, a_var[0:-2]) != val:
                     setattr(collection, a_var[0:-2], gvpm(a_var))
 
         try:
