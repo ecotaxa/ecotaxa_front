@@ -273,6 +273,7 @@ def posted_taxo_recast() -> TaxoRecastRsp:
 
 def posted_modified_recast(dwca: bool) -> bool:
     modified = 0
+    removerecast = ""
     if dwca:
         taxanum = gvp("taxanum", "0")
         histo_worms = gvp("histo-worms", "{}")
