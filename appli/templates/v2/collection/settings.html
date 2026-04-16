@@ -41,7 +41,7 @@
                           </div>
             <div class="form-box"  id="section-creators" class="w-full tab" data-u="{{ current_user.id|string() }}" data-alert="true">
             <label for="creator_persons">{{_('Creator users  and organisations')}}<i data-for="help_collection_creator" data-request="help"></i></label>
-              <select id='creator_persons' class="form-multiselect js js-autocomplete liste" data-orderitems=true name="creator_persons[]" data-type="person"  data-prefix="{{orgprefix}}" data-create=true placeholder="{{_('select a user or organisation')}}" multiple autocomplete="off"><option value="0"></option>
+              <select id='creator_persons' class="form-multiselect js js-autocomplete liste" data-orderitems=true name="creator_persons[]" data-type="person"  data-prefix="{{orgprefix}}" data-create=true data-importfield="creator_persons" placeholder="{{_('select a user or organisation')}}" multiple autocomplete="off"><option value="0"></option>
                {%-if target_coll-%}{%-for val in target_coll.display_order["creators"] -%}
                 {%-if val[-1]=="u"-%}
                 <option value="{{creators[val].id}}" selected="selected">
