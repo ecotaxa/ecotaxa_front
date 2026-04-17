@@ -33,7 +33,6 @@ def get_back_constants(_type):
     if not "API_" + _type + "_CONSTANTS" in current_app.config:
         with ApiClient(MiscApi, request) as api:
             consts: Constants = api.used_constants()
-        print("consts___", consts)
         if _type == "USER":
             current_app.config["API_" + _type + "_CONSTANTS"] = (
                 consts.user_status,
