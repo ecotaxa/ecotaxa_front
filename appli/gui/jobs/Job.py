@@ -6,11 +6,11 @@ from flask import flash, request
 from werkzeug.datastructures import FileStorage
 from appli import gvg, gvp
 from appli.project import sharedfilter
-from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import MyFilesApi, JobsApi
 from to_back.ecotaxa_cli_py.models import JobModel
 from appli.utils import ApiClient
 from appli.gui.jobs.staticlistes import py_messages
+from to_back.ecotaxa_cli_py import ApiException
 
 
 class Job(object):
@@ -67,7 +67,7 @@ class Job(object):
                 projs = [str(prj) for prj in coll.project_ids]
                 return ",".join(projs)
             else:
-                raise
+                raise ApiException(404, "Collection %s not Found" % str(collection_id))
         else:
             if request.method == "GET":
                 prjid = gvg("projid" or "0")

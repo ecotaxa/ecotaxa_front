@@ -57,7 +57,7 @@ class ApiClient(Generic[A]):
         api_client = _ApiClient()
         booster.boost(api_client)
         if isinstance(token, LocalProxy):
-            token = token.cookies.get("session")  # type:ignore
+            token = token.cookies.get("session")  # type: ignore
         api_client.configuration.access_token = token
         # Note: No trailing / in URL
         from appli import backend_url
@@ -106,9 +106,14 @@ def get_all_visible_projects() -> List[ProjectModel]:
     with ApiClient(ProjectsApi, request) as api:
         try:
             projects: List[ProjectModel] = api.search_projects(title_filter="%")
-            return [
-                prj for prj in projects if prj.access != "0"
-            ]  # Narrow to visible ones, even for logged users
+            otherprojects: List[ProjectModel] = api.search_projects(
+                title_filter="%", not_granted=True
+            )
+            prjs = [prj for prj in projects if prj.access != "0"] + [
+                prj for prj in otherprojects if prj.access != "0"
+            ]
+            # Narrow to visible ones, even for logged users
+            return prjs
         except ApiException as ae:
             return []
 
