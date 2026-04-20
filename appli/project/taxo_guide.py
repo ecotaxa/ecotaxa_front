@@ -10,7 +10,7 @@ SHEETS_QUERY_URL = "https://ecotaxoguide.imev-mer.fr/api/sheets/published-for-ta
 
 def getGuideSheets(instrument_id: str, taxon_ids: List[int] = None) -> Dict[str, int]:
     try:
-        rsp = requests.get(SHEETS_QUERY_URL, params={"ins_id": instrument_id, "cat_ids": taxon_ids}, timeout=5)
+        rsp = requests.get(SHEETS_QUERY_URL, params={"ins_id": instrument_id, "cat_ids": taxon_ids}, timeout=15)
         guides: List[Dict[str, int|str]] = rsp.json()
         return dict([(assoc["taxon_id"], assoc["sheet_id"]) for assoc in guides])
     except requests.exceptions.RequestException as e:
