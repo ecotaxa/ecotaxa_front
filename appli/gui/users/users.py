@@ -25,7 +25,7 @@ from appli.back_config import get_user_constants, get_back_constants
     SHORT_TOKEN_AGE,
     PROFILE_TOKEN_AGE,
     RECAPTCHAID,
-    OPENID_CONFIGURED
+    OPENID_CONFIGURED,
 ) = get_user_constants()
 ALL_IN_ONE = get_back_constants("ALL_IN_ONE")
 ACCOUNT_USER_CREATE = "create"
@@ -231,10 +231,14 @@ def user_create(
             if len(resp) <= 3 or resp[3] == False:
                 message = py_user["profilesuccess"]["create"]
             elif len(resp) >= 3 and resp[3] == True:
-                message = py_user["statusnotauthorized"]["01"]
+                if API_ACCOUNT_VALIDATION:
+                    message = py_user["statusnotauthorized"]["01"]
+                elif API_EMAIL_VERIFICATION:
+                    message = py_user["statusnotauthorized"]["00"]
+                else:
+                    message = resp[1]
             else:
                 message = resp[1]
-
             typ = "success"
         else:
             redir = url_for("gui_register") + "/" + token
@@ -454,9 +458,13 @@ def user_account(
                                     + py_user["checkspam"]
                                 )
                             )
-                        else:
+                        elif API_ACCOUNT_VALIDATION:
                             message = (
                                 message + " " + py_user["statusnotauthorized"]["01"]
+                            )
+                        else:
+                            message = (
+                                message + " " + py_user["statusnotauthorized"]["00"]
                             )
                     else:
                         # should not comme here

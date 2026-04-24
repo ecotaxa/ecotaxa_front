@@ -1,6 +1,5 @@
 from flask_babel import _
 
-
 # breadcrumb tree
 apptree = dict(
     {
@@ -88,6 +87,7 @@ py_messages = dict(
         "possiblemodel404": _("Error retrieving possible models"),
         "license404": _("Error retrieving licenses"),
         "project404": _("Project does not exist"),
+        "collection404": _("Collection does not exist"),
         "page404": _("The page does not exists."),
         "access403": _("Access denied "),
         "accessonly": {

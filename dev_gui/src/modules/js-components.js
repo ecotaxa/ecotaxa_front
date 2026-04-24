@@ -230,6 +230,17 @@ function createJsComponents() {
               });
               this.init(item);*/
               break;
+            case "js-dragdrop":
+              if (!dynamics.JsDragDrop ) {
+                let {
+                  JsDragDrop
+                } = await import('../modules/js-dragdrop.js');
+
+                dynamics.JsDragDrop = JsDragDrop;
+              }
+               dynamics.JsDragDrop(item);
+
+              break;
           }
         }
       }

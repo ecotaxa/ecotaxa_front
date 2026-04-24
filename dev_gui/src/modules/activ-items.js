@@ -292,6 +292,13 @@ function createActivItems() {
            form.addEventListener('submit',async (e) => {e.preventDefault();
            return await not_empty();})}
         break;
+        case "set-value":
+              const trgt = (item.dataset.hasOwnProperty('target')) ? document.getElementById(item.dataset.target) : null;
+              if (trgt === null) return;
+              item.addEventListener((item.dataset.event) ? item.dataset.event : 'click', (e) => {
+                  trgt.textContent = item.textContent;
+              });
+        break;
           }
 
     });

@@ -147,6 +147,7 @@ def prj_edit(prjid: int, new: bool = False):
     if gvp("save") == "Y":
         # Load posted variables
         previous_cnn = target_proj.cnn_network_id
+        formulae = target_proj.formulae
         # posted_contact_id = None
         # Update the project (from API call) with posted variables
 
@@ -167,6 +168,16 @@ def prj_edit(prjid: int, new: bool = False):
         if new != True and previous_cnn != target_proj.cnn_network_id:
             flash(py_messages["scnerased"], "success")
         # process members privileges results - members_by_right is empty as backend records are deleted on every update
+        # process formulae
+        formulae = ""
+        for a_var in ["total_water_volume", "subsample_coef", "individual_volume"]:
+            ret = gvp(a_var, "")
+            formulae += ret + "\r"
+        formulae = formulae.strip()
+        if target_proj.formulae.strip() != formulae:
+            setattr(target_proj, "formulae", formulae)
+        print("formulae", formulae)
+        return
         do_update = True
         contact_user = None
         err_msg = []
@@ -294,8 +305,10 @@ def prj_edit(prjid: int, new: bool = False):
         }
     )
     freecols = {}
+
     for column, prefix in defcols.items():
         freecols[column] = getattr(target_proj, prefix + "_free_cols")
+
     return render_template(
         "v2/project/projectsettings.html",
         target_proj=target_proj,

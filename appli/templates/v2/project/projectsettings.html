@@ -121,10 +121,7 @@
           </div>  </div>  </fieldset>
         <fieldset id="section-formulae" class="w-full tab">
             <legend class="tab-control">{{_('Formulae')}}</legend>
-          <div class="tab-content"> <div class="form-box">
-            <label for="formulae">{{ _('Formulae')}}<i data-for="help_project_formulae" data-request="help"></i> {{badge('success',_('new'),True)}}</label>
-            <textarea id="formulae" name="formulae" class="form-textarea" placeholder="concentration formulae" rows="6">{{ target_proj.formulae if target_proj else formulae }}</textarea>
-          </div></div>
+          <div class="tab-content"> {% include 'v2/project/_formulae.html' %}</div>
           </fieldset>
           {%-if target_proj-%}
           <fieldset id="section-freecols" class="w-full tab" >

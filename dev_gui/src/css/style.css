@@ -922,7 +922,9 @@ details.project-search .ts-dropdown .option ,  details.project-search .ts-dropdo
 .rights[data-r="managers"]  {@apply before:content-[attr(data-r)]  font-light   before:text-stone-800}
 .rights[data-r="viewers"]  {@apply before:content-[attr(data-r)]  font-light   before:text-stone-500}
 .rights[data-r] {@apply before:mr-2 before:px-1 before:capitalize   text-sm font-light  before:font-semibold  before:small-caps}
-
+/* projectsettings formulae tags */
+.tag.dropped {@apply bg-secondblue-400}
+.tag:not(.dropped)[draggable=false] {@apply opacity-[0.2]}
 /* hide title in small res when searching*/
 .hidesm {@apply hidden md:visible}
 /*********************************/

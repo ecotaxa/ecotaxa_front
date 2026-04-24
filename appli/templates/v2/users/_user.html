@@ -38,20 +38,24 @@
             <input type="text" id="{{key}}name" name="{{key}}name" class="form-input" value="{{ user[key+'name']}}" required data-required="{{_('this field is required')}}" placeholder="{{label}}"></div>
             {%endfor%}</div>
           {% else%}
-          {%- if createaccount != True and user.id!=-1 and  not current_user.is_admin==True and api_account_validation==True  -%}
+          {%- if createaccount != True and user.id!=-1 and  not current_user.is_admin==True and (api_account_validation==True or (api_email_verification and user.mail_status==False)) -%}
+          {%-if api_account_validation -%}
           {%- set dataconfirm = _('Please note that your account will be deactivated before a new validation by our services. Are you sure you want to modify your information?')-%}
+          {%-elif  api_email_verification -%}
+          {%- set dataconfirm = _('Please note that your account will be deactivated because your email status is unverified.  You will receive a confirmation email to reactivate your account.')-%}
+          {%-endif-%}
+          {%- if dataconfirm is defined -%}
           {%- set dataaction='data-action=confirm'-%}
           <div class="alert warning inverse text-xs">{{_('Please note that your account will be deactivated if you have modified one or more of the following data: name, email,organisation,country or planned usage of EcoTaxa')}}</div>
           {%-endif-%}
-          {%-set dataconfirm='' -%}
-          {%-set dataaction=''-%}
+          {%-endif-%}
           <div class="form-box">
           <label for="name">{{_('Name')}}</label>
           <input type="text" id="name" name="name" class="form-input" value="{{ user.name }}" required data-required="{{_('a name is required')}}" placeholder="{{_('Name')}}"></div>
           {% endif %}
           <div class="form-box">
             <label for="email">{{_('Email')}} <i data-for="help_profile_email" data-request="help"></i></label>
-            <input type="email" id="email" name="email" class="form-input  read-only:bg-info-50" value="{{ user.email }}"   {{' readonly' if (token!="" and token!=None and user.id==-1) else '' }} required data-required="{{_('an email is required')}}" placeholder="john@plankton.org">
+            <input type="email" id="email" name="email" class="form-input read-only:bg-info-50" value="{{ user.email }}"   {{' readonly' if (token!="" and token!=None and user.id==-1) else '' }} required data-required="{{_('an email is required')}}" placeholder="john@plankton.org">
             {%if createaccount != True or (user and user.email) -%}
             {% set type="warning"-%}
             <input type="hidden" name="currentemail" value="{{user.email}}">

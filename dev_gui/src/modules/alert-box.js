@@ -135,7 +135,7 @@ async function createAlertBox() {
       buttons = `${showall}<div class="btn-group flex justify-end max-w-full"><button class="button text-base ${alertconfig.domselectors.buttons.ok.substr(1)}"  value=true>${(options.buttons && options.buttons.ok && options.buttons.ok.text)?options.buttons.ok.text:i18nmessages.ok}</button><button class="button ${alertconfig.domselectors.buttons.cancel.substr(1)} text-base"  value=false>${(options.buttons && options.buttons.cancel && options.buttons.cancel.text)?options.buttons.cancel.text:i18nmessages.cancel}</button></div>`;
       showall = ``;
     }
-    let html = `<div class="content"><div class="signal hidden sm:block"><i class="icon"></i></div><div class="message"><strong class="type">${(i18nmessages.alerttype && i18nmessages.alerttype[message.type])?i18nmessages.alerttype[message.type]:message.type}</strong>${unescape((i18nmessages[message.content]) ? i18nmessages[message.content] : message.content)} ${buttons}</div>`;
+    let html = `<div class="content"><div class="signal hidden sm:block"><i class="icon"></i></div><div class="message"><strong class="type">${(i18nmessages.alerttype && i18nmessages.alerttype[message.type])?i18nmessages.alerttype[message.type]:message.type}</strong>${decodeURIComponent((i18nmessages[message.content]) ? i18nmessages[message.content] : message.content)} ${buttons}</div>`;
     if (message.dismissible) html += `<div class="close" data-dismiss="${box.id}"  aria-label="${i18nmessages.close}"><i class="icon-sm icon-x-mark cursor-pointer"></i></div>`;
 
     box.insertAdjacentHTML('afterbegin', html + `${showall} </div>`);
@@ -191,7 +191,7 @@ async function createAlertBox() {
             class: alertconfig.domselectors.message.substr(1)
           }, responsebox);
 
-        };
+        }
         responsebox.innerHTML = DOMPurify.sanitize(response.text());
         const btns = box.querySelector(alertconfig.domselectors.buttons.group);
         if (btns) {
@@ -286,7 +286,7 @@ async function createAlertBox() {
   }
 
   function getBoxById(id, parent = document) {
-    id=escape(unescape(id));
+    id=encodeURIComponent(decodeURIComponent(id));
     return (id !== '' && document.getElementById(id)) ? document.getElementById(id) : parent.querySelector('[data-message="' + id + '"]');
   }
 
@@ -451,9 +451,9 @@ async function createAlertBox() {
     }
     if (message.id) {
       const msg = el.querySelector(`${tag}[data-id="${message.id}"]`);
-      if (msg) msg.innerHTML = unescape(message.content);
-      else el.insertAdjacentHTML('beforeend', `<${tag} data-id="${message.id}">${unescape(message.content)}</${tag}>`);
-    } else el.insertAdjacentHTML('beforeend', `<${tag}>${unescape(message.content)}</${tag}>`);
+      if (msg) msg.innerHTML = decodeURIComponent(message.content);
+      else el.insertAdjacentHTML('beforeend', `<${tag} data-id="${message.id}">${decodeURIComponent(message.content)}</${tag}>`);
+    } else el.insertAdjacentHTML('beforeend', `<${tag}>${decodeURIComponent(message.content)}</${tag}>`);
   }
 
   function error() {
