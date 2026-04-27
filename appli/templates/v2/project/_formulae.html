@@ -10,35 +10,22 @@
 {%- macro display_tags()-%}
 <div class="pl-2 h-auto xl:basis-2/3  lg:basis-2/3 md:basis-auto basis-full flex flex-wrap ">{{combine_tags(cols,{"sample":target_proj.sample_free_cols,"acquisition":target_proj.acquisition_free_cols,"process":target_proj.process_free_cols,"object":target_proj.obj_free_cols}) }}</div>
 {%-endmacro-%}
-{%- set prefixes = {"sample":"sam","object":"obj","acquisition":"ssm","process":"ssm"} -%}
-{%-macro revert_prefixes(formula)-%}
-{%-for key,value in prefixes.items()-%}
-{%set _ret=formula|replace(value+".",key+".") %}
-{%-endfor-%}
-{{formula}}
-{%-endmacro-%}
-{%-macro set_prefixes(formula)-%}
-{%-for key,value in prefixes.items()-%}
-{%set _ret=formula|replace(key+".",value+".") %}
-{%-endfor-%}
-{{formula}}
-{%-endmacro-%}
 {%-if target_proj-%}
-{%- set total_water_volume = target_proj.formulae['total_water_volume'] if target_proj.formulae and 'total_water_volume' in target_proj.formulae else "total water volume/1000" -%}
-{%- set subsample_coef = target_proj.formulae['subsample_coef'] if target_proj.formulae and 'subsample_coef' in target_proj.formulae else "1/subsampling coefficient" -%}
-{%- set individual_volume =target_proj.formulae['individual_volume'] if target_proj.formulae and 'individual_volume' in target_proj.formulae else "4/3 * pi * (major_axis * pixel_size) * (minor_axis * pixel_size)^2'" -%}
+{%- set total_water_volume = formulae['total_water_volume'] if formulae and 'total_water_volume' in formulae else "total_water_volume/1000" -%}
+{%- set subsample_coef = formulae['subsample_coef'] if formulae and 'subsample_coef' in formulae else "1/subsampling_coefficient" -%}
+{%- set individual_volume =formulae['individual_volume'] if formulae and 'individual_volume' in formulae else "4/3 * pi * (major_axis * pixel_size) * (minor_axis * pixel_size)^2'" -%}
 <div class="flex flex-row  flex-wrap js js-dragdrop" data-formhandler="textarea"><div class="xl:basis-1/3 lg:basis-1/3 md:basis-2xs basis-full">
 <div class="form-box">
     <label for="total_water_volume">{{ _('Sample volume of the water body')}} <em>{{_('in m3')}}</em><i data-for="help_project_total_water_volume" data-request="help"></i> {{badge('success',_('new'),True)}}</label>
-    <div id="total_water_volume" class="form-textarea caret-secondblue-300" data-accept="sample" placeholder="{{_('total water volume')+'/1000'}}">{{revert_prefixes(total_water_volume)}}</div>
-            <div><em>{{_('This is the volume of water sampled within the sample or subsample, as appropriate for this dataset.')}}</em><span class="font-medium  relative cursor-pointer bg-secondblue-50 hover:bg-secondblue-100"  data-title="{{_('double click to set value')}}" data-action="set-value" data-event="dblclick" data-target="total_water_volume"> {{_('total water volume')+'/1000'}}</span></div></div>
+    <div id="total_water_volume" class="form-textarea caret-secondblue-300" data-accept="sample" placeholder="{{_('total water volume')+'/1000'}}">{{total_water_volume}}</div>
+            <div><em>{{_('This is the volume of water sampled within the sample or subsample, as appropriate for this dataset.')}}</em><span class="font-medium  relative cursor-pointer bg-secondblue-50 hover:bg-secondblue-100"  data-title="{{_('double click to set value')}}" data-action="set-value" data-event="dblclick" data-target="total_water_volume">{{total_water_volume}}</span></div></div>
     <div class="form-box">
             <label for="subsample_coef">{{ _('Subsampling coefficient')}} <em>{{_('in [0,1]')}}</em><i data-for="help_project_subsample_coef" data-request="help"></i> {{badge('success',_('new'),True)}}</label>
-        <div class="form-textarea caret-secondblue-300 " id="subsample_coef" data-accept="acquisition,process" placeholder="{{'1/'+_('subsampling coefficient')}}">{{revert_prefixes(subsample_coef)}}</div>
-             <div  class="basis-full"><em>{{_('This is the portion of the volume above that has been imaged.')}}</em><span class="font-medium relative cursor-pointer bg-secondblue-50 hover:bg-secondblue-100"  data-title="{{_('double click to set value')}}" data-action="set-value"  data-event="dblclick"  data-target="subsample_coef">{{'1/'+_('subsampling coefficient')}}</span></div></div>
+        <div class="form-textarea caret-secondblue-300 " id="subsample_coef" data-accept="acquisition,process" placeholder="{{'1/'+_('subsampling coefficient')}}">{{subsample_coef}}</div>
+             <div  class="basis-full"><em>{{_('This is the portion of the volume above that has been imaged.')}}</em><span class="font-medium relative cursor-pointer bg-secondblue-50 hover:bg-secondblue-100"  data-title="{{_('double click to set value')}}" data-action="set-value"  data-event="dblclick"  data-target="subsample_coef">{{subsampling_coefficient}}</span></div></div>
          <div class="form-box">
             <label for="individual_volume">{{ _('Individual object volume')}} <em>{{_(' in mm3')}}</em><i data-for="help_project_individual_volume" data-request="help"></i> {{badge('success',_('new'),True)}}</label>
-            <div id="individual_volume" class="form-textarea  caret-secondblue-300" data-accept="acquisition,process,object" placeholder="4/3 * pi * (major_axis * pixel_size) * (minor_axis * pixel_size)^2')" data-formulae="4/3 * pi * (major_axis * pixel_size) * (minor_axis * pixel_size)^2')|" >{{revert_prefixes(individual_volume)}}</div>
+            <div id="individual_volume" class="form-textarea  caret-secondblue-300" data-accept="acquisition,process,object" placeholder="4/3 * pi * (major_axis * pixel_size) * (minor_axis * pixel_size)^2')" data-formulae="4/3 * pi * (major_axis * pixel_size) * (minor_axis * pixel_size)^2')|" >{{individual_volume}}</div>
                 <div class="basis-full"><em>{{_('This should specify a formula to compute the volume of each object in mm3. Classic formulae are equivalent spherical volume = ')}}</em><span class="font-medium  cursor-pointer relative bg-secondblue-50 hover:bg-secondblue-100"  data-title="{{_('double click to set value')}}"  data-event="dblclick" data-action="set-value" data-target="individual_volume">4/3 * pi * ( sqrt(area/pi) * pixel_size )</span>
  <em>{{_('equivalent ellipsoidal volume = ')}}</em> <span class="font-medium cursor-pointer relative bg-secondblue-50 hover:bg-secondblue-100" data-title="{{_('double click to set value')}}"  data-event="dblclick"  data-action="set-value" data-target="individual_volume"> 4/3 * pi * (major_axis * pixel_size) * (minor_axis * pixel_size)^2')</span></div></div>
                 </div>{{display_tags()}}
