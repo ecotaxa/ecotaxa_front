@@ -559,7 +559,7 @@ export class ProjectPrivileges {
   formatPrivileges() {
     const lines = this.fieldset.querySelectorAll('[data-block="' + this.options.target + '"]');
     const format_privilege = (line) => {
-      const els = line.querySelectorAll('[name*="members["');
+      const els = line.querySelectorAll('[name*="members["]');
       els.forEach((el) => {
         let name = el.name;
         name = name.split('[');

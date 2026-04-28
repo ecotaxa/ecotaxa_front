@@ -251,11 +251,11 @@ def collection_edit(collection_id: int, new: bool = False):
     # Security & sanity checks
     # get target_proj
 
-    from appli.gui.collection.staticlistes import py_messages
+    from appli.gui.collection.staticlistes import py_messages as coll_messages
 
     collection = get_collection(collection_id)
     if collection is None:
-        flash(py_messages["selectothercollection"], "info")
+        flash(coll_messages["selectothercollection"], "info")
         return redirect(url_for("gui_collection_noright", collection_id=collection_id))
     # data structure used in both display & submit
     if gvp("save") == "Y":
@@ -322,9 +322,9 @@ def collection_edit(collection_id: int, new: bool = False):
                     collection_id=collection_id, collection_req=collection
                 )
                 if new:
-                    message = py_messages["collectioncreated"]
+                    message = coll_messages["collectioncreated"]
                 else:
-                    message = py_messages["collectionupdated"]
+                    message = coll_messages["collectionupdated"]
                 flash(
                     message + " " + collection.title,
                     "success",

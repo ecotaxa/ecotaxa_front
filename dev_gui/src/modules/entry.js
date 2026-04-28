@@ -1,7 +1,5 @@
 import {
   create_box,
-  dirseparator,
-  urlseparator,
   fetchSettings,
   generate_uuid
 } from '../modules/utils.js';

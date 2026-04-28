@@ -135,6 +135,27 @@ def prj_create() -> str:
 def prj_edit(prjid: int, new: bool = False):
     # Security & sanity checks
     # get target_proj
+    def manage_prefixes(formula, direction=True):
+
+        if direction:
+            prefixes = {
+                "sample": "sam",
+                "object": "obj",
+                "subsample": "ssm",
+                "subsample": "ssm",
+            }
+            for key, value in prefixes.items():
+                formula = formula.replace(value + ".", key + ".")
+        else:
+            prefixes = {
+                "sample": "sam",
+                "object": "obj",
+                "acquisition": "ssm",
+                "process": "ssm",
+            }
+            for key, value in prefixes.items():
+                formula = formula.replace(key + ".", value + ".")
+        return formula
 
     from appli.gui.staticlistes import py_messages
 
@@ -169,15 +190,14 @@ def prj_edit(prjid: int, new: bool = False):
             flash(py_messages["scnerased"], "success")
         # process members privileges results - members_by_right is empty as backend records are deleted on every update
         # process formulae
+
         formulae = ""
         for a_var in ["total_water_volume", "subsample_coef", "individual_volume"]:
-            ret = gvp(a_var, "")
-            formulae += ret + "\r"
+            _ret = gvp(a_var, "")
+            formulae += a_var + ": " + manage_prefixes(_ret, False) + "\r"
         formulae = formulae.strip()
         if target_proj.formulae.strip() != formulae:
             setattr(target_proj, "formulae", formulae)
-        print("formulae", formulae)
-        return
         do_update = True
         contact_user = None
         err_msg = []
@@ -309,6 +329,18 @@ def prj_edit(prjid: int, new: bool = False):
     for column, prefix in defcols.items():
         freecols[column] = getattr(target_proj, prefix + "_free_cols")
 
+    formulae = {}
+    if target_proj.formulae is not None:
+        lines = target_proj.formulae.split("\r")
+        for line in lines:
+            part = line.split(":")
+            print("part ", part)
+            formulae[part[0].strip()] = ":".join([p.strip() for p in part[1:]])
+            print("formulae", formulae)
+        for key, value in formulae.items():
+            formulae[key] = manage_prefixes(value, True)
+        print("target", formulae)
+
     return render_template(
         "v2/project/projectsettings.html",
         target_proj=target_proj,
@@ -319,6 +351,7 @@ def prj_edit(prjid: int, new: bool = False):
         freecols=freecols,
         possible_access=access,
         collections=collections,
+        formulae=formulae,
         new=new,
         # redir=redir,
     )

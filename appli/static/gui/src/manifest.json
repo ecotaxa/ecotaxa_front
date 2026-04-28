@@ -9,6 +9,7 @@
   "src_modules_js-taxomapping_js.js": "/static/gui/src/src_modules_js-taxomapping_js.js",
   "src_modules_js-import_js.js": "/static/gui/src/src_modules_js-import_js.js",
   "src_modules_js-tabs_js.js": "/static/gui/src/src_modules_js-tabs_js.js",
+  "src_modules_js-dragdrop_js.js": "/static/gui/src/src_modules_js-dragdrop_js.js",
   "src_modules_modal-container_js.js": "/static/gui/src/src_modules_modal-container_js.js",
   "src_modules_js-tree_js.js": "/static/gui/src/src_modules_js-tree_js.js",
   "src_modules_job-monitor_js.js": "/static/gui/src/src_modules_job-monitor_js.js",

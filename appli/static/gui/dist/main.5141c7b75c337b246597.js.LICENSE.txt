@@ -14,6 +14,8 @@
 
 /*! ../modules/js-components.js */
 
+/*! ../modules/js-dragdrop.js */
+
 /*! ../modules/js-import.js */
 
 /*! ../modules/js-my-files.js */

@@ -3,7 +3,7 @@ from flask_login import current_user, login_required
 from appli import app, gvp
 from appli.gui.commontools import is_partial_request
 from appli.gui.staticlistes import py_user
-from appli.back_config import get_user_constants, get_back_constants
+from appli.back_config import get_user_constants
 
 NO_STATUS = 10
 
@@ -79,7 +79,7 @@ def gui_me_activate(token: str):
         SHORT_TOKEN_AGE,
         PROFILE_TOKEN_AGE,
         RECAPTCHAID,
-        OPENID_CONFIGURED
+        OPENID_CONFIGURED,
     ) = get_user_constants()
     if request.method == "POST":
 
@@ -163,7 +163,7 @@ def gui_me_forgotten(token: str = ""):
         SHORT_TOKEN_AGE,
         PROFILE_TOKEN_AGE,
         RECAPTCHAID,
-        OPENID_CONFIGURED
+        OPENID_CONFIGURED,
     ) = get_user_constants()
     if request.method == "POST":
         partial = True

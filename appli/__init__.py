@@ -16,7 +16,6 @@ from appli.env_config import augment_from_env
 from appli.utils import ApiClient, ntcv
 from to_back.ecotaxa_cli_py import UsersApi, MinUserModel
 from appli.security_on_backend import user_from_api
-from to_back.ecotaxa_cli_py import ApiException
 
 app = Flask("appli")
 app.config.from_pyfile("../config/config.cfg")
