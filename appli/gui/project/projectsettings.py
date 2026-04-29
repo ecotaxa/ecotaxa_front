@@ -196,7 +196,10 @@ def prj_edit(prjid: int, new: bool = False):
             _ret = gvp(a_var, "")
             formulae += a_var + ": " + manage_prefixes(_ret, False) + "\r"
         formulae = formulae.strip()
-        if target_proj.formulae.strip() != formulae:
+        if (
+            target_proj.formulae is not None
+            and target_proj.formulae.strip() != formulae
+        ):
             setattr(target_proj, "formulae", formulae)
         do_update = True
         contact_user = None
