@@ -1,6 +1,8 @@
 import DOMPurify from 'dompurify';
 export function JsDragDrop(item,options) {
   const defaultOptions = {
+      pointstr:'.',
+      replacestr:"§§",
       css: {dragging:"dragging", dragover:"dragover",dropped:"dropped",disabled:"disabled"}
   }
   options = { ...defaultOptions,
@@ -61,7 +63,7 @@ export function JsDragDrop(item,options) {
     e.stopImmediatePropagation();
     e.dataTransfer.effectAllowed = effect;
     current.id=e.target.id;
-    current.type=e.target.textContent.split('.')[0];
+    current.type=e.target.textContent.split(options.pointstr)[0];
     e.dataTransfer.setData("text/plain",current.id);
     /*item.querySelectorAll('[data-accept]').forEach( drop => {
         const accept =(drop.dataset.accept)?drop.dataset.accept:null;
@@ -148,7 +150,7 @@ export function JsDragDrop(item,options) {
       }
       const accept =(e.target.dataset.accept)?e.target.dataset.accept:null;
       item.querySelectorAll('[draggable]').forEach(tag => {
-      const type=tag.id.split('.')[0];
+      const type=tag.id.split(options.replacestr)[0];
       if (accept.includes(type)) tag.draggable=true;
       else tag.draggable=no;
       });
@@ -192,34 +194,39 @@ export function JsDragDrop(item,options) {
     function replaceByTags(container) {
        const accept =(container.dataset.accept)?container.dataset.accept:null;
        const subsamples=['process','acquisition'];
-        let content,html,index;
+        let content,index;
        const replace_by=function(tagvalue,tag) {
            let clone;
          while(index>=0 ) {
             clone=createClone(tag);
-            html =content.substr(0,index)+ clone.outerHTML + content.substr(index+tagvalue.length);
-            index=content.indexOf(tagvalue,index+ clone.outerHTML.length);
-            container.innerHTML=html;
+            content =content.substr(0,index)+ clone.outerHTML + content.substr(index+tagvalue.length);
+            index=content.indexOf(tagvalue,index+ clone.outerHTML.length-1);
+            container.innerHTML=content;
             clone=document.getElementById(clone.id);
             cloneEvents(clone);
          }
         }
-      item.querySelectorAll('[draggable]').forEach(tag => {
-      const type=tag.id.split('.')[0];
+
+      sortedtags.forEach(tag => {
+      const type=tag.id.split(options.replacestr)[0];
       if (!accept.includes(type))  return;
       content=container.innerHTML;
       let tagvalue =tag.textContent;
       index=content.indexOf(tagvalue);
       replace_by(tagvalue,tag);
       if(subsamples.includes(type)) {
-        subsamples.forEach(sub => {tagvalue=tagvalue.replace(sub+'.','subsample.');tagvalue=tagvalue.replace(sub+'.</em>','subsample.</em>');});
+        subsamples.forEach(sub => {tagvalue=tagvalue.replace(sub+options.pointstr,'subsample.');tagvalue=tagvalue.replace(sub+'.</em>','subsample.</em>');});
         content=container.innerHTML;
         index=content.indexOf(tagvalue);
         replace_by(tagvalue,tag);
       }
       });
     }
-     item.querySelectorAll('[draggable]').forEach((tag) =>{
+    // sort by alpha and length
+    const sortedtags = Array.from(item.querySelectorAll('[draggable]')).sort((a,b)=> { if (a.textContent < b.textContent) return 1 ; else if (a.textContent > b.textContent)  return - 1; return 0;  });
+    sortedtags.forEach((tag) =>{
+    //must replace '.' (aka options.pointstr by options.replacestr) in id to replace text by html tags
+    tag.id=tag.id.replace(options.pointstr,options.replacestr);
     movehandlers.forEach(listener=> { tag.addEventListener(listener.name,listener.func)});
     })
     item.querySelectorAll('[data-accept]').forEach( (droparea) => {
@@ -227,13 +234,13 @@ export function JsDragDrop(item,options) {
         drophandlers.forEach(listener => {droparea.addEventListener(listener.name,listener.func);});
         replaceByTags(droparea);
     });
-   if(item.dataset.hasOwnProperty('formhandler')) {
+   if(options.formhandler) {
        const form=item.closest('form');
        if (form.formsubmit) form.formsubmit.addHandler('submit',() =>{
            item.querySelectorAll('[data-accept]').forEach(droparea=> {
             const input = document.createElement('input');
             input.type='hidden';
-            input.name=droparea.id;
+            input.name=droparea.id.replace(options.replacestr,options.pointstr);
             input.value=droparea.textContent;
             form.append(input);
            });

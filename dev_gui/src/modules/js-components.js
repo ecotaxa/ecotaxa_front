@@ -238,8 +238,7 @@ function createJsComponents() {
 
                 dynamics.JsDragDrop = JsDragDrop;
               }
-               dynamics.JsDragDrop(item);
-
+               dynamics.JsDragDrop(item,item.dataset);
               break;
           }
         }
