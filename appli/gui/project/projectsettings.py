@@ -196,10 +196,12 @@ def prj_edit(prjid: int, new: bool = False):
             _ret = gvp(a_var, "")
             formulae += a_var + ": " + manage_prefixes(_ret, False) + "\r"
         formulae = formulae.strip()
-        if (
-            target_proj.formulae is not None
-            and target_proj.formulae.strip() != formulae
-        ):
+        if target_proj.formulae is None:
+            checkformulae = None
+        else:
+            checkformulae = target_proj.formulae.strip()
+        if checkformulae != formulae:
+            print("forulae:", formulae)
             setattr(target_proj, "formulae", formulae)
         do_update = True
         contact_user = None
@@ -337,12 +339,9 @@ def prj_edit(prjid: int, new: bool = False):
         lines = target_proj.formulae.split("\r")
         for line in lines:
             part = line.split(":")
-            print("part ", part)
             formulae[part[0].strip()] = ":".join([p.strip() for p in part[1:]])
-            print("formulae", formulae)
         for key, value in formulae.items():
             formulae[key] = manage_prefixes(value, True)
-        print("target", formulae)
 
     return render_template(
         "v2/project/projectsettings.html",
