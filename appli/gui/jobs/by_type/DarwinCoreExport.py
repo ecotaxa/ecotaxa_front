@@ -25,7 +25,7 @@ class ExportDarwinCoreJob(ExportJob):
         projid, collection_id = cls.get_target_id()
         dry_run = gvp("dry_run") == "1"
         include_predicted = gvp("include_predicted") == "1"
-        with_absent = gvp("with_types_row") == "1"
+        with_absent = gvp("with_absent") == "1"
         with_computations = gvpm("with_computations" or [])
         formulae = gvp("formulae" or "")
         formulae_list = [a_line.strip().split(":") for a_line in formulae.splitlines()]
