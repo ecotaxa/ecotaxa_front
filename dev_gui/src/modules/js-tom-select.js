@@ -45,6 +45,7 @@ function createJsTomSelect() {
     const multiple = item.hasAttribute('multiple');
     const type = item.dataset.type;
     const orderitems=(item.dataset.hasOwnProperty('orderitems'))?true:false;
+    let _fetching={};
     let option = {
         url: '',
         settings: settings
@@ -98,7 +99,10 @@ function createJsTomSelect() {
         const personurl="/gui/persons/create/";
         if (item.dataset.prefix) option.settings.itemprefix=item.dataset.prefix;
         const open_new_person= async function() {
+        if(_fetching[personurl]) return;
+        _fetching[personurl]=true;
         const response = await fetch(personurl,fetchSettings);
+        _fetching[personurl]=false;
         return response;
         }
         const wait_for_input=async function(resp,newone,callback) {
@@ -120,7 +124,10 @@ function createJsTomSelect() {
         popup.classList.add('max-h-full');
         btn.addEventListener('click',async(e)=>{
         const url=btn.dataset.href + '?type=' + btn.dataset.type;
+        if(_fetching[url]) return;
+        _fetching[url]=true;
         response =await fetch(url,fetchSettings);
+        _fetching[url]=false;
         const reply=(response.ok) ?await response.text():await Promise.reject(response);
         content.innerHTML=reply;
         content.querySelectorAll(funcselector).forEach(el=> {applyTo(el);});
@@ -303,32 +310,40 @@ function createJsTomSelect() {
             if (query) url += '?filt_title=' + encodeURIComponent(query); //+ '&filt_instrum=' + encodeURIComponent(query);
             break;
         }
-        if (url !== null) fetch(url, fetchSettings()).then(response => response.json()).then(json => {
-          if (type === models.project) {
-            if (json.data && json.data.length) json = json.data.map(row => {
-              return {
-                id: row[1],
-                text: row[3][0],
-                rights: row[0]
+        if (url !== null) {
+          if(_fetching[url]) return;
+          _fetching[url]=true;
+          fetch(url, fetchSettings()).then(response => response.json()).then(json => {
+            if (type === models.project) {
+              if (json.data && json.data.length) json = json.data.map(row => {
+                return {
+                  id: row[1],
+                  text: row[3][0],
+                  rights: row[0]
+                }
+
+              });
+            } else if ([models.instr, models.organisation].indexOf(type) >= 0 && json.length) json = json.reduce((result, a, v) => {
+              a = DOMPurify.sanitize(a);
+              let obj = {
+                id: a,
+                text: a
               }
-
-            });
-          } else if ([models.instr, models.organisation].indexOf(type) >= 0 && json.length) json = json.reduce((result, a, v) => {
-            a = DOMPurify.sanitize(a);
-            let obj = {
-              id: a,
-              text: a
-            }
-            result.push(obj);
-            return result;
-          }, []);
-          if (json.length && typeof json == 'object') json = Object.entries(json);
-          return this.options + (callback)?callback(json):json;
-        }).catch(err => {
-          console.log('tomselect-err ', err);
-        });
+              result.push(obj);
+              return result;
+            }, []);
+            if (json.length && typeof json == 'object') json = Object.entries(json);
+            return this.options + (callback)?callback(json):json;
+          }).catch((err) => {
+      AlertBox.addAlert({
+        type: AlertBox.alertconfig.types.danger,
+        content: err.status ? `${err.status} ${err.statusText}` : err,
+        dismissible: true,
+      });
+    }).finally(()=> {
+      _fetching[url]=false;});
+        }
       },
-
       render: {
         option: function(el, escape) {
           if (el === undefined || el === null) return ``;
@@ -382,7 +397,7 @@ function createJsTomSelect() {
         };
       }
     }
-    if (item.dataset.orderitems) option.settings.plugins = { ...option.settings.plugins,
+    if (orderitems) option.settings.plugins = { ...option.settings.plugins,
           ...{
             'drag_drop': {}
           }

@@ -6,7 +6,7 @@
 # V2 new font interface projects list
 #
 
-from typing import List
+from typing import List, Optional
 
 from flask import request, render_template
 from flask_login import current_user
@@ -70,7 +70,7 @@ def _prjs_list_api(
     listall: bool = False,
     filt: dict = dict({}),
     for_managing: bool = False,
-    summary: bool = False,
+    fields: Optional[str] = "*default",
 ) -> list:
     import requests
 
@@ -90,8 +90,11 @@ def _prjs_list_api(
                 "for_managing": for_managing,
             }
         )
-        if summary:
-            payload.update({"fields": "*default"})
+        import time
+
+        if fields is not None and len(fields.strip()):
+            payload.update({"fields": fields})
+        starttime = time.time()
         with ApiClient(ProjectsApi, request) as apiproj:
             url = (
                 apiproj.api_client.configuration.host + "/projects/search"
@@ -101,6 +104,8 @@ def _prjs_list_api(
                 "Authorization": "Bearer " + token,
             }
         r = requests.get(url, headers=headers, params=payload)
+        print("payload", payload)
+        print(" time from api ", (time.time() - starttime))
         if r.status_code == 200:
             prjs.extend(r.json())
         else:
@@ -110,7 +115,6 @@ def _prjs_list_api(
 
 def projects_list(
     listall: bool = False,
-    partial: bool = False,
     for_managing: bool = False,
     selection="list",
     filt=None,
@@ -144,12 +148,41 @@ def projects_list(
         prjs = _prj_import_taxo_api(0, filt)
         if current_user.is_app_admin == False:
             prjs = prjs + _prj_import_taxo_api(0, filt, not_granted=True)
-    elif typeimport == "project":
-        prjs = _prjs_list_api(listall, filt, for_managing=True, summary=True)
     else:
-        prjs = _prjs_list_api(listall, filt, for_managing=for_managing, summary=True)
+        fields = "*default"
+        if typeimport == "project":
+            fields = "*summary"
+            for_managing = True
+        elif typeimport == "commons":
+            fields = "projid,title,instrument"
+        elif typeimport == "fields":
+            fields = "*default,classifsettings,classiffieldlist"
+        elif typeimport == "settings":
+            fields = "*default,,viewers,annotators,managers,contact,initclassiflist,classiffieldlist,cnn_network_id"
+        elif typeimport == "privileges":
+            fields = "*summary,viewers,annotators,managers,contact"
+        prjs = _prjs_list_api(
+            listall,
+            filt,
+            for_managing=for_managing,
+            fields=fields,
+        )
+        if fields is not None and "initclassiflist" in fields:
+            for i, a_prj in enumerate(prjs):
+                if a_prj["initclassiflist"] is None:
+                    a_prj["init_classif_list"] = []
+                else:
+                    a_prj["init_classif_list"] = [
+                        int(x)
+                        for x in a_prj["initclassiflist"].split(",")
+                        if x.isdigit()
+                    ]
+            prjs[i] = a_prj
+
         if typeimport != "" and current_user.is_app_admin == False:
-            prjs = prjs + _prjs_list_api(True, filt, for_managing=for_managing)
+            prjs = prjs + _prjs_list_api(
+                True, filt, for_managing=for_managing, fields=fields
+            )
         # last_used_projects are put on top of list in the interface
         last_used_projects = list(p.projid for p in current_user.last_used_projects)
         if len(last_used_projects):
@@ -166,7 +199,6 @@ def projects_list(
                     for u in prj[k]:
                         if current_user.id == u["id"]:
                             can_access[v].append(prj["projid"])
-
     from appli.gui.project.projects_list_interface_json import (
         project_table_columns,
         render_for_js,
@@ -252,6 +284,7 @@ def _prj_import_taxo_api(
                     "filter_subset": False,
                 }
             )
+            payload.update({"fields": "instrument,initclassiflist,classiffieldlist"})
             r = requests.get(url, headers=headers, params=payload)
             if r.status_code == 200:
                 prjs.extend(r.json())
@@ -266,6 +299,12 @@ def _prj_import_taxo_api(
     taxa_ids_for_all = set()
     stats_per_project = {}
     for a_prj in prjs:
+        if a_prj["initclassiflist"] is None:
+            a_prj["init_classif_list"] = []
+        else:
+            a_prj["init_classif_list"] = [
+                int(x) for x in a_prj["initclassiflist"].split(",") if x.isdigit()
+            ]
         taxa_ids_for_all.update(a_prj["init_classif_list"])
     for a_stat in stats:
         taxa_ids_for_all.update(a_stat.used_taxa)
@@ -274,7 +313,10 @@ def _prj_import_taxo_api(
     lst = [str(tid) for tid in taxa_ids_for_all if tid != -1]
     with ApiClient(TaxonomyTreeApi, request) as api:
         res: List[TaxonModel] = api.query_taxa_set(ids=" ".join(lst))
-    taxo_map = {taxon_rec.id: (taxon_rec.display_name , taxon_rec.lineage_status[0]) for taxon_rec in res}
+    taxo_map = {
+        taxon_rec.id: (taxon_rec.display_name, taxon_rec.lineage_status[0])
+        for taxon_rec in res
+    }
     prjs_pojo = []
     for a_prj in prjs:
         # exclude current prj

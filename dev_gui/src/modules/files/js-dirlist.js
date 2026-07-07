@@ -122,6 +122,7 @@ export const dirlistOptions = {
 
 function EntryAction(args, options) {
   const entryaction = new Entry(args, options);
+  let _fetching=false;
   entryaction.eventnames = {
     attach: 'attach',
     detach: 'detach',
@@ -188,10 +189,19 @@ function EntryAction(args, options) {
         data.append(api_parameters.dest, destpath.join(dirseparator));
         break;
     }
+    if(_fetching) return;
+    _fetching=true;
     const response = await fetch(this.options.url + urlseparator + action, fetchSettings({
       method: "POST",
       body: data,
-    }));
+    })).catch((err) => {
+      AlertBox.addAlert({
+        type: AlertBox.alertconfig.types.danger,
+        content: err.status ? `${err.status} ${err.statusText}` : err,
+        dismissible: false,
+      });
+    }).finally(()=> {
+      _fetching=false;});
     const json = await response.json();
     if (response.status === 200) {
       if (callback) callback(json.message);

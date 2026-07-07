@@ -13,7 +13,9 @@ let dynamics = {};
 import {
   ModuleEventEmitter
 } from '../modules/module-event-emitter.js';
+import {AlertBox} from "./alert-box";
 function createActivRequest() {
+  let _fetching=false;
   function applyTo(element = document) {
     element = (document || element instanceof HTMLElement) ? element : document.querySelector(element);
     if (!element) return;
@@ -233,17 +235,29 @@ function createActivRequest() {
 
   function fetchRequest(format, url, callback) {
     if (!callback) return;
+    if (_fetching) return;
+    _fetching=true;
     if (format === 'json') {
       fetch(url, fetchSettings()).then(response => response.json()).then(json => {
         callback(json);
+      }).catch(err => {
+        AlertBox.addAlert({
+        type: AlertBox.alertconfig.types.danger,
+        content: err.status ? `${err.status} ${err.statusText}` : err,
+        dismissible: true,
       });
+      }).finally(()=>{_fetching=false;});
     } else {
       fetch(url, fetchSettings()).then(response => response.text()).then(html => {
         html = DOMPurify.sanitize(html);
         callback(html);
       }).catch(err => {
-        console.log('request', err);
+        AlertBox.addAlert({
+        type: AlertBox.alertconfig.types.danger,
+        content: err.status ? `${err.status} ${err.statusText}` : err,
+        dismissible: true,
       });
+      }).finally(()=>{_fetching=false;});
     }
   }
   return {

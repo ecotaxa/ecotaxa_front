@@ -27,11 +27,7 @@
 {%- elif option.format=='textarea'-%}
 <label>{{option.label}}{%-if "help" in option -%}<i class="icon-help" data-for="{{'help_'+action+suffix+'#'+option.help}}" data-request="help" data-what="help"></i>{%-endif-%}</label>
 <textarea class="form-textarea {{option.class if 'class' in option}}" name="{{name}}"   id="{{name}}" placeholder="{{option.placeholder if 'placeholder' in option}}" rows="{{option.rows if 'rows' in options else 1}}">{{datas[name][0] if name in datas}}</textarea>
-{%- elif name=="advanced_options"-%}
-{%- set comment = option.taxo_mapping.comment if "taxo_mapping" in option and "comment" in option.taxo_mapping -%}
-<div class="form-box " id="import_options"><details>
-  <summary class="font-semibold">{{_('Advanced options')}}</summary>
-  <div id="advanced" data-shared="import_taxo-mapping"></div></details></div>
+
   {%-elif option.format=='fieldset'%}
   <details><summary>{{option.label}}</summary><div id="{{name+'_'+option.format}}" class="flex md:flex-row flex-wrap w-full">{%- for name,field in option.fields.items() -%}<div class="form-box line">{{ make_field(name,field)}}</div>
     {%-endfor-%}</div></details>
@@ -94,10 +90,6 @@
           <em class="blockquote text-sm">{{_('Contact the')}} <a href="mailto:{{prjmanagermailto}}" class="text-secondblue-600">{{_('project manager')}}</a> {{_('to know where and how to upload your data.')}}
             {{_('Once the import is complete, all data folders/files can be safely erased on the server.')}}</em>
         </div></div></div>
-        <div id="import_taxo-mapping" class="hide">
-        {%-set name="taxo_mapping"-%}
-        {%- include('/v2/taxonomy/_import_taxo_mapping.html') -%}
-        </div>
         </div>
     <!-- end files to import -->
     <div id="import-list"><input type="hidden" name="file_to_load" id="file_to_load"></div>

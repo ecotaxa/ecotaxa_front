@@ -3,7 +3,7 @@ from typing import ClassVar
 
 from flask import request
 
-from appli import gvp
+from appli import gvp, gvpm
 from appli.gui.jobs.by_type.Export import ExportJob
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py.api import ObjectsApi
@@ -27,7 +27,7 @@ class ExportSummaryJob(ExportJob):
     def job_req(cls):
 
         projid, collid = cls.get_target_id()
-        quantity = gvp("quantity")
+        quantity = gvpm("quantity")
         summarise_by = gvp("summarise_by")
         formulae = gvp("formulae")
         out_to_ftp = gvp("out_to_ftp") == "1"

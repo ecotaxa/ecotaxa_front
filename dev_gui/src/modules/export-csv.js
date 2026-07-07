@@ -67,7 +67,6 @@ export function exportCSV(state, options = {}, hidden = true) {
       };
       //headings
         let label =obj.name;
-        console.log('obj.name',label)
         if (!label) label = 'C' + column.index;
         row.push(text_convert(label));
         columns.push(obj);
@@ -96,15 +95,15 @@ export function exportCSV(state, options = {}, hidden = true) {
   // Download
   if (options.download) {
     // Create a link to trigger the download
-    link = document.createElement("a")
-    link.href = encodeURI(`data:text/csv;charset=utf-8,${str}`)
-    link.download = `${options.filename || "datatable_export"}.csv`
+    const lnk = document.createElement("a")
+    lnk.href = encodeURI(`data:text/csv;charset=utf-8,${str}`)
+    lnk.download = `${options.filename || "datatable_export"}.csv`
     // Append the link
-    document.body.appendChild(link);
+    document.body.appendChild(lnk);
     // Trigger the download
-    link.click();
+    lnk.click();
     // Remove the link
-    document.body.removeChild(link);
+    document.body.removeChild(lnk);
   }
   return str;
 }

@@ -154,7 +154,6 @@ def read_taxo_recast(target_id: int, operation: str, is_collection: bool):
         taxo_worms = taxa_populate(wormsids, keys, recastitems)
         taxo_auto = taxa_populate(autoids, keys, recastitems)
         taxo_recast = taxa_populate(recastids, keys, recastitems)
-        print("taxalist----", taxalist)
         return render_template(
             "v2/taxonomy/_dwca_taxo_recast.html",
             taxo_auto=taxo_auto,
@@ -202,9 +201,12 @@ def update_taxo_recast(
         with ApiClient(TaxonomyTreeApi, request) as api:
             api.update_taxonomy_recast(recast)
     except ApiException as ae:
-        if ae.status != NotFound.code:
-            new_ui_error(ae)
-    return read_taxo_recast(target_id, operation=operation, is_collection=is_collection)
+        new_ui_error(ae)
+    recast_operation = get_back_constants("RECAST_OPERATION")
+    if operation != recast_operation["project_import"]:
+        return read_taxo_recast(
+            target_id, operation=operation, is_collection=is_collection
+        )
 
 
 def get_taxostats(project_ids: str):

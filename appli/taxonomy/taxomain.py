@@ -110,6 +110,7 @@ def routetaxosearch() -> List[Any]:
 @app.route("/taxo/searchworms", methods=["GET"])
 def routetaxosearchworms():
     name = gvg("q", "").strip()
+    extended = gvg("extended", "0")
     user = get_login()
     if user is None:
         return PrintInCharte("Please login to access this page")

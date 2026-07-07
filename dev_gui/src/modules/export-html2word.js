@@ -2,8 +2,10 @@ import {
   fetchSettings,
   unescape_html,
 } from '../modules/utils.js';
+let _fetching=false;
 async function get_html(element, pages = [], files = []) {
   pages.push(element.innerHTML);
+
   for await (const el of element.querySelectorAll('[data-request="help"]')) {
     if (!el.dataset.file || files.indexOf(el.dataset.file) >= 0) return;
     files.push(el.dataset.file);
@@ -24,7 +26,10 @@ export async function export_html2word(element, trigger, filename = '') {
    const preHtml = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Export HTML To Doc</title></head><body>";
    const postHtml = "</body></html>";
    const pages = [];
+   if(_fetching) return;
+    _fetching=true;
    await get_html(element,pages);
+     _fetching=false;
    const content = preHtml + pages.join(`<br style="page-break-before: always">`) + postHtml;
    const blob = new Blob(['\ufeff', content], {
       type: 'application/msword'
