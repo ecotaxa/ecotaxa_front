@@ -67,7 +67,7 @@ export class Entry {
       cancelable: true
     },
   };
-
+  _fetching=false;
 
   constructor(entry, options = {}) {
     this.name = entry.name;
@@ -412,7 +412,10 @@ export class Entry {
         'content-type': 'application/json'
       })
     };
+    if(this._fetching) return;
+    this._fetching=true;
     const response = await fetch(url, fetchSettings(fetchoptions));
+    this._fetching=false;
     if (response.ok) {
       const entries = await this.jsonEntries(response);
 

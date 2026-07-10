@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 from json import JSONEncoder
 from typing import List
-from flask import render_template, json, flash, request, make_response,url_for
+from flask import render_template, json, flash, request, url_for
 from flask_login import current_user, login_required
 from appli import app, gvg
+from appli.constants import TaxoType
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py.api import TaxonomyTreeApi
 from to_back.ecotaxa_cli_py.models import TaxonModel
+from flask_babel import _
 
 
 @login_required
@@ -24,7 +26,7 @@ def gui_taxotree_root_json():
                 None,
                 r.nb_objects + r.nb_children_objects,
                 len(r.children) > 0,
-                r.status
+                r.status,
             )
             for r in roots
         ]
@@ -48,7 +50,7 @@ def gui_taxotree_root_json():
                 parent,
                 r.nb_objects + r.nb_children_objects,
                 len(r.children) > 0,
-                r.status
+                r.status,
             )
             for r in children
         ]
@@ -61,7 +63,7 @@ def gui_taxotree_root_json():
                 name=r[1],
                 num=r[3],
                 children=r[4],
-                status=r[5]
+                status=r[5],
             )
             for r in res
         ]
@@ -101,7 +103,6 @@ def gui_taxo_browse():
 def _admin_or_project_creator() -> bool:
     user = current_user.api_user
     return (1 in user.can_do) or (2 in user.can_do)
-
 
 
 def do_full_sync(do_flash: bool):

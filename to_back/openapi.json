@@ -2,7 +2,7 @@
   "openapi":"3.0.2",
   "info":{
     "title":"EcoTaxa",
-    "version":"0.0.44"
+    "version":"0.0.45"
   },
   "servers":[
     {
@@ -1957,12 +1957,12 @@
             "in":"query"
           },
           {
-            "description":"One of ['projid', 'title', 'access', 'status', 'objcount', 'pctvalidated', 'pctclassified', 'classifsettings', 'classiffieldlist', 'popoverfieldlist', 'comments', 'rf_models_used', 'cnn_network_id', 'formulae', 'instrument', 'instrument_url', 'highest_right']",
+            "description":"One of ['projid', 'title', 'access', 'status', 'objcount', 'pctvalidated', 'pctclassified', 'classifsettings', 'initclassiflist', 'classiffieldlist', 'popoverfieldlist', 'comments', 'rf_models_used', 'cnn_network_id', 'formulae', 'instrument', 'instrument_url', 'highest_right']",
             "required":false,
             "schema":{
               "title":"Order field",
               "type":"string",
-              "description":"One of ['projid', 'title', 'access', 'status', 'objcount', 'pctvalidated', 'pctclassified', 'classifsettings', 'classiffieldlist', 'popoverfieldlist', 'comments', 'rf_models_used', 'cnn_network_id', 'formulae', 'instrument', 'instrument_url', 'highest_right']"
+              "description":"One of ['projid', 'title', 'access', 'status', 'objcount', 'pctvalidated', 'pctclassified', 'classifsettings', 'initclassiflist', 'classiffieldlist', 'popoverfieldlist', 'comments', 'rf_models_used', 'cnn_network_id', 'formulae', 'instrument', 'instrument_url', 'highest_right']"
             },
             "example":"instrument",
             "name":"order_field",
@@ -2126,12 +2126,12 @@
             "in":"query"
           },
           {
-            "description":"One of ['projid', 'title', 'access', 'status', 'objcount', 'pctvalidated', 'pctclassified', 'classifsettings', 'classiffieldlist', 'popoverfieldlist', 'comments', 'rf_models_used', 'cnn_network_id', 'formulae', 'instrument', 'instrument_url', 'highest_right']",
+            "description":"One of ['projid', 'title', 'access', 'status', 'objcount', 'pctvalidated', 'pctclassified', 'classifsettings', 'initclassiflist', 'classiffieldlist', 'popoverfieldlist', 'comments', 'rf_models_used', 'cnn_network_id', 'formulae', 'instrument', 'instrument_url', 'highest_right']",
             "required":false,
             "schema":{
               "title":"Order field",
               "type":"string",
-              "description":"One of ['projid', 'title', 'access', 'status', 'objcount', 'pctvalidated', 'pctclassified', 'classifsettings', 'classiffieldlist', 'popoverfieldlist', 'comments', 'rf_models_used', 'cnn_network_id', 'formulae', 'instrument', 'instrument_url', 'highest_right']"
+              "description":"One of ['projid', 'title', 'access', 'status', 'objcount', 'pctvalidated', 'pctclassified', 'classifsettings', 'initclassiflist', 'classiffieldlist', 'popoverfieldlist', 'comments', 'rf_models_used', 'cnn_network_id', 'formulae', 'instrument', 'instrument_url', 'highest_right']"
             },
             "example":"instrument",
             "name":"order_field",
@@ -2485,6 +2485,64 @@
                   10,
                   10
                 ]
+              }
+            }
+          },
+          "422":{
+            "description":"Validation Error",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security":[
+          {
+            "BearerOrCookieAuth":[]
+          }
+        ]
+      },
+      "patch":{
+        "tags":[
+          "projects"
+        ],
+        "summary":"Patch Project",
+        "description":"**Update the project**, return **NULL upon success.**\n\nNote that some fields will **NOT** be updated and simply ignored, e.g. *free_cols*.",
+        "operationId":"patch_project",
+        "parameters":[
+          {
+            "description":"Internal, numeric id of the project.",
+            "required":true,
+            "schema":{
+              "title":"Project Id",
+              "type":"integer",
+              "description":"Internal, numeric id of the project."
+            },
+            "example":1,
+            "name":"project_id",
+            "in":"path"
+          }
+        ],
+        "requestBody":{
+          "content":{
+            "application/json":{
+              "schema":{
+                "$ref":"#/components/schemas/ProjectReq"
+              }
+            }
+          },
+          "required":true
+        },
+        "responses":{
+          "200":{
+            "description":"Successful Response",
+            "content":{
+              "application/json":{
+                "schema":{},
+                "example":{}
               }
             }
           },
@@ -7029,6 +7087,92 @@
           }
         }
       }
+    },
+    "/migrated_ids":{
+      "get":{
+        "tags":[
+          "misc"
+        ],
+        "summary":"Get Migrated Ids",
+        "description":"**Return migrated IDs from old IDs.**",
+        "operationId":"get_migrated_ids",
+        "parameters":[
+          {
+            "description":"String containing the list of one or more project ids separated by non-num char.",
+            "required":false,
+            "schema":{
+              "title":"Project IDs",
+              "type":"string",
+              "description":"String containing the list of one or more project ids separated by non-num char.",
+              "default":""
+            },
+            "example":"1,2,3",
+            "name":"projects",
+            "in":"query"
+          },
+          {
+            "description":"String containing the list of one or more sample ids separated by non-num char.",
+            "required":false,
+            "schema":{
+              "title":"Sample IDs",
+              "type":"string",
+              "description":"String containing the list of one or more sample ids separated by non-num char.",
+              "default":""
+            },
+            "example":"1,2,3",
+            "name":"samples",
+            "in":"query"
+          },
+          {
+            "description":"String containing the list of one or more acquisition ids separated by non-num char.",
+            "required":false,
+            "schema":{
+              "title":"Acquisition IDs",
+              "type":"string",
+              "description":"String containing the list of one or more acquisition ids separated by non-num char.",
+              "default":""
+            },
+            "example":"1,2,3",
+            "name":"acquisitions",
+            "in":"query"
+          },
+          {
+            "description":"String containing the list of one or more object ids separated by non-num char.",
+            "required":false,
+            "schema":{
+              "title":"Object IDs",
+              "type":"string",
+              "description":"String containing the list of one or more object ids separated by non-num char.",
+              "default":""
+            },
+            "example":"1,2,3",
+            "name":"objects",
+            "in":"query"
+          }
+        ],
+        "responses":{
+          "200":{
+            "description":"Successful Response",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/MigratedIDsRsp"
+                }
+              }
+            }
+          },
+          "422":{
+            "description":"Validation Error",
+            "content":{
+              "application/json":{
+                "schema":{
+                  "$ref":"#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components":{
@@ -8183,7 +8327,8 @@
               "project_export":"project_export",
               "collection_export":"collection_export",
               "dwca_export_occurrence":"dwca_export_occurrence",
-              "dwca_export_emof":"dwca_export_emof"
+              "dwca_export_emof":"dwca_export_emof",
+              "project_import":"project_import"
             },
             "example":{
               "prediction_input":"pre_predict",
@@ -8528,6 +8673,27 @@
             "default":false,
             "example":false
           },
+          "quantity":{
+            "title":"Quantity",
+            "type":"array",
+            "items":{
+              "anyOf":[
+                {
+                  "$ref":"#/components/schemas/ExportTypeEnum"
+                },
+                {
+                  "$ref":"#/components/schemas/SummaryExportQuantitiesOptionsEnum"
+                }
+              ]
+            },
+            "description":"The quantity to compute. Abundance is always possible.",
+            "default":[
+              "abundance"
+            ],
+            "example":[
+              "abundance"
+            ]
+          },
           "sum_subtotal":{
             "title":"Sum subtotal",
             "allOf":[
@@ -8711,7 +8877,8 @@
         "enum":[
           "C",
           "S",
-          "A"
+          "A",
+          "I"
         ],
         "type":"string",
         "description":"An enumeration."
@@ -9249,6 +9416,67 @@
         },
         "description":"Merge response."
       },
+      "MigratedIDsRsp":{
+        "title":"MigratedIDsRsp",
+        "required":[
+          "projects",
+          "samples",
+          "acquisitions",
+          "objects"
+        ],
+        "type":"object",
+        "properties":{
+          "projects":{
+            "title":"Projects old->new",
+            "type":"object",
+            "additionalProperties":{
+              "type":"integer"
+            },
+            "description":"The mapping from old project IDs to new IDs.",
+            "example":{
+              "1":13,
+              "3":16
+            }
+          },
+          "samples":{
+            "title":"Samples old->new",
+            "type":"object",
+            "additionalProperties":{
+              "type":"integer"
+            },
+            "description":"The mapping from old sample IDs to new IDs.",
+            "example":{
+              "10":13000001,
+              "11":13000002
+            }
+          },
+          "acquisitions":{
+            "title":"Acquisitions/Processes old->new",
+            "type":"object",
+            "additionalProperties":{
+              "type":"integer"
+            },
+            "description":"The mapping from old acquisition/process IDs to new IDs.",
+            "example":{
+              "20":1300000001,
+              "21":1300000002
+            }
+          },
+          "objects":{
+            "title":"Objects old->new",
+            "type":"object",
+            "additionalProperties":{
+              "type":"integer"
+            },
+            "description":"The mapping from old object IDs to new IDs.",
+            "example":{
+              "30":13000000001,
+              "31":13000000002
+            }
+          }
+        },
+        "description":"Response for migrated IDs."
+      },
       "MinUserModel":{
         "title":"MinUserModel",
         "required":[
@@ -9387,6 +9615,12 @@
             "description":"The parent acquisition Id.",
             "example":144
           },
+          "classif_who":{
+            "title":"Classification who",
+            "type":"integer",
+            "description":"The user who manually classified this object, if **V** or **D**.",
+            "example":"null"
+          },
           "classif_id":{
             "title":"Classification Id",
             "type":"integer",
@@ -9443,12 +9677,6 @@
             "title":"Classification score",
             "type":"number",
             "description":"The ML score for this object, if **P**.",
-            "example":"null"
-          },
-          "classif_who":{
-            "title":"Classification who",
-            "type":"integer",
-            "description":"The user who manually classified this object, if **V** or **D**.",
             "example":"null"
           },
           "orig_id":{
@@ -9519,6 +9747,12 @@
             "description":"The parent acquisition Id.",
             "example":144
           },
+          "classif_who":{
+            "title":"Classification who",
+            "type":"integer",
+            "description":"The user who manually classified this object, if **V** or **D**.",
+            "example":"null"
+          },
           "classif_id":{
             "title":"Classification Id",
             "type":"integer",
@@ -9575,12 +9809,6 @@
             "title":"Classification score",
             "type":"number",
             "description":"The ML score for this object, if **P**.",
-            "example":"null"
-          },
-          "classif_who":{
-            "title":"Classification who",
-            "type":"integer",
-            "description":"The user who manually classified this object, if **V** or **D**.",
             "example":"null"
           },
           "orig_id":{
@@ -10423,6 +10651,11 @@
             "type":"string",
             "example":"baseproject=1602\ncritvar=%area,angle,area,area_exc,bx,by,cdexc,centroids,circ.,circex,convarea,convperim,cv,elongation,esd,fcons,feret,feretareaexc,fractal,height,histcum1,histcum2,histcum3,intden,kurt,lat_end,lon_end,major,max,mean,meanpos,median,min,minor,mode,nb1,nb2,perim.,perimareaexc,perimferet,perimmajor,range,skelarea,skew,slope,sr,stddev,symetrieh,symetriehc,symetriev,symetrievc,thickr,width,x,xm,xstart,y,ym,ystart\nposttaxomapping=\nseltaxo=45074,84963,61990,13333,82399,61973,62005,25930,25932,61996,78426,81941,11514,85076,85061,30815,85185,92230,85079,84993,25824,85115,85004,26525,25944,11509,26524,92112,84976,25942,84980,85078,78418,84977,85060,61993,61991,85069,81871,74144,11758,72431,13381,11518,5,18758,85117,92042,84968,84997,87826,92236,92237,92039,84989,85193,83281,78412,92239,71617,81977,45071,12865,85044,81940,85067,12908,85116,56693,85008,92139,92068\nusemodel_foldername=testln1"
           },
+          "initclassiflist":{
+            "title":"Initial categories",
+            "type":"string",
+            "description":" Aggregated categories from the collection projects."
+          },
           "classiffieldlist":{
             "title":"Classification field list",
             "type":"string",
@@ -10504,20 +10737,6 @@
               "nb_images":"t01"
             }
           },
-          "bodc_variables":{
-            "title":"Expressions for computing standard BODC quantities.",
-            "type":"object",
-            "additionalProperties":{
-              "type":"string"
-            },
-            "description":"BODC quantities from columns. Only the 3 keys listed in example are valid.",
-            "default":{},
-            "example":{
-              "subsample_coef":"1/ssm.sub_part",
-              "total_water_volume":"sam.tot_vol/1000",
-              "individual_volume":"4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)**3"
-            }
-          },
           "init_classif_list":{
             "title":"Init classification list",
             "type":"array",
@@ -10590,6 +10809,105 @@
           }
         },
         "description":"Basic and computed information about the Project."
+      },
+      "ProjectReq":{
+        "title":"Update full or partial Project Model",
+        "type":"object",
+        "properties":{
+          "title":{
+            "title":"Title",
+            "type":"string",
+            "description":"The project title.",
+            "example":"MyProject"
+          },
+          "instrument":{
+            "title":"Instrument",
+            "type":"string",
+            "description":"This project's instrument code.",
+            "example":"Zooscan"
+          },
+          "status":{
+            "title":"Status",
+            "type":"string",
+            "description":"The project status.",
+            "example":"Annotate"
+          },
+          "access":{
+            "title":"Access level",
+            "allOf":[
+              {
+                "$ref":"#/components/schemas/AccessLevelEnum"
+              }
+            ],
+            "description":"When \"1\" (PUBLIC), the project is visible by all users.PUBLIC: \"1\", OPEN: \"2\", PRIVATE: \"0\"",
+            "default":"1",
+            "example":"1"
+          },
+          "classiffieldlist":{
+            "title":"Classification field list",
+            "type":"string",
+            "example":"depth_min=depth_min\r\ndepth_max=depth_max\r\narea=area [pixel]\r\nmean=mean [0-255]\r\nfractal=fractal\r\nmajor=major [pixel]\r\nsymetrieh=symetrieh\r\ncirc.=circ\r\nferet = Feret [pixel]"
+          },
+          "initclassiflist":{
+            "title":"Initial categories",
+            "type":"string",
+            "description":" Aggregated categories from the collection projects."
+          },
+          "comments":{
+            "title":"Comments",
+            "type":"string",
+            "description":"The project comments.",
+            "example":""
+          },
+          "cnn_network_id":{
+            "title":"Cnn network id",
+            "type":"string",
+            "example":"SCN_zooscan_group1"
+          },
+          "formulae":{
+            "title":"Formulae",
+            "type":"string",
+            "description":"Concentration formulae.",
+            "default":"subsample_coef: 1/ssm.sub_part\ntotal_water_volume: sam.tot_vol/1000\nindividual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)**3",
+            "example":""
+          },
+          "managers":{
+            "title":"Managers",
+            "type":"array",
+            "items":{
+              "$ref":"#/components/schemas/MinUserModel"
+            },
+            "description":"Managers of this project.",
+            "default":[]
+          },
+          "annotators":{
+            "title":"Annotators",
+            "type":"array",
+            "items":{
+              "$ref":"#/components/schemas/MinUserModel"
+            },
+            "description":"Annotators of this project, if not manager.",
+            "default":[]
+          },
+          "viewers":{
+            "title":"Viewers",
+            "type":"array",
+            "items":{
+              "$ref":"#/components/schemas/MinUserModel"
+            },
+            "description":"Viewers of this project, if not manager nor annotator.",
+            "default":[]
+          },
+          "contact":{
+            "title":"Contact",
+            "allOf":[
+              {
+                "$ref":"#/components/schemas/MinUserModel"
+              }
+            ],
+            "description":"The contact person is a manager who serves as the contact person for other users and EcoTaxa's managers."
+          }
+        }
       },
       "ProjectSetColumnStatsModel":{
         "title":"ProjectSetColumnStatsModel",
@@ -10751,7 +11069,8 @@
           "project_export",
           "collection_export",
           "dwca_export_occurrence",
-          "dwca_export_emof"
+          "dwca_export_emof",
+          "project_import"
         ],
         "type":"string",
         "description":"An enumeration."
@@ -11139,9 +11458,25 @@
           },
           "quantity":{
             "title":"Quantity",
-            "allOf":[
+            "anyOf":[
+              {
+                "$ref":"#/components/schemas/ExportTypeEnum"
+              },
               {
                 "$ref":"#/components/schemas/SummaryExportQuantitiesOptionsEnum"
+              },
+              {
+                "type":"array",
+                "items":{
+                  "anyOf":[
+                    {
+                      "$ref":"#/components/schemas/ExportTypeEnum"
+                    },
+                    {
+                      "$ref":"#/components/schemas/SummaryExportQuantitiesOptionsEnum"
+                    }
+                  ]
+                }
               }
             ],
             "description":"The quantity to compute. Abundance is always possible.",

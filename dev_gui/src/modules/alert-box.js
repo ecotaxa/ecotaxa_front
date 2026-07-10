@@ -8,6 +8,7 @@ import {
   css
 } from '../modules/modules-config.js';
 // alertbox one instance by page - display alertbox with uniqueid
+
 async function createAlertBox() {
   // to remove
   const alertconfig = {
@@ -66,8 +67,11 @@ async function createAlertBox() {
   let messages_container;
   let url = {
     translation: '/gui/i18n',
-    template: '/gui/alertbox'
+    msgcookie:'/gui/setmsgcookie'
   }
+    let _fetching={};
+  _fetching[url.translation]=false;
+  _fetching[url.msgcookie]=false;
   const messagemodel = {
     parent: null,
     type: alertconfig.types.info,
@@ -75,9 +79,14 @@ async function createAlertBox() {
   }
   const allowedtypes = Object.values(alertconfig.types);
   const i18nmessages = await getI18nmessages();
+
   async function getI18nmessages() {
+    if (url.translation in _fetching &&  _fetching[url.translation]) return;
+    _fetching[url.translation]=true;
     const response = await fetch(url.translation, fetchSettings);
-    return await response.json();
+    const resp= await response.json();
+    _fetching[url.translation]=false;
+    return resp;
   }
 
   function applyTo(element = document) {
@@ -105,6 +114,7 @@ async function createAlertBox() {
           e.preventDefault();
           return activate_alert(item);
         });
+         _fetching[options.href]=false;
       } else activate_alert(item);
     });
 
@@ -181,6 +191,8 @@ async function createAlertBox() {
     let callback = (options.callback) ? options.callback : null,
       callback_cancel = (options.callback_cancel) ? (options.callback_cancel) : null;
     if (options.href) callback = () => {
+      if(_fetching[options.href]) return;
+      _fetching[options.href]=true;
       fetch(options.href + '&' + new URLSearchParams({
         partial: true
       }), fetchSettings()).then(response => {
@@ -201,7 +213,14 @@ async function createAlertBox() {
           });
         }
         box.dataset.refresh = true;
+      }).catch((err) => {
+      AlertBox.addAlert({
+        type: AlertBox.alertconfig.types.danger,
+        content: err.status ? `${err.status} ${err.statusText}` : err,
+        dismissible: false,
       });
+    }).finally(()=> {
+      _fetching[options.href]=false;});
     };
     //waitForAnswer(box, callback, callback_cancel);
   }
@@ -317,10 +336,19 @@ async function createAlertBox() {
       const params = new FormData();
       params.append("name", box.dataset.cook);
       params.append("value", box.dataset.value);
-      fetch('/gui/setmsgcookie', fetchSettings({
+      if (_fetching[url.msgcookie]) return;
+      _fetching[url.msgcookie]=true;
+      fetch(url.msgcookie, fetchSettings({
         method: "POST",
         body: params
-      }));
+      })).catch((err) => {
+      AlertBox.addAlert({
+        type: AlertBox.alertconfig.types.danger,
+        content: err.status ? `${err.status} ${err.statusText}` : err,
+        dismissible: false,
+      });
+    }).finally(()=> {
+      _fetching[url.msgcookie]=false;});
     }
     const animate = (box.dataset.type && box.dataset.type === alertconfig.types.confirm) ? [{
       opacity: 1,

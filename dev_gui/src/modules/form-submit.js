@@ -43,6 +43,7 @@ export class FormSubmit {
       this.init();
       form.formsubmit = this;
        }
+    if(this.options.fetch) {this._fetching=false;}
     return form.formsubmit;
   }
   init() {
@@ -301,6 +302,8 @@ export class FormSubmit {
   async formFetch(format = null) {
     const formdata = new FormData(this.form);
     formdata["fetch"] = true;
+    if(this._fetching) return;
+    this._fetching=true;
     let response= await fetch(this.form.action, fetchSettings({
         method: 'POST',
         body: formdata,
@@ -308,6 +311,7 @@ export class FormSubmit {
         this.displayResponse(err, true);
         this.enableForm()
       }).finally(response => {
+        this._fetching=false;
         this.disableForm();
       });
     if (response.redirected) {

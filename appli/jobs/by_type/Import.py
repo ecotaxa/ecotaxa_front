@@ -29,6 +29,7 @@ class ImportJob(Job):
     UI_NAME: ClassVar = "FileImport"
 
     STEP0_TEMPLATE: ClassVar = "jobs/import_create.html"
+    TAXO_TEMPLATE: ClassVar = "jobs/import_question1.html"
 
     @classmethod
     def initial_dialog(cls) -> str:
@@ -162,7 +163,7 @@ class ImportJob(Job):
         not_found_taxo = job.question["missing_taxa"]
         not_found_users = job.question["missing_users"]
         return render_template(
-            "jobs/import_question1.html",
+            cls.TAXO_TEMPLATE,
             header=txt,
             taxo=not_found_taxo,
             users=not_found_users,
@@ -199,7 +200,7 @@ class ImportJob(Job):
             except ApiException as ae:
                 cls.flash_any_error([str(ae)])
                 return render_template(
-                    "jobs/import_question1.html",
+                    cls.TAXO_TEMPLATE,
                     header="",
                     taxo=not_found_taxo,
                     users=not_found_users,

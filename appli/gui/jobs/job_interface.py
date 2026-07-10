@@ -136,11 +136,11 @@ def export_format_options(_type=None, target: Optional[str] = "project"):
             "quantity": {
                 "label": _("Quantity to compute"),
                 "options": [
-                    {"label": _("Abundance"), "value": "abundance"},
+                    {"label": _("Count"), "value": "abundance"},
                     {"label": _("Concentration"), "value": "concentration"},
                     {"label": _("Biovolume"), "value": "biovolume"},
                 ],
-                "format": "radio",
+                "format": "checkbox",
                 "help": "help_export_summary_quantity",
             },
             "summarise_by": {
@@ -282,17 +282,6 @@ def export_format_options(_type=None, target: Optional[str] = "project"):
 
 def import_format_options(_type=None) -> dict:
 
-    taxomapping = dict(
-        {
-            "taxo_mapping": {
-                "label": _("Mapping from present category to output replacement one "),
-                "comment": _(" Type '_discard_' to discard category"),
-                "format": "taxoline",
-                "help": "help_import_summary_taxo_mapping",
-                "addoption": "_discard_,0",
-            }
-        },
-    )
     formdatas = dict(
         {
             "general": {
@@ -342,7 +331,6 @@ def import_format_options(_type=None) -> dict:
                     "format": "checkbox",
                     "value": "Y",
                 },
-                "advanced_options": taxomapping,
             },
             "simple": {
                 "metadata": {
@@ -428,7 +416,6 @@ def import_format_options(_type=None) -> dict:
                     "format": "checkbox",
                     "value": "Y",
                 },
-                "advanced_options": taxomapping,
             },
         }
     )

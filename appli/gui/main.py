@@ -13,7 +13,11 @@ from flask_login import current_user, login_required, login_user
 from requests import Response
 
 from appli import app, gvg, gvp, ApiClient
-from appli.back_config import get_back_constants, bytes_to_human_readable, get_user_constants
+from appli.back_config import (
+    get_back_constants,
+    bytes_to_human_readable,
+    get_user_constants,
+)
 from appli.gui.commontools import is_partial_request
 from appli.gui.staticlistes import py_messages, py_user
 from appli.security_on_backend import ApiUserWrapper
@@ -42,14 +46,18 @@ def gui_logout():
 
     logout_user()
     resp = redirect(url_for("gui_login"))
-    if '_id_token' in session:
+    if "_id_token" in session:
         from appli import backend_url
         import requests
-        r = requests.get(backend_url + "/openid/logout", allow_redirects=False,
-                         cookies={"id_token": session.get("_id_token")})
+
+        r = requests.get(
+            backend_url + "/openid/logout",
+            allow_redirects=False,
+            cookies={"id_token": session.get("_id_token")},
+        )
         if r.status_code in [302, 303, 307]:
             resp = redirect(r.headers["Location"])
-        session.pop('_id_token')
+        session.pop("_id_token")
     return resp
 
 
@@ -57,7 +65,10 @@ def gui_logout():
 def openid_login():
     from appli import backend_url
     import requests
-    r = requests.get(backend_url + "/openid/login", allow_redirects=False, cookies=request.cookies)
+
+    r = requests.get(
+        backend_url + "/openid/login", allow_redirects=False, cookies=request.cookies
+    )
     # The backend should return a redirect to the OpenID provider
     if r.status_code in [302, 303, 307]:
         resp = redirect(r.headers["Location"])
@@ -76,6 +87,7 @@ def openid_login():
 def openid_callback():
     from appli import backend_url
     import requests
+
     # Forward callback with query string & cookies to backend
     url = backend_url + "/openid/callback"
     qs = request.query_string.decode() if request.query_string else ""
@@ -160,9 +172,11 @@ def gui_login():
         SHORT_TOKEN_AGE,
         PROFILE_TOKEN_AGE,
         RECAPTCHAID,
-        OPENID_CONFIGURED
+        OPENID_CONFIGURED,
     ) = get_user_constants()
-    return render_template("v2/login.html", next=referer, bg=True, OPENID_CONFIGURED=OPENID_CONFIGURED)
+    return render_template(
+        "v2/login.html", next=referer, bg=True, OPENID_CONFIGURED=OPENID_CONFIGURED
+    )
 
 
 @app.route("/gui/register", defaults={"token": None}, methods=["GET", "POST"])

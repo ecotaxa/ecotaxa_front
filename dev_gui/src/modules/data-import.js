@@ -18,6 +18,7 @@ import {
   defined_privileges,
   domselectors
 } from '../modules/modules-config.js';
+import {AlertBox} from "./alert-box";
 const key_privileges = Object.keys(defined_privileges).reduce(function(result, key) {
   result[key] = key;
   return result;
@@ -47,6 +48,7 @@ export class DataImport {
   thcells = [];
   trs = [];
   datas;
+  _fetching=false;
   constructor(tbl, what = null, selector = null) {
     if (!tbl) return;
     // tbl is a TableComponent  ?
@@ -678,6 +680,8 @@ export class DataImport {
                   'method': 'POST',
                   'body': formData
                 });
+                if (this._fetching) return;
+                this._fetching=true;
                 fetch(url, opts).then(response =>
                   response.json()
                 ).then(results => {
@@ -715,7 +719,11 @@ export class DataImport {
                   }
                   results = null;
                   this.setImportedTag(input);
-                });
+                }).catch((err)=> { AlertBox.addAlert({
+        type: AlertBox.alertconfig.types.danger,
+        content: err.status ? `${err.status} ${err.statusText}` : err,
+        dismissible: true,
+      });}).finally(()=> {this._fetching=false;});
               }
             } else if (ts) {
               if (input.multiple) this.imports[name].forEach(data => {

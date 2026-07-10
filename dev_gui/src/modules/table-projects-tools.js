@@ -13,6 +13,7 @@ function ImportList(state, attach = null) {
   const rowimported = -1;
   const selectimports=[];
   const importindexes=[];
+  let _fetching=false;
   const cellid = state.getCellId(state.cellidname);
   // display only lines with fields values equals to record fields values - criteria is a list of cellnames
   const criteria_names = ['instrument', 'access'];
@@ -37,9 +38,12 @@ function ImportList(state, attach = null) {
       project_ids: ids.join(','),
       simulate:"y"
     });
+    if (_fetching) return;
+    _fetching=true;
     const response = await fetch(url, fetchSettings({
       method: 'GET',
     }))
+
     let results = await response.json();
     delete results.excluded;
     const collator = new Intl.Collator(undefined, {
@@ -59,6 +63,7 @@ function ImportList(state, attach = null) {
         return collator.compare(a.value, b.value)
       });
     };
+    _fetching=false;
     return results;
   }
 

@@ -762,8 +762,8 @@ input[type="search"].wait, .form-input[type="search"].wait, body.wait {@apply cu
 .table-pagination-list li {@apply inline-block border rounded bg-stone-50 border-secondblue-100 text-secondblue-600 px-2  mr-1.5}
 .table-pagination-list li.pager {@apply bg-white border-none}
 .table-pagination-list li.active {@apply bg-white shadow}
-.table-wrapper {@apply h-full w-full block max-w-full;}
-.large-table .table-wrapper {@apply overflow-x-auto will-change-scroll;contain: strict;  contain-intrinsic-height: 300px;}
+.table-wrapper {@apply  h-full w-full block max-w-full overflow-y-auto relative;}
+.large-table .table-wapper {@apply overflow-x-auto will-change-scroll;contain: strict;}
 .table-top , .table-bottom {@apply flex md:flex-row w-full justify-between pb-1 pr-1 z-20;}
 .table-info {@apply py-4}
 .table-filters {@apply order-1 text-center align-bottom ml-auto md:basis-2/4 py-2 ;}
@@ -793,8 +793,8 @@ a.disabled {@apply pointer-events-none;}
 /***********************/
 /* projects list      */
 /**********************/
-.prjlist .table-top {@apply sticky  top-14 z-20 h-14 bg-white }
-.prjlist .table-table thead {@apply sticky  top-28 z-20}
+.prjlist .table-top {@apply sticky  top-0 z-50 h-14 bg-white }
+.prjlist .table-table thead {@apply sticky  top-14 z-20}
 .prjlist .table-table thead tr th {@apply  bg-stone-300 hover:text-secondblue-500 text-secondblue-900  border-secondblue-100 shadow-sm;}
 .prjlist .table-table th .sublabel {@apply text-xs font-light text-stone-500 }
 .prjlist .table-table tr {@apply h-8 max-h-8 overflow-hidden}
@@ -815,8 +815,8 @@ td .txcc {@apply font-medium text-base uppercase text-stone-700}
 td details:not([open]) {@apply text-ellipsis text-clip  overflow-hidden overscroll-x-contain}
 td details:not([open]) summary {@apply mr-0.5  text-ellipsis truncate whitespace-nowrap overflow-hidden }
 td details:not([open]) summary > a {@apply float-right text-sm}
-td details.open summary {@apply text-stone-800 font-semibold whitespace-normal overflow-hidden !important}
-td details.open {@apply static;}
+td details[open] summary, td details.open summary {@apply text-stone-800 font-semibold whitespace-normal overflow-hidden !important}
+td details[open], td details.open {@apply static;}
 /*about */
 .prjlist td details summary {@apply hover:font-normal cursor-pointer  }
 /* progress bar */
@@ -855,7 +855,7 @@ ul.lineage-list > li {@apply before:inline before:content-['<'] before:mx-1 befo
 #tip-inline.hide {@apply max-h-0 hidden relative}
 .button-expand {@apply w-auto mx-auto text-center block border-stone-200 border-dotted  p-1 mb-1 text-stone-700}
 .max-tabstat-h {@apply  md:max-h-[500px]}
-.button-export {@apply float-right }
+.button-export {@apply float-right}
 .short-stats {@apply overflow-hidden}
 section.separate {@apply after:w-96 before:h-[0.5] w-full h-auto pb-8 pt-4 block after:block after:mx-auto after:bg-stone-800 after:mb-8 after:content-["_"]}
 .stat-label {@apply font-medium pr-2 w-full md:basis-2/12 }

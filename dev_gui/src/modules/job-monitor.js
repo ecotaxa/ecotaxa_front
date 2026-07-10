@@ -6,8 +6,10 @@ import {
 import {
   css
 } from '../modules/modules-config.js';
+import {AlertBox} from "./alert-box";
 
 export function jobMonitor(item, options = {}) {
+  let _fetching = false;
   const jobOptions = {
     url: "/gui/job/status/"
   }
@@ -151,9 +153,10 @@ export function jobMonitor(item, options = {}) {
   let html = [];
 
   function check_job_status() {
+    if (_fetching) return;
+    _fetching=true;
     fetch(options.url + jobid, fetchSettings).then(response => response.json()).then(job => {
-
-      if (job) {
+       if (job) {
         if (job.state) {
           display_infos(job);
         }
@@ -196,8 +199,13 @@ export function jobMonitor(item, options = {}) {
       if (stop === false) setTimeout(check_job_status, 1000);
       return;
     }).catch((err) => {
-      console.log('err', err);
-    });
+      AlertBox.addAlert({
+        type: AlertBox.alertconfig.types.danger,
+        content: err.status ? `${err.status} ${err.statusText}` : err,
+        dismissible: true,
+      });
+    }).finally(()=> {
+      _fetching=false;});
   }
   check_job_status();
 }

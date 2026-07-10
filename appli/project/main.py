@@ -45,7 +45,6 @@ from to_back.ecotaxa_cli_py.models import (
     ProjectTaxoStatsModel,
 )
 
-
 ######################################################################################################################
 
 
@@ -575,7 +574,10 @@ MAX_LEN_BEFORE_HYPHEN = 12
 
 # noinspection PyPep8Naming
 def FormatNameForVignetteDisplay(
-    category_name: Optional[str], taxostatus: Optional[str], hyphenator, cache: Dict[str, str]
+    category_name: Optional[str],
+    taxostatus: Optional[str],
+    hyphenator,
+    cache: Dict[str, str],
 ) -> str:
     if category_name is None:
         category_name = ""
@@ -587,9 +589,9 @@ def FormatNameForVignetteDisplay(
     part0 = parts[0]
     if len(part0) >= MAX_LEN_BEFORE_HYPHEN:
         part0 = hyphenator.hyphenize(part0)
-    depre = ''
+    depre = ""
     if taxostatus == "D":
-        depre = ' deprecated'
+        depre = " deprecated"
     restxt: str = f"<span class='cat_name{depre}'>{part0}</span>"
     if len(parts) > 1:
         restxt += "<span class='cat_ancestor'> &lt;&nbsp;{}</span>".format(
@@ -626,7 +628,6 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
     # Public view is when the project is visible, but the current user has no right on it.
     g.PublicViewMode = proj.highest_right == ""
     user_can_modify = proj.highest_right in ("Manage", "Annotate") and not read_only
-
     # récupération des parametres d'affichage
     filtres = {}
     for col in sharedfilter.FilterList:
@@ -684,7 +685,7 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
         "img.file_name",
         "txo.name",
         "txo.display_name",
-        "txo.taxostatus"
+        "txo.taxostatus",
     ]
     api_cols_to_display = OrderedDict()
 
@@ -929,7 +930,9 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
             "<b>!</b> " if dtl["obj.complement_info"] not in (None, "") else ""
         )
 
-        name_chunk = FormatNameForVignetteDisplay(display_name, taxostatus, hyphenator, categ_cache)
+        name_chunk = FormatNameForVignetteDisplay(
+            display_name, taxostatus, hyphenator, categ_cache
+        )
         if g.PublicViewMode:
             simsrch_btn = ""
         else:
@@ -1028,15 +1031,17 @@ def prjGetClassifTab(PrjId):
             taxon.id,
             taxon.name,
             (taxon.id_lineage[1] if len(taxon.id_lineage) > 1 else None),
-            taxon.status
+            taxon.status,
         ]
         for taxon in taxa
     }
     # ...but not necessarily all the parents
     for a_taxon in taxa:
         prev_id = None
-        for taxon_id, taxon_name , taxon_status in zip(
-            reversed(a_taxon.id_lineage), reversed(a_taxon.lineage),reversed(a_taxon.lineage_status)
+        for taxon_id, taxon_name, taxon_status in zip(
+            reversed(a_taxon.id_lineage),
+            reversed(a_taxon.lineage),
+            reversed(a_taxon.lineage_status),
         ):
             if taxon_id not in taxotree:
                 taxotree[taxon_id] = [taxon_id, taxon_name, prev_id, taxon_status]
@@ -1135,7 +1140,10 @@ def prjGetClassifTab(PrjId):
         line["htmldisplayname"] = html_display_name
         line["taxoparent"] = html_taxo_parent
     return render_template(
-        "project/classiftab.html", res=restree, taxotree=json.dumps(taxotree), projid=PrjId
+        "project/classiftab.html",
+        res=restree,
+        taxotree=json.dumps(taxotree),
+        projid=PrjId,
     )
 
 

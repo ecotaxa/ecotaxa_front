@@ -6,4 +6,6 @@
 
 /*! ../modules/utils.js */
 
+/*! ./alert-box */
+
 /*! dompurify */
