@@ -151,14 +151,14 @@ def projects_list(
     else:
         fields = "*default"
         if typeimport == "project":
-            fields = "*summary"
+            fields = "*summary,viewers,annotators,managers,contact"
             for_managing = True
         elif typeimport == "commons":
             fields = "projid,title,instrument"
         elif typeimport == "fields":
             fields = "*default,classifsettings,classiffieldlist"
         elif typeimport == "settings":
-            fields = "*default,,viewers,annotators,managers,contact,initclassiflist,classiffieldlist,cnn_network_id"
+            fields = "*default,viewers,annotators,managers,contact,initclassiflist,classiffieldlist,cnn_network_id"
         elif typeimport == "privileges":
             fields = "*summary,viewers,annotators,managers,contact"
         prjs = _prjs_list_api(
