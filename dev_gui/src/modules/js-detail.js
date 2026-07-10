@@ -49,7 +49,7 @@ export function JsDetail(options) {
     el.append(detail);
     const padding = 6;
     const cell = (options.istable) ? el.closest('td') : el;
-    let t = (options.istable) ? parseInt(wrapper.querySelector('table').offsetTop) : 0;
+    let t = 0;//(options.istable) ? parseInt(wrapper.querySelector('table').offsetTop) : 0;
     t = t + (parseInt(cell.offsetTop) + parseInt(el.offsetHeight) + padding) + 'px';
     const h = (parseInt(cell.offsetHeight) + parseInt(detail.offsetHeight) + padding) + 'px';
     const w = (parseInt(wrapper.offsetWidth)) + 'px';

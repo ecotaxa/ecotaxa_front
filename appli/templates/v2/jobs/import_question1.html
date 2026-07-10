@@ -1,0 +1,54 @@
+{% extends "./v2/layout.html" %}
+{% from "./v2/macros/macros.html" import modal , alertbox with context %}
+{% from "./v2/project/macros.html" import pick_from_other with context %}
+{% block body %}
+  <div class="container mx-auto">
+    <h2>Job {{job.id}} - Import data (step 2 of 2)</h2>
+    <h3>Question reason</h3>
+    {{ job.progress_msg |nl2br|safe }}
+   {% if users|length()>0 or taxo|length()>0  %}
+    <form class="js form-submit" method="post">
+      {% if (taxo|length())>0 %}
+      <fieldset><legend>Taxonomy manual mapping</legend>
+        <div class="text-sm mb-4">If you <em class="font-medium">really</em> cannot find a suitable category
+        <ul class="ml-4">
+          <li>Create it in the Taxonomy management <a href="/taxo/browse/?fromtask={{ job.id }}" class="text-mainblue-700 hover:text-secondblue-600">HERE</a></li>
+          <li>Map your category into one of the temporary categories for now (<code>temporary_1</code>, <code>temporary_2</code>,
+            etc.)
+          </li>
+          <li>then contact your project manager and request the creation of the category</li>
+        </ul>
+        Once the category is created, you will be able to move your objects from <code>temporary_*</code> to the newly
+        created category.
+        </div><input type="hidden" name="simple-taxanum" value={{taxo|length}}>
+        <div class="flex flex-row"><div  class="w-64  mr-4"><span class="font-medium">{{_('Imported name')}}</span></div><div  class="w-96 -mr-4"><span class="font-medium">{{_('EcoTaxa name')}}</span></div><div class="w-24 align-end">&nbsp;</div></div>
+        {%- for taxon in taxo -%}
+      <div class="flex flex-row mt-0.5"><div class="w-64  mr-4"><span class="font-medium">{{ taxon }}</span><input type="hidden" name="item-taxo-{{loop.index}}" id="item-taxo-{{loop.index}}" value="{{ taxon }}"></div><div class="w-96  mr-4"><input type="text" data-maxitems=1 data-create=false name="item-replace-{{loop.index}}" id="item-replace-{{loop.index}}"  data-nodeprecated class="form-input js js-autocomplete" autocomplete="off" placeholder="{{_('replace by')}}"  data-type="taxo" data-role="replace" value="{{answers['taxa'][taxon] if answers and 'taxa' in answers and taxon in answers['taxa'] else ''}}" ></div><div class="w-24 align-end"><span class="button is-pick"><i class="icon icon-bars-4-sm"></i></span></div></div>
+        {%- endfor -%}
+</fieldset>
+      {% endif %}
+      {% if (users|length())>0 %}
+<fieldset>
+        <legend>Users manual mapping</legend>
+        {% for usr in users %}<input type="hidden" name="simple-usernum" value={{users|length}}>
+<div class="flex flex-row mb-0.5">
+          <div class="w-64 mr-4">
+            <span class="font-medium">{{ usr }}</span>
+            <input type="hidden" name="origuser{{ loop.index }}" value="{{ usr }}">
+            </div>
+            <div class="w-96 mr-4">
+             <input type="text" data-maxitems=1 data-create=false name="user-replace-{{loop.index}}" id="user-replace-{{loop.index}}" class="form-input js js-autocomplete" autocomplete="off" placeholder="{{_('replace by')}}"  data-type="user"  value="{{answers['users'][usr] if answers and 'taxa' in answers and usr in answers['users'] else ''}}">
+            </div>
+          </div>
+        {% endfor %}
+</fieldset>
+      {% endif %}
+    {% set modal_title = _('taxo pick') %}
+    {% set data = " data-tree=taxotree  data-request=taxotree data-droptarget=item-replace data-url=/gui/search/taxotreejson" %}
+    {% set btn = {'class':'button is-pick hide','title':modal_title,'icon':'icon-bars-4-sm','text': _('taxonomy') ,'data':data+' data-root=# data-target=unique '}%}
+    {{ modal('taxotree',  btn = btn,modal_title = modal_title, data=data) }}
+      <input type="hidden" name="starttask" value="Y">
+      <button type="submit" class="button is-primary ">Continue</button>
+    </form>{%endif%}
+  </div>
+{% endblock %}

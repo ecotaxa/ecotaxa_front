@@ -105,9 +105,7 @@ def gui_job_question(job_id: int):
     """
     Used for jobs needing user input during the processing.
     """
-    from appli.jobs.views import jobAsk
 
-    return jobAsk(job_id)
     py_messages = py_get_messages("jobs")
     with ApiClient(JobsApi, request) as japi:
         try:
@@ -121,8 +119,8 @@ def gui_job_question(job_id: int):
     with ApiClient(UsersApi, request) as uapi:
         owner: MinUserModel = uapi.get_user(user_id=job.owner_id)
 
-    if job.state != "A":
-        return ""
+    # if job.state != "A":
+    #    return ""
     job_cls = Job.find_job_class_by_name(Job, job.type)
     assert job_cls is not None, "%s not known as a job UI type" % job.type
     if request.method == "GET":

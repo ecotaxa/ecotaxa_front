@@ -13,14 +13,11 @@ from to_back.ecotaxa_cli_py.api import (
     UsersApi,
     JobsApi,
 )
-from to_back.ecotaxa_cli_py.models import (
-    ImportReq,
-    ImportRsp,
-    JobModel,
-)
+from to_back.ecotaxa_cli_py.models import ImportReq, ImportRsp, JobModel, TaxoRecastRsp
 from appli.gui.jobs.job_interface import import_format_options
+from appli.back_config import get_back_constants
+from appli.gui.taxonomy.tools import update_taxo_recast
 from flask_babel import _
-
 
 
 class ImportJob(Job):
@@ -33,13 +30,14 @@ class ImportJob(Job):
 
     STEP0_TEMPLATE: ClassVar = "/v2/jobs/import.html"
     FINAL_TEMPLATE: ClassVar = "v2/jobs/_import_final.html"
+    TAXO_TEMPLATE: ClassVar = "v2/jobs/import_question.html"
     IMPORT_TYPE: ClassVar = None
     ACTION = "import"
 
     @classmethod
     def initial_dialog(cls) -> str:
         """In UI/flask, initial load, GET"""
-        projid, collid = cls.get_target_id()
+        projid, _collid = cls.get_target_id()
         target_proj = cls.get_target_obj(projid)
         if target_proj is None:
             return render_template(cls.NOOBJ_TEMPLATE, projid=projid)
@@ -95,7 +93,7 @@ class ImportJob(Job):
     @classmethod
     def create_or_update(cls):
         """In UI/flask, submit/resubmit of initial page, POST"""
-        projid = cls.get_target_id()
+        projid, _collid = cls.get_target_id()
         target_proj = cls.get_target_obj(projid)
         # Save preferences
         server_path = gvp("ServerPath")
@@ -145,17 +143,15 @@ class ImportJob(Job):
     @classmethod
     def initial_question_dialog(cls, job: JobModel):
         """The back-end need some data for proceeding"""
-        txt = "<h1>Text File Importation Task</h1>"
+        print('import question"', job.params)
         projid = job.params["prj_id"]
         target_proj = cls.get_target_obj(projid)
 
         # Feed local values
-        not_found_taxo = job.question["missing_taxa"]
-        not_found_users = job.question["missing_users"]
-
+        not_found_taxo = getattr(job.question, "missing_taxa")
+        not_found_users = getattr(job.question, "missing_users")
         return render_template(
-            "v2/jobs/_import_question.html",
-            header=txt,
+            "v2/jobs/import_question1.html",
             taxo=not_found_taxo,
             users=not_found_users,
             job=job,
@@ -165,40 +161,56 @@ class ImportJob(Job):
     @classmethod
     def treat_question_reply(cls, job: JobModel):
         """Relay user answers (to questions) to back-end"""
-        not_found_taxo = job.question["missing_taxa"]
-        not_found_users = job.question["missing_users"]
-
+        not_found_taxo = getattr(job.question, "missing_taxa")
+        not_found_users = getattr(job.question, "missing_users")
         app.logger.info("Form Data = %s", request.form)
         categs = {}
         for i in range(1, 1 + len(not_found_taxo)):
             orig = gvp(
-                "orig%d" % i
-            )  # Le nom original est dans origXX et la nouvelle valeur dans taxolbXX
-            newvalue = gvp("taxolb%d" % i)
+                "item-taxo-%d" % i
+            )  # Le nom original est dans item-taxo-XX et la nouvelle valeur dans item-replace-XX
+            newvalue = gvp("item-replace-%d" % i)
             if orig in not_found_taxo and newvalue != "":
                 categs[orig] = newvalue
         users = {}
         for i in range(1, 1 + len(not_found_users)):
             orig = gvp(
                 "origuser%d" % i
-            )  # Le nom original est dans origXX et la nouvelle valeur dans taxolbXX
-            newvalue = gvp("userlb%d" % i)
+            )  # Le nom original est dans origXX et la nouvelle valeur dans user-replace-XX
+            newvalue = gvp("user-replace-%d" % i)
             if orig in not_found_users and newvalue != "":
                 users[orig] = newvalue
         answers = {"users": users, "taxa": categs}
+        if len(answers["taxa"].values()):
+            cls.make_recast(job.params["prj_id"], answers["taxa"])
         with ApiClient(JobsApi, request) as api:
             try:
                 api.reply_job_question(job_id=job.id, body=answers)
             except ApiException as ae:
                 cls.flash_any_error([str(ae)])
                 return render_template(
-                    "v2/jobs/_import_question.html",
+                    "v2/jobs/import_question1.html",
                     header="",
                     taxo=not_found_taxo,
                     users=not_found_users,
+                    replace=answers,
                     job=job,
                 )
         return redirect(url_for("gui_job_show", job_id=job.id))
+
+    @classmethod
+    def make_recast(cls, target_id: int, values: dict):
+        recast = TaxoRecastRsp(from_to=values, doc={})
+        recast_operation = get_back_constants("RECAST_OPERATION")
+        operation = recast_operation["project_import"]
+        recasts = {operation: recast}
+        for operation, recast in recasts.items():
+            update_taxo_recast(
+                target_id=target_id,
+                taxonomy_recast=recast,
+                operation=operation,
+                is_collection=False,
+            )
 
     @classmethod
     def _must_skip_existing_objects(cls) -> bool:

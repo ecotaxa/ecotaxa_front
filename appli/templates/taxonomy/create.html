@@ -10,7 +10,7 @@
     </div>
     <div><span>Create a WoRMS taxon
         <i class="fas fa-info-circle" data-content="{{_('Type a taxon name, the name will be searched into the WoRMS database.')}}"></i>
-      </span>{{ ht.InputText('taxosearchname', searchname ,
+      </span> &nbsp;&nbsp;<label><input type="checkbox" name="extendnsearch" id="extendsearch" value="1"> Extend search to not marine species</label>{{ ht.InputText('taxosearchname', searchname ,
                 extrataginfo=("class=form-control maxlength=100  "
                 )|safe) }} <button type="button" onclick="const val=$('#taxosearchname').val();const searchurl='{{url_for('routetaxosearchworms')}}?q='+encodeURIComponent(val).replaceAll('%20','+');loadUrl(searchurl,'GET',null,null,{},'... requesting Worms API ...')" class="btn btn-blue"><i class="fa fa-search"></i> Search
         </button>  </button></div>
@@ -90,6 +90,8 @@
 
         function loadUrl(url,method='GET',element=null,callback=null,data={},wait="...") {
             if (element===null) element = $('#At2PopupWindow'+windex+' .At2PopupContent');
+            const extendsearch = $("#extendsearch").is(":checked");
+            if (extendsearch) url+='&extended=1';
             $.ajax(url, {
             data: data,
             type: method,
