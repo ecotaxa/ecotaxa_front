@@ -243,7 +243,7 @@ def export_format_options(_type=None, target: Optional[str] = "project"):
                     ),
                     "datas": {
                         "include_predicted": True,
-                        "with_absent": True,
+                        "with_absent": False,
                         "with_computations": ("ABO", False),
                         "taxo_mapping": ({}, False),
                         "formulae": (
