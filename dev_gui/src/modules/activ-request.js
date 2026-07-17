@@ -94,15 +94,7 @@ function createActivRequest() {
 
           callback = async (html) => {
             const modalcontent = modal.setContent(html);
-           /* if (!dynamics.JsComponents) {
-              const {
-                JsComponents
-              } = await import('../modules/js-components.js');
-              dynamics.JsComponents = JsComponents;
-            }
-            dynamics.JsComponents.applyTo(modalcontent);*/
             await activateContent(item,modalcontent);
-
           }
         } else {
           callback = url = null;
@@ -204,7 +196,7 @@ function createActivRequest() {
               dynamics.JsComponents = JsComponents;
             }
              dynamics.JsComponents.applyTo(content);
-             item.classList.add(css.hide);
+             //item.classList.add(css.hide);
              /* fetch request -modal - contextual help */
             ActivRequest.applyTo(content);
             /*** activate data-action  **/
@@ -224,13 +216,6 @@ function createActivRequest() {
               dynamics.AlertBox = AlertBox;
            }
             dynamics.AlertBox.applyTo(content);
-  }
-
-  function makeCloseRequest(item) {
-    item.addEventListener(ev, async (e) => {
-      const modal = await callModal(item);
-      if (modal) modal.dismissModal();
-    });
   }
 
   function fetchRequest(format, url, callback) {

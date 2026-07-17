@@ -79,9 +79,6 @@ const tableselectors = Object.freeze({
 
 const NOTFOUND = '#NOTFOUND#';
 
-// Cache des formatters pour éviter de les recréer
-let formattersCache = null;
-
 export class TableComponent {
   uuid = null;
   grid = {
@@ -138,6 +135,11 @@ export class TableComponent {
   _fetching = false;
   _lastSearch = null;
   _rowsRenderedCallbacks = [];
+  // Cache des formatters pour éviter de les recréer - doit être par instance : les formatters
+  // (ex: "imports" de table-project.js) capturent `this` par closure, donc un cache partagé
+  // entre plusieurs tables ayant le même params.from (ex: deux tables "pick" en prjlist, une
+  // pour taxo et une pour privileges) réutiliserait à tort les colonnes/boutons de la première.
+  _formattersCache = null;
 
   constructor(container, options = {}) {
     if (!container) return;
@@ -733,6 +735,9 @@ export class TableComponent {
   rowAttributes(tr, index) {
     const id = this.getCellData(index, this.cellidname);
     tr.dataset[this.cellidname] = id;
+    // absolute index into grid.data - virtual scroll only keeps a moving window of <tr>s in
+    // the DOM, so plugins (eg. DataImport) can't resolve a row's position from DOM order alone.
+    tr.dataset.rowindex = index;
     return this.setRowAttributes ? this.setRowAttributes(this, tr, id) : tr;
   }
 
@@ -799,8 +804,8 @@ export class TableComponent {
 
   async getFormatters() {
     // Retourner le cache si disponible
-    if (formattersCache && this.params.from === formattersCache.from) {
-      return formattersCache.formatters;
+    if (this._formattersCache && this.params.from === this._formattersCache.from) {
+      return this._formattersCache.formatters;
     }
 
     const formatters = {
@@ -972,7 +977,7 @@ export class TableComponent {
       formatters;
 
     // Mettre en cache
-    formattersCache = {
+    this._formattersCache = {
       from: this.params.from,
       formatters: finalFormatters
     };

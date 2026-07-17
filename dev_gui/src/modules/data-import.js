@@ -40,8 +40,7 @@ export class DataImport {
   importzone = null;
   selectors;
   button;
-  clearbutton;
-  replacebutton;
+   replacebutton;
   tabbutton;
   dom;
   tbl = null;
@@ -99,6 +98,24 @@ export class DataImport {
       projid = this.dom.querySelector('[' + this.selector + '="' + projid.value + '"]');
       if (projid) projid.hidden = true;
     }
+    this.rebindSelectors();
+    if (this.tabbutton) {
+      this.tabbutton.addEventListener('click', (e) => {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        this.resizeZone(e);
+      });
+    }
+
+  }
+
+  // (Re)binds import selectors (buttons/inputs) found in the currently rendered <tr>s, and
+  // refreshes the this.trs snapshot. Virtual scroll destroys and recreates <tr>/<td> on every
+  // scroll (table-component.js enableVirtualScroll), so this must be re-run each time rows are
+  // re-rendered - see the onRowsRendered registration in table-project.js - not just once at
+  // setup, otherwise rows scrolled into view later never get their import handler attached.
+  rebindSelectors() {
+    this.trs = Array.from(this.dom.querySelectorAll('tbody tr'));
     const indextocheck = this.indexToCheck();
     this.selectors = this.dom.querySelectorAll('[' + this.selector + '] button, [' + this.selector + '] input');
     this.selectors.forEach(selector => {
@@ -119,14 +136,6 @@ export class DataImport {
         selector.addEventListener(evt, apply_selection, false);
       };
     });
-    if (this.tabbutton) {
-      this.tabbutton.addEventListener('click', (e) => {
-        e.stopImmediatePropagation();
-        e.preventDefault();
-        this.resizeZone(e);
-      });
-    }
-
   }
 
   columnProperty(name, index) {
@@ -143,6 +152,9 @@ export class DataImport {
   rowIndex(td) {
     const ref = (td.parentElement) ? td.parentElement : null;
     if (!ref) return null;
+    // With virtual scroll, this.trs is only a snapshot of the currently rendered window, so a
+    // DOM-order lookup can't be trusted - each <tr> instead carries its real grid.data index.
+    if (ref.dataset.rowindex !== undefined) return parseInt(ref.dataset.rowindex, 10);
     return this.trs.findIndex(tr => (tr === ref));
   }
   disableSelector(selector, disable = true) {
@@ -274,7 +286,7 @@ export class DataImport {
       if (index >= 0) {
         const tdindex = this.columnIndex('name', name);
         // show import buttons if importzone
-        const cell = (tdindex >= 0) ? this.trs[rowindex].cells[tdindex] : null;
+        const cell = (tdindex >= 0) ? tr.cells[tdindex] : null;
         if (cell && add) cell.classList.add(css.selected);
         const rowdata = this.datas[rowindex];
         const celldata = rowdata[index];
@@ -357,7 +369,7 @@ export class DataImport {
              if (name === models.projid) {
               const idx = this.columnIndex('name', 'title');
               // show import buttons if importzone
-              const celllabel = (idx >= 0) ? this.trs[rowindex].cells[idx] : null;
+              const celllabel = (idx >= 0) ? tr.cells[idx] : null;
               const datalabel = rowdata[idx];
               const label = (celllabel) ? this.getDataToImport(celllabel, datalabel) : data;
               const item = {};
@@ -375,7 +387,7 @@ export class DataImport {
             }
             break;
         }
-      };
+      }
     });
     if (this.thcells.length) {
       if (this.button) {
@@ -466,7 +478,7 @@ export class DataImport {
     const append_resets = (name, td, i) => {
       const rowindex = this.rowIndex(td);
       const celldata = this.datas[rowindex][i];
-      const cell = this.trs[rowindex].cells[i];
+      const cell = tr.cells[i];
       const data = this.getDataToImport(cell, celldata);
       if (!resets[name]) resets[name] = [data];
       else if (resets[name].indexOf(data) < 0) resets[name].push(data);

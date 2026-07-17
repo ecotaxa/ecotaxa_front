@@ -36,6 +36,9 @@ export const initImport = async (state) => {
     DataImport
   } = await import('../modules/data-import.js');
   state.dataImport = new DataImport(state);
+  // virtual scroll destroys and recreates <tr>/<td> on every scroll, so the import
+  // buttons/inputs on rows scrolled into view later need their handlers re-bound too.
+  state.onRowsRendered(() => state.dataImport.rebindSelectors());
   state.importfields = state.grid.columns.filter(column => (column.hasOwnProperty('selectcells')));
   state.importfields = (state.importfields.length) ? state.importfields[0].selectcells : null;
   state.dataImport.itemRemove = itemRemove;
