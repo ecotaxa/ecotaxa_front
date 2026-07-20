@@ -677,10 +677,10 @@ export class DataImport {
           if (input && this.imports[name] !== undefined) {
             const type = (input.type) ? input.type : input.tagName.toLowerCase();
             ts = input.tomselect;
-            if (['init_classif_list'].indexOf(name) >= 0) {
+            if (['init_classif_list','initclassiflist'].indexOf(name) >= 0) {
               let ids = this.imports[name];
               if (Array.isArray(ids)) ids = ids.join(',');
-              else ids = ids.replace('[', '').replace(']', '').replaceAll(' ', '');
+              else if(ids !== null) ids = ids.replace('[', '').replace(']', '').replaceAll(' ', '');
               if (ids !== '') {
                 if (ts) ts.wrapper.classList.add('wait-for-results');
                 let opts = fetchSettings(),

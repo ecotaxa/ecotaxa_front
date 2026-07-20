@@ -2514,18 +2514,18 @@ class ProjectsApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def update_project(self, project_id, update_project_req, **kwargs):  # noqa: E501
+    def update_project(self, project_id, project_model, **kwargs):  # noqa: E501
         """Update Project  # noqa: E501
 
         **Update the project**, return **NULL upon success.**  Note that some fields will **NOT** be updated and simply ignored, e.g. *free_cols*.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.update_project(project_id, update_project_req, async_req=True)
+        >>> thread = api.update_project(project_id, project_model, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
         :param int project_id: Internal, numeric id of the project. (required)
-        :param UpdateProjectReq update_project_req: (required)
+        :param ProjectModel project_model: (required)
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
@@ -2538,20 +2538,20 @@ class ProjectsApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.update_project_with_http_info(project_id, update_project_req, **kwargs)  # noqa: E501
+        return self.update_project_with_http_info(project_id, project_model, **kwargs)  # noqa: E501
 
-    def update_project_with_http_info(self, project_id, update_project_req, **kwargs):  # noqa: E501
+    def update_project_with_http_info(self, project_id, project_model, **kwargs):  # noqa: E501
         """Update Project  # noqa: E501
 
         **Update the project**, return **NULL upon success.**  Note that some fields will **NOT** be updated and simply ignored, e.g. *free_cols*.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.update_project_with_http_info(project_id, update_project_req, async_req=True)
+        >>> thread = api.update_project_with_http_info(project_id, project_model, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
         :param int project_id: Internal, numeric id of the project. (required)
-        :param UpdateProjectReq update_project_req: (required)
+        :param ProjectModel project_model: (required)
         :param _return_http_data_only: response data without head status code
                                        and headers
         :param _preload_content: if False, the urllib3.HTTPResponse object will
@@ -2570,7 +2570,7 @@ class ProjectsApi(object):
 
         all_params = [
             'project_id',
-            'update_project_req'
+            'project_model'
         ]
         all_params.extend(
             [
@@ -2593,10 +2593,10 @@ class ProjectsApi(object):
         if self.api_client.client_side_validation and ('project_id' not in local_var_params or  # noqa: E501
                                                         local_var_params['project_id'] is None):  # noqa: E501
             raise ApiValueError("Missing the required parameter `project_id` when calling `update_project`")  # noqa: E501
-        # verify the required parameter 'update_project_req' is set
-        if self.api_client.client_side_validation and ('update_project_req' not in local_var_params or  # noqa: E501
-                                                        local_var_params['update_project_req'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `update_project_req` when calling `update_project`")  # noqa: E501
+        # verify the required parameter 'project_model' is set
+        if self.api_client.client_side_validation and ('project_model' not in local_var_params or  # noqa: E501
+                                                        local_var_params['project_model'] is None):  # noqa: E501
+            raise ApiValueError("Missing the required parameter `project_model` when calling `update_project`")  # noqa: E501
 
         collection_formats = {}
 
@@ -2612,8 +2612,8 @@ class ProjectsApi(object):
         local_var_files = {}
 
         body_params = None
-        if 'update_project_req' in local_var_params:
-            body_params = local_var_params['update_project_req']
+        if 'project_model' in local_var_params:
+            body_params = local_var_params['project_model']
         # HTTP header `Accept`
         header_params['Accept'] = self.api_client.select_header_accept(
             ['application/json'])  # noqa: E501

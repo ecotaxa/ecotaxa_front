@@ -104,8 +104,6 @@ def _prjs_list_api(
                 "Authorization": "Bearer " + token,
             }
         r = requests.get(url, headers=headers, params=payload)
-        print("payload", payload)
-        print(" time from api ", (time.time() - starttime))
         if r.status_code == 200:
             prjs.extend(r.json())
         else:
@@ -161,14 +159,21 @@ def projects_list(
             fields = "*default,viewers,annotators,managers,contact,initclassiflist,classiffieldlist,cnn_network_id"
         elif typeimport == "privileges":
             fields = "*summary,viewers,annotators,managers,contact"
+        elif typeimport == "renamingrules":
+            fields = "*summary"
+            for_managing = True
         prjs = _prjs_list_api(
             listall,
             filt,
             for_managing=for_managing,
             fields=fields,
         )
-        if fields is not None and "initclassiflist" in fields:
-            for i, a_prj in enumerate(prjs):
+        if (
+            fields is not None
+            and "initclassiflist" in fields
+            and "init_classif_list" not in fields
+        ):
+            for a_prj in prjs:
                 if a_prj["initclassiflist"] is None:
                     a_prj["init_classif_list"] = []
                 else:
@@ -177,8 +182,6 @@ def projects_list(
                         for x in a_prj["initclassiflist"].split(",")
                         if x.isdigit()
                     ]
-            prjs[i] = a_prj
-
         if typeimport != "" and current_user.is_app_admin == False:
             prjs = prjs + _prjs_list_api(
                 True, filt, for_managing=for_managing, fields=fields

@@ -107,7 +107,6 @@ from to_back.ecotaxa_cli_py.models.taxon_model import TaxonModel
 from to_back.ecotaxa_cli_py.models.taxon_usage_model import TaxonUsageModel
 from to_back.ecotaxa_cli_py.models.taxonomy_recast_req import TaxonomyRecastReq
 from to_back.ecotaxa_cli_py.models.taxonomy_tree_status import TaxonomyTreeStatus
-from to_back.ecotaxa_cli_py.models.update_project_req import UpdateProjectReq
 from to_back.ecotaxa_cli_py.models.user_activate_req import UserActivateReq
 from to_back.ecotaxa_cli_py.models.user_activity import UserActivity
 from to_back.ecotaxa_cli_py.models.user_model_with_rights import UserModelWithRights

@@ -140,7 +140,7 @@ def project_table_columns(
                     "status": {"label": _("status")},
                     "contact": {"label": _("contact"), "hidden": True},
                     "comments": {"label": _("comments"), "hidden": True},
-                    "init_classif_list": {"label": _("preset"), "hidden": True},
+                    "initclassiflist": {"label": _("preset"), "hidden": True},
                     "privileges": {"label": _("members"), "format": "privileges"},
                     "access": {"label": _("access"), "format": "access"},
                     "classiffieldlist": {"label": _("sorting tools"), "format": "text"},
@@ -154,6 +154,14 @@ def project_table_columns(
                     "contact": {"label": _("contact"), "hidden": True},
                     "privileges": {"label": _("members"), "format": "privileges"},
                     "access": {"label": _("Access"), "format": "access"},
+                }
+            ),
+            "renamingrules": dict(
+                {
+                    "title": {"label": _("title")},
+                    "instrument": {"label": _("instrument")},
+                    "status": {"label": _("status")},
+                    "access": {"label": _("access"), "format": "access"},
                 }
             ),
         },
@@ -225,7 +233,7 @@ def project_table_columns(
                     "contact",
                     "status",
                     "access",
-                    "init_classif_list",
+                    "initclassiflist",
                     "classiffieldlist",
                     "privileges",
                     "cnn_network_id",
@@ -307,7 +315,7 @@ def render_samples_stats(
         if len(used_taxa) > 0:
             usedtaxa = dict({})
             for t in taxo_with_names(list(set(used_taxa))):
-                usedtaxa.update(dict({str(t[0]): (t[1],t[2])}))
+                usedtaxa.update(dict({str(t[0]): (t[1], t[2])}))
             for i, sample in enumerate(samples):
                 taxa = []
                 for taxon in sample["used_taxa"]:

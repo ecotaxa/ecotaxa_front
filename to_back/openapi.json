@@ -2406,7 +2406,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateProjectReq"
+                "$ref": "#/components/schemas/ProjectModel"
               }
             }
           },
@@ -11949,125 +11949,6 @@
             "type": "string",
             "description": "Taxonomy tree last refresh/sync from taxonomy server. Date, with format YYYY-MM-DDThh:mm:ss.",
             "example": "2021-10-07T01:26:47"
-          }
-        }
-      },
-      "UpdateProjectReq": {
-        "title": "Update full or partial Project Model",
-        "type": "object",
-        "properties": {
-          "title": {
-            "title": "Title",
-            "type": "string",
-            "description": "The project title.",
-            "example": "MyProject"
-          },
-          "instrument": {
-            "title": "Instrument",
-            "type": "string",
-            "description": "This project's instrument code.",
-            "example": "Zooscan"
-          },
-          "status": {
-            "title": "Status",
-            "type": "string",
-            "description": "The project status.",
-            "example": "Annotate"
-          },
-          "access": {
-            "title": "Access level",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AccessLevelEnum"
-              }
-            ],
-            "description": "When \"1\" (PUBLIC), the project is visible by all users.PUBLIC: \"1\", OPEN: \"2\", PRIVATE: \"0\"",
-            "default": "1",
-            "example": "1"
-          },
-          "classiffieldlist": {
-            "title": "Classification field list",
-            "type": "string",
-            "example": "depth_min=depth_min\r\ndepth_max=depth_max\r\narea=area [pixel]\r\nmean=mean [0-255]\r\nfractal=fractal\r\nmajor=major [pixel]\r\nsymetrieh=symetrieh\r\ncirc.=circ\r\nferet = Feret [pixel]"
-          },
-          "initclassiflist": {
-            "title": "Initial categories",
-            "type": "string",
-            "description": " Aggregated categories from the collection projects."
-          },
-          "comments": {
-            "title": "Comments",
-            "type": "string",
-            "description": "The project comments.",
-            "example": ""
-          },
-          "cnn_network_id": {
-            "title": "Cnn network id",
-            "type": "string",
-            "example": "SCN_zooscan_group1"
-          },
-          "formulae": {
-            "title": "Formulae",
-            "type": "string",
-            "description": "Concentration formulae.",
-            "default": "subsample_coef: 1/ssm.sub_part\ntotal_water_volume: sam.tot_vol/1000\nindividual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)**3",
-            "example": ""
-          },
-          "managers": {
-            "title": "Managers",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MinUserModel"
-            },
-            "description": "Managers of this project.",
-            "default": []
-          },
-          "annotators": {
-            "title": "Annotators",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MinUserModel"
-            },
-            "description": "Annotators of this project, if not manager.",
-            "default": []
-          },
-          "viewers": {
-            "title": "Viewers",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MinUserModel"
-            },
-            "description": "Viewers of this project, if not manager nor annotator.",
-            "default": []
-          },
-          "contact": {
-            "title": "Contact",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/MinUserModel"
-              }
-            ],
-            "description": "The contact person is a manager who serves as the contact person for other users and EcoTaxa's managers."
-          },
-          "init_classif_list": {
-            "title": "Init classification list",
-            "type": "array",
-            "items": {
-              "type": "integer"
-            },
-            "description": "Favorite taxa used in classification.",
-            "default": [],
-            "example": [
-              5,
-              11493,
-              11498,
-              11509
-            ]
-          },
-          "popoverfieldlist": {
-            "title": "Pop over field list",
-            "type": "string",
-            "example": "depth_min=depth_min\r\ndepth_max=depth_max\r\narea=area [pixel]\r\nmean=mean [0-255]\r\nfractal=fractal\r\nmajor=major [pixel]\r\nsymetrieh=symetrieh\r\ncirc.=circ\r\nferet = Feret [pixel]"
           }
         }
       },

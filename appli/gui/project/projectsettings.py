@@ -201,7 +201,6 @@ def prj_edit(prjid: int, new: bool = False):
         else:
             checkformulae = target_proj.formulae.strip()
         if checkformulae != formulae:
-            print("forulae:", formulae)
             setattr(target_proj, "formulae", formulae)
         do_update = True
         contact_user = None
@@ -277,7 +276,6 @@ def prj_edit(prjid: int, new: bool = False):
         if len(target_proj.managers) == 0:
             flash("managerrequired", "error")
             do_update = False
-
         # Update on back-end
         if do_update:
             try:
