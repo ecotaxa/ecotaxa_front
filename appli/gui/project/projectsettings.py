@@ -191,15 +191,19 @@ def prj_edit(prjid: int, new: bool = False):
         # process members privileges results - members_by_right is empty as backend records are deleted on every update
         # process formulae
 
-        formulae = ""
+        formulae = {}
         for a_var in ["total_water_volume", "subsample_coef", "individual_volume"]:
-            _ret = gvp(a_var, "")
-            formulae += a_var + ": " + manage_prefixes(_ret, False) + "\r"
-        formulae = formulae.strip()
+            ret = gvp(a_var, "")
+            if ret.strip() != "":
+                formulae[a_var] = manage_prefixes(ret, False) + "\r"
+        if len(formulae.keys()) == 0:
+            formulae = None
+
         if target_proj.formulae is None:
             checkformulae = None
         else:
             checkformulae = target_proj.formulae.strip()
+
         if checkformulae != formulae:
             setattr(target_proj, "formulae", formulae)
         do_update = True
