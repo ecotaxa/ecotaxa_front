@@ -16,6 +16,7 @@ from to_back.ecotaxa_cli_py.models import (
 )
 from appli.gui.commontools import possible_access, possible_models
 from appli.back_config import get_back_constants
+import json
 
 ###############################################common for create && edit  #######################################################################
 
@@ -136,6 +137,7 @@ def prj_edit(prjid: int, new: bool = False):
     # Security & sanity checks
     # get target_proj
     def manage_prefixes(formula, direction=True):
+        formula = formula.replace('"', "")
 
         if direction:
             prefixes = {
@@ -145,6 +147,7 @@ def prj_edit(prjid: int, new: bool = False):
                 "subsample": "ssm",
             }
             for key, value in prefixes.items():
+                value = value.strip()
                 formula = formula.replace(value + ".", key + ".")
         else:
             prefixes = {
@@ -193,18 +196,17 @@ def prj_edit(prjid: int, new: bool = False):
 
         formulae = {}
         for a_var in ["total_water_volume", "subsample_coef", "individual_volume"]:
-            ret = gvp(a_var, "")
+            ret = gvp(a_var, "").replace("\r", "").replace("\n", "")
             if ret.strip() != "":
-                formulae[a_var] = manage_prefixes(ret, False) + "\r"
-        if len(formulae.keys()) == 0:
-            formulae = None
+                formulae[a_var] = manage_prefixes(ret, False)
 
         if target_proj.formulae is None:
             checkformulae = None
         else:
             checkformulae = target_proj.formulae.strip()
-
+        formulae = json.dumps(formulae) if len(formulae.keys()) else None
         if checkformulae != formulae:
+            print("formulae ****", formulae)
             setattr(target_proj, "formulae", formulae)
         do_update = True
         contact_user = None
@@ -282,6 +284,8 @@ def prj_edit(prjid: int, new: bool = False):
             do_update = False
         # Update on back-end
         if do_update:
+            if isinstance(target_proj.formulae, dict):
+                target_proj.formulae = json.dumps(target_proj.formulae)
             try:
                 with ApiClient(ProjectsApi, request) as api:
                     api.update_project(
@@ -338,10 +342,13 @@ def prj_edit(prjid: int, new: bool = False):
 
     formulae = {}
     if target_proj.formulae is not None:
-        lines = target_proj.formulae.split("\r")
-        for line in lines:
-            part = line.split(":")
-            formulae[part[0].strip()] = ":".join([p.strip() for p in part[1:]])
+        if isinstance(target_proj.formulae, dict):
+            formulae = target_proj.formulae
+        else:
+            lines = target_proj.formulae.split("\r")
+            for line in lines:
+                part = line.split(":")
+                formulae[part[0].strip()] = ":".join([p.strip() for p in part[1:]])
         for key, value in formulae.items():
             formulae[key] = manage_prefixes(value, True)
 
