@@ -142,6 +142,7 @@ def prj_edit(prjid: int, new: bool = False):
             "total_water_volume/1000",
             "1/subsampling_coefficient",
             "4/3 * pi * (major_axis * pixel_size) * (minor_axis * pixel_size)^2'",
+            "4/3 * pi * ( sqrt(area/pi) * pixel_size )",
         ]
         for val in noneformulae:
             if formula == val:
