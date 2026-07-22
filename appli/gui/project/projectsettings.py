@@ -136,9 +136,16 @@ def prj_create() -> str:
 def prj_edit(prjid: int, new: bool = False):
     # Security & sanity checks
     # get target_proj
-    def manage_prefixes(formula, direction=True):
-        formula = formula.replace('"', "")
 
+    def manage_prefixes(formula, direction=True):
+        noneformulae = [
+            "total_water_volume/1000",
+            "1/subsampling_coefficient",
+            "4/3 * pi * (major_axis * pixel_size) * (minor_axis * pixel_size)^2'",
+        ]
+        for val in noneformulae:
+            if formula == val:
+                formula = ""
         if direction:
             prefixes = {
                 "sample": "sam",
@@ -171,7 +178,6 @@ def prj_edit(prjid: int, new: bool = False):
     if gvp("save") == "Y":
         # Load posted variables
         previous_cnn = target_proj.cnn_network_id
-        formulae = target_proj.formulae
         # posted_contact_id = None
         # Update the project (from API call) with posted variables
 
@@ -197,6 +203,7 @@ def prj_edit(prjid: int, new: bool = False):
         formulae = {}
         for a_var in ["total_water_volume", "subsample_coef", "individual_volume"]:
             ret = gvp(a_var, "").replace("\r", "").replace("\n", "")
+
             if ret.strip() != "":
                 formulae[a_var] = manage_prefixes(ret, False)
 
@@ -204,7 +211,7 @@ def prj_edit(prjid: int, new: bool = False):
             checkformulae = None
         else:
             checkformulae = target_proj.formulae.strip()
-        formulae = json.dumps(formulae) if len(formulae.keys()) else None
+        formulae = json.dumps(formulae) if len(formulae.keys()) else Non
         if checkformulae != formulae:
             setattr(target_proj, "formulae", formulae)
         do_update = True
@@ -343,13 +350,10 @@ def prj_edit(prjid: int, new: bool = False):
     if target_proj.formulae is not None:
         if isinstance(target_proj.formulae, dict):
             formulae = target_proj.formulae
+        elif target_proj.formulae == "None":
+            target_proj.formulae = None
         else:
-            lines = target_proj.formulae.split("\r")
-            for line in lines:
-                part = line.split(":")
-                formulae[part[0].strip()] = ":".join([p.strip() for p in part[1:]])
-        for key, value in formulae.items():
-            formulae[key] = manage_prefixes(value, True)
+            formulae = json.loads(target_proj.formulae)
 
     return render_template(
         "v2/project/projectsettings.html",
