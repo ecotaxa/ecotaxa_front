@@ -211,7 +211,8 @@ def prj_edit(prjid: int, new: bool = False):
             checkformulae = None
         else:
             checkformulae = target_proj.formulae.strip()
-        formulae = json.dumps(formulae) if len(formulae.keys()) else Non
+        formulae = json.dumps(formulae) if len(formulae.keys()) else None
+
         if checkformulae != formulae:
             setattr(target_proj, "formulae", formulae)
         do_update = True
