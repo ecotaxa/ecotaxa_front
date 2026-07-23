@@ -16,7 +16,7 @@ from to_back.ecotaxa_cli_py.api import (
 from to_back.ecotaxa_cli_py.models import ImportReq, ImportRsp, JobModel, TaxoRecastRsp
 from appli.gui.jobs.job_interface import import_format_options
 from appli.back_config import get_back_constants
-from appli.gui.taxonomy.tools import update_taxo_recast
+from appli.gui.taxonomy.tools import update_taxo_recast, get_taxo_recast
 from flask_babel import _
 
 
@@ -29,8 +29,8 @@ class ImportJob(Job):
     UI_NAME: ClassVar = "FileImport"
 
     STEP0_TEMPLATE: ClassVar = "/v2/jobs/import.html"
-    FINAL_TEMPLATE: ClassVar = "v2/jobs/_import_final.html"
-    TAXO_TEMPLATE: ClassVar = "v2/jobs/import_question.html"
+    FINAL_TEMPLATE: ClassVar = "/v2/jobs/_import_final.html"
+    TAXO_TEMPLATE: ClassVar = "/v2/jobs/_import_question.html"
     IMPORT_TYPE: ClassVar = None
     ACTION = "import"
 
@@ -38,12 +38,12 @@ class ImportJob(Job):
     def initial_dialog(cls) -> str:
         """In UI/flask, initial load, GET"""
         projid, _collid = cls.get_target_id()
-        target_proj = cls.get_target_obj(projid)
+        target_proj = cls.get_target_obj(int(projid))
         if target_proj is None:
             return render_template(cls.NOOBJ_TEMPLATE, projid=projid)
         # Get stored last server path value for this project, if any
         with ApiClient(UsersApi, request) as uapi:
-            _unused = uapi.get_current_user_prefs(projid, "cwd")
+            _unused = uapi.get_current_user_prefs(int(projid), "cwd")
         formdatas, formoptions, import_links = import_format_options()
         return render_template(
             cls.STEP0_TEMPLATE,
@@ -94,7 +94,7 @@ class ImportJob(Job):
     def create_or_update(cls):
         """In UI/flask, submit/resubmit of initial page, POST"""
         projid, _collid = cls.get_target_id()
-        target_proj = cls.get_target_obj(projid)
+        target_proj = cls.get_target_obj(int(projid))
         # Save preferences
         server_path = gvp("ServerPath")
 
@@ -103,7 +103,7 @@ class ImportJob(Job):
                 # Compute directory to open next time, we pick the parent to avoid double import of the same
                 # directory or zip.
                 cwd = str(Path(server_path).parent)
-                api.set_current_user_prefs(projid, "cwd", cwd)
+                api.set_current_user_prefs(int(projid), "cwd", cwd)
         req = cls.job_req()
         if req is not None:
             rsp = cls.api_job_call(req)
@@ -143,16 +143,30 @@ class ImportJob(Job):
     @classmethod
     def initial_question_dialog(cls, job: JobModel):
         """The back-end need some data for proceeding"""
-        print('import question"', job.params)
-        projid = job.params["prj_id"]
-        target_proj = cls.get_target_obj(projid)
+        params: dict = job.params
+        projid = params["prj_id"]
+        target_proj = cls.get_target_obj(int(projid))
 
         # Feed local values
-        not_found_taxo = getattr(job.question, "missing_taxa")
-        not_found_users = getattr(job.question, "missing_users")
+        question: dict = job.question
+        if "missing_taxa" in question.keys():
+            not_found_taxo = question["missing_taxa"]
+            recast_operation = get_back_constants("RECAST_OPERATION")
+            operation = recast_operation["project_import"]
+            recast = get_taxo_recast(
+                target_id=projid, operation=operation, is_collection=False
+            )
+        else:
+            recast = None
+            not_found_taxo = []
+        if "missing_users" in question.keys():
+            not_found_users = question["missing_users"]
+        else:
+            not_found_users = []
         return render_template(
-            "v2/jobs/import_question1.html",
+            cls.TAXO_TEMPLATE,
             taxo=not_found_taxo,
+            recast=recast,
             users=not_found_users,
             job=job,
             target_proj=target_proj,
@@ -161,8 +175,16 @@ class ImportJob(Job):
     @classmethod
     def treat_question_reply(cls, job: JobModel):
         """Relay user answers (to questions) to back-end"""
-        not_found_taxo = getattr(job.question, "missing_taxa")
-        not_found_users = getattr(job.question, "missing_users")
+        question: dict = job.question
+        params: dict = job.params
+        if "missing_taxa" in question.keys():
+            not_found_taxo = question["missing_taxa"]
+        else:
+            not_found_taxo = []
+        if "missisng_users" in question.keys():
+            not_found_users = question["missing_users"]
+        else:
+            not_found_users = []
         app.logger.info("Form Data = %s", request.form)
         categs = {}
         for i in range(1, 1 + len(not_found_taxo)):
@@ -182,14 +204,14 @@ class ImportJob(Job):
                 users[orig] = newvalue
         answers = {"users": users, "taxa": categs}
         if len(answers["taxa"].values()):
-            cls.make_recast(job.params["prj_id"], answers["taxa"])
+            cls.make_recast(params["prj_id"], answers["taxa"])
         with ApiClient(JobsApi, request) as api:
             try:
                 api.reply_job_question(job_id=job.id, body=answers)
             except ApiException as ae:
                 cls.flash_any_error([str(ae)])
                 return render_template(
-                    "v2/jobs/import_question1.html",
+                    cls.TAXO_TEMPLATE,
                     header="",
                     taxo=not_found_taxo,
                     users=not_found_users,
@@ -200,9 +222,14 @@ class ImportJob(Job):
 
     @classmethod
     def make_recast(cls, target_id: int, values: dict):
-        recast = TaxoRecastRsp(from_to=values, doc={})
+        newrecast = TaxoRecastRsp(from_to=values, doc={})
         recast_operation = get_back_constants("RECAST_OPERATION")
         operation = recast_operation["project_import"]
+        recast = get_taxo_recast(
+            target_id=target_id, operation=operation, is_collection=False
+        )
+        recast.from_to.update(newrecast.from_to)
+        recast.doc.update(newrecast.doc)
         recasts = {operation: recast}
         for operation, recast in recasts.items():
             update_taxo_recast(

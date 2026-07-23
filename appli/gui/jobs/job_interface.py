@@ -109,13 +109,6 @@ def export_format_options(_type=None, target: Optional[str] = "project"):
                     "quantity": ("abundance", False),
                     "summarise_by": ("none", False),
                     "taxo_mapping": ({}, False),
-                    "formulae": (
-                        """
-    subsample_coef: 1/ssm.sub_part
-    total_water_volume: sam.tot_vol/1000
-    individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)**3 """,
-                        False,
-                    ),
                     "out_to_ftp": (0, False),
                 },
             },
@@ -158,12 +151,6 @@ def export_format_options(_type=None, target: Optional[str] = "project"):
                 "format": "taxoline",
                 "help": "help_export_summary_taxo_mapping",
                 "recast_operation": target + "_export",
-            },
-            "formulae": {
-                "label": _("Formulae"),
-                "example": '{"subsample_coef"->str, "total_water_volume"->str, "individual_volume"->str}',
-                "format": "textarea",
-                "help": "help_export_summary_formulae",
             },
         }
     )
@@ -220,12 +207,6 @@ def export_format_options(_type=None, target: Optional[str] = "project"):
                         "recast_operation": "dwca_export_emof",
                         "show_recast": True,
                     },
-                    "formulae": {
-                        "label": _("Formulae"),
-                        "example": '{"subsample_coef"->str, "total_water_volume"->str, "individual_volume"->str}',
-                        "format": "textarea",
-                        "help": "help_export_darwincore_formulae",
-                    },
                     "extra_xml": {
                         "label": _("Extra XML block"),
                         "format": "text",
@@ -246,13 +227,6 @@ def export_format_options(_type=None, target: Optional[str] = "project"):
                         "with_absent": False,
                         "with_computations": ("ABO", False),
                         "taxo_mapping": ({}, False),
-                        "formulae": (
-                            """
-                    subsample_coef: 1/ssm.sub_part
-                    total_water_volume: sam.tot_vol/1000
-                    individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)**3 """,
-                            False,
-                        ),
                     },
                 }
             }

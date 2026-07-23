@@ -11,13 +11,14 @@ import {AlertBox} from "./alert-box";
 export function jobMonitor(item, options = {}) {
   let _fetching = false;
   const jobOptions = {
-    url: "/gui/job/status/"
+    url: "/gui/job/status/",
+    questionurl:"/gui/job/question/"
   }
   options = { ...jobOptions,
     ...options
   }
   const jobid = item.dataset.id;
-  const jobStates = {
+  let jobStates = {
     E: 'Error',
     F: 'Done',
     R: 'Running',
@@ -113,7 +114,8 @@ export function jobMonitor(item, options = {}) {
     if (!divinfo) return;
     switch (key) {
       case "state":
-        divinfo.innerText = jobStates[job.state];
+        if (job.state==="A") divinfo.innerHTML = jobStates[job.state];
+        else divinfo.innerText = jobStates[job.state];
         break;
       case "errors":
         const trigger = divinfo.querySelector('[data-action="toggle"]');
@@ -157,18 +159,11 @@ export function jobMonitor(item, options = {}) {
     _fetching=true;
     fetch(options.url + jobid, fetchSettings).then(response => response.json()).then(job => {
        if (job) {
-        if (job.state) {
-          display_infos(job);
-        }
-
         switch (job.state) {
           case "A":
             // question
             stop = true;
-            //window.location.href = window.location.origin + "/Job/Question/" + job.id;
-            responsediv.innerHTML = `Question waiting for an answer ` + go_next(window.location.origin + "/Job/Question/" + job.id, 'Go', 'warning');
-            populate("questiondata");
-
+            jobStates["A"]= `Question waiting for an answer ` + go_next(window.location.origin + options.questionurl + job.id, 'Question', 'warning');
             break;
           case "F":
             stop = true;
@@ -195,7 +190,7 @@ export function jobMonitor(item, options = {}) {
           stop = true;
         }
       } else stop = true;
-
+      if (job.state) display_infos(job);
       if (stop === false) setTimeout(check_job_status, 1000);
       return;
     }).catch((err) => {

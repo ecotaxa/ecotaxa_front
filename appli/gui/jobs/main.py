@@ -116,8 +116,16 @@ def gui_job_question(job_id: int):
             elif ae.status == 404:
                 flash(py_messages["upload"]["nofile"], "error")
                 return redirect(url_for("gui_list_jobs"))
+
     with ApiClient(UsersApi, request) as uapi:
-        owner: MinUserModel = uapi.get_user(user_id=job.owner_id)
+        try:
+            owner: MinUserModel = uapi.get_user(user_id=job.owner_id)
+        except ApiException as ae:
+            if ae.status in (401, 403):
+                flash(py_messages["notauthorized"], "error")
+            elif ae.status == 404:
+                flash(py_messages["upload"]["nofile"], "error")
+                return redirect(url_for("gui_list_jobs"))
 
     # if job.state != "A":
     #    return ""
