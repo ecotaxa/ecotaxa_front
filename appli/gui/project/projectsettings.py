@@ -1,4 +1,4 @@
-from typing import List, Union, Dict
+from typing import List, Optional, Union, Dict
 from flask import render_template, flash, request, redirect, url_for
 from flask_login import current_user
 from appli import gvp, gvpm
@@ -17,6 +17,10 @@ from to_back.ecotaxa_cli_py.models import (
 from appli.gui.commontools import possible_access, possible_models
 from appli.back_config import get_back_constants
 import json
+import re
+
+# valid formulae keys - also used to split a legacy formulae string into a dict
+FORMULAE_KEYS = ["total_water_volume", "subsample_coef", "individual_volume"]
 
 ###############################################common for create && edit  #######################################################################
 
@@ -98,6 +102,42 @@ def _user_cando(autho):
         return True
 
 
+def _formulae_str_to_dict(formulae: Union[dict, str, None]) -> Optional[dict]:
+    """Normalize target_proj.formulae (dict, legacy string, or None) into a dict.
+
+    The back-end can return formulae as a dict already, as the string "None",
+    or as one string where each valid key (FORMULAE_KEYS) is directly
+    followed by ':' and its value, with no reliable separator between
+    entries (blank, \r, \r\n or nothing at all).
+    """
+    if isinstance(formulae, dict):
+        return formulae
+    if formulae is None or formulae == "None" or formulae.strip() == "":
+        return None
+    keys_pattern = "|".join(FORMULAE_KEYS)
+    normalized = re.sub(r"\s*(" + keys_pattern + r"):", r";\1:", formulae.strip())
+    result = {}
+    for chunk in normalized.split(";"):
+        chunk = chunk.strip()
+        if not chunk:
+            continue
+        key, _, value = chunk.partition(":")
+        value = value.strip()
+        result[key] = None if value == "None" else value
+    return result if result else None
+
+
+def _formulae_to_json_str(formulae: Union[dict, str, None]) -> Optional[str]:
+    """Serialize a formulae dict into a JSON string ready to be saved.
+
+    Complements _formulae_str_to_dict: turns the in-memory dict back into a
+    string that json.loads can parse.
+    """
+    if isinstance(formulae, dict):
+        return json.dumps(formulae) if formulae else None
+    return formulae
+
+
 def prj_create() -> str:
     if not _user_cando(1):
         from werkzeug.exceptions import Forbidden
@@ -174,6 +214,7 @@ def prj_edit(prjid: int, new: bool = False):
     if target_proj is None:
         flash(py_messages["selectotherproject"], "info")
         return redirect(url_for("gui_prj_noright", projid=prjid))
+    target_proj.formulae = _formulae_str_to_dict(target_proj.formulae)
     # Reconstitute members list with privs
     # data structure used in both display & submit
     if gvp("save") == "Y":
@@ -202,18 +243,15 @@ def prj_edit(prjid: int, new: bool = False):
         # process formulae
 
         formulae = {}
-        for a_var in ["total_water_volume", "subsample_coef", "individual_volume"]:
-            ret = gvp(a_var, "").replace("\r", "").replace("\n", "")
+        for a_var in FORMULAE_KEYS:
+            ret = gvp(a_var, "")
 
             if ret.strip() != "":
-                formulae[a_var] = manage_prefixes(ret, False)
+                ret = _formulae_str_to_dict(ret)
+                for key, value in ret.items():
+                    formulae[key] = manage_prefixes(value, False)
 
-        if target_proj.formulae is None:
-            checkformulae = None
-        else:
-            checkformulae = target_proj.formulae.strip()
-        formulae = json.dumps(formulae) if len(formulae.keys()) else None
-
+        checkformulae = target_proj.formulae
         if checkformulae != formulae:
             setattr(target_proj, "formulae", formulae)
         do_update = True
@@ -292,8 +330,7 @@ def prj_edit(prjid: int, new: bool = False):
             do_update = False
         # Update on back-end
         if do_update:
-            if isinstance(target_proj.formulae, dict):
-                target_proj.formulae = json.dumps(target_proj.formulae)
+            target_proj.formulae = _formulae_to_json_str(target_proj.formulae)
             try:
                 with ApiClient(ProjectsApi, request) as api:
                     api.update_project(
@@ -348,14 +385,7 @@ def prj_edit(prjid: int, new: bool = False):
     for column, prefix in defcols.items():
         freecols[column] = getattr(target_proj, prefix + "_free_cols")
 
-    formulae = {}
-    if target_proj.formulae is not None:
-        if isinstance(target_proj.formulae, dict):
-            formulae = target_proj.formulae
-        elif target_proj.formulae == "None":
-            target_proj.formulae = None
-        else:
-            formulae = json.loads(target_proj.formulae)
+    formulae = target_proj.formulae or {}
 
     return render_template(
         "v2/project/projectsettings.html",
