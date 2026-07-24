@@ -29,7 +29,6 @@ class ExportSummaryJob(ExportJob):
         projid, collid = cls.get_target_id()
         quantity = gvpm("quantity")
         summarise_by = gvp("summarise_by")
-        formulae = gvp("formulae")
         out_to_ftp = gvp("out_to_ftp") == "1"
         modifiedrecast: bool = posted_modified_recast(False)
         if modifiedrecast:
@@ -40,19 +39,11 @@ class ExportSummaryJob(ExportJob):
                 is_collection = False
                 target_id = projid
             cls.make_recast(target_id, is_collection)
-        if formulae is None:
-            formulae_dict = {}
-        else:
-            formulae_list = [
-                a_line.strip().split(":") for a_line in formulae.splitlines()
-            ]
-            formulae_dict = {var.strip(): val.strip() for var, val in formulae_list}
         req = SummaryExportReq(
             collection_id=collid,
             project_id=projid,
             quantity=quantity,
             summarise_by=summarise_by,
-            formulae=formulae_dict,
             out_to_ftp=out_to_ftp,
         )
         return req

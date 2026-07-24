@@ -74,16 +74,24 @@ export function exportCSV(state, options = {}, hidden = true) {
      if (!column.hidden ) j++;
   });
   rows.push(make_line(row));
-  const trs = state.dom.querySelectorAll('tbody tr');
 
-  for (let i = 0; i < trs.length; i++) {
+  // Virtual scroll only keeps a moving window of <tr>s mounted in state.dom, so reading
+  // rows straight from the live tbody silently dropped every row scrolled out of view.
+  // Render each data row off-screen instead, reusing the table's own column renderers so
+  // formatted values (numbers, checks, links...) still match what's shown on screen.
+  // getVisibleRowCount/resolveRowIndex go through grid.filteredIndexes, so an active
+  // search filter is respected the same way it is for on-screen rendering.
+  const visibleRowCount = state.getVisibleRowCount();
+  for (let pos = 0; pos < visibleRowCount; pos++) {
+    const i = state.resolveRowIndex(pos);
     row = [];
     j=0;
-    const tds = trs[i].querySelectorAll('th,td');
+    const tr = state.createTableRow(state.grid.data[i], i);
+    const tds = tr.querySelectorAll('th,td');
     state.grid.columns.forEach((column) => {
       const index = column.index;
       if ((hidden === true || !column.hidden) && (options.skipcolumns.length === 0 || options.skipcolumns.indexOf(index) < 0)) {
-        const value = (column.hidden) ? state.grid.data[i][index] : (tds[j]) ? tds[j].innerText : 'None';
+        const value = (column.hidden) ? state.grid.data[i][index] : (tds[j]) ? tds[j].textContent : 'None';
         row.push(text_convert(value));
       }
       if(!column.hidden) j++;

@@ -27,9 +27,6 @@ class ExportDarwinCoreJob(ExportJob):
         include_predicted = gvp("include_predicted") == "1"
         with_absent = gvp("with_absent") == "1"
         with_computations = gvpm("with_computations" or [])
-        formulae = gvp("formulae" or "")
-        formulae_list = [a_line.strip().split(":") for a_line in formulae.splitlines()]
-        formulae_dict = {var.strip(): val.strip() for var, val in formulae_list}
         extra_xml = gvp("extra_xml" or "")
         # taxo_recast
         modifiedrecast: bool = posted_modified_recast(True)
@@ -49,7 +46,6 @@ class ExportDarwinCoreJob(ExportJob):
             include_predicted=include_predicted,
             with_absent=with_absent,
             with_computations=with_computations,
-            formulae=formulae_dict,
             extra_xml=extra_xml,
         )
         return req

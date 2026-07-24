@@ -247,6 +247,13 @@ def project_table_columns(
                 "selectcells": ["projid"],
             }
         },
+        "renamingrules": {
+            "select": {
+                "label": _("select"),
+                "what": "project",
+                "selectcells": ["projid"],
+            }
+        },
     }
 
     if selection == "import":

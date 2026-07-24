@@ -65,7 +65,7 @@ is-done
       <th>{{_('State')}}</th>
       <td>{%set statetext = _(' waiting for an answer') %}<span id="job-state" data-text="{{statetext}}">{{ state2label[job.state]|safe }}</span>
         {% if job.state=="A" %}
-          {{statetext}} <a href="/Job/Question/{{job.id}}" class="button is-warning">{{_('Go')}}</a>
+          {{statetext}} <a href="{{url_for('gui_job_question',job_id=job.id)}}" class="button is-warning">{{_('Question')}}</a>
         {% elif job.state in ("E") %}
           <a href="{{url_for("gui_job_force_restart", job_id=job.id)}}">
             <button class="button text-xs py-.5 ml-1 inverse btn-sm">{{_('Force restart')}}</button>
