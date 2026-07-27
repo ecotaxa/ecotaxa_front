@@ -4,6 +4,7 @@
 import html
 import inspect
 import math
+import re
 import sys
 import traceback
 import urllib.parse
@@ -313,6 +314,10 @@ def JinjaNl2BR(t):
     return t.replace("\n", "<br>\n")
 
 
+def JinjaRegexReplace(s, pattern, repl):
+    return re.sub(pattern, repl, s)
+
+
 def JinjaGetUsersManagerList(sujet=""):
     admin_users: List[MinUserModel]
     if current_user.is_authenticated:
@@ -341,6 +346,7 @@ def JinjaGetEcotaxaVersionText():
 
 app.jinja_env.filters["datetime"] = JinjaFormatDateTime
 app.jinja_env.filters["nl2br"] = JinjaNl2BR
+app.jinja_env.filters["regex_replace"] = JinjaRegexReplace
 app.jinja_env.globals.update(
     GetManagerList=JinjaGetUsersManagerList,
     GetEcotaxaVersionText=JinjaGetEcotaxaVersionText,

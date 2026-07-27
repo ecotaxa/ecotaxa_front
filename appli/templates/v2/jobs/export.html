@@ -2,6 +2,15 @@
 {% from "./v2/macros/macros.html" import form_group_radio , modal with context %}
 {% from "./v2/project/macros.html" import display_filters , header_project_job with context %}
 {%-set shared="export-taxoline"-%}
+{%- set formulae_tag_class="tag inline-block rounded text-xs font-normal p-1 mr-1 mb-1 h-6 bg-stone-400 hover:bg-secondblue-400 hover:drop-shadow-none drop-shadow-sm text-stone-50 dropped" -%}
+{%- macro tag_formulae_prefixes(text)-%}
+{%- set ns = namespace(tagged=text) -%}
+{%- set ns.tagged = ns.tagged|replace("&","&amp;")|replace("<","&lt;")|replace(">","&gt;") -%}
+{%- for prefix in ['subsample','object','sample'] -%}
+{%- set ns.tagged = ns.tagged|regex_replace('\\b'+prefix+'\\.\\w+','<span class="'+formulae_tag_class+'">\\g<0></span>') -%}
+{%- endfor -%}
+{{ ns.tagged|safe }}
+{%-endmacro-%}
 {%- macro make_part_form(type_export,datas)-%}
 {%-for name,option in formoptions[type_export].items() -%}
 {%- if name in datas.keys() -%}<div class="form-box" data-name={{name}}>
@@ -25,7 +34,24 @@
  {%- set target_id=collection_id if collection_id|string!='0' else projid -%}
 {%- set is_collection=1 if target_type=='collection' else 0 -%}
 <div data-notshared="{{shared}}"><a id="refresh_taxo_recast-{{option.recast_operation}}-{{type_export}}" {{'data-ontab=click' if option.show_recast is defined}} data-href="{{url_for('gui_get_taxo_recast',target_id=target_id,operation=option.recast_operation,is_collection=is_collection)}}" data-request="href" class="btn-small button text-base text-mainblue-700 hover:text-secondblue-400 ">{{option.label}} <i data-for="{{option.help}}" data-request="help"></i></a><div class="w-full"></div></div>
- {%-endif-%}{%-endif-%}
+ {%-elif option.format=='formulae'-%}
+<div class="label inline-block mr-2 w-auto">{{option.label}}</div>
+{%- set formulae_value = datas["formulae"][0] -%}
+{%- if formulae_value is mapping -%}
+  {%- if formulae_value -%}
+  <ul>
+  {%- for f_key,f_value in formulae_value.items() -%}
+    <li><strong>{{f_key}}</strong>: {{ tag_formulae_prefixes(f_value)|safe }}</li>
+
+  {%- endfor -%}
+  </ul>
+  {%- else -%}<span class="inline-block italic">
+  {{_('No formulae defined for this project')}}</span>
+  {%- endif -%}
+{%- else -%}<span class="inline-block italic">
+{{ formulae_value }}</span>
+{%- endif -%}
+{%-endif-%}{%-endif-%}
 </div>{%-endif-%}{%-endfor%}
 {%-endmacro-%}
 {% block body %}

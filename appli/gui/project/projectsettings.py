@@ -102,6 +102,38 @@ def _user_cando(autho):
         return True
 
 
+def _manage_prefixes(formula, direction=True):
+    noneformulae = [
+        "total_water_volume/1000",
+        "1/subsampling_coefficient",
+        "4/3 * pi * (major_axis * pixel_size) * (minor_axis * pixel_size)^2'",
+        "4/3 * pi * ( sqrt(area/pi) * pixel_size )",
+    ]
+    for val in noneformulae:
+        if formula == val:
+            formula = ""
+    if direction:
+        prefixes = {
+            "sample": "sam",
+            "object": "obj",
+            "subsample": "ssm",
+            "subsample": "ssm",
+        }
+        for key, value in prefixes.items():
+            value = value.strip()
+            formula = formula.replace(value + ".", key + ".")
+    else:
+        prefixes = {
+            "sample": "sam",
+            "object": "obj",
+            "acquisition": "ssm",
+            "process": "ssm",
+        }
+        for key, value in prefixes.items():
+            formula = formula.replace(key + ".", value + ".")
+    return formula
+
+
 def _formulae_str_to_dict(formulae: Union[dict, str, None]) -> Optional[dict]:
     """Normalize target_proj.formulae (dict, legacy string, or None) into a dict.
 
@@ -114,6 +146,12 @@ def _formulae_str_to_dict(formulae: Union[dict, str, None]) -> Optional[dict]:
         return formulae
     if formulae is None or formulae == "None" or formulae.strip() == "":
         return None
+    try:
+        parsed = json.loads(formulae)
+        if isinstance(parsed, dict):
+            return parsed if parsed else None
+    except (json.JSONDecodeError, TypeError):
+        pass
     keys_pattern = "|".join(FORMULAE_KEYS)
     normalized = re.sub(r"\s*(" + keys_pattern + r"):", r";\1:", formulae.strip())
     result = {}
@@ -177,37 +215,6 @@ def prj_edit(prjid: int, new: bool = False):
     # Security & sanity checks
     # get target_proj
 
-    def manage_prefixes(formula, direction=True):
-        noneformulae = [
-            "total_water_volume/1000",
-            "1/subsampling_coefficient",
-            "4/3 * pi * (major_axis * pixel_size) * (minor_axis * pixel_size)^2'",
-            "4/3 * pi * ( sqrt(area/pi) * pixel_size )",
-        ]
-        for val in noneformulae:
-            if formula == val:
-                formula = ""
-        if direction:
-            prefixes = {
-                "sample": "sam",
-                "object": "obj",
-                "subsample": "ssm",
-                "subsample": "ssm",
-            }
-            for key, value in prefixes.items():
-                value = value.strip()
-                formula = formula.replace(value + ".", key + ".")
-        else:
-            prefixes = {
-                "sample": "sam",
-                "object": "obj",
-                "acquisition": "ssm",
-                "process": "ssm",
-            }
-            for key, value in prefixes.items():
-                formula = formula.replace(key + ".", value + ".")
-        return formula
-
     from appli.gui.staticlistes import py_messages
 
     target_proj = get_target_prj(prjid, for_managing=True)
@@ -244,12 +251,10 @@ def prj_edit(prjid: int, new: bool = False):
 
         formulae = {}
         for a_var in FORMULAE_KEYS:
-            ret = gvp(a_var, "")
+            ret = gvp(a_var, "").strip()
 
-            if ret.strip() != "":
-                ret = _formulae_str_to_dict(ret)
-                for key, value in ret.items():
-                    formulae[key] = manage_prefixes(value, False)
+            if ret != "":
+                formulae[a_var] = _manage_prefixes(ret, False)
 
         checkformulae = target_proj.formulae
         if checkformulae != formulae:
@@ -386,7 +391,8 @@ def prj_edit(prjid: int, new: bool = False):
         freecols[column] = getattr(target_proj, prefix + "_free_cols")
 
     formulae = target_proj.formulae or {}
-
+    for key, value in formulae.items():
+        formulae[key] = _manage_prefixes(value, True)
     return render_template(
         "v2/project/projectsettings.html",
         target_proj=target_proj,

@@ -43,7 +43,7 @@ class ExportJob(Job):
         filters = cls._extract_filters_from_url()
         # always return every export possibilities
         formdatas, formoptions, export_links = export_format_options(
-            target=cls.TARGET_TYPE
+            target=cls.TARGET_TYPE, target_obj=target_obj
         )
         # hack to have 3 types instead of one page by job export type
         return render_template(
@@ -82,8 +82,9 @@ class ExportJob(Job):
             for e in errors:
                 flash(e, "error")
 
+            target_obj = cls.get_target_obj(projid, collid)
             formdatas, formoptions, export_links = export_format_options(
-                cls.EXPORT_TYPE
+                cls.EXPORT_TYPE, target=cls.TARGET_TYPE, target_obj=target_obj
             )
             if req is None:
                 req_dict = req

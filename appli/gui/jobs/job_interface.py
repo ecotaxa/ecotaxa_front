@@ -8,9 +8,29 @@ from to_back.ecotaxa_cli_py.api import UsersApi
 from to_back.ecotaxa_cli_py.models import JobModel
 
 
-def export_format_options(_type=None, target: Optional[str] = "project"):
+def export_format_options(
+    _type=None, target: Optional[str] = "project", target_obj=None
+):
     if target is None:
         target = "project"
+    collection_formulae_message = _(
+        "Formulae for the computation of concentrations and biovolumes should be specified in each project composing the collection"
+    )
+    if target == "collection":
+        formulae_value = collection_formulae_message
+    else:
+        from appli.gui.project.projectsettings import (
+            _formulae_str_to_dict,
+            _manage_prefixes,
+        )
+
+        if isinstance(target_obj, dict):
+            raw_formulae = target_obj.get("formulae")
+        else:
+            raw_formulae = getattr(target_obj, "formulae", None)
+        formulae_value = _formulae_str_to_dict(raw_formulae) or {}
+        for key, value in formulae_value.items():
+            formulae_value[key] = _manage_prefixes(value, True)
     out_to_ftp = {
         "out_to_ftp": {
             "label": _(
@@ -110,6 +130,7 @@ def export_format_options(_type=None, target: Optional[str] = "project"):
                     "summarise_by": ("none", False),
                     "taxo_mapping": ({}, False),
                     "out_to_ftp": (0, False),
+                    "formulae": (formulae_value, False),
                 },
             },
             "identification": {
@@ -151,6 +172,10 @@ def export_format_options(_type=None, target: Optional[str] = "project"):
                 "format": "taxoline",
                 "help": "help_export_summary_taxo_mapping",
                 "recast_operation": target + "_export",
+            },
+            "formulae": {
+                "label": _("Formulae"),
+                "format": "formulae",
             },
         }
     )
@@ -199,6 +224,7 @@ def export_format_options(_type=None, target: Optional[str] = "project"):
                         "format": "checkbox",
                         "help": "help_export_darwincore_quantity",
                     },
+                    "formulae": {"label": _("Formulae"), "format": "formulae"},
                     "taxo_mapping": {
                         "id": "dwca_taxo_mapping",
                         "label": _("Taxonomy mapping"),
@@ -227,6 +253,7 @@ def export_format_options(_type=None, target: Optional[str] = "project"):
                         "with_absent": False,
                         "with_computations": ("ABO", False),
                         "taxo_mapping": ({}, False),
+                        "formulae": (collection_formulae_message, False),
                     },
                 }
             }
