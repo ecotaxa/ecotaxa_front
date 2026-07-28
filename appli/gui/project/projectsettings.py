@@ -171,10 +171,16 @@ def _formulae_to_json_str(formulae: Union[dict, str, None]) -> Optional[str]:
 
     Complements _formulae_str_to_dict: turns the in-memory dict back into a
     string that json.loads can parse.
+
+    Never returns None: the generated API client drops None attributes from
+    the request body entirely (see sanitize_for_serialization), which makes
+    the back-end fall back to its own non-JSON legacy default for formulae
+    and reject it with a 422. An empty JSON object is sent instead so the
+    key is always present and valid.
     """
     if isinstance(formulae, dict):
-        return json.dumps(formulae) if formulae else None
-    return formulae
+        return json.dumps(formulae) if formulae else "{}"
+    return formulae if formulae is not None else "{}"
 
 
 def prj_create() -> str:
