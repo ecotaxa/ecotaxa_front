@@ -35,6 +35,14 @@ export function jobMonitor(item, options = {}) {
     responsediv.id = 'responsediv';
     item.prepend(responsediv);
   }
+  // the progress message has its own node, otherwise writing it would wipe out
+  // the final action (download, ... ) inserted in responsediv when job is done
+  let messagediv = document.getElementById("responsemessage");
+  if (messagediv === null) {
+    messagediv = document.createElement('div');
+    messagediv.id = 'responsemessage';
+    responsediv.append(messagediv);
+  }
 
 
   let stop = false;
@@ -42,7 +50,7 @@ export function jobMonitor(item, options = {}) {
   const progress_bar = function(state, percent = 0, msg = "") {
     if (!percent) percent = 0;
     const progressbar = document.getElementById('progressbar');
-    responsediv.textContent = msg;
+    messagediv.textContent = msg;
     if (divstate) divstate.textContent = msg;
     if (progressbar !== null) {
       progressbar.firstChild.textContent = percent + '%';
@@ -153,11 +161,26 @@ export function jobMonitor(item, options = {}) {
     });
   }
   let html = [];
+  let final_displayed = false;
+
+  function display_final() {
+    if (!responsediv) return;
+    if (html.length && !final_displayed) {
+      final_displayed = true;
+      responsediv.insertAdjacentHTML('afterbegin', html.join(''));
+      // bind the actions (get file, ... ) of the inserted buttons, as done on a page load
+      import('../modules/activ-items.js').then(({
+        ActivItems
+      }) => ActivItems.applyTo(responsediv));
+    }
+    responsediv.classList.remove(css.hide);
+  }
 
   function check_job_status() {
     if (_fetching) return;
     _fetching=true;
     fetch(options.url + jobid, fetchSettings).then(response => response.json()).then(job => {
+      let showfinal = false;
        if (job) {
         switch (job.state) {
           case "A":
@@ -181,16 +204,12 @@ export function jobMonitor(item, options = {}) {
             break;
         }
 
-        if (job.state && job.state === "E" || job.state === 'F' || job.type === "Prediction") {
-          //  display_final(job.finalaction);
-          if (responsediv) {
-            responsediv.insertAdjacentHTML('afterbegin', html.join(''));
-            responsediv.classList.remove(css.hide);
-          }
-          stop = true;
-        }
+        showfinal = (job.state === "E" || job.state === 'F' || job.type === "Prediction");
+        if (showfinal) stop = true;
       } else stop = true;
       if (job.state) display_infos(job);
+      // after display_infos, which refreshes the progress message
+      if (showfinal) display_final();
       if (stop === false) setTimeout(check_job_status, 1000);
       return;
     }).catch((err) => {
