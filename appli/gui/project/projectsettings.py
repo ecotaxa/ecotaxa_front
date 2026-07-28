@@ -391,7 +391,7 @@ def prj_edit(prjid: int, new: bool = False):
     for column, prefix in defcols.items():
         freecols[column] = getattr(target_proj, prefix + "_free_cols")
 
-    formulae = target_proj.formulae or {}
+    formulae = _formulae_str_to_dict(target_proj.formulae) or {}
     for key, value in formulae.items():
         formulae[key] = _manage_prefixes(value, True)
     return render_template(
