@@ -1,4 +1,3 @@
-import DOMPurify from 'dompurify';
 import {
   ActivRequest
 } from "../modules/activ-request.js";
@@ -9,6 +8,7 @@ import {
 } from '../modules/utils.js';
 import {
   css,
+  filter_files,
 } from '../modules/modules-config.js';
 import {
   ModuleEventEmitter
@@ -33,7 +33,7 @@ export function JsImport(container, options = {}) {
     browse: ['directory', 'file'],
     textimport: 'to import'
   };
-  let selected=null;
+  let selected = null;
   container = (container instanceof HTMLElement) ? container : document.querySelector(container);
   if (!container) return;
   options = { ...defaultOptions,
@@ -47,7 +47,7 @@ export function JsImport(container, options = {}) {
   options.textimport = (container.dataset.textimport) ? container.dataset.textimport : options.textimport;
   const submitbtn = container.querySelector('[type="submit"]');
   let typeimport;
-  let myFiles;
+  let jsDirList;
   let eventnames = {
     import: 'import',
     select: 'select',
@@ -111,40 +111,25 @@ export function JsImport(container, options = {}) {
   }
   async function showSelection(refresh = false) {
     const apply_filters = () => {
-      let filters = typeimport.split('-');
-      filters = filters.map(filter => {
-        return new Set([...(filter_files[filter] ? filter_files[filter] : [])]);
-      });
-      myFiles.container.querySelectorAll('[data-ftype]').forEach(entry => {
-        if (filters.has(entry.dataset.ftype)) entry.classList.remove('disabled');
+      const filters = typeimport.split('-');
+      const allowed = new Set(filters.flatMap(filter => filter_files[filter] ? filter_files[filter].split(',').map(ext => ext.trim()) : []));
+      jsDirList.container.querySelectorAll('[data-ftype]').forEach(entry => {
+        if (allowed.has(entry.dataset.ftype)) entry.classList.remove('disabled');
         else entry.classList.add('disabled');
       });
     }
     const displayselection = document.getElementById(options.selectors.sourcezone);
     if (!displayselection) return;
-    if (!myFiles) {
+    if (!jsDirList) {
       const {
-        JsMyFiles
-      } = await import('../modules/js-my-files.js');
-      myFiles = new JsMyFiles(displayselection, {
-        import: url.toimport,
+        JsDirList
+      } = await import('../modules/files/js-dirlist.js');
+      jsDirList = new JsDirList(displayselection, {
         url: url.dirlist,
-        browse: options.browse,
-        upload: {
-          label: (displayselection.dataset.uploadlabel) ? (displayselection.dataset.uploadlabel) : 'upload',
-          callback: () => {
-            showSubmit(false);
-          }
-        }
       });
-       myFiles.eventnames.clearother='clearother';
-        ModuleEventEmitter.on(myFiles.eventnames.clearother, (e) => {deSelect();},myFiles.uuid);
-      ModuleEventEmitter.on(eventnames.select, (e) => {
-        myFiles.detachDropzone();
-      }, myFiles.uuid);
-      addImportControls(myFiles.jsDirList, myFiles.uuid);
+      addImportControls(jsDirList, jsDirList.uuid);
       const detachcallback=function() {deSelect();showSubmit(false);}
-      myFiles.jsDirList.detachcallback=detachcallback;
+      jsDirList.detachcallback=detachcallback;
       container.querySelectorAll('[data-import]').forEach(async (item) => {
         item.dataset.request = item.dataset.import;
         await ActivRequest.makeRequest(item);

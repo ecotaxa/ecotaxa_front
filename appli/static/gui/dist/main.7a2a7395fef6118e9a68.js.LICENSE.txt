@@ -4,6 +4,8 @@
 
 /*! ../modules/export-html2word.js */
 
+/*! ../modules/files/js-dirlist.js */
+
 /*! ../modules/form-submit.js */
 
 /*! ../modules/job-monitor.js */

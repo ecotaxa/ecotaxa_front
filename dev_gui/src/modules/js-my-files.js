@@ -1,3 +1,4 @@
+
 import {
   dom_purify,
   fetchSettings,
@@ -9,31 +10,20 @@ import {
 } from '../modules/utils.js';
 import {
   css,
+  objaccept,
 } from '../modules/modules-config.js';
 import {
   AlertBox
 } from '../modules/alert-box.js';
 import {
   JsDirList,
-  dirlistOptions
 } from '../modules/files/js-dirlist.js';
 import {
   ModuleEventEmitter
 } from '../modules/module-event-emitter.js';
-const objaccept = {
-  "image/*": [".png", ".jpeg", ".jpg"],
-  "text/tab-separated-values": [".tsv"],
-  "application/zip": [".zip"],
-  "application/gzip": [".gz"],
-  "application/x-bzip": [".bz"],
-  "application/x-bzip2": [".bz2"]
-}
 const accept = Object.values(objaccept).reduce((a, b) => a.concat(b));
 css.button = 'button p-1 mx-auto sm:mr-4 mb-4';
-const filter_files = {
-  images: "png,jpeg,jpg,gif",
-  tsv: "txt,tsv,zip, gzip,gz"
-}
+css.inline = 'inline-block';
 export class JsMyFiles {
   done = true;
   jsDirToZip = null;
@@ -102,7 +92,7 @@ export class JsMyFiles {
           sizes: 'sizes',
           timers: 'timers'
         },
-
+        dirlistcontainer:'dirlist',
         css: {
           dragover: 'dragover'
         }
@@ -118,7 +108,6 @@ export class JsMyFiles {
   }
   init() {
     // create dirlist box
-    this.addDisplayProgression();
     this.addDropzone();
     this.addDirList();
     this.initControls();
@@ -256,10 +245,11 @@ export class JsMyFiles {
     });
   }
 
-  addDropzone() { //
-    this.dropzone = create_box('div', {
+  addDropzone() {
+    this.dropzone = document.getElementById(this.options.display.dropzone);
+    if (this.dropzone===null) this.dropzone = create_box('div', {
       id: this.options.display.dropzone
-    });
+    },this.dirlistcontainer);
     const input = (this.haspicker) ? null : create_box('input', {
       type: "file",
       name: this.options.selectors.uploadfile,
@@ -272,19 +262,15 @@ export class JsMyFiles {
     if (input) input.addEventListener("change", (e) => {
       this.handleBrowse(e)
     });
-    const btns = create_box('div', {},
-      this.dropzone);
-
     this.options.browse.forEach(opt => {
       const text = (this.container.dataset[`textbrowse${opt}`]) ? this.container.dataset[`textbrowse${opt}`] : `browse${opt}`;
-      const btn = create_box('span', {
-        class: this.options.selectors.trigger.slice(1),
+      const btn = create_box('div', {
+        class: [this.options.selectors.trigger.slice(1), css.inline],
         dataset: {
           type: opt
         },
         text: text
-      }, btns);
-
+      }, this.dropzone);
       btn.addEventListener('click', async (e) => {
         if (this.haspicker) {
           this.openDirDialog(opt, (e) => {
@@ -306,11 +292,12 @@ export class JsMyFiles {
       });
     });
 
-    const spandrop = create_box('span', {
+    const divdrop = create_box('div', {
       text: this.container.dataset.textdrop
-    }, btns);
+    }, this.dropzone);
     const browselink = create_box('a', {
-    text:this.container.dataset.textbrowse,class:'modal', spandrop})
+    text:this.container.dataset.textbrowse,class:'modal', divdrop})
+    this.addDisplayProgression(this.dropzone);
   }
 
   toggleDropTarget(on = true) {
@@ -355,15 +342,16 @@ export class JsMyFiles {
   }
 
   async addDirList() {
-    this.jsDirList = new JsDirList(this.container);
+    const parent=document.getElementById(this.options.dirlistcontainer);
+    if (dirlist!==null) this.jsDirList = new JsDirList(parent);
     this.activentry = this.jsDirList.root;
     this.rootitem = this.targetitem = this.activentry.container;
     ModuleEventEmitter.on(this.jsDirList.eventnames.attach, (e) => {
       if (!e.entry) return;
-      if (e.entry !== this.activentry && this.activentry.isBranch(true)) this.detachDropzone();
+      if (e.entry !== this.activentry && this.activentry.isBranch(true)) this.enableDropzone(false);
       this.activentry = e.entry;
       this.targetitem = this.activentry.container;
-      if (this.activentry.isBranch(true)) this.addUploadDialog();
+      if (this.activentry.isBranch(true)) this.enableDropzone();
     }, this.jsDirList.uuid);
     ModuleEventEmitter.on(this.jsDirList.eventnames.detach, (e) => {
       this.detachDropzone();
@@ -385,17 +373,19 @@ export class JsMyFiles {
     this.activentry.label.dispatchEvent(new Event('click'));
   }
 
-  addDisplayProgression() {
+  addDisplayProgression(parent=null) {
     // add counters
     if (this.displayprogression) return;
     let el = document.getElementById(this.options.display.progression);
-    if (!el) {
+    console.log(' el', el)
+    if (el===null) {
+      parent=(parent===null)?this.container:parent;
       el = create_box('div', {
         id: this.options.display.progression
-      }, this.container);
-      el.insertAdjacentHTML('afterbegin', `<div class="${this.options.display.progression}"><div class="${this.options.display.counters}"></div><div class="${this.options.display.sizes}"></div><div class="${css.progress}"></div><div class="${this.options.display.timers}"></div></div>`);
-      this.displayprogression = el;
-    }
+      }, parent);
+          } else el.classList.remove(css.hide);
+    el.insertAdjacentHTML('afterbegin', `<div class="${this.options.display.progression}"><div class="${this.options.display.counters}"></div><div class="${this.options.display.sizes}"></div><div class="${css.progress}"></div><div class="${this.options.display.timers}"></div></div>`);
+    this.displayprogression = el;
   }
   enableDropzone(enable = true, destroy = false) {
     if (destroy || enable === false) this.dropzone.classList.add(css.hide);
@@ -407,7 +397,7 @@ export class JsMyFiles {
   //
   attachDropzone() {
     if (this.dropzone.dataset.active) {
-      this.targetitem.insertBefore(this.dropzone, this.activentry.label.nextElementSibling);
+      //this.targetitem.insertBefore(this.dropzone, this.activentry.label.nextElementSibling);
       this.toggleDropTarget(true);
     }
     ['dragover', 'dragenter'].forEach(eventname => {
@@ -492,7 +482,7 @@ export class JsMyFiles {
     AlertBox.addConsole(message);
   }
 
-  addUploadDialog() {
+  enableUploadDialog() {
     if (this.options.controls.scan) {
       this.enableDropzone(true);
       this.attachDropzone();

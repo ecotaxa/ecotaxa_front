@@ -35,7 +35,8 @@ const fetchfroms = Object.freeze({
   userslist: '/gui/admin/userslist/',
   guestslist:'/gui/guestslist/',
   organizationslist:'/gui/organizationslist/',
-  prjpredict: '/gui/prjsforprediction/'
+  prjpredict: '/gui/prjsforprediction/',
+  prjtaxorecast:'/gui/prjlist?typeimport=renamingrules'
 });
 
 const tablecss = Object.freeze({
@@ -953,7 +954,8 @@ export class TableComponent {
       collectionlist: () => import('../modules/table-collection.js'),
       prjlist: () => import('../modules/table-project.js'),
       prjsamplestats: () => import('../modules/table-sample.js'),
-      prjpredict: () => import('../modules/table-prediction.js')
+      prjpredict: () => import('../modules/table-prediction.js'),
+      prjtaxorecast: () => import('../modules/table-project.js'),
     };
 
     if (this.params.from && pluginLoaders[this.params.from]) {
@@ -964,7 +966,8 @@ export class TableComponent {
         collectionlist: models.id,
         prjlist: models.projid,
         prjsamplestats: models.sampleid,
-        prjpredict: models.projid
+        prjpredict: models.projid,
+        prjtaxorecast:models.recastid,
       };
 
       if (modelIds[this.params.from]) {

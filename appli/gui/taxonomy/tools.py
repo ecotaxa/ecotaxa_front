@@ -1,5 +1,5 @@
 import json
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional,Any
 from flask import request, render_template
 from appli.back_config import get_back_constants
 from appli import gvp
@@ -209,6 +209,37 @@ def update_taxo_recast(
         )
 
 
+def projects_with_recast(operation: str,project_ids: List[int]=[],taxonames:bool=False) -> list:
+    """List of projects with recast recast_id, project_id , project_title , transforms , documentation
+    """
+    try:
+        with ApiClient(TaxonomyTreeApi, request) as api:
+            recasts= api.search_taxonomy_recast(
+                project_ids=",".join(str(pid) for pid in project_ids),
+                operation=operation,
+            )
+            if taxonames:
+                ids:List[Any]=[]
+                for recast in recasts:
+                    ids.extend(recast.transforms.values())
+                try:
+                    ids=[str(_id) for _id in list(set(ids))]
+                    res: List[TaxonModel] = api.query_taxa_set(ids=" ".join(ids))
+                    names= {r.id:(r.id,r.display_name) for r in res}
+                except ApiException as ae:
+                    new_ui_error(ae)
+                    return []
+                for recast in recasts:
+                    for k,v in recast.transforms.items():
+                        recast.transforms[k]=names[v]
+                return recasts
+            else:
+                return recasts
+    except ApiException as ae:
+        new_ui_error(ae)
+        return []
+
+
 def get_taxostats(project_ids: str):
     with ApiClient(ProjectsApi, request) as api:
         taxa = api.project_set_get_stats(ids=project_ids)
@@ -280,7 +311,7 @@ def posted_modified_recast(dwca: bool) -> bool:
         taxanum = gvp("taxanum", "0")
         histo_worms = gvp("histo-worms", "{}")
         histo_recast = gvp("histo-recast", "{}")
-        histo_doc = gvp("histo-doc", {})
+        histo_doc = gvp("histo-doc", "{}")
         prefix = ""
         histo = {"worms": histo_worms, "recast": histo_recast, "doc": histo_doc}
     else:

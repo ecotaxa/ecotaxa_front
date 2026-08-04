@@ -146,6 +146,13 @@ def projects_list(
         prjs = _prj_import_taxo_api(0, filt)
         if current_user.is_app_admin == False:
             prjs = prjs + _prj_import_taxo_api(0, filt, not_granted=True)
+    elif typeimport == "renamingrules":
+        from appli.back_config import get_back_constants
+        from appli.gui.taxonomy.tools import projects_with_recast
+
+        recast_operation = get_back_constants("RECAST_OPERATION")
+        prjs=projects_with_recast(operation=recast_operation["project_import"],taxonames=True)
+
     else:
         fields = "*default"
         if typeimport == "project":
@@ -159,9 +166,7 @@ def projects_list(
             fields = "*default,viewers,annotators,managers,contact,initclassiflist,classiffieldlist,cnn_network_id"
         elif typeimport == "privileges":
             fields = "*summary,viewers,annotators,managers,contact"
-        elif typeimport == "renamingrules":
-            fields = "*summary"
-            for_managing = True
+
         prjs = _prjs_list_api(
             listall,
             filt,
@@ -186,6 +191,7 @@ def projects_list(
             prjs = prjs + _prjs_list_api(
                 True, filt, for_managing=for_managing, fields=fields
             )
+
         # last_used_projects are put on top of list in the interface
         last_used_projects = list(p.projid for p in current_user.last_used_projects)
         if len(last_used_projects):
@@ -261,7 +267,7 @@ def projects_list_page(
 # new import taxo ( no more separate ids and text)
 def _prj_import_taxo_api(
     prjid: int = 0, filt: dict = None, not_granted: bool = False
-) -> list:
+) -> List[ProjectModel]:
     import requests
 
     prjs = list([])

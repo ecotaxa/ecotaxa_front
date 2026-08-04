@@ -158,10 +158,11 @@ def project_table_columns(
             ),
             "renamingrules": dict(
                 {
-                    "title": {"label": _("title")},
-                    "instrument": {"label": _("instrument")},
-                    "status": {"label": _("status")},
-                    "access": {"label": _("access"), "format": "access"},
+                    "project_id":{"label": _("project id")},
+                    "project_title": {"label": _("title")},
+                    "transforms": {"label": _("category recast"),"format":"jsonb"},
+                    "documentation": {"label": _("documentation"),"format":"jsonb"},
+                    "recast_id": {"label": _("recast id")},
                 }
             ),
         },
@@ -250,14 +251,21 @@ def project_table_columns(
         "renamingrules": {
             "select": {
                 "label": _("select"),
-                "what": "project",
-                "selectcells": ["projid"],
+                "what": "renamingrules",
+                "selectcells": ["transforms"],
             }
         },
     }
 
     if selection == "import":
-        ths = dict(
+        if typeimport == "renamingrules":
+            ths = dict(
+                {
+                    **select[typeimport],
+                    **columns["import"][typeimport],
+                })
+        else:
+            ths = dict(
             {
                 **select[typeimport],
                 **columns["import"]["commons"],
@@ -484,7 +492,10 @@ def render_for_js(prjs: list, columns: dict, can_access: dict) -> list:
                         attrvalue = ""
                 else:
                     # data come from different types (if taxo it's  dict)
-                    attrvalue = prj[key]
+                    if isinstance(prj, dict):
+                        attrvalue = prj[key]
+                    else:
+                        attrvalue = getattr(prj, key)
                     if key in translations:
                         if attrvalue in translations[key]:
                             attrvalue = translations[key][attrvalue]

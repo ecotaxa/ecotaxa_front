@@ -69,6 +69,7 @@ function createJsTomSelect() {
     option.settings.maxItems =(item.dataset.hasOwnProperty('maxitems'))? parseInt(item.dataset.maxitems):(multiple) ? null : 1;
     switch (type) {
       case models.project:
+      case models.renamingrules:
         // for top navigation search and collections
         option.url = "/gui/prjlist/";
         option.settings = { ...option.settings,
@@ -307,6 +308,7 @@ function createJsTomSelect() {
             }
             break;
           case models.project:
+          case models.renamingrules:
             if (query) url += '?filt_title=' + encodeURIComponent(query); //+ '&filt_instrum=' + encodeURIComponent(query);
             break;
         }
@@ -314,7 +316,7 @@ function createJsTomSelect() {
           if(_fetching[url]) return;
           _fetching[url]=true;
           fetch(url, fetchSettings()).then(response => response.json()).then(json => {
-            if (type === models.project) {
+            if (type === models.project || type === models.renamingrules) {
               if (json.data && json.data.length) json = json.data.map(row => {
                 return {
                   id: row[1],

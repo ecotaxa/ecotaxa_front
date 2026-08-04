@@ -167,10 +167,9 @@ export function jobMonitor(item, options = {}) {
             break;
           case "F":
             stop = true;
-            if (job.finalaction) html.push(job.finalaction);
+            if (job.finalaction) jobStates["F"]=job.finalaction;
             break;
           case "E":
-
             stop = true;
             break;
           case "P":
@@ -182,7 +181,6 @@ export function jobMonitor(item, options = {}) {
         }
 
         if (job.state && job.state === "E" || job.state === 'F' || job.type === "Prediction") {
-          //  display_final(job.finalaction);
           if (responsediv) {
             responsediv.insertAdjacentHTML('afterbegin', html.join(''));
             responsediv.classList.remove(css.hide);

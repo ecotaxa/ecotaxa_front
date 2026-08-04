@@ -278,7 +278,7 @@ export class DataImport {
     const selectcells = this.getSelectCells(cellindex, whatpart);
     if (!selectcells) return;
     if ([typeimport.settings, typeimport.privileges].indexOf(what) >= 0) this.imports[models.contact] = this.findContact(this.datas[rowindex]);
-    if ([typeimport.project, typeimport.taxo, typeimport.privileges].indexOf(what) >= 0) this.createImportzone(what);
+    if ([typeimport.project, typeimport.taxo, typeimport.privileges, typeimport.renamingrules].indexOf(what) >= 0) this.createImportzone(what);
     this.addResetButton();
     let ts = null;
     selectcells.forEach((name, index) => {
@@ -357,6 +357,15 @@ export class DataImport {
             });
             showbtns = (((ts) ? ts.items.length : this.importzone.selectedIndex + 1) > 0);
             break;
+          case typeimport.renamingrules:
+            if (!this.imports[models.recastid]) this.imports[models.recastid] = [];
+            if (add) this.imports[models.recastid].push(celldata);
+            else {
+              const idx = this.imports[models.recastid].indexOf(celldata);
+              if (idx > -1) this.imports[models.recastid].splice(idx, 1);
+            }
+            this.populateImportZone(add, celldata, what);
+            break;
           case typeimport.project:
             const ln = Object.keys(this.imports).length;
             if (!this.imports[name]) this.imports[name] = [];
@@ -391,14 +400,11 @@ export class DataImport {
     });
     if (this.thcells.length) {
       if (this.button) {
-        const activate = (!this.button.dataset.activated && ([typeimport.taxo, typeimport.privileges, typeimport.project].indexOf(what) >= 0));
+        const activate = (!this.button.dataset.activated && ([typeimport.taxo, typeimport.privileges, typeimport.project, typeimport.renamingrules].indexOf(what) >= 0));
         this.showImport(showbtns);
         if (activate) this.activateButtons(what, selectcells);
       } else this.makeImport(null, selectcells, what, true);
     }
-  }
-  messageZone(item) {
-    console.log('itemmessage', item);
   }
   activateButtons(what, selectcells) {
     this.button.addEventListener('click', async (e) => {
@@ -406,13 +412,15 @@ export class DataImport {
       e.preventDefault();
       await this.makeImport(e.currentTarget, selectcells, what, true);
     });
-    this.replacebutton.addEventListener('click', async (e) => {
-      e.stopImmediatePropagation();
-      e.preventDefault();
-      await this.makeImport(e.currentTarget, selectcells, what, true);
-    });
     this.button.dataset.activated = true;
+    if (this.replacebutton) {
+      this.replacebutton.addEventListener('click', async (e) => {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        await this.makeImport(e.currentTarget, selectcells, what, true);
+      });
     this.replacebutton.dataset.activated = true;
+      }
   }
 
   findContact(tds, name = 'contact') {
@@ -531,7 +539,7 @@ export class DataImport {
       this.resetSelectors();
       this.resetImports();
       this.button.disabled = false;
-      this.replacebutton.disabled = false;
+      if (this.replacebutton) this.replacebutton.disabled = false;
       this.showImport(false);
     });
   }
@@ -610,35 +618,8 @@ export class DataImport {
     }
     return true;
   }
-
-  async makeImport(btn, selectcells, what, close = false) {
-    let done = true,
-      ts = null;
-
-    switch (what) {
-      case typeimport.taxo:
-        if (!this.importzone) return false;
-        done = this.cloneImport(btn);
-        break;
-      case typeimport.privileges:
-        if (!this.importzone) return false;
-        done = this.renderPrivileges((btn.dataset.replace && btn.dataset.replace === 'replace'));
-        if (this.importzone.currentlist) this.importzone.currentlist = {};
-        break;
-      case typeimport.project:
-        if (!this.importzone) return false;
-        done = this.cloneImport(btn);
-        const idx = selectcells.indexOf(models.projid);
-        const newone = (this.form.dataset.id) ? parseInt(this.form.dataset.id) : 0;
-        if (newone===0) {
-        if(selectcells.indexOf("creator_persons") <0) selectcells = selectcells.concat(["creator_persons"]);
-        const results = await this.compileProjectRecords(newone);
-        selectcells.forEach(result => {
-          this.imports[result] = results[result];
-        });}
-
-      default:
-        const ts_add_select_item = function(ts, data) {
+  import_selectedcells(what,name,done) {
+    const ts_add_select_item = function(ts, data) {
           const el = {};
           if (typeof(data) == 'string') {
             el[ts.settings.labelField] = unescape_html(data);
@@ -671,12 +652,11 @@ export class DataImport {
           } else input.value = data;
 
         }
-        selectcells.forEach((name, index) => {
-          let input = ((this.form.querySelector('[data-importfield="' + name + '"]')) ? this.form.querySelector('[data-importfield="' + name + '"]') : this.form.querySelector('[name="' + name + '"]'));
-          if (input && input.dataset.noimport) return;
+    let input = ((this.form.querySelector('[data-importfield="' + name + '"]')) ? this.form.querySelector('[data-importfield="' + name + '"]') : this.form.querySelector('[name="' + name + '"]'));
+          if (input===null || input.dataset.noimport) return;
           if (input && this.imports[name] !== undefined) {
             const type = (input.type) ? input.type : input.tagName.toLowerCase();
-            ts = input.tomselect;
+            const ts = input.tomselect;
             if (['init_classif_list','initclassiflist'].indexOf(name) >= 0) {
               let ids = this.imports[name];
               if (Array.isArray(ids)) ids = ids.join(',');
@@ -771,6 +751,42 @@ export class DataImport {
             const clearprivileges = false;
             done = done && this.importPrivileges(this.imports[name], clearprivileges);
           }
+  }
+  async makeImport(btn, selectcells, what, close = false) {
+    let done = true,
+      ts = null;
+
+    switch (what) {
+      case typeimport.taxo:
+        if (!this.importzone) return false;
+        done = this.cloneImport(btn);
+        break;
+      case typeimport.privileges:
+        if (!this.importzone) return false;
+        done = this.renderPrivileges((btn.dataset.replace && btn.dataset.replace === 'replace'));
+        if (this.importzone.currentlist) this.importzone.currentlist = {};
+        break;
+      case typeimport.renamingrules:
+        if (!this.importzone) return false;
+        done=await this.importRenamingRules();
+        break;
+      case typeimport.project:
+        if (!this.importzone) return false;
+        done = this.cloneImport(btn);
+        const newone = (this.form.dataset.id) ? parseInt(this.form.dataset.id) : 0;
+        if (newone===0) {
+        if(selectcells.indexOf("creator_persons") <0) selectcells = selectcells.concat(["creator_persons"]);
+        const results = await this.compileProjectRecords(newone);
+        selectcells.forEach(result => {
+          this.imports[result] = results[result];
+        });}
+        selectcells.forEach((name) => {
+          this.import_selectedcells(what,name,done);
+        });
+        break;
+      default:
+        selectcells.forEach((name) => {
+          this.import_selectedcells(what,name,true);
         });
         break;
     }
@@ -846,15 +862,16 @@ export class DataImport {
     if (!this.button) return;
     if (show === false) {
       this.button.classList.add(css.hide);
-      this.replacebutton.classList.add(css.hide);
+      if (this.replacebutton) this.replacebutton.classList.add(css.hide);
       this.importcontainer.classList.add(css.hide);
       if (this.tabbutton) this.tabbutton.classList.add(css.hide);
     } else {
       if (this.importzone) {
         this.button.classList.remove(css.hide);
-        this.replacebutton.classList.remove(css.hide);
-        this.importcontainer.classList.remove(css.hide);
         this.button.disabled = false;
+        if (this.replacebutton) this.replacebutton.classList.remove(css.hide);
+        this.importcontainer.classList.remove(css.hide);
+
         if (this.tabbutton) {
           this.tabbutton.classList.remove(css.hide);
           if (this.importzone.tomselect) {

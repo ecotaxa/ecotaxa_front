@@ -2,7 +2,8 @@ import DOMPurify from 'dompurify';
 import {
   generate_uuid,
   fetchSettings,
-  create_box
+  create_box,
+  decodeURIComponentSafe
 } from '../modules/utils.js';
 import {
   css
@@ -305,7 +306,7 @@ async function createAlertBox() {
   }
 
   function getBoxById(id, parent = document) {
-    id=encodeURIComponent(decodeURIComponent(id));
+    id=encodeURIComponent(decodeURIComponentSafe(id));
     return (id !== '' && document.getElementById(id)) ? document.getElementById(id) : parent.querySelector('[data-message="' + id + '"]');
   }
 
@@ -479,9 +480,9 @@ async function createAlertBox() {
     }
     if (message.id) {
       const msg = el.querySelector(`${tag}[data-id="${message.id}"]`);
-      if (msg) msg.innerHTML = decodeURIComponent(message.content);
-      else el.insertAdjacentHTML('beforeend', `<${tag} data-id="${message.id}">${decodeURIComponent(message.content)}</${tag}>`);
-    } else el.insertAdjacentHTML('beforeend', `<${tag}>${decodeURIComponent(message.content)}</${tag}>`);
+      if (msg) msg.innerHTML = decodeURIComponentSafe(message.content);
+      else el.insertAdjacentHTML('beforeend', `<${tag} data-id="${message.id}">${decodeURIComponentSafe(message.content)}</${tag}>`);
+    } else el.insertAdjacentHTML('beforeend', `<${tag}>${decodeURIComponentSafe(message.content)}</${tag}>`);
   }
 
   function error() {

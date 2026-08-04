@@ -10,7 +10,6 @@ import {
 
 
 function ImportList(state, attach = null) {
-  const rowimported = -1;
   const selectimports=[];
   const importindexes=[];
   let _fetching=false;

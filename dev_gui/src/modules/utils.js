@@ -42,7 +42,7 @@ function create_range(node, chars, range) {
                  chars.count = 0;
             }
         } else {
-            for (const lp = 0; lp < node.childNodes.length; lp++) {
+            for (let lp = 0; lp < node.childNodes.length; lp++) {
                 range = create_range(node.childNodes[lp], chars, range);
                 if (chars.count === 0) {
                    break;
@@ -232,7 +232,25 @@ function stop_on_error(message, callback = null) {
   if (callback) callback;
   throw new Error(message);
 }
-
+function decodeURIComponentSafe(uri, mod) {
+    var out = new String(),
+        arr,
+        i = 0,
+        l,
+        x;
+    typeof mod === "undefined" ? mod = 0 : 0;
+    arr = uri.split(/(%(?:d0|d1)%.{2})/);
+    for (l = arr.length; i < l; i++) {
+        try {
+            x = decodeURIComponent(arr[i]);
+        } catch (e) {
+            x = mod ? arr[i].replace(/%(?!\d+)/g, '%25') : arr[i];
+        }
+        out += x;
+    }
+    return out;
+}
+const noop = function() {};
 export {
   generate_uuid,
   fetchSettings,
@@ -251,5 +269,7 @@ export {
   stop_on_error,
   dirseparator,
   urlseparator,
-  set_cursor_editable
+  set_cursor_editable,
+  decodeURIComponentSafe,
+  noop
 }

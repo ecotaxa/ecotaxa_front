@@ -4,7 +4,7 @@
 
 /*! ../modules/entry.js */
 
-/*! ../modules/js-my-files.js */
+/*! ../modules/files/js-dirlist.js */
 
 /*! ../modules/module-event-emitter.js */
 

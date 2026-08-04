@@ -14,6 +14,8 @@ export const models = {
   viewers: 'viewers',
   instr: 'instr',
   taxo: 'taxo',
+  transforms:'transforms',
+  recastid:'recast_id',
   taxotree: 'taxotree',
   settings: 'settings',
   help: 'help',
@@ -23,14 +25,16 @@ export const models = {
   controls: "controls",
   imports: "imports",
   commonserver: 'commonserver',
-  organisation: 'organisation'
+  organisation: 'organisation',
+  renamingrules: 'renamingrules'
 };
 
 export const typeimport = {
   taxo: models.taxo,
   privileges: models.privileges,
   settings: models.settings,
-  project: models.project
+  project: models.project,
+  renamingrules:models.renamingrules
 };
 export const css = {
   hide: 'hide',
@@ -119,6 +123,22 @@ export const domselectors = {
       danger: '.alert.danger'
     },
   }
+};
+export const objaccept = {
+  "image/*": [".png", ".jpeg", ".jpg", ".gif"],
+  "text/plain": [".txt"],
+  "text/tab-separated-values": [".tsv"],
+  "application/zip": [".zip"],
+  "application/gzip": [".gz"],
+  "application/x-bzip": [".bz"],
+  "application/x-bzip2": [".bz2"]
+};
+export const filter_files = {
+  images: objaccept["image/*"].map(ext => ext.slice(1)).join(','),
+  tsv: Object.entries(objaccept)
+    .filter(([mime]) => mime !== "image/*")
+    .flatMap(([, exts]) => exts.map(ext => ext.slice(1)))
+    .join(',')
 };
 export const default_messages = {
   wait: 'Please wait...',

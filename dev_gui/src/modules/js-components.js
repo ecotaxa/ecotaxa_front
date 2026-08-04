@@ -171,6 +171,16 @@ function createJsComponents() {
               }
               const jsMyFiles = new dynamics.JsMyFiles(item);
               break;
+            case 'js-dirlist':
+              if (!dynamics.JsDirList) {
+                const {
+                  JsDirList
+                } = await
+                import('../modules/files/js-dirlist.js');
+                dynamics.JsDirList = JsDirList;
+              }
+              const jsDirList = new dynamics.JsDirList(item);
+              break;
             case 'js-import':
               // depends on  js-submit
               if (!dynamics.FormSubmit) {

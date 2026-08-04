@@ -255,11 +255,11 @@ li:not(.on) ul.entries {@apply hidden}
 .counters, .sizes {@apply p-2 rounded-sm text-sm  my-1 w-auto w-1/2 inline-block }
 .counters span, .sizes span {@apply font-normal}
 /*js import */
-#dropzone {@apply w-auto min-w-[50%] inline-block small-caps font-light}
-#dropzone .trigger {@apply  before:mr-0 small-caps text-black bg-stone-50 py-0.5 px-1.5 mr-3 w-6 overflow-x-hidden rounded drop-shadow hover:bg-secondblue-200 hover:drop-shadow-none before:p-0.5 before:icon }
+#dropzone {@apply p-8 rounded border border-stone-800 border-2 border-dashed relative }
+#dropzone .trigger {@apply  before:mr-0 text-sm text-black bg-stone-50 py-0.5 px-1.5 mr-3 w-[48.5%] overflow-x-hidden rounded drop-shadow hover:bg-secondblue-200 hover:drop-shadow-none before:p-0.5 before:icon }
 #dropzone .trigger[data-type="directory"]  {@apply before:icon-arrow-up-tray }
 #dropzone .trigger[data-type="file"]  {@apply before:icon-arrow-up-square}
-#dropzone span:not(.trigger) {@apply text-ellipsis w-8 overflow-x-hidden hover:overflow-x-auto}
+#dropzone div:not(.trigger) {@apply text-ellipsis w-auto text-sm}
 .displayimport {@apply  border border-secondblue-200 rounded  text-base font-normal w-full h-auto min-h-8 px-2 py-1 overflow-y-visible hover:bg-secondblue-50 }
 .displayimport.active {@apply  bg-success-50}
 .displayimport li {@apply relative}
