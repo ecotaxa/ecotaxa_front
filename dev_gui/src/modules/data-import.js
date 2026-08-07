@@ -846,7 +846,7 @@ export class DataImport {
     let resetbtn = this.dom.parentElement.querySelector(domselectors.resetbutton);
     if (resetbtn === null) {
       resetbtn = create_box('a', {
-        class: domselectors.resetbutton.substr(1),
+        class: domselectors.resetbutton.slice(1),
         text: this.tbl.params.reset
       }, this.dom.parentElement.firstChild);
     }

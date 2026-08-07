@@ -1,8 +1,6 @@
 import DOMPurify from 'dompurify';
 import {
   fetchSettings,
-  unescape_html,
-  create_box
 } from '../modules/utils.js';
 import {
   domselectors,
@@ -10,9 +8,6 @@ import {
   models,css
 } from '../modules/modules-config.js';
 let dynamics = {};
-import {
-  ModuleEventEmitter
-} from '../modules/module-event-emitter.js';
 import {AlertBox} from "./alert-box";
 function createActivRequest() {
   let _fetching=false;
@@ -100,6 +95,17 @@ function createActivRequest() {
           callback = url = null;
         }
         break;
+         case models.files:
+          modal = await callModal(item);
+          if (!modal) return;
+          url = item.dataset.url + '?' + new URLSearchParams({
+            dirlist_id: ((item.dataset.dirlist) ? item.dataset.dirlist : null)
+            });
+          callback = async (html) => {
+            const modalcontent = modal.setContent(html);
+            await activateContent(item,modalcontent);
+          }
+        break;
       case models.taxotree:
         modal = await callModal(item);
       case models.commonserver:
@@ -162,9 +168,9 @@ function createActivRequest() {
       default:
         if (item.dataset.href) {
           url = item.dataset.href;
-          if (url.substr(0, 1) === '?') {
+          if (url.slice(0, 1) === '?') {
             url = window.location.href.split('?');
-            if (url.length > 1) url = url.join('?') + '&' + item.dataset.href.substr(1);
+            if (url.length > 1) url = url.join('?') + '&' + item.dataset.href.slice(1);
             else url = url[0] + item.dataset.href;
           }
           let content =item.nextElementSibling;

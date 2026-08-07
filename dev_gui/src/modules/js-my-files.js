@@ -75,8 +75,10 @@ export class JsMyFiles {
           }
         },
         upload: {
-          label: 'upload'
+          label: 'upload',
+          droptarget:true,
         },
+
         btnprefix: 'btn',
         btnfilelist: null,
         selectors: {
@@ -92,7 +94,6 @@ export class JsMyFiles {
           sizes: 'sizes',
           timers: 'timers'
         },
-        dirlistcontainer:'dirlist',
         css: {
           dragover: 'dragover'
         }
@@ -249,7 +250,7 @@ export class JsMyFiles {
     this.dropzone = document.getElementById(this.options.display.dropzone);
     if (this.dropzone===null) this.dropzone = create_box('div', {
       id: this.options.display.dropzone
-    },this.dirlistcontainer);
+    },this.container);
     const input = (this.haspicker) ? null : create_box('input', {
       type: "file",
       name: this.options.selectors.uploadfile,
@@ -298,13 +299,13 @@ export class JsMyFiles {
     const browselink = create_box('a', {
     text:this.container.dataset.textbrowse,class:'modal', divdrop})
     this.addDisplayProgression(this.dropzone);
+    this.droptarget=(this.options.upload.droptarget)?this.dropzone:null;
   }
 
-  toggleDropTarget(on = true) {
+  toggleDropTarget(on = true,) {
     const self = this;
-     const droptarget = (this.activentry) ? this.activentry.container : null;
+    const droptarget = (this.droptarget)?this.droptarget:((this.activentry) ? this.activentry.container : null);
     if (droptarget === null) return;
-
     function highlight(e) {
         droptarget.classList.add(cssdragover)
     }
@@ -328,7 +329,7 @@ export class JsMyFiles {
         droptarget.removeEventListener(eventname, unhighlight, false);
     });
       droptarget.removeEventListener('drop', target_drop);
-      droptarget.classList.remove(this.options.selectors.droptarget.substr(1));
+      droptarget.classList.remove(this.options.selectors.droptarget.slice(1));
     } else {
     ['dragenter', 'dragover'].forEach(eventname => {
         droptarget.addEventListener(eventname, highlight, false);
@@ -337,13 +338,12 @@ export class JsMyFiles {
     droptarget.addEventListener(eventname, unhighlight, false);
     });
       droptarget.addEventListener('drop', target_drop);
-      droptarget.classList.add(this.options.selectors.droptarget.substr(1));
+      droptarget.classList.add(this.options.selectors.droptarget.slice(1));
     }
   }
 
   async addDirList() {
-    const parent=document.getElementById(this.options.dirlistcontainer);
-    if (dirlist!==null) this.jsDirList = new JsDirList(parent);
+    if (this.container!==null) this.jsDirList = new JsDirList(this.container);
     this.activentry = this.jsDirList.root;
     this.rootitem = this.targetitem = this.activentry.container;
     ModuleEventEmitter.on(this.jsDirList.eventnames.attach, (e) => {
@@ -377,7 +377,6 @@ export class JsMyFiles {
     // add counters
     if (this.displayprogression) return;
     let el = document.getElementById(this.options.display.progression);
-    console.log(' el', el)
     if (el===null) {
       parent=(parent===null)?this.container:parent;
       el = create_box('div', {
@@ -396,8 +395,8 @@ export class JsMyFiles {
   }
   //
   attachDropzone() {
+    console.log('this.dropzone', this.dropzone.dataset)
     if (this.dropzone.dataset.active) {
-      //this.targetitem.insertBefore(this.dropzone, this.activentry.label.nextElementSibling);
       this.toggleDropTarget(true);
     }
     ['dragover', 'dragenter'].forEach(eventname => {
@@ -648,18 +647,15 @@ export class JsMyFiles {
           };
         }
         break;
-        case this.eventnames.endzip:
+      case this.eventnames.endzip:
         if (!part) this.showComplete();
-        // combine endzip and upload for prod
-       // btn.textContent = `Uploading file` + ((part) ? ` ` + part : ``);
-        btn.dataset.message = JSON.stringify({
+        btn.textContent = this.container.dataset.ended || `Upload`;
+        message = {
           name: this.eventnames.endzip,
           part: part,
           path: filepath,
           bigfile: bigfile,
-        });
-         setTimeout( () => {this.emitToZip(btn);},1000);
-         return;
+        };
         break;
     case this.eventnames.sendfile:
         this.done=false;

@@ -10,10 +10,6 @@
 
 /*! ../modules/modules-config.js */
 
-/*! ../modules/tooltip.js */
-
 /*! ../modules/utils.js */
-
-/*! dompurify */
 
 /*! import() */

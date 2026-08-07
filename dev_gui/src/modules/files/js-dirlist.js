@@ -440,7 +440,7 @@ export class JsDirList {
       this.options.entry.url = this.options.url;
       this.container = create_box(
         this.options.entry.tags.tag, {
-          class: this.options.selectors.dirlist.substr(1)
+          class: this.options.selectors.dirlist.slice(1)
         }, parent);
       // unique id to communicate ModuleEventEmitter
       this.uuid = generate_uuid();

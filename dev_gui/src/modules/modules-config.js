@@ -26,7 +26,8 @@ export const models = {
   imports: "imports",
   commonserver: 'commonserver',
   organisation: 'organisation',
-  renamingrules: 'renamingrules'
+  renamingrules: 'renamingrules',
+  files:'files'
 };
 
 export const typeimport = {

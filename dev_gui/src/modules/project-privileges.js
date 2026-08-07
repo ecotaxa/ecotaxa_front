@@ -627,7 +627,7 @@ export class ProjectPrivileges {
   }
 
   tabError(on) {
-    const tab = (this.fieldset.classList.contains(domselectors.component.tabs.tab.substr(1))) ? this.fieldset : ((this.fieldset.parentElement.classList.contains(domselectors.component.tabs.tab.substr(1))) ? this.fieldset.parentElement : null);
+    const tab = (this.fieldset.classList.contains(domselectors.component.tabs.tab.slice(1))) ? this.fieldset : ((this.fieldset.parentElement.classList.contains(domselectors.component.tabs.tab.slice(1))) ? this.fieldset.parentElement : null);
     if (tab === null) return;
     if (on === true) tab.classList.add(css.error);
     else tab.classList.remove(css.error);

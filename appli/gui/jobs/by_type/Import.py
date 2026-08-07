@@ -56,14 +56,15 @@ class ImportJob(Job):
                 dict(
                     {
                         "name": "myfiles",
-                        "label": _("Upload or select from my files"),
+                        "label": _("Import from my files"),
                         "help": "help_import_myfiles",
+                        "open":True
                     }
                 ),
                 dict(
                     {
                         "name": "server",
-                        "label": _("Choose a folder or zip file on the server"),
+                        "label": _("Import from a folder or zip file on the server"),
                         "help": "help_import_server",
                         "data": " data-import=commonserver data-exclude=FTP,ftp_plankton,plankton,Ecotaxa_Data_to_import,Ecotaxa_Exported_data  data-url=gui/common/ServerFolderSelectJSON data-where=import-server data-tree=commonserver data-target=unique",
                     }
@@ -222,14 +223,18 @@ class ImportJob(Job):
 
     @classmethod
     def make_recast(cls, target_id: int, values: dict):
+        print('values', values)
         newrecast = TaxoRecastRsp(from_to=values, doc={})
         recast_operation = get_back_constants("RECAST_OPERATION")
         operation = recast_operation["project_import"]
         recast = get_taxo_recast(
             target_id=target_id, operation=operation, is_collection=False
         )
-        recast.from_to.update(newrecast.from_to)
-        recast.doc.update(newrecast.doc)
+        if recast is None:
+            recast=newrecast
+        else:
+            recast.from_to.update(newrecast.from_to)
+            recast.doc.update(newrecast.doc)
         recasts = {operation: recast}
         for operation, recast in recasts.items():
             update_taxo_recast(
@@ -254,11 +259,16 @@ class ImportJob(Job):
         # on efface donc la tache et on lui propose d'aller sur la classif manuelle ou auto
         if job.state == "F":
             time.sleep(1)
+            projid = job.params["prj_id"]
+            source_path = job.params["req"]["source_path"]
+            from appli.gui.files.tools import get_staged_import_manifest
+
             return render_template(
                 cls.FINAL_TEMPLATE,
                 jobid=job.id,
-                source_path=job.params["req"]["source_path"],
-                projid=job.params["prj_id"],
+                source_path=source_path,
+                original_sources=get_staged_import_manifest(projid, source_path),
+                projid=projid,
             )
         else:
             return ""

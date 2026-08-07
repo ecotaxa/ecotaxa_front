@@ -17,10 +17,10 @@ export class ModalContainer {
       this.trigger = trigger;
 
       if (trigger.dataset.what === models.help) {
-        this.modal = (document.getElementById(domselectors.component.modal.help.substr(1))) ? document.getElementById(domselectors.component.modal.help.substr(1)) : document.querySelector(domselectors.component.modal.help);
+        this.modal = (document.getElementById(domselectors.component.modal.help.slice(1))) ? document.getElementById(domselectors.component.modal.help.slice(1)) : document.querySelector(domselectors.component.modal.help);
       } else if (trigger.dataset.target && trigger.dataset.target !== 'unique') {
         const md = document.getElementById(trigger.dataset.target);
-        if (md && md.classList.contains(domselectors.component.modal.modalcontainer.substr(1))) this.modal = md;
+        if (md && md.classList.contains(domselectors.component.modal.modalcontainer.slice(1))) this.modal = md;
         else if (md) this.modal = md.closest(domselectors.component.modal.modalcontainer);
         else this.modal = trigger.closest(domselectors.component.modal.modalcontainer);
 
@@ -71,7 +71,7 @@ export class ModalContainer {
   openContent(trigger) {
     if (!trigger.dataset.for) return;
     if (trigger.dataset.close) return this.dismissModal();
-    if (this.modal.classList.contains(domselectors.component.modal.help.substr(1))) {
+    if (this.modal.classList.contains(domselectors.component.modal.help.slice(1))) {
       const siblings = this.getContentSiblings();
       siblings.forEach(sibling => {
         if (sibling !== trigger) sibling.open = false;

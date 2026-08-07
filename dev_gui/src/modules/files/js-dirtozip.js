@@ -359,7 +359,7 @@ const browser = detect();
   }
     async function gzipBigFile(file, filepath) {
     let dt = Date.now();
-    filepath = (filepath.indexOf(dirseparator) === 0) ? filepath.substr(1) : filepath;
+    filepath = (filepath.indexOf(dirseparator) === 0) ? filepath.slice(1) : filepath;
     const parts = filepath.split(dirseparator);
     parts.pop();
     const sendpath = uploadpath + dirseparator +parts.join(dirseparator);

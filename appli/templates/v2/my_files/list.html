@@ -1,17 +1,15 @@
+{%if not partial%}
 {% extends "./v2/layout.html" %}
+{%endif%}
 {% from "./v2/macros/macros.html" import  modal  with context %}
-
 {% block body %}
     <div class="container mx-auto">
-      {% set data = {'file':'_help_my_files'} %}
-      {{ modal(id='help-my-files',modal_title= _("My Files"), type='modal-help',position='modal-aside modal-right ',summary_pos={'float':'right','clear':'right'},data = data) }}
+        {%-if not partial-%}{% set data = {'file':'_help_my_files'} %}
+      {{ modal(id='help-my-files',modal_title= _("My Files"), type='modal-help',position='modal-aside modal-right ',summary_pos={'float':'right','clear':'right'},data = data) }}{%-endif-%}
           <div class="w-full">
             <div class="form-box">
-                {%include("./v2/my_files/_list.html") %}
+                {%include("./v2/my_files/_list.html") with context%}
             </div>
-<div class="flex flex-col">
-
-          </div></div>
-
+</div>
     </div>
 {% endblock %}
