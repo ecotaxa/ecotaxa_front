@@ -11,7 +11,6 @@ import {
 from '../../modules/utils.js';
 import {
   css,
-  filter_files,
 } from '../../modules/modules-config.js';
 import {
   AlertBox
@@ -25,6 +24,10 @@ import {
   Entry,
   EntryControls
 } from '../../modules/entry.js';
+const filter_files = {
+  images: "png,jpeg,jpg,gif",
+  tsv: "txt,tsv,zip, gzip,gz"
+}
 // local css
 css.intrash = 'intrash';
 // original types
