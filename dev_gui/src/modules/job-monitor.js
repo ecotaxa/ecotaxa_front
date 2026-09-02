@@ -36,7 +36,6 @@ export function jobMonitor(item, options = {}) {
     item.prepend(responsediv);
   }
 
-
   let stop = false;
   let cl = 'is-pending';
   const progress_bar = function(state, percent = 0, msg = "") {
@@ -153,12 +152,7 @@ export function jobMonitor(item, options = {}) {
     });
   }
   let html = [];
-
-  function check_job_status() {
-    if (_fetching) return;
-    _fetching=true;
-    fetch(options.url + jobid, fetchSettings).then(response => response.json()).then(job => {
-       if (job) {
+  function set_job_status(job) {
         switch (job.state) {
           case "A":
             // question
@@ -167,7 +161,8 @@ export function jobMonitor(item, options = {}) {
             break;
           case "F":
             stop = true;
-            if (job.finalaction) jobStates["F"]=job.finalaction;
+             if (job.finalaction)   html.push(job.finalaction);
+             console.log('jobfinalaction', job.finalaction)
             break;
           case "E":
             stop = true;
@@ -180,16 +175,25 @@ export function jobMonitor(item, options = {}) {
             break;
         }
 
-        if (job.state && job.state === "E" || job.state === 'F' || job.type === "Prediction") {
-          if (responsediv) {
-            responsediv.insertAdjacentHTML('afterbegin', html.join(''));
-            responsediv.classList.remove(css.hide);
+  }
+  function set_final_status() {
+    if (responsediv) {
+      responsediv.insertAdjacentHTML('afterbegin', html.join(''));
+      responsediv.classList.remove(css.hide);
+      html=[];
           }
-          stop = true;
-        }
+
+  }
+  function check_job_status() {
+    if (_fetching) return;
+    _fetching=true;
+    fetch(options.url + jobid, fetchSettings).then(response => response.json()).then(job => {
+       if (job) {
+        set_job_status(job);
+        if (job.state) display_infos(job);
       } else stop = true;
-      if (job.state) display_infos(job);
       if (stop === false) setTimeout(check_job_status, 1000);
+      else set_final_status();
       return;
     }).catch((err) => {
       AlertBox.addAlert({

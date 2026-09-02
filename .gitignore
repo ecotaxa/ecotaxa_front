@@ -12,3 +12,4 @@ __pycache__/
 /testsandbox/*
 /dev_gui/package-lock.json
 /py
+appli/static/gui/data/
