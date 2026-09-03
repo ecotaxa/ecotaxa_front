@@ -238,6 +238,7 @@ function decodeURIComponentSafe(uri, mod) {
         i = 0,
         l,
         x;
+    if (uri === undefined || uri === null) return '';
     typeof mod === "undefined" ? mod = 0 : 0;
     arr = uri.split(/(%(?:d0|d1)%.{2})/);
     for (l = arr.length; i < l; i++) {
