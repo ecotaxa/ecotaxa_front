@@ -925,6 +925,8 @@ details.project-search .ts-dropdown .option ,  details.project-search .ts-dropdo
 /* projectsettings formulae tags */
 .tag.dropped {@apply bg-secondblue-400}
 .tag:not(.dropped)[draggable=false] {@apply opacity-[0.2]}
+/* a prefix.column token in a formula that this project has no matching field for */
+.form-textarea .formula-missing {@apply text-danger-600 font-semibold underline decoration-wavy decoration-danger-500 underline-offset-2}
 /* hide title in small res when searching*/
 .hidesm {@apply hidden md:visible}
 /*********************************/

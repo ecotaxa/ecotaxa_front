@@ -26,7 +26,8 @@ export const models = {
   imports: "imports",
   commonserver: 'commonserver',
   organisation: 'organisation',
-  renamingrules: 'renamingrules'
+  renamingrules: 'renamingrules',
+  formulae: 'formulae'
 };
 
 export const typeimport = {
@@ -34,7 +35,8 @@ export const typeimport = {
   privileges: models.privileges,
   settings: models.settings,
   project: models.project,
-  renamingrules:models.renamingrules
+  renamingrules:models.renamingrules,
+  formulae: models.formulae
 };
 export const css = {
   hide: 'hide',

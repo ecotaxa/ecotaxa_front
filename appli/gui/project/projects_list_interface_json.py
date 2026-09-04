@@ -135,6 +135,22 @@ def project_table_columns(
                     "classiffieldlist": {"label": "presets", "format": "text"},
                 }
             ),
+            "formulae": dict(
+                {
+                    "total_water_volume": {
+                        "label": _("Sample water volume"),
+                        "format": "text",
+                    },
+                    "subsample_coef": {
+                        "label": _("Subsampling coef."),
+                        "format": "text",
+                    },
+                    "individual_volume": {
+                        "label": _("Individual volume"),
+                        "format": "text",
+                    },
+                }
+            ),
             "settings": dict(
                 {
                     "status": {"label": _("status")},
@@ -220,6 +236,18 @@ def project_table_columns(
                 "what": "fields",
                 "field": "projid",
                 "selectcells": ["classiffieldlist"],
+            }
+        },
+        "formulae": {
+            "select": {
+                "label": _("select"),
+                "what": "formulae",
+                "field": "projid",
+                "selectcells": [
+                    "total_water_volume",
+                    "subsample_coef",
+                    "individual_volume",
+                ],
             }
         },
         "settings": {
