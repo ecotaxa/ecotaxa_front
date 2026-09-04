@@ -192,14 +192,59 @@ export function JsImport(container, options = {}) {
     });
   }
 
+  // Set/clear the selection of a single entry (map membership + button style).
+  function setSelectedState(entry, selected) {
+    const key = entry.getCurrentPath().join(dirseparator);
+    if (selected) multiSelected.set(key, entry);
+    else multiSelected.delete(key);
+    if (entry.importButton) entry.importButton.classList.toggle('is-selected', selected);
+  }
+
+  // Walk every already-loaded descendant entry (files never have .entries).
+  function eachDescendant(entry, fn) {
+    if (!Array.isArray(entry.entries) || entry.entries.length === 0) return;
+    entry.entries.forEach(child => {
+      if (!child) return;
+      if (child.importButton) fn(child);
+      eachDescendant(child, fn);
+    });
+  }
+
+  // Walk every ancestor folder up to (but excluding) the untoggleable root.
+  function eachAncestor(entry, fn) {
+    let parent = entry.getParent();
+    while (parent) {
+      if (parent.importButton) fn(parent);
+      parent = parent.getParent();
+    }
+  }
+
+  // True when an ancestor folder is currently selected.
+  function hasSelectedAncestor(entry) {
+    let parent = entry.getParent();
+    while (parent) {
+      if (multiSelected.has(parent.getCurrentPath().join(dirseparator))) return true;
+      parent = parent.getParent();
+    }
+    return false;
+  }
+
   function toggleMultiSelect(entry) {
     const key = entry.getCurrentPath().join(dirseparator);
-    if (multiSelected.has(key)) {
-      multiSelected.delete(key);
-    } else {
-      multiSelected.set(key, entry);
+    const willSelect = !multiSelected.has(key);
+
+    setSelectedState(entry, willSelect);
+
+    const isBranch = [entryTypes.branch, entryTypes.root].indexOf(entry.type) >= 0;
+    if (isBranch) {
+      // Ticking/unticking a folder cascades to every loaded child.
+      eachDescendant(entry, (child) => setSelectedState(child, willSelect));
     }
-    if (entry.importButton) entry.importButton.classList.toggle('is-selected', multiSelected.has(key));
+    if (!willSelect) {
+      // Unticking anything bubbles up: an ancestor folder can no longer
+      // claim that all of its contents are selected. Ticked siblings stay.
+      eachAncestor(entry, (ancestor) => setSelectedState(ancestor, false));
+    }
     showSubmit(multiSelected.size > 0);
   }
   function addImportPath(value) {
@@ -226,6 +271,8 @@ export function JsImport(container, options = {}) {
         if (allowed.indexOf(entry.type) < 0) return;
         if (exclude.indexOf(entry.name) >= 0) return;
         attachImportToggle(entry);
+        // A child loaded (lazily) under an already-ticked folder inherits the tick.
+        if (hasSelectedAncestor(entry)) setSelectedState(entry, true);
       };
       return;
     }
@@ -286,8 +333,10 @@ export function JsImport(container, options = {}) {
       const formdata = new FormData();
       const projid = document.getElementById('projid');
       formdata.append('projid', (projid) ? projid.value : '');
-      multiSelected.forEach((entry) => {
-        formdata.append('entries', entry.getCurrentPath().join(dirseparator));
+      multiSelected.forEach((entry, key) => {
+        // Use the map key: a subtree wiped by removeEntries() can leave an
+        // entry whose parent chain (and thus getCurrentPath()) is stale.
+        formdata.append('entries', key);
       });
       const json = await fetch(url.stageimport, fetchSettings({
         method: 'POST',

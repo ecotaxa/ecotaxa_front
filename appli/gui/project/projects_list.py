@@ -166,6 +166,8 @@ def projects_list(
             fields = "*default,viewers,annotators,managers,contact,initclassiflist,classiffieldlist,cnn_network_id"
         elif typeimport == "privileges":
             fields = "*summary,viewers,annotators,managers,contact"
+        elif typeimport == "formulae":
+            fields = "*default,formulae"
 
         prjs = _prjs_list_api(
             listall,
@@ -191,6 +193,28 @@ def projects_list(
             prjs = prjs + _prjs_list_api(
                 True, filt, for_managing=for_managing, fields=fields
             )
+
+        if typeimport == "formulae":
+            # split the single 'formulae' string into the 3 form keys (front-end
+            # prefixes) and keep only projects that actually define at least one
+            from appli.gui.project.projectsettings import (
+                _formulae_str_to_dict,
+                _manage_prefixes,
+                FORMULAE_KEYS,
+            )
+
+            with_formulae = []
+            for a_prj in prjs:
+                fdict = _formulae_str_to_dict(a_prj.get("formulae")) or {}
+                has_any = False
+                for k in FORMULAE_KEYS:
+                    v = (fdict.get(k) or "").strip()
+                    a_prj[k] = _manage_prefixes(v, True) if v else ""
+                    if a_prj[k]:
+                        has_any = True
+                if has_any:
+                    with_formulae.append(a_prj)
+            prjs = with_formulae
 
         # last_used_projects are put on top of list in the interface
         last_used_projects = list(p.projid for p in current_user.last_used_projects)
