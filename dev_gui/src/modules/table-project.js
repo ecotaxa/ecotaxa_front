@@ -236,6 +236,7 @@ export default function(state) {
           case models.settings:
           case models.privileges:
           case models.fields:
+          case models.formulae:
             btns.push({
               nodename: "BUTTON",
               attributes: {

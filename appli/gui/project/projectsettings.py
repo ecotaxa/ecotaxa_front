@@ -125,6 +125,10 @@ def _manage_prefixes(formula, direction=True):
             formula = formula.replace(value + ".", key + ".")
     else:
         prefixes = {
+            # "subsample" must come before "sample" ("sample." is a substring
+            # of "subsample."). The front-end shows acquisition/process columns
+            # under a single "subsample." alias; the back-end only knows "ssm."
+            "subsample": "ssm",
             "sample": "sam",
             "object": "obj",
             "acquisition": "ssm",
@@ -365,7 +369,18 @@ def prj_edit(prjid: int, new: bool = False):
                     redir = url_for("gui_prj_edit", prjid=target_proj.projid)
                     return redirect(redir)
             except ApiException as ae:
-                flash(py_messages["updateexception"] + "%s" % ae.reason)
+                from flask import current_app
+
+                current_app.logger.error(
+                    "update_project failed (%s) - sent formulae=%r - body=%s",
+                    ae.reason,
+                    target_proj.formulae,
+                    ae.body,
+                )
+                flash(
+                    py_messages["updateexception"]
+                    + "%s - %s" % (ae.reason, ae.body)
+                )
     lst = [str(tid) for tid in target_proj.init_classif_list]
     # common func used in project stats
     from appli.gui.taxonomy.tools import taxo_with_names

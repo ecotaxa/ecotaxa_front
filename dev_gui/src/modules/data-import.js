@@ -738,7 +738,16 @@ export class DataImport {
                   else add_select_option(input, this.imports[name]);
                   break;
                 default:
-                  input.value = this.imports[name];
+                  if (input.isContentEditable) {
+                    input.textContent = this.imports[name];
+                    try {
+                      const dd = input.closest('.js-dragdrop');
+                      if (dd && dd.jsdragdrop) dd.jsdragdrop.rehydrate(input);
+                    } catch (e) {
+                      /* chips are cosmetic - never let it abort the import */
+                    }
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                  } else input.value = this.imports[name];
                   break;
               }
               this.setImportedTag(input);
