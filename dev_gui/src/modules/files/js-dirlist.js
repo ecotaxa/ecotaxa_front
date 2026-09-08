@@ -202,6 +202,9 @@ function EntryAction(args, options) {
     const json = await response.json();
     if (response.status === 200) {
       if (callback) callback(json.message);
+      // notify any other file tree on the page (e.g. the import list while the
+      // "My files" manager is open in a modal) that the server tree changed.
+      ModuleEventEmitter.emit('filesmutated', { action: action });
       return true;
     } else {
       if (callback_error) {

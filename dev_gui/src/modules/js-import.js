@@ -58,6 +58,7 @@ export function JsImport(container, options = {}) {
   let eventnames = {
     import: 'import',
     select: 'select',
+    filesmutated: 'filesmutated',
   };
   let importliste = "";
   let filetoload = document.getElementById(options.selectors.inputname);
@@ -134,9 +135,24 @@ export function JsImport(container, options = {}) {
       jsDirList = new JsDirList(displayselection, {
         url: url.dirlist,
       });
+      // Import browses "My files" read-only: no create/remove/move/rename
+      // toolbar. JsDirList guards every toolbar call with `if (this.entrycontrols)`
+      // so nulling it here disables the toolbar without touching EntryControls.
+      jsDirList.entrycontrols = null;
       addImportControls(jsDirList, jsDirList.uuid, null, [], true);
       const detachcallback=function() {deSelect();showSubmit(false);}
       jsDirList.detachcallback=detachcallback;
+      // Keep the import tree in sync with changes made to the server files
+      // elsewhere - typically the "My files" manager opened in a modal
+      // (create / delete / rename / move a directory, or an upload). Those paths
+      // emit 'filesmutated' on the shared bus (js-dirlist.js fetchAction and
+      // js-my-files.js upload "ready"). Registered once, inside this guard.
+      ModuleEventEmitter.on(eventnames.filesmutated, async () => {
+        if (!jsDirList || !jsDirList.root) return;
+        await jsDirList.root.list();
+        jsDirList.root.setOpen(true);
+        if (typeimport) apply_filters();
+      });
       container.querySelectorAll('[data-import]').forEach(async (item) => {
         item.dataset.request = item.dataset.import;
         await ActivRequest.makeRequest(item);
@@ -181,9 +197,6 @@ export function JsImport(container, options = {}) {
     const btn = create_box('span', {
       class: ['control-select', 'import-toggle']
     }, entry.container);
-    create_box('i', {
-      class: ['icon', 'icon-check']
-    }, btn);
     entry.importButton = btn;
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -263,9 +276,8 @@ export function JsImport(container, options = {}) {
 
     if (multiselect) {
       // Each file/directory line gets its own persistent checkbox-like
-      // toggle button, independent from the shared entrycontrols toolbar
-      // (create/remove/move/rename) that only ever displays for one entry
-      // at a time.
+      // toggle button (attachImportToggle). The dirlist toolbar is disabled
+      // by the caller (jsDirList.entrycontrols = null).
       const allowed = (typentries) ? typentries : [entryTypes.branch, entryTypes.node];
       entrylist.root.options.onEntryCreated = (entry) => {
         if (allowed.indexOf(entry.type) < 0) return;
