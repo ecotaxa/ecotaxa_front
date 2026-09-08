@@ -187,7 +187,7 @@ export function JsTree(parent, options = {}) {
                 console.log('errordrop ', error)
                 dragentry.unMove();
               }
-            } else console.log('noactionon drop');
+            } else console.log('noaction on drop');
 
           } else console.log(' parent===null or dragitem===null or dragitem===parent', dragentry)
 
@@ -196,7 +196,7 @@ export function JsTree(parent, options = {}) {
            if (options.actions && options.actions.select) options.actions.select(entry);
           else {
             const droptarget = (options.droptarget) ? document.getElementById(options.droptarget) : null;
-            if (!droptarget) console.log('no-target');
+            if (!droptarget) console.log('no-target',options);
             else {
               if (droptarget.tomselect) {
                 const ts = droptarget.tomselect;

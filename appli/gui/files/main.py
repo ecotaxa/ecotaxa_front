@@ -1,5 +1,5 @@
 from flask_login import login_required
-from appli import app, gvp
+from appli import app, gvp, gvpm
 from appli.gui.commontools import make_response
 
 
@@ -45,6 +45,21 @@ def gui_files_remove() -> dict:
 
     ret = remove_dir_file(entry)
     return make_response(200, str(ret))
+
+
+@app.route("/gui/files/import/stage", methods=["POST"])
+@login_required
+def gui_files_import_stage() -> dict:
+    projid = gvp("projid", "")
+    entries = gvpm("entries")
+    if projid == "" or not entries:
+        return make_response(422, "")
+    from appli.gui.files.tools import stage_import_sources
+
+    ret = stage_import_sources(int(projid), entries)
+    if "error" in ret:
+        return make_response(422, ret)
+    return make_response(200, ret)
 
 
 @app.route("/gui/files/rename", methods=["POST"])

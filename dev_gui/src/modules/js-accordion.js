@@ -51,7 +51,7 @@ function createJsAccordion() {
       if (currentitem === null || currentitem.element !== element) currentitem = setItem(element, summary, content);
       onClick(e);
     });
-
+    if (element.dataset.hasOwnProperty("open")) { summary.click();}
     function isOpen(current = currentitem) {
       return (element.tagName.toLowerCase() === 'details') ? element.open : ((content.classList.contains(css.hide)) ? false : true);
     }

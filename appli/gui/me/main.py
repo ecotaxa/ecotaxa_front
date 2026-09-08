@@ -1,6 +1,6 @@
 from flask import request, url_for, render_template, redirect, flash
 from flask_login import current_user, login_required
-from appli import app, gvp
+from appli import app, gvp,gvg
 from appli.gui.commontools import is_partial_request
 from appli.gui.staticlistes import py_user
 from appli.back_config import get_user_constants
@@ -20,7 +20,8 @@ def gui_me():
 @app.route("/gui/me/files", methods=["GET"])
 @login_required
 def gui_me_files() -> str:
-    return render_template("/v2/my_files/list.html")
+    dirlist_id=gvg('dirlist','upload_dirlist')
+    return render_template("/v2/my_files/list.html",dirlist_id=dirlist_id,partial=is_partial_request())
 
 
 @app.route("/gui/me/upload", methods=["GET"])

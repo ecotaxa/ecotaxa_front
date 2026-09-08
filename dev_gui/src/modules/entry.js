@@ -109,6 +109,7 @@ export class Entry {
     this.container = el;
     this.loaded = this.container.dataset.loaded = false;
     this.initEvents();
+    if (typeof this.options.onEntryCreated === 'function') this.options.onEntryCreated(this);
   }
   initEvents() {this.addListeners();}
   getParent() {
@@ -128,7 +129,7 @@ export class Entry {
     let entries = this.container.querySelector(this.options.selectors.entries);
     if (create && entries === null) {
       return create_box(this.options.tags.tag, {
-        class: this.options.selectors.entries.substr(1)
+        class: this.options.selectors.entries.slice(1)
       }, this.container);
     }
     return entries;
@@ -554,7 +555,7 @@ export function EntryControls(container = document, options = {}) {
 
   function detachControls() {
     if (activentry === null) return;
-    activentry.container.classList.remove(options.selectors.hascontrols.substr(1));
+    activentry.container.classList.remove(options.selectors.hascontrols.slice(1));
     box.classList.add(css.hide);
     box.disabled = true;
     container.append(box);
@@ -566,7 +567,7 @@ export function EntryControls(container = document, options = {}) {
     detachControls();
     activentry = entry;
     activentry.container.prepend(box);
-    activentry.container.classList.add(options.selectors.hascontrols.substr(1));
+    activentry.container.classList.add(options.selectors.hascontrols.slice(1));
     activateControls();
     box.classList.remove(css.hide);
     delete box.disabled;

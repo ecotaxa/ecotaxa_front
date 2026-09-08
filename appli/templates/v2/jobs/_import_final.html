@@ -1,3 +1,11 @@
 <em class="mb-2 block">{{_('Data correctly imported from ')}} {{source_path}}</em>
+{% if original_sources %}
+<div class="mb-4">
+  <em class="block mb-1">{{_('Real (original) location of the imported files/directories in My Files:')}}</em>
+  <ul class="list-disc pl-6">
+    {% for src in original_sources %}<li>{{src.original}}</li>{% endfor %}
+  </ul>
+</div>
+{% endif %}
 <a href="{{url_for("gui_prj_classify", projid=projid)}}" class="button is-primary">{{_('Go to Manual Classification Screen')}}</a>
 <a href="{{url_for("jobCreate", job_type="Prediction", projid=projid)}}" class="button is-primary">{{_('Go to Automatic Classification Screen')}}</a>

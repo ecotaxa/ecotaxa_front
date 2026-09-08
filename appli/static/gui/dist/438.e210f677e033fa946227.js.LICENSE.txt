@@ -1,13 +1,3 @@
-/*! ../../modules/alert-box.js */
-
-/*! ../../modules/entry.js */
-
-/*! ../../modules/module-event-emitter.js */
-
-/*! ../../modules/modules-config.js */
-
-/*! ../../modules/utils.js */
-
 /*! ../modules/alert-box.js */
 
 /*! ../modules/module-event-emitter.js */

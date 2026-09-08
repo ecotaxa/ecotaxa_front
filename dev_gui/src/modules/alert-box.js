@@ -143,7 +143,7 @@ async function createAlertBox() {
     let showall = `<div class="showall hide" data-title="${i18nmessages.viewfull}"><i class="icon iconview"></i></div>`;
     if (message.type === alertconfig.types.confirm) {
       buttons = (options.buttons) ? options.buttons : null;
-      buttons = `${showall}<div class="btn-group flex justify-end max-w-full"><button class="button text-base ${alertconfig.domselectors.buttons.ok.substr(1)}"  value=true>${(options.buttons && options.buttons.ok && options.buttons.ok.text)?options.buttons.ok.text:i18nmessages.ok}</button><button class="button ${alertconfig.domselectors.buttons.cancel.substr(1)} text-base"  value=false>${(options.buttons && options.buttons.cancel && options.buttons.cancel.text)?options.buttons.cancel.text:i18nmessages.cancel}</button></div>`;
+      buttons = `${showall}<div class="btn-group flex justify-end max-w-full"><button class="button text-base ${alertconfig.domselectors.buttons.ok.slice(1)}"  value=true>${(options.buttons && options.buttons.ok && options.buttons.ok.text)?options.buttons.ok.text:i18nmessages.ok}</button><button class="button ${alertconfig.domselectors.buttons.cancel.slice(1)} text-base"  value=false>${(options.buttons && options.buttons.cancel && options.buttons.cancel.text)?options.buttons.cancel.text:i18nmessages.cancel}</button></div>`;
       showall = ``;
     }
     let html = `<div class="content"><div class="signal hidden sm:block"><i class="icon"></i></div><div class="message"><strong class="type">${(i18nmessages.alerttype && i18nmessages.alerttype[message.type])?i18nmessages.alerttype[message.type]:message.type}</strong>${decodeURIComponent((i18nmessages[message.content]) ? i18nmessages[message.content] : message.content)} ${buttons}</div>`;
@@ -201,7 +201,7 @@ async function createAlertBox() {
         let responsebox = box.querySelector(alertconfig.domselectors.message);
         if (!responsebox) {
           responsebox = create_box('div', {
-            class: alertconfig.domselectors.message.substr(1)
+            class: alertconfig.domselectors.message.slice(1)
           }, responsebox);
 
         }
@@ -242,13 +242,13 @@ async function createAlertBox() {
   }
 
   function messagesContainer() {
-    let item = document.getElementById(alertconfig.domselectors.alertmessages.substr(1));
+    let item = document.getElementById(alertconfig.domselectors.alertmessages.slice(1));
     if (item === null) {
       item = create_box('div', {
-        class: alertconfig.domselectors.alertmessages.substr(1)
+        class: alertconfig.domselectors.alertmessages.slice(1)
       }, document.body);
       const container = create_box('div', {
-        class: alertconfig.domselectors.messageslist.substr(1)
+        class: alertconfig.domselectors.messageslist.slice(1)
       }, item);
     }
     messages_container = (!messages_container) ? item.querySelector(alertconfig.domselectors.messageslist) : messages_container;
@@ -264,7 +264,7 @@ async function createAlertBox() {
   }
 
   function alertMessage(box, attach = false) {
-    box.classList.add(alertconfig.domselectors.alertmessage.substr(1));
+    box.classList.add(alertconfig.domselectors.alertmessage.slice(1));
     const message = box.querySelector(alertconfig.domselectors.message);
     if (message === null) return;
     if (attach === true) {

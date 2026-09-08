@@ -1,4 +1,3 @@
-import DOMPurify from 'dompurify';
 import {
   ActivRequest
 } from "../modules/activ-request.js";
@@ -9,6 +8,7 @@ import {
 } from '../modules/utils.js';
 import {
   css,
+  filter_files,
 } from '../modules/modules-config.js';
 import {
   ModuleEventEmitter
@@ -16,6 +16,9 @@ import {
 import {
   entryTypes,
 } from '../modules/entry.js';
+import {
+  AlertBox
+} from '../modules/alert-box.js';
 css.displayimport = 'displayimport';
 export function JsImport(container, options = {}) {
   const defaultOptions = {
@@ -28,12 +31,15 @@ export function JsImport(container, options = {}) {
     },
     url: {
       import: "gui/import",
-      dirlist: "gui/files"
+      dirlist: "gui/files",
+      stageimport: "gui/files/import/stage"
     },
     browse: ['directory', 'file'],
-    textimport: 'to import'
+    textimport: 'import'
   };
-  let selected=null;
+  let selected = null;
+  // Multiple files/directories selected in the "My files" tree, keyed by their path.
+  let multiSelected = new Map();
   container = (container instanceof HTMLElement) ? container : document.querySelector(container);
   if (!container) return;
   options = { ...defaultOptions,
@@ -42,15 +48,17 @@ export function JsImport(container, options = {}) {
   let url = {};
   url.dirlist = (container.dataset.dirlist) ? container.dataset.dirlist : options.url.dirlist;
   url.import = (container.dataset.import) ? container.dataset.import : options.url.import;
+  url.stageimport = (container.dataset.stageimport) ? container.dataset.stageimport : options.url.stageimport;
   options.selectors.importzoneid = (container.dataset.importzoneid) ? container.dataset.importzoneid : options.selectors.importzoneid;
   options.browse = (container.dataset.browse) ? container.dataset.browse.split(',') : options.browse;
   options.textimport = (container.dataset.textimport) ? container.dataset.textimport : options.textimport;
   const submitbtn = container.querySelector('[type="submit"]');
   let typeimport;
-  let myFiles;
+  let jsDirList;
   let eventnames = {
     import: 'import',
     select: 'select',
+    filesmutated: 'filesmutated',
   };
   let importliste = "";
   let filetoload = document.getElementById(options.selectors.inputname);
@@ -111,40 +119,40 @@ export function JsImport(container, options = {}) {
   }
   async function showSelection(refresh = false) {
     const apply_filters = () => {
-      let filters = typeimport.split('-');
-      filters = filters.map(filter => {
-        return new Set([...(filter_files[filter] ? filter_files[filter] : [])]);
-      });
-      myFiles.container.querySelectorAll('[data-ftype]').forEach(entry => {
-        if (filters.has(entry.dataset.ftype)) entry.classList.remove('disabled');
+      const filters = typeimport.split('-');
+      const allowed = new Set(filters.flatMap(filter => filter_files[filter] ? filter_files[filter].split(',').map(ext => ext.trim()) : []));
+      jsDirList.container.querySelectorAll('[data-ftype]').forEach(entry => {
+        if (allowed.has(entry.dataset.ftype)) entry.classList.remove('disabled');
         else entry.classList.add('disabled');
       });
     }
     const displayselection = document.getElementById(options.selectors.sourcezone);
     if (!displayselection) return;
-    if (!myFiles) {
+    if (!jsDirList) {
       const {
-        JsMyFiles
-      } = await import('../modules/js-my-files.js');
-      myFiles = new JsMyFiles(displayselection, {
-        import: url.toimport,
+        JsDirList
+      } = await import('../modules/files/js-dirlist.js');
+      jsDirList = new JsDirList(displayselection, {
         url: url.dirlist,
-        browse: options.browse,
-        upload: {
-          label: (displayselection.dataset.uploadlabel) ? (displayselection.dataset.uploadlabel) : 'upload',
-          callback: () => {
-            showSubmit(false);
-          }
-        }
       });
-       myFiles.eventnames.clearother='clearother';
-        ModuleEventEmitter.on(myFiles.eventnames.clearother, (e) => {deSelect();},myFiles.uuid);
-      ModuleEventEmitter.on(eventnames.select, (e) => {
-        myFiles.detachDropzone();
-      }, myFiles.uuid);
-      addImportControls(myFiles.jsDirList, myFiles.uuid);
+      // Import browses "My files" read-only: no create/remove/move/rename
+      // toolbar. JsDirList guards every toolbar call with `if (this.entrycontrols)`
+      // so nulling it here disables the toolbar without touching EntryControls.
+      jsDirList.entrycontrols = null;
+      addImportControls(jsDirList, jsDirList.uuid, null, [], true);
       const detachcallback=function() {deSelect();showSubmit(false);}
-      myFiles.jsDirList.detachcallback=detachcallback;
+      jsDirList.detachcallback=detachcallback;
+      // Keep the import tree in sync with changes made to the server files
+      // elsewhere - typically the "My files" manager opened in a modal
+      // (create / delete / rename / move a directory, or an upload). Those paths
+      // emit 'filesmutated' on the shared bus (js-dirlist.js fetchAction and
+      // js-my-files.js upload "ready"). Registered once, inside this guard.
+      ModuleEventEmitter.on(eventnames.filesmutated, async () => {
+        if (!jsDirList || !jsDirList.root) return;
+        await jsDirList.root.list();
+        jsDirList.root.setOpen(true);
+        if (typeimport) apply_filters();
+      });
       container.querySelectorAll('[data-import]').forEach(async (item) => {
         item.dataset.request = item.dataset.import;
         await ActivRequest.makeRequest(item);
@@ -176,6 +184,81 @@ export function JsImport(container, options = {}) {
   }
   function deSelect() {
   if(selected!==null) {selected.setSelected(false);selected.active=true;selected.emitEvent();selected=null;}
+  if(multiSelected.size>0) {
+    multiSelected.forEach(entry => {
+      if (entry.importButton) entry.importButton.classList.remove('is-selected');
+    });
+    multiSelected.clear();
+    showSubmit(false);
+  }
+  }
+
+  function attachImportToggle(entry) {
+    const btn = create_box('span', {
+      class: ['control-select', 'import-toggle']
+    }, entry.container);
+    entry.importButton = btn;
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      toggleMultiSelect(entry);
+    });
+  }
+
+  // Set/clear the selection of a single entry (map membership + button style).
+  function setSelectedState(entry, selected) {
+    const key = entry.getCurrentPath().join(dirseparator);
+    if (selected) multiSelected.set(key, entry);
+    else multiSelected.delete(key);
+    if (entry.importButton) entry.importButton.classList.toggle('is-selected', selected);
+  }
+
+  // Walk every already-loaded descendant entry (files never have .entries).
+  function eachDescendant(entry, fn) {
+    if (!Array.isArray(entry.entries) || entry.entries.length === 0) return;
+    entry.entries.forEach(child => {
+      if (!child) return;
+      if (child.importButton) fn(child);
+      eachDescendant(child, fn);
+    });
+  }
+
+  // Walk every ancestor folder up to (but excluding) the untoggleable root.
+  function eachAncestor(entry, fn) {
+    let parent = entry.getParent();
+    while (parent) {
+      if (parent.importButton) fn(parent);
+      parent = parent.getParent();
+    }
+  }
+
+  // True when an ancestor folder is currently selected.
+  function hasSelectedAncestor(entry) {
+    let parent = entry.getParent();
+    while (parent) {
+      if (multiSelected.has(parent.getCurrentPath().join(dirseparator))) return true;
+      parent = parent.getParent();
+    }
+    return false;
+  }
+
+  function toggleMultiSelect(entry) {
+    const key = entry.getCurrentPath().join(dirseparator);
+    const willSelect = !multiSelected.has(key);
+
+    setSelectedState(entry, willSelect);
+
+    const isBranch = [entryTypes.branch, entryTypes.root].indexOf(entry.type) >= 0;
+    if (isBranch) {
+      // Ticking/unticking a folder cascades to every loaded child.
+      eachDescendant(entry, (child) => setSelectedState(child, willSelect));
+    }
+    if (!willSelect) {
+      // Unticking anything bubbles up: an ancestor folder can no longer
+      // claim that all of its contents are selected. Ticked siblings stay.
+      eachAncestor(entry, (ancestor) => setSelectedState(ancestor, false));
+    }
+    showSubmit(multiSelected.size > 0);
   }
   function addImportPath(value) {
     document.getElementById(options.selector.importzone).value = value;
@@ -189,7 +272,22 @@ export function JsImport(container, options = {}) {
     showSubmit();
   }
 
-  function addImportControls(entrylist, uploaduuid, typentries = null,exclude=[]) {
+  function addImportControls(entrylist, uploaduuid, typentries = null,exclude=[],multiselect=false) {
+
+    if (multiselect) {
+      // Each file/directory line gets its own persistent checkbox-like
+      // toggle button (attachImportToggle). The dirlist toolbar is disabled
+      // by the caller (jsDirList.entrycontrols = null).
+      const allowed = (typentries) ? typentries : [entryTypes.branch, entryTypes.node];
+      entrylist.root.options.onEntryCreated = (entry) => {
+        if (allowed.indexOf(entry.type) < 0) return;
+        if (exclude.indexOf(entry.name) >= 0) return;
+        attachImportToggle(entry);
+        // A child loaded (lazily) under an already-ticked folder inherits the tick.
+        if (hasSelectedAncestor(entry)) setSelectedState(entry, true);
+      };
+      return;
+    }
 
     function add_remove_import(e) {
         if (selected) {
@@ -214,7 +312,7 @@ export function JsImport(container, options = {}) {
         class:["control-select"],
         exclude:exclude,
         typentries: (typentries) ? typentries : [entryTypes.branch,entryTypes.node],
-        text: (options.toselect)?(options.toselect):'select to import',
+        text: (options.toselect)?(options.toselect):'import',
         callback: add_remove_import
       }
     };
@@ -225,8 +323,8 @@ export function JsImport(container, options = {}) {
         value: false
       }, uploaduuid);
     }
-   entrylist.entrycontrols.options.controls = { ...control,
-      ...entrylist.entrycontrols.options.controls,
+   entrylist.entrycontrols.options.controls = { ...entrylist.entrycontrols.options.controls,
+      ...control,
 
     };
 
@@ -242,7 +340,38 @@ export function JsImport(container, options = {}) {
     } else submit.disabled = true;
   }
 
-  function processImport() {
+  async function processImport() {
+    if (multiSelected.size > 0) {
+      const formdata = new FormData();
+      const projid = document.getElementById('projid');
+      formdata.append('projid', (projid) ? projid.value : '');
+      multiSelected.forEach((entry, key) => {
+        // Use the map key: a subtree wiped by removeEntries() can leave an
+        // entry whose parent chain (and thus getCurrentPath()) is stale.
+        formdata.append('entries', key);
+      });
+      const json = await fetch(url.stageimport, fetchSettings({
+        method: 'POST',
+        body: formdata,
+      })).then(response => response.json()).catch(err => {
+        AlertBox.addAlert({
+          type: AlertBox.alertconfig.types.danger,
+          content: err.status ? `${err.status} ${err.statusText}` : err,
+          dismissible: false,
+        });
+        return null;
+      });
+      if (!json || json.status !== 200 || !json.message || !json.message.source_path) {
+        AlertBox.addAlert({
+          type: AlertBox.alertconfig.types.danger,
+          content: 'Unable to prepare the selected files/directories for import.',
+          dismissible: true,
+        });
+        return false;
+      }
+      filetoload.value = json.message.source_path;
+      return true;
+    }
     if (filetoload.value === "") {
       alert('nothing to upload');
       return false;

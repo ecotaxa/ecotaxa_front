@@ -11,6 +11,7 @@ import {
 from '../../modules/utils.js';
 import {
   css,
+  filter_files,
 } from '../../modules/modules-config.js';
 import {
   AlertBox
@@ -24,10 +25,6 @@ import {
   Entry,
   EntryControls
 } from '../../modules/entry.js';
-const filter_files = {
-  images: "png,jpeg,jpg,gif",
-  tsv: "txt,tsv,zip, gzip,gz"
-}
 // local css
 css.intrash = 'intrash';
 // original types
@@ -205,6 +202,9 @@ function EntryAction(args, options) {
     const json = await response.json();
     if (response.status === 200) {
       if (callback) callback(json.message);
+      // notify any other file tree on the page (e.g. the import list while the
+      // "My files" manager is open in a modal) that the server tree changed.
+      ModuleEventEmitter.emit('filesmutated', { action: action });
       return true;
     } else {
       if (callback_error) {
@@ -443,7 +443,7 @@ export class JsDirList {
       this.options.entry.url = this.options.url;
       this.container = create_box(
         this.options.entry.tags.tag, {
-          class: this.options.selectors.dirlist.substr(1)
+          class: this.options.selectors.dirlist.slice(1)
         }, parent);
       // unique id to communicate ModuleEventEmitter
       this.uuid = generate_uuid();

@@ -233,6 +233,7 @@ function stop_on_error(message, callback = null) {
   throw new Error(message);
 }
 function decodeURIComponentSafe(uri, mod) {
+    if (uri===undefined) return "";
     var out = new String(),
         arr,
         i = 0,

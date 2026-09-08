@@ -254,12 +254,14 @@ li:not(.on) ul.entries {@apply hidden}
 .display-progression {@apply flex sm:flex-row border border-secondblue-100 drop-shadow-sm p-2 mb-2}
 .counters, .sizes {@apply p-2 rounded-sm text-sm  my-1 w-auto w-1/2 inline-block }
 .counters span, .sizes span {@apply font-normal}
-/*js import */
-#dropzone {@apply w-auto min-w-[50%] inline-block small-caps font-light}
-#dropzone .trigger {@apply  before:mr-0 small-caps text-black bg-stone-50 py-0.5 px-1.5 mr-3 w-6 overflow-x-hidden rounded drop-shadow hover:bg-secondblue-200 hover:drop-shadow-none before:p-0.5 before:icon }
+/*js import - upload dropzone */
+#dropzone {@apply relative flex flex-col items-center justify-center gap-3 w-full h-full min-h-[200px] p-6 text-center rounded-lg border-2 border-dashed border-stone-300 bg-stone-50 text-stone-500 cursor-pointer transition-colors duration-200 hover:border-mainblue-400 hover:bg-mainblue-50}
+#dropzone.dragover {@apply border-solid border-mainblue-600 bg-mainblue-100 text-mainblue-800 drop-shadow}
+#dropzone .dropzone-title {@apply flex flex-col items-center gap-1.5 text-base font-semibold text-stone-700 before:icon before:h-9 before:w-9 before:icon-arrow-up-tray before:opacity-60}
+#dropzone.dragover .dropzone-title {@apply text-mainblue-800 before:opacity-90}
+#dropzone .trigger {@apply inline-flex items-center justify-center gap-1.5 w-full max-w-[15rem] font-btn text-sm font-medium text-mainblue-700 bg-white border border-stone-200 rounded-md px-3 py-1.5 shadow-sm whitespace-nowrap overflow-hidden text-ellipsis transition-colors hover:bg-mainblue-700 hover:text-white hover:border-mainblue-700 hover:shadow-none before:icon before:p-0.5 before:mr-0 before:opacity-70}
 #dropzone .trigger[data-type="directory"]  {@apply before:icon-arrow-up-tray }
 #dropzone .trigger[data-type="file"]  {@apply before:icon-arrow-up-square}
-#dropzone span:not(.trigger) {@apply text-ellipsis w-8 overflow-x-hidden hover:overflow-x-auto}
 .displayimport {@apply  border border-secondblue-200 rounded  text-base font-normal w-full h-auto min-h-8 px-2 py-1 overflow-y-visible hover:bg-secondblue-50 }
 .displayimport.active {@apply  bg-success-50}
 .displayimport li {@apply relative}
@@ -298,14 +300,19 @@ tr.disabled {@apply opacity-70}
 .on .entryN , .entryN {@apply  text-sm font-light}
 .entries [data-name$=".tsv"] .entryN {@apply font-normal}
 /* entry selected */
-.selected > .entryB, .selected > .entryN {@apply font-semibold  after:content-[attr(data-selected)] after:small-caps after:text-sm after:absolute after:top-0 after:bg-secondblue-400 after:text-stone-50 after:right-0 after:py-0 after:px-2 after:h-7 after:max-h-7 after:rounded-sm}
+.selected > .entryB, .selected > .entryN {@apply font-semibold  after:flex after:items-center after:gap-1 after:small-caps after:text-sm after:absolute after:top-0 after:bg-secondblue-400 after:text-stone-50 after:right-0 after:py-0 after:px-2 after:h-7 after:max-h-7 after:rounded-sm}
+.selected > .entryB::after, .selected > .entryN::after {content:url("data:image/svg+xml; utf8, <svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 20 20' fill='white'><path fill-rule='evenodd' d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z' clip-rule='evenodd' /></svg>") attr(data-selected)}
 .selected .entries  {@apply hidden}
 .folders .wait > .entryB, .folders .wait > .entryD,
  .folders .wait > .entryR {@apply after:mr-1 after:p-0.5 after:icon after:icon-arrow-path-sm}
 .entries .editable {@apply font-normal border border-stone-300 border-dashed text-ellipsis min-w-[3rem] outline-transparent outline-none before:pl-0 after:pr-2 pl-2 bg-white}
 .entrycontrols {@apply text-sm  w-auto  mr-1 inline-block float-right relative}
-.entrycontrols span {@apply mr-1 sm:mr-1.5 rounded-full h-7 w-7 max-h-7 p-0.5 bg-transparent hover:bg-white cursor-pointer  static}
-.entrycontrols span.control-select , .control-select {@apply text-sm small-caps bg-stone-700 font-semibold hover:bg-secondblue-400 h-5 max-h-5 text-stone-50 drop-shadow-sm hover:drop-shadow-none rounded-sm p-1}
+/* overflow-hidden + align-baseline puts the box's baseline at its bottom edge,
+   so the box bottom lines up with the file-name text baseline. */
+.control-select.import-toggle {@apply inline-block overflow-hidden align-baseline text-center leading-4 cursor-pointer bg-stone-200 hover:bg-stone-300 font-semibold text-xs text-stone-200 hover:text-stone-600 before:content-["\2713"] w-4 h-4 max-h-4 rounded-sm ml-4 }
+.control-select.import-toggle.is-selected {@apply  bg-transparent text-secondblue-500 before:content-["\2713"]}
+/* highlight the whole entry row while its select toggle is on */
+.folders [data-name]:has(> .control-select.is-selected) {@apply text-secondblue-600}
 .intrash {@apply bg-danger-100}
 
 /* form with tabs */

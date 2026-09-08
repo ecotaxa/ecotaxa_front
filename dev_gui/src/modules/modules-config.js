@@ -27,6 +27,7 @@ export const models = {
   commonserver: 'commonserver',
   organisation: 'organisation',
   renamingrules: 'renamingrules',
+  files: 'files',
   formulae: 'formulae'
 };
 

@@ -114,7 +114,7 @@ function createJsTomSelect() {
         document.body.classList.add(css.hidevscroll);
         const popup =create_box("div", {class:["absolute","z-[100]","bg-white","w-96","h-48","p-8","rounded","drop-shadow","centered"],src:personurl},parent);
         parent.disabled=true;
-        const close=create_box("div",{class:[domselectors.close.substr(1)],text:"x"},popup);
+        const close=create_box("div",{class:[domselectors.close.slice(1)],text:"x"},popup);
         const content=create_box("div",{class:["h-full","w-full"]},popup);
         close.addEventListener('click', (e)=> {popup.remove();delete parent.disabled;  document.body.classList.remove(css.hidevscroll); });
         content.insertAdjacentHTML('afterbegin',reply);
@@ -353,7 +353,7 @@ function createJsTomSelect() {
           // add optgroup
           const optgroup = (el.hasOwnProperty('optgroup')) ? `data-optgroup=${el.optgroup}` : ``;
           const label = _get_label(el, option.settings.labelField);
-          const itemprefix =(this.settings.itemprefix  && el[this.settings.valueField].length>this.settings.itemprefix.length)?((el[this.settings.valueField].substr(0,this.settings.itemprefix.length)===this.settings.itemprefix)?this.settings.itemprefix.replace('_',''):""):"";
+          const itemprefix =(this.settings.itemprefix  && el[this.settings.valueField].length>this.settings.itemprefix.length)?((el[this.settings.valueField].slice(0,this.settings.itemprefix.length)===this.settings.itemprefix)?this.settings.itemprefix.replace('_',''):""):"";
           return `<div class="py-2 flex  ${ ((multiple)?'inline-flex':'') } ${itemprefix}  ${((el.status && el.status=='D')?'deprecated':'')} " ${optgroup}  data-value="${el[option.settings.valueField]}">${ escape(label) }</div>`;
         },
         item: function(el, escape) {
@@ -362,7 +362,7 @@ function createJsTomSelect() {
           const inlist = (users_list!==null && users_list[el[this.settings.valueField]]) ? `data-inlist` : ``;
           const cancel = ``;
           const label = _get_label(el, option.settings.labelField, true);
-          const itemprefix =(this.settings.itemprefix && el[this.settings.valueField].length>this.settings.itemprefix.length)?((el[this.settings.valueField].substr(0,this.settings.itemprefix.length)===this.settings.itemprefix)?this.settings.itemprefix.replace('_',''):""):"";
+          const itemprefix =(this.settings.itemprefix && el[this.settings.valueField].length>this.settings.itemprefix.length)?((el[this.settings.valueField].slice(0,this.settings.itemprefix.length)===this.settings.itemprefix)?this.settings.itemprefix.replace('_',''):""):"";
           return DOMPurify.sanitize(`<div class="${((multiple) ? `flex inline-flex ` : ``) } ${itemprefix} ${optgroup} ${((el.status && el.status=='D')?'deprecated':'')}" data-value="${el[this.settings.valueField]}" ${inlist}>${ escape(label) } ${ cancel }</div>`);
         },
         no_results: function(data, escape) {
