@@ -223,7 +223,7 @@ export function JsImport(container, options = {}) {
     });
   }
 
-  // Walk every ancestor folder up to (but excluding) the untoggleable root.
+  // Walk every ancestor folder up to and including the root.
   function eachAncestor(entry, fn) {
     let parent = entry.getParent();
     while (parent) {
@@ -282,10 +282,22 @@ export function JsImport(container, options = {}) {
       entrylist.root.options.onEntryCreated = (entry) => {
         if (allowed.indexOf(entry.type) < 0) return;
         if (exclude.indexOf(entry.name) >= 0) return;
+        // Never offer the trash directory, nor anything inside it, for import.
+        // (branches inside trash are already retyped to 'discarded' above, but
+        //  files keep their 'node' type, so guard explicitly.)
+        if ((entry.isTrashDir && entry.isTrashDir()) ||
+          (entry.isInTrash && entry.isInTrash())) return;
         attachImportToggle(entry);
         // A child loaded (lazily) under an already-ticked folder inherits the tick.
         if (hasSelectedAncestor(entry)) setSelectedState(entry, true);
       };
+      // The root ("My files") directory is built before onEntryCreated is set,
+      // so give it the same toggle explicitly: ticking it cascades to every
+      // loaded child, exactly like any other directory.
+      if (entrylist.root && !entrylist.root.importButton &&
+        exclude.indexOf(entrylist.root.name) < 0) {
+        attachImportToggle(entrylist.root);
+      }
       return;
     }
 

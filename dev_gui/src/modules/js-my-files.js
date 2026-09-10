@@ -22,8 +22,10 @@ import {
   ModuleEventEmitter
 } from '../modules/module-event-emitter.js';
 const accept = Object.values(objaccept).reduce((a, b) => a.concat(b));
-css.button = 'button p-1 mx-auto sm:mr-4 mb-4';
+css.button = 'button is-action self-start my-1';
 css.inline = 'inline-block';
+// collapsible progression boxes, in display order
+const BOX_ORDER = ['zipped', 'rejected', 'errorfile'];
 export class JsMyFiles {
   done = true;
   jsDirToZip = null;
@@ -38,6 +40,7 @@ export class JsMyFiles {
   };
   rejected = [];
   errorfile = [];
+  zipped = [];
   listener;
   constructor(container, options = {}) {
     if (!container.jsmyfiles) {
@@ -146,6 +149,7 @@ export class JsMyFiles {
                 name: 'reject',
                 path: e.path,
               });
+              this.updateExceptCounters();
               break;
             case this.eventnames.progress:
               self.showControl(key, e);
@@ -177,6 +181,8 @@ export class JsMyFiles {
                   });
                   break;
                 case this.eventnames.errorfile:
+                    if (e.path) this.errorfile.push(e.path);
+                    this.updateExceptCounters();
                     self.showControl(e.name, e);
                     e.name=AlertBox.alertconfig.types.error;
                     e.message+=(e.path)?' '+e.path:'';
@@ -236,11 +242,40 @@ export class JsMyFiles {
   scanHandle(dir, options) {
     return this.jsDirToZip.scanHandle(dir, options);
   }
+  uploadBusy() {
+    // an upload is actually being sent: no more files can join the archive
+    if (this.done === false) {
+      AlertBox.addAlert({
+        type: AlertBox.alertconfig.types.info,
+        content: 'Upload in progress — wait until it finishes before adding more files.',
+        dismissible: true,
+        inverse: false
+      });
+      return true;
+    }
+    return false;
+  }
   async handleBrowse(e) {
+    if (this.uploadBusy()) return;
     if (!this.setUploadEntry()) return;
     this.initTimer();
     this.toggleCounters(true);
+    this.updateExceptCounters();
     if (!this.haspicker) e = e.target.files;
+    const picks = (e instanceof FileList) ? [...e] : (Array.isArray(e) ? e : [e]);
+    const seen = new Set();
+    const named = [];
+    picks.forEach((it) => {
+      const rel = it.webkitRelativePath || '';
+      const name = rel ? rel.split(dirseparator)[0] : it.name;
+      if (!name || seen.has(name)) return;
+      seen.add(name);
+      named.push({
+        name: name,
+        isDir: (it.kind === 'directory') || rel.includes(dirseparator)
+      });
+    });
+    this.addDroppedNames(named);
     await this.scanBrowse(e, {
       accept: accept,
     });
@@ -293,53 +328,121 @@ export class JsMyFiles {
       });
     });
 
-    const divdrop = create_box('div', {
-      text: this.container.dataset.textdrop
-    }, this.dropzone);
-    const browselink = create_box('a', {
-    text:this.container.dataset.textbrowse,class:'modal', divdrop})
-    this.addDisplayProgression(this.dropzone);
+    // progression / counters / upload button live right below the dropzone,
+    // outside of it
+    this.addDisplayProgression(this.dropzone.parentElement || this.container);
+    this.dropzone.insertAdjacentElement('afterend', this.displayprogression);
+
+    // the native directory picker only takes one folder at a time - a persistent
+    // console-style note right under the dropzone points the user at drag & drop
+    // for several
+    const dirhint = create_box('div', {
+      class: [css.console, 'flex', 'items-start', 'gap-1.5'],
+      dataset: {
+        role: 'dir-hint'
+      }
+    });
+    create_box('i', {
+      class: ['icon', 'icon-info', 'shrink-0']
+    }, dirhint);
+    create_box('span', {
+      text: this.container.dataset.textbrowsedirectoryhint ||
+        'To add several directories at once, drag & drop them onto the zone.'
+    }, dirhint);
+    this.dropzone.insertAdjacentElement('afterend', dirhint);
+
     this.droptarget=(this.options.upload.droptarget)?this.dropzone:null;
   }
 
+  // entries still being zipped: light, shown inside the dropzone
+  droppedNamesBox() {
+    if (!this.droppedbox || !this.droppedbox.isConnected) {
+      this.droppedbox = this.dropzone.querySelector('.dropzone-files')
+        || create_box('div', {
+          class: 'dropzone-files'
+        }, this.dropzone);
+    }
+    return this.droppedbox;
+  }
+  addDroppedNames(items) {
+    if (!items || !items.length) return;
+    const box = this.droppedNamesBox();
+    items.forEach(({
+      name,
+      isDir
+    }) => {
+      if (!name) return;
+      const chip = create_box('span', {
+        class: ['dropzone-file', 'zipping'],
+        dataset: {
+          type: isDir ? 'dir' : 'file'
+        },
+        title: name
+      }, box);
+      create_box('span', {
+        class: 'dropzone-file-name',
+        text: name
+      }, chip);
+    });
+  }
+  // the archive is done: record the entries that were being zipped and drop
+  // their live chips from the dropzone (they are shown on demand from the
+  // "compressed" counter instead)
+  markDroppedZipped() {
+    if (!this.droppedbox) return;
+    const done = this.droppedbox.querySelectorAll('.dropzone-file.zipping');
+    if (!done.length) return;
+    done.forEach((el) => {
+      this.zipped.push({
+        name: el.getAttribute('title') || el.textContent.trim(),
+        isDir: el.dataset.type === 'dir'
+      });
+      el.remove();
+    });
+    if (!this.droppedbox.querySelector('.dropzone-file')) {
+      this.droppedbox.remove();
+      this.droppedbox = null;
+    }
+    this.updateExceptCounters();
+  }
+  clearDroppedNames() {
+    if (this.droppedbox) {
+      this.droppedbox.remove();
+      this.droppedbox = null;
+    }
+    this.zipped = [];
+  }
+
   toggleDropTarget(on = true,) {
-    const self = this;
     const droptarget = (this.droptarget)?this.droptarget:((this.activentry) ? this.activentry.container : null);
     if (droptarget === null) return;
-    function highlight(e) {
-        droptarget.classList.add(cssdragover)
-    }
-    function unhighlight(e) {
-        droptarget.classList.remove(cssdragover);
-    }
     const cssdragover = (this.jsDirList) ? (this.jsDirList.options.entry) ? this.jsDirList.options.entry.css.dragover : this.options.css.dragover : this.options.css.dragover;
-    const target_dragover = (e) => {e.preventDefault();
-      if (!this.dragover && this.activentry && this.activentry.container === e.currentTarget) {
-        droptarget.classList.add(cssdragover);
-      }
-    e.dataTransfer.dropEffect = "move";
+    // build the handlers once so add/removeEventListener actually pair up -
+    // toggleDropTarget is called again on every folder change and fresh
+    // closures would just stack another drop listener each time
+    if (!this._dropHandlers || this._dropHandlers.el !== droptarget) {
+      const self = this;
+      this._dropHandlers = {
+        el: droptarget,
+        highlight: () => droptarget.classList.add(cssdragover),
+        unhighlight: () => droptarget.classList.remove(cssdragover),
+        drop: async (e) => { await self.handleDrop(e); }
+      };
     }
-    const target_drop = async (e) => { await self.handleDrop(e);}
-    // set events and css for new dropzone
+    const h = this._dropHandlers;
+    const dropclass = this.options.selectors.droptarget.slice(1);
+    // always detach first: listeners must never stack
+    ['dragenter', 'dragover'].forEach(ev => droptarget.removeEventListener(ev, h.highlight, false));
+    ['dragleave', 'drop'].forEach(ev => droptarget.removeEventListener(ev, h.unhighlight, false));
+    droptarget.removeEventListener('drop', h.drop);
     if (on === false) {
-     ['dragenter', 'dragover'].forEach(eventname => {
-        droptarget.removeEventListener(eventname, highlight, false);
-    });
-    ['dragleave', 'drop'].forEach(eventname => {
-        droptarget.removeEventListener(eventname, unhighlight, false);
-    });
-      droptarget.removeEventListener('drop', target_drop);
-      droptarget.classList.remove(this.options.selectors.droptarget.slice(1));
-    } else {
-    ['dragenter', 'dragover'].forEach(eventname => {
-        droptarget.addEventListener(eventname, highlight, false);
-    });
-    ['dragleave', 'drop'].forEach(eventname => {
-    droptarget.addEventListener(eventname, unhighlight, false);
-    });
-      droptarget.addEventListener('drop', target_drop);
-      droptarget.classList.add(this.options.selectors.droptarget.slice(1));
+      droptarget.classList.remove(dropclass);
+      return;
     }
+    ['dragenter', 'dragover'].forEach(ev => droptarget.addEventListener(ev, h.highlight, false));
+    ['dragleave', 'drop'].forEach(ev => droptarget.addEventListener(ev, h.unhighlight, false));
+    droptarget.addEventListener('drop', h.drop);
+    droptarget.classList.add(dropclass);
   }
 
   async addDirList() {
@@ -348,10 +451,10 @@ export class JsMyFiles {
     this.rootitem = this.targetitem = this.activentry.container;
     ModuleEventEmitter.on(this.jsDirList.eventnames.attach, (e) => {
       if (!e.entry) return;
-      if (e.entry !== this.activentry && this.activentry.isBranch(true)) this.enableDropzone(false);
+      if (e.entry !== this.activentry && this.activentry.isBranch(true)) this.detachDropzone();
       this.activentry = e.entry;
       this.targetitem = this.activentry.container;
-      if (this.activentry.isBranch(true)) this.enableDropzone();
+      if (this.activentry.isBranch(true)) this.enableUploadDialog();
     }, this.jsDirList.uuid);
     ModuleEventEmitter.on(this.jsDirList.eventnames.detach, (e) => {
       this.detachDropzone();
@@ -374,7 +477,7 @@ export class JsMyFiles {
   }
 
   addDisplayProgression(parent=null) {
-    // add counters
+    // holds the collapsible progression boxes and the upload button
     if (this.displayprogression) return;
     let el = document.getElementById(this.options.display.progression);
     if (el===null) {
@@ -382,8 +485,7 @@ export class JsMyFiles {
       el = create_box('div', {
         id: this.options.display.progression
       }, parent);
-          } else el.classList.remove(css.hide);
-    el.insertAdjacentHTML('afterbegin', `<div class="${this.options.display.progression}"><div class="${this.options.display.counters}"></div><div class="${this.options.display.sizes}"></div><div class="${css.progress}"></div><div class="${this.options.display.timers}"></div></div>`);
+    } else el.classList.remove(css.hide);
     this.displayprogression = el;
   }
   enableDropzone(enable = true, destroy = false) {
@@ -395,13 +497,16 @@ export class JsMyFiles {
   }
   //
   attachDropzone() {
-    console.log('this.dropzone', this.dropzone.dataset)
     if (this.dropzone.dataset.active) {
       this.toggleDropTarget(true);
     }
-    ['dragover', 'dragenter'].forEach(eventname => {
-     window.addEventListener(eventname, function(e) {e.preventDefault();}, false);
-    });
+    // add the window-level preventDefault once (needed so drop events fire)
+    if (!this._windowDragGuard) {
+      this._windowDragGuard = (e) => e.preventDefault();
+      ['dragover', 'dragenter'].forEach(eventname => {
+        window.addEventListener(eventname, this._windowDragGuard, false);
+      });
+    }
   }
   detachDropzone() {
     this.enableDropzone(false);
@@ -447,6 +552,7 @@ export class JsMyFiles {
   async handleDrop(e) {
     e.preventDefault();
     e.stopPropagation();
+    if (this.uploadBusy()) return;
     if (!this.setUploadEntry()) return;
     let dataTransfer;
     if (e.dataTransfer) {
@@ -454,16 +560,21 @@ export class JsMyFiles {
     } else dataTransfer = e;
     this.initTimer();
     const items = [...((dataTransfer.items) ? dataTransfer.items : dataTransfer.files)];
-    if (items.length) {
-      this.enableDropzone(false);
-      await items.forEach(async item => {
-        if (item.kind === "file") {
-          item = await item.webkitGetAsEntry();
-          this.toggleCounters(true);
-          await this.scanHandle(item);
-
-        }
-      })
+    // webkitGetAsEntry() must be called synchronously here: the DataTransferItem
+    // objects are cleared as soon as the drop handler returns, so resolve every
+    // dropped entry now and hand them to a single scan pass.
+    const entries = items
+      .filter(item => item.kind === "file")
+      .map(item => item.webkitGetAsEntry())
+      .filter(Boolean);
+    if (entries.length) {
+      this.addDroppedNames(entries.map((en) => ({
+        name: en.name,
+        isDir: en.isDirectory === true
+      })));
+      this.toggleCounters(true);
+      this.updateExceptCounters();
+      await this.scanHandle(entries);
     }
   }
    showComplete() {
@@ -505,26 +616,30 @@ export class JsMyFiles {
 
   fileCounter(e) {
     const counters = this.counters[e.name];
+    if (!counters) return;
     counters.counter += 1;
-    if (e.size !== null) counters.size += parseInt(e.size);
-    counters.display.counter.textContent = counters.counter;
-    if (counters.display.size) counters.display.size.textContent = format_bytes(counters.size);
+    if (e.size != null) counters.size += (parseInt(e.size) || 0);
+    // the read / compressed detail lives in the "processed" box (title + footer)
+    this.syncListBox('zipped');
     this.quotaEstimate();
   }
 
   resetCounter(item) {
     const counters = this.counters[item];
-    ['counter', 'size'].forEach(el => {
-      if (counters.display[el]) {
-        counters[el] = 0;
-        counters.display[el].textContent = 0;
-      }
-    });
+    if (!counters) return;
+    counters.counter = 0;
+    counters.size = 0;
   }
   resetCounters() {
     Object.keys(this.options.controls).forEach(key => {
       this.resetCounter(key);
     });
+    this.rejected = [];
+    this.errorfile = [];
+    const parent = this.displayprogression || this.container;
+    if (parent) parent.querySelectorAll('.except-list').forEach((p) => p.remove());
+    this.clearDroppedNames();
+    this.updateExceptCounters();
     this.toggleCounters(false);
   }
   toggleCounters(show = true) {
@@ -534,85 +649,160 @@ export class JsMyFiles {
     else el.classList.add(css.hide);
   }
 
-  initFileCounter(item, opts, i) {
-    const sep = (i) ? ` / ` : ``;
-    let counter = 0;
-    let counterdisplay = null;
-    let size = 0;
-    let sizedisplay = null;
-    // create dom display elements
-
-
-    let boxcounters = document.getElementById(this.options.display.progression);
-
-    const itemopts = {
-      display: {},
-    };
-    Object.entries(opts).forEach(([k, val]) => {
-      const cl = k + 's';
-      const txt = {
-        counter: ' read',
-        size: ' read',
-        counterzipped: ' compressed',
-        sizezipped: ' compressed',
-        counterrejected: ' rejected',
-        countererrorfile: ' error',
-      }
-      const displaylist = ['counterrejected', 'countererrorfile'];
-      let elinsert = boxcounters.querySelector('.' + cl);
-      if (!elinsert) elinsert = create_box('div', {
-        class: cl
-      }, boxcounters, ``);
-      let el = elinsert.querySelector('.' + val);
-      if (!el) {
-        el = create_box('span', {
-          class: val,
-        }, elinsert, ` / `);
-        if (txt.hasOwnProperty(val)) {
-          // add a link to display the rejected files list
-          if (displaylist.indexOf(val) >= 0) {
-            const link = create_box('a', {
-              text: txt[val],
-              class: 'text-error',
-              title: `Click to display the list of ${txt[val]} files`
-            }, elinsert);
-            link.addEventListener('click', (e) => {
-              e.preventDefault();
-              this.displayExcept(link, val);
-            });
-          } else elinsert.append(document.createTextNode(txt[val]));
-        }
-      } else this.resetCounter(item);
-      itemopts.display[k] = el;
-      itemopts[k] = 0;
-    });
-
+  // scan / zip / reject / errorfile keep running totals only
+  initFileCounter(item) {
     this.counters = { ...this.counters,
-      ...{
-        [item]: itemopts
+      [item]: {
+        counter: 0,
+        size: 0,
+        display: {}
       }
     };
-
   }
-  displayExcept(el, type) {
-    type = type.replace('counter', '');
-    const textval = {
-      rejected: ` type rejected`,
-      errorfile: ` in error`
-    };
-    if (Object.keys(textval).indexOf(type) < 0) return;
-    const message = {
-      type: AlertBox.alertconfig.types.warning,
-      parent: el,
-      content: `Files ${this.rejected.join('<br>')} ${textval[type]}`,
-    };
-    if (el.dataset.hasmessage) {
-      AlertBox.removeMessage(message);
-      delete el.dataset.hasmessage;
-    } else {
-      el.dataset.hasmessage = true;
-      AlertBox.addMessage(message);
+
+  // one collapsible box per concern; its always-visible title is the toggle
+  initProgressionBoxes() {
+    const box = this.displayprogression;
+    if (!box || box.dataset.boxdelegated) return;
+    box.dataset.boxdelegated = '1';
+    box.addEventListener('click', (e) => {
+      const title = e.target.closest('.except-list-title');
+      if (!title || !box.contains(title)) return;
+      const panel = title.closest('.except-list');
+      if (panel) panel.classList.toggle('is-open');
+    });
+  }
+
+  listBoxConf(type) {
+    return {
+      zipped: {
+        suffix: 'processed',
+        list: this.zipped,
+        icons: true,
+        foot: true,
+        always: true
+      },
+      rejected: {
+        suffix: 'rejected',
+        list: this.rejected,
+        icons: false,
+        foot: false
+      },
+      errorfile: {
+        suffix: 'in error',
+        list: this.errorfile,
+        icons: false,
+        foot: false
+      },
+    }[type];
+  }
+
+  // rebuild every collapsible box from the current lists
+  updateExceptCounters() {
+    BOX_ORDER.forEach((type) => this.syncListBox(type));
+  }
+
+  // create / update / drop one box, keeping its open state
+  syncListBox(type) {
+    const parent = this.displayprogression;
+    if (!parent) return;
+    const conf = this.listBoxConf(type);
+    if (!conf) return;
+    const list = conf.list || [];
+    let panel = parent.querySelector(`.except-list[data-except="${type}"]`);
+    if (!conf.always && !list.length) {
+      if (panel) panel.remove();
+      return;
     }
+    if (!panel) {
+      panel = create_box('div', {
+        // the processed box carries the live read / compressed counters in its
+        // footer, so open it by default - the user can still collapse it
+        class: conf.foot ? ['except-list', 'is-open'] : 'except-list',
+        dataset: {
+          except: type
+        }
+      });
+      this.placeListBox(panel, type);
+      create_box('p', {
+        class: 'except-list-title'
+      }, panel);
+      const body = create_box('div', {
+        class: 'except-list-body'
+      }, panel);
+      create_box('ul', {
+        class: 'except-list-items'
+      }, body);
+      if (conf.foot) create_box('div', {
+        class: 'except-list-foot'
+      }, body);
+    }
+    panel.querySelector('.except-list-title').textContent =
+      `${list.length} ${(list.length === 1) ? 'entry' : 'entries'} ${conf.suffix}`;
+    const ul = panel.querySelector('.except-list-items');
+    ul.textContent = '';
+    if (!list.length) {
+      create_box('li', {
+        class: 'except-list-empty',
+        text: '—'
+      }, ul);
+    } else {
+      list.forEach((entry) => {
+        if (conf.icons) {
+          const li = create_box('li', {
+            class: 'dropzone-file',
+            dataset: {
+              type: entry.isDir ? 'dir' : 'file'
+            },
+            title: entry.name
+          }, ul);
+          create_box('span', {
+            class: 'dropzone-file-name',
+            text: entry.name
+          }, li);
+        } else {
+          create_box('li', {
+            text: entry,
+            title: entry
+          }, ul);
+        }
+      });
+    }
+    if (conf.foot) this.updateProcessedFoot();
+  }
+
+  // keep the boxes in a stable order after the progression card
+  placeListBox(panel, type) {
+    const parent = this.displayprogression;
+    const order = BOX_ORDER;
+    const idx = order.indexOf(type);
+    for (let i = idx + 1; i < order.length; i++) {
+      const later = parent.querySelector(`.except-list[data-except="${order[i]}"]`);
+      if (later) return void later.before(panel);
+    }
+    for (let i = idx - 1; i >= 0; i--) {
+      const earlier = parent.querySelector(`.except-list[data-except="${order[i]}"]`);
+      if (earlier) return void earlier.after(panel);
+    }
+    const card = parent.querySelector('.display-progression');
+    if (card) card.after(panel);
+    else parent.prepend(panel);
+  }
+
+  // "x read / x compressed" (count + size) footer of the processed box
+  updateProcessedFoot() {
+    const box = this.displayprogression;
+    const foot = box && box.querySelector('.except-list[data-except="zipped"] .except-list-foot');
+    if (!foot) return;
+    const scan = this.counters.scan || {};
+    const zip = this.counters.zip || {};
+    foot.textContent = '';
+    create_box('span', {
+      text: `${scan.counter || 0} read / ${zip.counter || 0} compressed`
+    }, foot);
+    create_box('span', {
+      text: `${format_bytes(scan.size || 0)} read / ${format_bytes(zip.size || 0)} compressed`
+    }, foot);
   }
 
   showControl(action, opts) {
@@ -648,7 +838,10 @@ export class JsMyFiles {
         }
         break;
       case this.eventnames.endzip:
-        if (!part) this.showComplete();
+        if (!part) {
+          this.showComplete();
+          this.markDroppedZipped();
+        }
         btn.textContent = this.container.dataset.ended || `Upload`;
         message = {
           name: this.eventnames.endzip,
@@ -702,9 +895,25 @@ export class JsMyFiles {
         btn.click();
         return;
         break;
+      case this.eventnames.uploaderror:
+        // upload failed but the compressed archive is still in browser storage:
+        // keep the button live so the user can re-send it without rebuilding
+        if (btn.previousElementSibling &&
+          btn.previousElementSibling.tagName.toLowerCase() === "svg")
+          btn.previousElementSibling.remove(); // drop the progress spinner
+        btn.textContent = this.container.dataset.retry || `Retry upload`;
+        btn.classList.remove(css.console);
+        btn.disabled = false;
+        message = {
+          name: this.eventnames.sendfile,
+          path: filepath,
+          part: part,
+          bigfile: bigfile,
+        };
+        break;
       case this.eventnames.errorfile:
       case this.eventnames.error:
-        btn.textContent = (opts.text) ? opts.text : `Error `+JSON.stringify(message);
+        btn.textContent = opts.text || opts.message || `Error`;
         btn.classList.add(css.console);
         btn.disabled=true;
         message=null;
@@ -748,10 +957,11 @@ export class JsMyFiles {
   }
 
   initControls() {
-    Object.entries(this.options.controls).forEach(([key, control], i) => {
-       this.initFileCounter(key, control.display, i);
+    Object.entries(this.options.controls).forEach(([key, control]) => {
+      this.initFileCounter(key);
       if (control.btn) this.activateControls(key, control.btn);
     });
+    this.initProgressionBoxes();
   }
   activateControls(key, btns) {
     Object.keys(btns).forEach((btn) => {

@@ -251,17 +251,48 @@ button.submitslider {@apply min-w-[200px]}
 li:not(.on) ul.entries {@apply hidden}
 .console {@apply rounded-sm border border-info-50 text-info-600 text-xs px-4 py-1 my-2 }
 .button.console {@apply py-2 text-base rounded border-none bg-transparent}
-.display-progression {@apply flex sm:flex-row border border-secondblue-100 drop-shadow-sm p-2 mb-2}
-.counters, .sizes {@apply p-2 rounded-sm text-sm  my-1 w-auto w-1/2 inline-block }
-.counters span, .sizes span {@apply font-normal}
+/* my_files : upload progression - a stack of collapsible boxes under the dropzone */
+#display-progression {@apply flex flex-col items-start gap-1.5 w-full mt-2}
+/* upload action button - left aligned, compact */
+#display-progression .button.is-action {@apply self-start mr-auto ml-0 mt-1 text-sm sm:text-sm py-1.5 px-4 drop-shadow-sm}
+.except-list {@apply w-full rounded-md border overflow-hidden}
+.except-list-title {@apply m-0 flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold cursor-pointer select-none before:icon before:icon-sm before:icon-chevron-right before:opacity-60 before:transition-transform}
+.except-list.is-open > .except-list-title::before {@apply rotate-90}
+.except-list-body {@apply hidden}
+.except-list.is-open > .except-list-body {@apply block}
+.except-list-items {@apply list-none m-0 p-0 max-h-40 overflow-y-auto}
+.except-list-items li {@apply px-2.5 py-1 text-xs break-all border-t first:border-t-0}
+.except-list-items li.except-list-empty {@apply text-stone-400 border-stone-100}
+.except-list-items li.dropzone-file {@apply break-normal}
+.except-list-foot {@apply flex flex-col gap-0.5 px-2.5 py-1.5 text-xs text-stone-800 border-t border-stone-100 bg-stone-50}
+/* processed = neutral */
+.except-list[data-except="zipped"] {@apply border-secondblue-100}
+.except-list[data-except="zipped"] > .except-list-title {@apply text-secondblue-700 bg-secondblue-50}
+.except-list[data-except="zipped"] .except-list-items li {@apply text-stone-600 border-stone-100}
+/* rejected = warning */
+.except-list[data-except="rejected"] {@apply border-warning-200}
+.except-list[data-except="rejected"] > .except-list-title {@apply text-warning-700 bg-warning-50}
+.except-list[data-except="rejected"] .except-list-items li {@apply text-warning-800 border-warning-100}
+/* error = danger */
+.except-list[data-except="errorfile"] {@apply border-danger-300}
+.except-list[data-except="errorfile"] > .except-list-title {@apply text-danger-800 bg-danger-100}
+.except-list[data-except="errorfile"] .except-list-items li {@apply text-danger-700 border-danger-200}
 /*js import - upload dropzone */
-#dropzone {@apply relative flex flex-col items-center justify-center gap-3 w-full h-full min-h-[200px] p-6 text-center rounded-lg border-2 border-dashed border-stone-300 bg-stone-50 text-stone-500 cursor-pointer transition-colors duration-200 hover:border-mainblue-400 hover:bg-mainblue-50}
+#dropzone {@apply relative flex flex-col items-center justify-center gap-3 w-full h-auto min-h-[200px] p-6 text-center rounded-lg border-2 border-dashed border-stone-300 bg-stone-50 text-stone-500 cursor-pointer transition-colors duration-200 hover:border-mainblue-400 hover:bg-mainblue-50}
 #dropzone.dragover {@apply border-solid border-mainblue-600 bg-mainblue-100 text-mainblue-800 drop-shadow}
 #dropzone .dropzone-title {@apply flex flex-col items-center gap-1.5 text-base font-semibold text-stone-700 before:icon before:h-9 before:w-9 before:icon-arrow-up-tray before:opacity-60}
 #dropzone.dragover .dropzone-title {@apply text-mainblue-800 before:opacity-90}
-#dropzone .trigger {@apply inline-flex items-center justify-center gap-1.5 w-full max-w-[15rem] font-btn text-sm font-medium text-mainblue-700 bg-white border border-stone-200 rounded-md px-3 py-1.5 shadow-sm whitespace-nowrap overflow-hidden text-ellipsis transition-colors hover:bg-mainblue-700 hover:text-white hover:border-mainblue-700 hover:shadow-none before:icon before:p-0.5 before:mr-0 before:opacity-70}
+#dropzone .trigger {@apply inline-flex items-center justify-center gap-1.5 w-full max-w-[15rem] font-btn text-sm font-medium text-mainblue-700 bg-white border border-stone-200 rounded-md px-3 py-1.5 shadow-sm whitespace-nowrap overflow-hidden text-ellipsis transition-colors hover:bg-mainblue-700 hover:text-white hover:border-mainblue-700 hover:shadow-none before:icon before:p-0.5 before:mr-0 before:opacity-70 hover:before:invert hover:before:opacity-100}
 #dropzone .trigger[data-type="directory"]  {@apply before:icon-arrow-up-tray }
 #dropzone .trigger[data-type="file"]  {@apply before:icon-arrow-up-square}
+/* names of the files / folders being dropped / zipped (live, inside the dropzone) */
+.dropzone-files {@apply flex flex-col items-start gap-1 w-full max-h-40 overflow-y-auto mt-1}
+.dropzone-file {@apply flex items-center gap-1.5 w-full text-sm font-medium text-stone-700 before:icon before:icon-sm before:shrink-0 before:opacity-80}
+.dropzone-file[data-type="dir"] {@apply before:icon-folder-sm}
+.dropzone-file[data-type="file"] {@apply before:icon-document-sm}
+.dropzone-file-name {@apply truncate min-w-0}
+/* light stone while the archive is being zipped, dark stone once done */
+.dropzone-file.zipping {@apply text-stone-300 before:opacity-50}
 .displayimport {@apply  border border-secondblue-200 rounded  text-base font-normal w-full h-auto min-h-8 px-2 py-1 overflow-y-visible hover:bg-secondblue-50 }
 .displayimport.active {@apply  bg-success-50}
 .displayimport li {@apply relative}
@@ -311,8 +342,10 @@ tr.disabled {@apply opacity-70}
    so the box bottom lines up with the file-name text baseline. */
 .control-select.import-toggle {@apply inline-block overflow-hidden align-baseline text-center leading-4 cursor-pointer bg-stone-200 hover:bg-stone-300 font-semibold text-xs text-stone-200 hover:text-stone-600 before:content-["\2713"] w-4 h-4 max-h-4 rounded-sm ml-4 }
 .control-select.import-toggle.is-selected {@apply  bg-transparent text-secondblue-500 before:content-["\2713"]}
-/* highlight the whole entry row while its select toggle is on */
-.folders [data-name]:has(> .control-select.is-selected) {@apply text-secondblue-600}
+/* tint the entry's own name while its select toggle is on - target the label
+   span, not the [data-name] li, so the colour doesn't inherit into nested
+   rows (e.g. the trash dir, which has no toggle) */
+.folders [data-name]:has(> .control-select.is-selected) > [class^="entry"] {@apply text-secondblue-600}
 .intrash {@apply bg-danger-100}
 
 /* form with tabs */

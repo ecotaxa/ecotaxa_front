@@ -43,6 +43,7 @@ export function JsDirToZip(options = {}) {
     pending: 'pending',
     progress: 'progress',
     errorfile: 'errorfile',
+    uploaderror: 'uploaderror',
     counter: 'counter',
     reject: 'reject',
     message: 'message',
@@ -52,6 +53,30 @@ export function JsDirToZip(options = {}) {
   };
   let jsScanDir, properties,uploadpath;
   let trydelete=0;
+  // scan batches (drop / browse) are run one after another so they never
+  // interleave while feeding the same archive
+  let scanChain = Promise.resolve();
+  function serializeScan(task) {
+    const run = scanChain.then(task, task);
+    scanChain = run.catch(() => {});
+    return run;
+  }
+  // resolves the batch currently being ingested (its files are processed
+  // asynchronously through the counter events, so the batch is only "done"
+  // once its completion callback - or endProcess - fires)
+  let batchDeferred = null;
+  function newBatch() {
+    let resolve;
+    const promise = new Promise((r) => { resolve = r; });
+    batchDeferred = {
+      promise,
+      resolve: () => { batchDeferred = null; resolve(); }
+    };
+    return batchDeferred;
+  }
+  function endBatch() {
+    if (batchDeferred) batchDeferred.resolve();
+  }
   const defaultOptions = {
     uploadurl: '/gui/files/upload',
     tusuploadurl: window.location.origin + '/api/user_files/upload',
@@ -103,7 +128,10 @@ const browser = detect();
       } else console.log('partly finished '+properties.hashandlers+ 'follow='+properties.follow, e);
     }, uuid);
     ModuleEventEmitter.on(eventnames.endzip, async(e) => {
-      if (!e.bigfile && properties.zip) properties.zip.end();
+      if (!e.bigfile && properties.zip) {
+        properties.zip.end();
+        properties.closed = true;
+      }
       const evtsend=async function() {
       const zipclosed = await listStorage(null,properties.zipname);
       if (zipclosed === true) {
@@ -170,6 +198,10 @@ const browser = detect();
       },
       handlers: [],
       hashandlers:false,
+      // number of scan batches (drop / browse) currently being ingested
+      scanning: 0,
+      // true once the archive has been closed for upload: no more additions
+      closed: false,
      }
   }
   async function reset() {
@@ -204,14 +236,29 @@ const browser = detect();
     if (properties.follow) await properties.follow();
   }
 
+  function emitEndZip(e) {
+    const message = buildMessage(e, {
+      name: eventnames.endzip
+    });
+    ModuleEventEmitter.emit(eventnames.complete, message, _listener);
+    // archive fully built and waiting for the user: the next drop / browse
+    // batch can now be ingested
+    endBatch();
+  }
   function checkProcessed(e) {
+    // a drop / browse is still feeding the current archive: don't close it yet
+    if (properties.scanning > 0) return;
     if (properties.endreaddir === true) {
-    if(properties.endcounter === true) {
-      const message = buildMessage(e, {
-       name: eventnames.endzip
-      });
-      ModuleEventEmitter.emit(eventnames.complete, message, _listener);
-    }  else if (properties.counter.error>0) endProcess();}
+      if (properties.endcounter === true) {
+        emitEndZip(e);
+      } else if (properties.counter.error > 0) {
+        endProcess();
+      } else if (properties.counter.scan === properties.counter.zip) {
+        // reading finished with nothing left to zip (e.g. every dropped file
+        // was rejected) - release the batch so more can be added
+        emitEndZip(e);
+      }
+    }
   }
 
   function zipOnData(zip = null) {
@@ -278,6 +325,13 @@ const browser = detect();
     };
   }
   async function scanCommon(zipname, options = {}) {
+    if (properties.closed) {
+      ModuleEventEmitter.emit(eventnames.message, {
+        name: AlertBox.alertconfig.types.info,
+        message: 'The upload has already started. Wait until it finishes before adding more files.',
+      }, _listener);
+      return false;
+    }
     properties.endreaddir = false;
     if (properties.zip === null) {
       zipname = zipname.split(dirseparator)[0];
@@ -308,9 +362,13 @@ const browser = detect();
         jsScanDir = JsScanDir(process_file);
       }
     }
+    return true;
   }
 
-  async function scanBrowse(pick, options = {}) {
+  function scanBrowse(pick, options = {}) {
+    return serializeScan(() => scanBrowseImpl(pick, options));
+  }
+  async function scanBrowseImpl(pick, options = {}) {
     const entries = (pick instanceof FileList) ? Array.from(pick) : (pick.kind === "directory") ? await Array.fromAsync(pick.values()): (Array.isArray(pick)) ? pick : [pick];
     const name = entries[0].name;
     let relpath = (pick instanceof FileList) ? entries[0].webkitRelativePath : null;
@@ -318,23 +376,45 @@ const browser = detect();
     if (relpath.length) relpath.pop();
     relpath = relpath.join(dirseparator);
     const path = (pick instanceof FileList) ? relpath : (pick.kind === "directory") ? pick.name : ``;
-    await scanCommon(path, options);
+    if ((await scanCommon(path, options)) === false) return;
+    properties.scanning += 1;
+    const batch = newBatch();
     await jsScanDir.processEntries(entries, path, () => {
+      properties.scanning = Math.max(0, properties.scanning - 1);
       dirComplete();
     });
+    await batch.promise;
   }
 
-  async function scanHandle(dropped, options = {}) {
-    await scanCommon(dropped.name, options);
-    if (dropped.isDirectory === true) {
-      await jsScanDir.readDirectory(dropped, () => {
+  function scanHandle(dropped, options = {}) {
+    return serializeScan(() => scanHandleImpl(dropped, options));
+  }
+  async function scanHandleImpl(dropped, options = {}) {
+    // `dropped` may be a single entry or several entries dropped at once; they
+    // all go into one zip, so scanCommon runs once and dirComplete() is emitted
+    // only after the last entry has been read.
+    const entries = Array.isArray(dropped) ? dropped.slice() : [dropped];
+    if (!entries.length) return;
+    if ((await scanCommon(entries[0].name, options)) === false) return;
+    properties.scanning += 1;
+    const batch = newBatch();
+    const next = async () => {
+      if (!entries.length) {
+        properties.scanning = Math.max(0, properties.scanning - 1);
         dirComplete();
-      });
-    } else if (dropped.isFile === true) {
-      await jsScanDir.processFile(dropped, () => {
-        dirComplete();
-      });
-    }
+        return;
+      }
+      const entry = entries.shift();
+      if (entry.isDirectory === true) {
+        await jsScanDir.readDirectory(entry, next);
+      } else if (entry.isFile === true) {
+        await jsScanDir.processFile(entry, next);
+      } else {
+        await next();
+      }
+    };
+    await next();
+    await batch.promise;
   }
 
   function dirComplete() {
@@ -506,7 +586,16 @@ const browser = detect();
           await zipStream(file, filepath);
         }
         partZip();
-        } else endProcess();
+        } else {
+          // the archive being built is over the server limit: alert and stop
+          properties.counter.error += 1;
+          onError(eventnames.errorfile, {
+            name: eventnames.error,
+            path: filepath,
+            message: `The archive is too large to upload (over ${format_bytes(MAXSIZE)}). Remove some files, or add them in several separate uploads.`,
+          }, _listener);
+          return endProcess(true);
+        }
       } else {
         await zipStream(file, filepath);
       }
@@ -532,6 +621,16 @@ const browser = detect();
     const entrypath = (entry.fullPath) ? entry.fullPath : entry.webkitRelativePath;
     entry.file(async file => {
       await addFileToZipStream(file, entrypath);
+    }, (err) => {
+      // the file could not be read: report it and release the current batch so
+      // the archive does not stay stuck half-built
+      properties.counter.error += 1;
+      onError(eventnames.errorfile, {
+        name: eventnames.error,
+        path: entrypath,
+        message: 'Could not read file ' + entrypath,
+      }, _listener);
+      endProcess(true);
     });
   }
 
@@ -646,10 +745,32 @@ async function listStorage(entry = null,name=null) {
       },
       onError: async (error) => {
         properties.follow = null;
-        await endFetch(message);
-        properties.counter.error += 1;
-        onError(eventnames.errorfile, message);
-        if (bigfile || properties.hashandlers) endProcess();
+        if (bigfile || properties.hashandlers) {
+          // unchanged: multi-part / big-file uploads can't be resumed here
+          await endFetch(message);
+          properties.counter.error += 1;
+          onError(eventnames.errorfile, message);
+          endProcess();
+          return;
+        }
+        // single archive: keep the zip in OPFS so the user can re-send it.
+        // Do NOT endFetch / terminate / reset, and do NOT bump counter.error
+        // (sendZipFile()'s `if (properties.counter.error > 0) return endProcess()`
+        //  guard must stay clear so a retry can go through).
+        properties.zip = null; // mirror endFetch's cleanup; archive file stays
+        ModuleEventEmitter.emit(eventnames.message, {
+          name: AlertBox.alertconfig.types.error,
+          message: 'Upload failed (' +
+            ((error && error.message) ? error.message : 'network or server error') +
+            '). Click "Retry upload" to try again.',
+          path: message.path,
+        }, _listener);
+        ModuleEventEmitter.emit(eventnames.complete, {
+          name: eventnames.uploaderror,
+          path: uploadpath, // dir only; sendfile handler appends file.name
+          part: 0,
+          bigfile: false,
+        }, _listener);
       },
       onProgress: (bytesUploaded, bytesTotal) => {
         const percentage = (bytesUploaded / bytesTotal * 100).toFixed();
@@ -717,9 +838,11 @@ async function listStorage(entry = null,name=null) {
          properties.counter.error+=1;
         onError(eventnames.errorfile, message); if(bigfile || properties.hashandlers) endProcess();    }
   }
-  function endProcess() {
+  function endProcess(silent = false) {
     properties.follow=null;
-    onError(eventnames.errorfile,{
+    properties.scanning = 0;
+    endBatch();
+    if (!silent) onError(eventnames.errorfile,{
             name: AlertBox.alertconfig.types.error,
             message: "Upload not done. one or more files exceeds max upload size",
             path:uploadpath,
