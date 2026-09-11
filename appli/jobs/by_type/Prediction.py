@@ -70,7 +70,7 @@ class PredictionJob(Job):
     @classmethod
     def base_projects_select_page(cls):
         # First configuration page, choose base projects
-        # This page is called from initial GET or POSTs to iself when project filters are used
+        # This page is called from initial GET or POSTs to itself when project filters are used
         target_prj, filters_html = cls.get_target_project()
         if target_prj is None:
             return PrintInCharte(filters_html)
@@ -283,16 +283,19 @@ class PredictionJob(Job):
     @staticmethod
     def api_read_accessible_projects(instrument_filter, title_filter):
         bef = time.time()
+        fields = "title,cnn_network_id,instrument,objcount,pctvalidated,obj_free_cols"
         with ApiClient(ProjectsApi, request) as api:
             ret: List[ProjectModel] = api.search_projects(not_granted=False,
                                                           title_filter=title_filter,
                                                           instrument_filter=instrument_filter,
-                                                          filter_subset=False)
+                                                          filter_subset=False,
+                                                          fields=fields)
         with ApiClient(ProjectsApi, request) as api:
             ret.extend(api.search_projects(not_granted=True,
                                            title_filter=title_filter,
                                            instrument_filter=instrument_filter,
-                                           filter_subset=False))
+                                           filter_subset=False,
+                                           fields=fields))
         app.logger.info('Get Projects API call duration: %0.3f s', time.time() - bef)
         return ret
 

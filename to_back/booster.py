@@ -127,6 +127,8 @@ def to_obj(json_obj, klass):
 
         if type(json_obj) == dict:
             for fld, tpe in ret.openapi_types.items():
+                if fld not in json_obj:  # we have tunable object fields now
+                    continue
                 val = json_obj[fld]
                 val = to_obj(val, tpe)
                 setattr(ret, fld, val)
