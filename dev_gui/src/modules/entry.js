@@ -44,6 +44,7 @@ export const entryOptions = {
     dragover: 'dragover',
     dragitem: 'dragitem',
     selected: 'selected',
+    content: 'entry-content',
   },
   event: {
     name: 'eventEntry'
@@ -100,18 +101,30 @@ export class Entry {
       draggable: this.isDraggable(),
       dataset: dataset,
     });
+    // import picker: icon+name live in their own wrapper, indented per
+    // nesting depth via CSS (see style.css, explicit per-depth [data-name] >
+    // .entries > ... chains), while el itself (and any per-entry control
+    // prepended into it, e.g. the checkbox) stays unindented - so that
+    // control lines up in a single column regardless of depth.
+    const contentParent = (this.options.wrapContent) ? create_box('div', {
+      class: this.options.css.content
+    }, el) : el;
     const cl = `${this.options.prefix}${this.type}`;
-    if([entryTypes.branch,entryTypes.root,entryTypes.discard].indexOf(this.type)>=0 ) this.icon= create_box('span',{class:'ico-'+cl},el);
+    if([entryTypes.branch,entryTypes.root,entryTypes.discard].indexOf(this.type)>=0 ) this.icon= create_box('span',{class:'ico-'+cl},contentParent);
     this.label = create_box(this.options.tags.label, {
       class: cl,
       text: (entry.label) ? entry.label : entry.name
-    }, el);
+    }, contentParent);
     this.container = el;
     this.loaded = this.container.dataset.loaded = false;
     this.initEvents();
     if (typeof this.options.onEntryCreated === 'function') this.options.onEntryCreated(this);
   }
-  initEvents() {this.addListeners();}
+  // EntryAction (js-dirlist.js) overrides getListeners() right after
+  // construction - it passes deferListeners so this early auto-attach (which
+  // would still use the base class's own getListeners()) is skipped, and
+  // calls addListeners() itself once the override is in place instead.
+  initEvents() {if (!this.options.deferListeners) this.addListeners();}
   getParent() {
     return this.parent;
   }
@@ -258,7 +271,10 @@ export class Entry {
       func: func
     });
     toolTip.applyTo(this.icon,'click to display children of this entry');}
-    toolTip.applyTo(this.label,'click to activate tools on this entry', () => {return (this.active!==true);});
+    // notips: callers that repurpose the tree (e.g. the read-only import picker)
+    // opt out of the "activate tools" hint - there are no tools there
+    if (!this.options.notips)
+      toolTip.applyTo(this.label,'click to activate tools on this entry', () => {return (this.active!==true);});
     return listeners;
   }
 
@@ -517,6 +533,7 @@ export function EntryControls(container = document, options = {}) {
     //add listener
     const evt = (control.trigger) ? control.trigger : 'click';
     const func = (e) => {
+      e.stopPropagation();
       if (activentry === null) return;
       const detail = {
         callback: () => {

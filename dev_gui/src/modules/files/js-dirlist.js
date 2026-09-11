@@ -86,6 +86,14 @@ export const dirlistOptions = {
         icon: 'icon-folder-plus',
         typentries: [entryTypes.branch, entryTypes.root]
       },
+      // rendered right after "new folder" - which is hidden for file entries,
+      // so rename comes first on those
+      rename: {
+        action: 'rename',
+        text: 'rename',
+        icon: 'icon-pencil',
+        typentries: [entryTypes.branch, entryTypes.node]
+      },
       remove: {
         action: 'remove',
         text: 'delete',
@@ -94,11 +102,6 @@ export const dirlistOptions = {
       },
       move: {
         action: 'move',
-        typentries: [entryTypes.branch, entryTypes.node]
-      },
-      rename: {
-        action: 'rename',
-        trigger: 'dblclick',
         typentries: [entryTypes.branch, entryTypes.node]
       }
     },
@@ -118,7 +121,7 @@ export const dirlistOptions = {
 }
 
 function EntryAction(args, options) {
-  const entryaction = new Entry(args, options);
+  const entryaction = new Entry(args, { ...options, deferListeners: true });
   let _fetching=false;
   entryaction.eventnames = {
     attach: 'attach',
@@ -143,8 +146,12 @@ function EntryAction(args, options) {
   entryaction.branchListener = function(callback = null) {
     const el = this.container;
     if (el.dataset.action === "create") return;
-    this.toggleActive();
-    if (this.isActive()) this.branchActivate(callback).then(() => {
+    // always activate (never toggle off): a click always means "select this
+    // as the upload target" - toggling meant a click on an already-active
+    // folder (or one left active from a prior selection) silently
+    // deactivated it instead, requiring a second click to select it again
+    this.setOn(true);
+    this.branchActivate(callback).then(() => {
       this.emitEvent();
     });
   }
@@ -221,20 +228,24 @@ function EntryAction(args, options) {
       return false;
     }
   }
-  entryaction.listenRename = function(evt = 'dblclick') {
+  // put the entry label into inline-edit mode (used by the rename control and by
+  // the freshly created folder placeholder)
+  entryaction.startRename = function() {
+    if (this.isTrashDir() || this.type === entryTypes.discard) return;
+    const label = this.getLabelElement();
+    label.dataset.oldname = label.textContent;
+    this.setEditable();
+    set_cursor_editable(this.label);
+  }
+  entryaction.listenRename = function() {
     const entry = this;
-    const label = entry.getLabelElement();
-    label.addEventListener(evt, (e) => {
-      label.dataset.oldname = label.textContent;
-      if (this.type === entryTypes.discard) {
-        e.preventDefault();
-        return;
-      }
-      entry.setEditable();
-      set_cursor_editable(entry.label);
-    });
-    // remove editable when click on entry
+    // clicking away from the label ends edit mode; a still-unnamed "create"
+    // placeholder is dropped. Clicks on the entry's own control toolbar don't
+    // count as "away".
     entry.container.addEventListener('click', (e) => {
+      // not currently renaming - let the click through to the row's own listeners
+      if (entry.getLabelElement().contentEditable !== 'true') return;
+      if (e.target.closest('.entrycontrols')) return;
       e.preventDefault();
       e.stopImmediatePropagation();
       entry.setEditable(false);
@@ -284,8 +295,24 @@ function EntryAction(args, options) {
   }
   entryaction.getListeners = function() {
     let listeners = [];
-    let func = (e) => {
-      e.stopImmediatePropagation();
+    const clickExpand = !!this.options.clickExpand;
+    // rollover/click/dblclick only ever respond on the icon and the name -
+    // not the whole row (its own padding, or - for import - the checkbox's
+    // own area). Leaf entries have no separate icon span.
+    const targets = this.icon ? ['label', 'icon'] : ['label'];
+    // click always selects/activates the entry (upload target in My files,
+    // checkbox toggle in the import picker); dblclick always expands or
+    // collapses a folder, with no background change of its own.
+    // A double-click still fires two ordinary 'click' events on the same
+    // target before 'dblclick' does (standard browser behaviour), so the
+    // click's own action is queued behind a short delay and cancelled if a
+    // dblclick follows within it - otherwise both actions would run.
+    let clickTimer = null;
+    let doClick = () => {
+      if (clickExpand) {
+        if (this.importButton) this.importButton.click();
+        return;
+      }
       this.branchListener(() => {
         this.emitEvent(this.eventnames.attach);
       });
@@ -294,8 +321,11 @@ function EntryAction(args, options) {
     if ([entryTypes.root, entryTypes.discard].indexOf(this.type) < 0) {
       listeners = this.moveHandlers();
       if (this.type === entryTypes.node) {
-        func = (e) => {
-          e.stopImmediatePropagation();
+        doClick = () => {
+          if (clickExpand) {
+            if (this.importButton) this.importButton.click();
+            return;
+          }
           this.toggleActive();
           this.emitEvent();
         }
@@ -304,10 +334,55 @@ function EntryAction(args, options) {
       } else listeners = listeners.concat(this.dropHandlers());
       this.listenRename();
     } else listeners = listeners.concat(this.dropHandlers());
-    listeners.unshift({
-      name: 'click',
-      target: 'label',
-      func: func
+    const func = (e) => {
+      e.stopImmediatePropagation();
+      if (clickTimer) clearTimeout(clickTimer);
+      clickTimer = setTimeout(() => {
+        clickTimer = null;
+        doClick();
+      }, 250);
+    };
+    // My files: click selects a directory as the upload target - meaningless
+    // on a file, so files get no click action there at all. Import always
+    // wants the click (it toggles that file's own checkbox).
+    const skipClick = this.type === entryTypes.node && !clickExpand;
+    if (!skipClick) {
+      targets.forEach((target) => {
+        listeners.unshift({ name: 'click', target: target, func: func });
+      });
+    }
+    // dblclick always just expands/collapses - only meaningful on a branch
+    if ([entryTypes.root, entryTypes.branch, entryTypes.discard].indexOf(this.type) >= 0) {
+      targets.forEach((target) => {
+        listeners.push({
+          name: 'dblclick',
+          target: target,
+          func: (e) => {
+            e.stopImmediatePropagation();
+            if (clickTimer) {
+              clearTimeout(clickTimer);
+              clickTimer = null;
+            }
+            this.toggleOpen();
+          }
+        });
+      });
+    }
+    targets.forEach((target) => {
+      listeners.push({
+        name: 'mouseenter',
+        target: target,
+        func: () => {
+          this.emitEvent('mouseenter');
+        }
+      });
+      listeners.push({
+        name: 'mouseleave',
+        target: target,
+        func: () => {
+          this.emitEvent('mouseleave');
+        }
+      });
     });
     return listeners;
   }
@@ -372,17 +447,14 @@ function EntryAction(args, options) {
     entries.prepend(new_entry.container);
     new_entry.container.dataset.action = this.options.actions.create;
     new_entry.isnew=true;
-    new_entry.label.dispatchEvent(new Event('dblclick'));}
+    new_entry.startRename();}
     if(!this.loaded) this.list().then(()=>{
     this.setOpen(true);
     create_entry();
     }); else create_entry();
    }
   entryaction.rename = function() {
-    if (this.isTrashDir()) return;
-    this.fetchAction(this.options.actions.rename).then(() => {
-      console.log('renamed', this)
-    });
+    this.startRename();
   }
 
   entryaction.move = function(dest, callback = null) {
@@ -437,8 +509,13 @@ export class JsDirList {
         ...options
       };
 
+      // dirlistOptions.entry (icons, draggables, ...) must survive even when
+      // a caller passes its own partial options.entry (e.g. import's tags
+      // override) - the shallow spread above already replaced it wholesale
+      // with just that partial object, so re-layer it in explicitly here.
       this.options.entry = { ...entryOptions,
-        ...this.options.entry,
+        ...dirlistOptions.entry,
+        ...options.entry,
       };
       this.options.entry.url = this.options.url;
       this.container = create_box(
@@ -468,6 +545,13 @@ export class JsDirList {
       }
     };
     options.listener = this.uuid;
+    // pass through to the entries (e.g. import picker disables the hover hints)
+    if (this.options.notips) options.notips = true;
+    // import picker: single click expands/collapses, double click toggles the checkbox
+    if (this.options.clickExpand) options.clickExpand = true;
+    // import picker: wrap icon+name so they (not the row, or the checkbox
+    // prepended into it) carry the per-depth indentation - see entry.js init()
+    if (this.options.wrapContent) options.wrapContent = true;
     this.root = EntryAction({
       type: type,
       name: '',
@@ -528,6 +612,25 @@ export class JsDirList {
           if (this.overitem) this.overitem.classList.remove(e.entry.options.css.dragover);
           this.overitem = null;
           break;
+        case "mouseenter":
+          // controls only ever show on rollover, whether or not the row is
+          // the selected one - selection is shown via .row-selected instead
+          if (this._hoverLeaveTimer) {
+            clearTimeout(this._hoverLeaveTimer);
+            this._hoverLeaveTimer = null;
+          }
+          if (this.entrycontrols && !this.dragentry) this.entrycontrols.attachControls(e.entry);
+          break;
+        case "mouseleave":
+          // debounced: moving straight from one row to the next (or briefly
+          // crossing a boundary while the toolbar's own insertion shifts the
+          // row's layout) shouldn't make the controls flicker off and back on
+          if (this._hoverLeaveTimer) clearTimeout(this._hoverLeaveTimer);
+          this._hoverLeaveTimer = setTimeout(() => {
+            this._hoverLeaveTimer = null;
+            if (this.entrycontrols && !this.dragentry) this.entrycontrols.detachControls();
+          }, 150);
+          break;
         case "drop":
           if (!this.dragentry) {
             ModuleEventEmitter.emit(this.eventnames.action, e, this.uuid);
@@ -564,8 +667,26 @@ export class JsDirList {
   setActiventry(entry = null) {
     this.activentry = entry;
   }
+  // Marks the truly selected row (persists while hover previews elsewhere)
+  // separately from .has-controls (which also lights up on a mere hover).
+  markSelectedRow(entry) {
+    if (this.activentry && this.activentry !== entry) this.activentry.container.classList.remove('row-selected');
+    entry.container.classList.add('row-selected');
+  }
+
+  // Selects an entry (background only) without showing its controls toolbar -
+  // that only ever appears on an actual rollover.
+  selectEntry(entry) {
+    this.markSelectedRow(entry);
+    this.activentry = entry;
+    ModuleEventEmitter.emit(this.eventnames.attach, {
+      entry: this.activentry
+    }, this.uuid);
+  }
+
   attachControls(entry) {
     if (this.entrycontrols) this.entrycontrols.attachControls(entry);
+    this.markSelectedRow(entry);
     this.activentry = entry;
     ModuleEventEmitter.emit(this.eventnames.attach, {
       entry: this.activentry
@@ -575,6 +696,7 @@ export class JsDirList {
   detachControls() {
     const dest = (this.activentry) ? ((this.activentry.parent) ? this.activentry.parent : this.root) : this.root;
     if (this.entrycontrols) this.entrycontrols.attachControls(dest);
+    this.markSelectedRow(dest);
     this.activentry = dest;
     ModuleEventEmitter.emit(this.eventnames.attach, {
       entry: dest

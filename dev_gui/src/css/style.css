@@ -247,8 +247,9 @@ button.submitslider {@apply min-w-[200px]}
 .comment-captcha {@apply hidden}
 /*special for safari bug*/
 
-/* my_files list*/
-li:not(.on) ul.entries {@apply hidden}
+/* my_files list - [data-name]/.entries (not li/ul) so this also matches the
+   import picker's div-based rows (see entry.js, options.tags) */
+[data-name]:not(.on) .entries {@apply hidden}
 .console {@apply rounded-sm border border-info-50 text-info-600 text-xs px-4 py-1 my-2 }
 .button.console {@apply py-2 text-base rounded border-none bg-transparent}
 /* my_files : upload progression - a stack of collapsible boxes under the dropzone */
@@ -278,13 +279,19 @@ li:not(.on) ul.entries {@apply hidden}
 .except-list[data-except="errorfile"] > .except-list-title {@apply text-danger-800 bg-danger-100}
 .except-list[data-except="errorfile"] .except-list-items li {@apply text-danger-700 border-danger-200}
 /*js import - upload dropzone */
-#dropzone {@apply relative flex flex-col items-center justify-center gap-3 w-full h-auto min-h-[200px] p-6 text-center rounded-lg border-2 border-dashed border-stone-300 bg-stone-50 text-stone-500 cursor-pointer transition-colors duration-200 hover:border-mainblue-400 hover:bg-mainblue-50}
-#dropzone.dragover {@apply border-solid border-mainblue-600 bg-mainblue-100 text-mainblue-800 drop-shadow}
+#dropzone {@apply relative flex flex-col items-center justify-center gap-3 w-full h-auto min-h-[200px] p-6 text-center rounded-lg border-2 border-dashed border-stone-300 bg-stone-50 text-stone-500 cursor-pointer transition-colors duration-200 hover:border-mainblue-400}
+/* bg-mainblue-100 matches .row-selected - only while a directory actually is
+   the current upload target (js-my-files.js toggles this on attach/detach) */
+#dropzone.has-target {@apply bg-mainblue-100}
+/* a shade darker than the has-target resting state, so actively dragging a
+   file over it still reads as visually distinct */
+#dropzone.dragover {@apply border-solid border-mainblue-600 bg-mainblue-200 text-mainblue-800 drop-shadow}
 #dropzone .dropzone-title {@apply flex flex-col items-center gap-1.5 text-base font-semibold text-stone-700 before:icon before:h-9 before:w-9 before:icon-arrow-up-tray before:opacity-60}
 #dropzone.dragover .dropzone-title {@apply text-mainblue-800 before:opacity-90}
 #dropzone .trigger {@apply inline-flex items-center justify-center gap-1.5 w-full max-w-[15rem] font-btn text-sm font-medium text-mainblue-700 bg-white border border-stone-200 rounded-md px-3 py-1.5 shadow-sm whitespace-nowrap overflow-hidden text-ellipsis transition-colors hover:bg-mainblue-700 hover:text-white hover:border-mainblue-700 hover:shadow-none before:icon before:p-0.5 before:mr-0 before:opacity-70 hover:before:invert hover:before:opacity-100}
 #dropzone .trigger[data-type="directory"]  {@apply before:icon-arrow-up-tray }
 #dropzone .trigger[data-type="file"]  {@apply before:icon-arrow-up-square}
+
 /* names of the files / folders being dropped / zipped (live, inside the dropzone) */
 .dropzone-files {@apply flex flex-col items-start gap-1 w-full max-h-40 overflow-y-auto mt-1}
 .dropzone-file {@apply flex items-center gap-1.5 w-full text-sm font-medium text-stone-700 before:icon before:icon-sm before:shrink-0 before:opacity-80}
@@ -299,53 +306,109 @@ li:not(.on) ul.entries {@apply hidden}
 .target-upload {@apply w-auto font-btn text-sm text-mainblue-700 border-stone-50 border rounded p-[0.25rem]}
 .disabled {@apply opacity-90}
 tr.disabled {@apply opacity-70}
-.has-controls {@apply  border-b border-stone-200 font-bold bg-mainblue-50}
+/* the row itself stays transparent - only the name span is tinted (see
+   .entryN/.entryB/.entryR/.entryD below), and since that span is a block
+   that fills whatever space the icon/checkbox/toolbar floats leave, the
+   tint naturally starts right at the icon and runs to the row's end */
+.has-controls > .entryN, .has-controls > .entryB, .has-controls > .entryR, .has-controls > .entryD {@apply bg-mainblue-50}
+/* the actually-selected row (sticks after a click, unlike the hover preview
+   above) - darker so the two states read as distinct, and placed after
+   .has-controls so it wins when a row is both currently hovered and selected */
+.row-selected > .entryN, .row-selected > .entryB, .row-selected > .entryR, .row-selected > .entryD {@apply bg-mainblue-100}
+/* mark every descendant of a selected folder semibold, so being "inside"
+   the selection is still visible without tinting their background */
+.folders [data-name].row-selected .entries [class^="entry"] {@apply font-semibold}
 /* browse or drop in a subdir*/
 .has-controls .boxtitle {@apply w-36 right-0 top-1 z-20 absolute small-caps truncate overflow-x-hidden}
 [data-name][data-type="R"] [data-name] {@apply ml-4 relative}
+/* import picker (wrapContent, see entry.js init()): the row itself stays
+   unindented - its icon+name wrapper (.entry-content below) carries the
+   indentation instead, so a control prepended into the row (the checkbox)
+   isn't dragged along with it. Needs higher specificity than the ml-4 rule
+   above (same attribute-selector count would tie on source order alone). */
 .dirlist {@apply h-full mt-2 }
-[data-name][data-type="R"] , [data-name][data-type="D"] {@apply ml-0  py-0.5  relative}
+/* a little vertical breathing room around every row, of any type */
+[data-name] {@apply py-1}
+[data-name][data-type="R"] , [data-name][data-type="D"] {@apply ml-0  relative}
 .folders [data-name].removed {@apply font-normal border border-stone-300 bg-danger-200}
 .folders [data-name].dragging {@apply font-normal border border-warning-300 bg-warning-200}
 .folders [data-name].dragover {@apply font-normal border border-secondblue-100 bg-secondblue-100 min-h-32}
 .folders [data-name].droptarget.dragover {@apply hover:drop-shadow pb-4}
 .folders [data-name].dragover .entrycontrols , .folders [data-name].dragover #dropzone {@apply hide}
 .on {@apply  block sm:max-h-[50v]  overflow-y-hidden}
-.on > .entries  {@apply block  overflow-y-auto }
-.folders .entryN {@apply before:icon-md before:opacity-80 before:absolute before:block before:top-1.5 before:left-0  pl-5 }
-.entryN, .entryB, .entryR, .entryD  {@apply text-base font-normal align-text-bottom mb-0.5 mr-0.5 cursor-pointer}
-.folders .ico-entryD, .folders .ico-entryR, .folders .ico-entryB, .taxotree .ico-entryR, .taxotree .ico-entryB  {@apply w-4 h-4 inline-block before:icon-md before:opacity-80 before:absolute before:block before:top-1.5 before:left-0  mr-0.5  pl-5 cursor-pointer }
+/* clear-both: always start below the icon/checkbox/toolbar floats, whatever
+   their relative heights, instead of wrapping alongside them */
+.on > .entries  {@apply block clear-both overflow-y-auto }
+/* import picker only (wrapContent): icon+name wrapper - block+overflow-hidden
+   so it still fills the gap next to the checkbox float */
+.entry-content {@apply block overflow-hidden}
+/* per-depth indent = --indent-unit * depth, one explicit chain per level
+   anchored to the root so each only matches its exact depth (an inline
+   margin-left set from JS, and a --tree-depth custom-property counter, were
+   both tried here first and didn't take effect for reasons never pinned
+   down - plain per-depth selectors are more verbose but leave nothing to
+   debug at runtime). Tune the indent width in one place via --indent-unit. */
+.folders {--indent-unit: theme('spacing.4');}
+.folders [data-name][data-type="R"] > .entries > [data-name] > .entry-content {@apply ml-[calc(var(--indent-unit))]}
+.folders .entryN {@apply relative before:icon-md before:opacity-80 before:absolute before:block before:top-1.5 before:left-0  pl-5 }
+/* block + overflow-hidden: a floated icon/checkbox (and a floated toolbar on
+   the other side) leave a gap between them that this fills completely, so
+   its own background (see .has-controls/.row-selected/:hover above) starts
+   right at the icon and runs to the row's end - not the whole row's width */
+.entryN, .entryB, .entryR, .entryD  {@apply block overflow-hidden text-sm font-normal my-1 mr-0.5 cursor-pointer}
+.folders .ico-entryD, .folders .ico-entryR, .folders .ico-entryB, .taxotree .ico-entryR, .taxotree .ico-entryB  {@apply relative w-4 h-4 before:icon-md before:opacity-80 before:absolute before:block before:top-1.5 before:left-0  mr-0.5  pl-5 cursor-pointer }
+.folders .ico-entryD, .folders .ico-entryR, .folders .ico-entryB {@apply float-left}
+.taxotree .ico-entryR, .taxotree .ico-entryB {@apply inline-block}
 .folders .ico-entryR, .folders .ico-entryB {@apply before:icon-folder-sm}
 .folders .entryD {@apply text-base font-normal}
 .folders .ico-entryD {@apply before:icon-trash-sm}
-.folders .on > .entryR, .folders .on > .entryB {@apply font-semibold}
-.folders .on > .ico-entryR, .folders .on > .ico-entryB {@apply before:icon-folder-open}
+/* two selectors each below: the row's direct child (My files) and, for the
+   import picker's icon+name wrapper (wrapContent), one level deeper */
+.folders .on > .entryR, .folders .on > .entryB,
+.folders .on > .entry-content > .entryR, .folders .on > .entry-content > .entryB {@apply font-semibold}
+.folders .on > .ico-entryR, .folders .on > .ico-entryB,
+.folders .on > .entry-content > .ico-entryR, .folders .on > .entry-content > .ico-entryB {@apply before:icon-folder-open}
 .taxotree .ico-entryR, .taxotree .ico-entryB  {@apply before:icon-plus}
 .taxotree .on > .ico-entryR, .taxotree .on > .ico-entryB  {@apply before:icon-minus}
-.on > .entryD {@apply font-semibold}
-.on > .ico-entryD {@apply  before:icon-trash}
+.on > .entryD, .on > .entry-content > .entryD {@apply font-semibold}
+.on > .ico-entryD, .on > .entry-content > .ico-entryD {@apply  before:icon-trash}
 .folders .entryN {@apply before:icon-document-sm}
 .entryN.img {@apply before:icon-image-sm }
 .entryN.doc {@apply before:icon-document-sm}
-.on > .entryN {@apply font-semibold}
+.on > .entryN, .on > .entry-content > .entryN {@apply font-semibold}
 .on .entryN , .entryN {@apply  text-sm font-light}
 .entries [data-name$=".tsv"] .entryN {@apply font-normal}
 /* entry selected */
 .selected > .entryB, .selected > .entryN {@apply font-semibold  after:flex after:items-center after:gap-1 after:small-caps after:text-sm after:absolute after:top-0 after:bg-secondblue-400 after:text-stone-50 after:right-0 after:py-0 after:px-2 after:h-7 after:max-h-7 after:rounded-sm}
 .selected > .entryB::after, .selected > .entryN::after {content:url("data:image/svg+xml; utf8, <svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 20 20' fill='white'><path fill-rule='evenodd' d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z' clip-rule='evenodd' /></svg>") attr(data-selected)}
 .selected .entries  {@apply hidden}
-.folders .wait > .entryB, .folders .wait > .entryD,
- .folders .wait > .entryR {@apply after:mr-1 after:p-0.5 after:icon after:icon-arrow-path-sm}
+.folders .wait > .entryB, .folders .wait > .entryD, .folders .wait > .entryR,
+.folders .wait > .entry-content > .entryB, .folders .wait > .entry-content > .entryD, .folders .wait > .entry-content > .entryR {@apply after:mr-1 after:p-0.5 after:icon after:icon-arrow-path-sm}
 .entries .editable {@apply font-normal border border-stone-300 border-dashed text-ellipsis min-w-[3rem] outline-transparent outline-none before:pl-0 after:pr-2 pl-2 bg-white}
 .entrycontrols {@apply text-sm  w-auto  mr-1 inline-block float-right relative}
 /* overflow-hidden + align-baseline puts the box's baseline at its bottom edge,
    so the box bottom lines up with the file-name text baseline. */
-.control-select.import-toggle {@apply inline-block overflow-hidden align-baseline text-center leading-4 cursor-pointer bg-stone-200 hover:bg-stone-300 font-semibold text-xs text-stone-200 hover:text-stone-600 before:content-["\2713"] w-4 h-4 max-h-4 rounded-sm ml-4 }
-.control-select.import-toggle.is-selected {@apply  bg-transparent text-secondblue-500 before:content-["\2713"]}
-/* tint the entry's own name while its select toggle is on - target the label
-   span, not the [data-name] li, so the colour doesn't inherit into nested
-   rows (e.g. the trash dir, which has no toggle) */
-.folders [data-name]:has(> .control-select.is-selected) > [class^="entry"] {@apply text-secondblue-600}
+/* floats ignore vertical-align, so align-baseline (used when this was
+   inline-block) can't nudge it to the text baseline any more - use the same
+   relative top offset the icon uses for the identical alignment problem */
+.control-select.import-toggle {@apply relative top-1.5 float-left overflow-hidden text-center leading-4 cursor-pointer bg-stone-200 hover:bg-stone-300 font-semibold text-xs text-stone-200 hover:text-stone-600 before:content-["\2713"] w-4 h-4 max-h-4 rounded-sm mr-2 }
+.control-select.import-toggle.is-selected {@apply  bg-secondblue-50 text-secondblue-500 before:content-["\2713"]}
+/* folder not itself checked, but a descendant is - show a dash instead of the checkmark */
+.folders [data-name].has-selected-inside > .control-select.import-toggle:not(.is-selected) {@apply text-secondblue-500 before:content-["\2212"]}
+/* rollover background for import rows - on the name span (see the comment
+   by .entryN/.entryB/.entryR/.entryD above), not the row, so it starts at
+   the icon and runs to the row's end rather than covering the checkbox too */
+/* :hover on the row itself would trigger from anywhere in its box (its own
+   padding, the checkbox's area) - scope it to only the icon or the name
+   actually being hovered, matching where click/dblclick actually respond */
+.folders [data-name]:has(> .control-select.import-toggle):has(> [class^="ico-entry"]:hover, > [class^="entry"]:hover) > [class^="entry"] {@apply bg-mainblue-50}
+/* tint (and lightly shade) the entry's own name while its select toggle is
+   on - target the label span, not the [data-name] li, so neither the colour
+   nor the background inherit into nested rows (e.g. the trash dir, which has
+   no toggle) */
+.folders [data-name]:has(> .control-select.is-selected) > [class^="entry"] {@apply text-secondblue-600 bg-mainblue-50}
+/* unchecked folder that still has a checked entry inside (e.g. while collapsed) */
+.folders [data-name].has-selected-inside > [class^="entry"] {@apply text-secondblue-600}
 .intrash {@apply bg-danger-100}
 
 /* form with tabs */
@@ -464,6 +527,8 @@ content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" f
 content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="fill-current"><path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.52.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z" clip-rule="evenodd" /></svg>')
 }
 .icon-pencil-sm {content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="fill-current"><path d="m2.695 14.762-1.262 3.155a.5.5 0 0 0 .65.65l3.155-1.262a4 4 0 0 0 1.343-.886L17.5 5.501a2.121 2.121 0 0 0-3-3L3.58 13.419a4 4 0 0 0-.885 1.343Z" /></svg>');
+}
+.icon-pencil {content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="stroke-current"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" /></svg>');
 }
 .icon-minus {
 content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 12H6" /></svg>')

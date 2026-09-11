@@ -308,6 +308,15 @@ export class JsMyFiles {
         text: text
       }, this.dropzone);
       btn.addEventListener('click', async (e) => {
+        if (!this.activentry) {
+          AlertBox.addAlert({
+            type: "error",
+            content: 'Select a directory first.',
+            dismissible: true,
+            inverse: true
+          });
+          return;
+        }
         if (this.haspicker) {
           this.openDirDialog(opt, (e) => {
             this.handleBrowse(e)
@@ -454,6 +463,7 @@ export class JsMyFiles {
       if (e.entry !== this.activentry && this.activentry.isBranch(true)) this.detachDropzone();
       this.activentry = e.entry;
       this.targetitem = this.activentry.container;
+      this.dropzone.classList.add('has-target');
       if (this.activentry.isBranch(true)) this.enableUploadDialog();
     }, this.jsDirList.uuid);
     ModuleEventEmitter.on(this.jsDirList.eventnames.detach, (e) => {
@@ -461,6 +471,7 @@ export class JsMyFiles {
       this.activentry = null;
       this.uploadentry = null;
       this.targetitem = null;
+      this.dropzone.classList.remove('has-target');
     }, this.jsDirList.uuid);
     ModuleEventEmitter.on(this.jsDirList.eventnames.action, (e) => {
       switch (e.action) {
@@ -473,7 +484,12 @@ export class JsMyFiles {
           break;
       }
     }, this.jsDirList.uuid);
-    this.activentry.label.dispatchEvent(new Event('click'));
+    // select the "My files" root by default (background only - the controls
+    // toolbar itself only ever shows on an actual rollover)
+    this.jsDirList.root.setOn(true);
+    this.jsDirList.selectEntry(this.jsDirList.root);
+    // deploy the "My files" root by default so its folders are visible on load
+    this.jsDirList.root.setOpen(true);
   }
 
   addDisplayProgression(parent=null) {
@@ -552,6 +568,15 @@ export class JsMyFiles {
   async handleDrop(e) {
     e.preventDefault();
     e.stopPropagation();
+    if (!this.activentry) {
+      AlertBox.addAlert({
+        type: "error",
+        content: 'Select a directory first.',
+        dismissible: true,
+        inverse: true
+      });
+      return;
+    }
     if (this.uploadBusy()) return;
     if (!this.setUploadEntry()) return;
     let dataTransfer;

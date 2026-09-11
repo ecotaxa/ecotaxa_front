@@ -134,14 +134,28 @@ export function JsImport(container, options = {}) {
       } = await import('../modules/files/js-dirlist.js');
       jsDirList = new JsDirList(displayselection, {
         url: url.dirlist,
+        // read-only picker: no per-entry toolbar, so drop the "activate tools" hint
+        notips: true,
+        // single click expands/collapses a row, double click toggles its checkbox
+        clickExpand: true,
+        // wrap icon+name in their own indented div so the checkbox prepended
+        // into the row stays unindented, lining up in a single left column
+        wrapContent: true,
+        entry: {
+          tags: { tag: 'div', subtag: 'div', label: 'span' },
+        },
       });
       // Import browses "My files" read-only: no create/remove/move/rename
       // toolbar. JsDirList guards every toolbar call with `if (this.entrycontrols)`
       // so nulling it here disables the toolbar without touching EntryControls.
       jsDirList.entrycontrols = null;
       addImportControls(jsDirList, jsDirList.uuid, null, [], true);
+      // deploy the "My files" root so its folders show right away
+      jsDirList.root.setOpen(true);
+      // Note: NOT wired as jsDirList.detachcallback - this tree is a persistent
+      // multiselect picker, so browsing/expanding folders must not clear ticks
+      // (unlike the single-select accordion pickers below, which do want that).
       const detachcallback=function() {deSelect();showSubmit(false);}
-      jsDirList.detachcallback=detachcallback;
       // Keep the import tree in sync with changes made to the server files
       // elsewhere - typically the "My files" manager opened in a modal
       // (create / delete / rename / move a directory, or an upload). Those paths
@@ -191,17 +205,26 @@ export function JsImport(container, options = {}) {
     multiSelected.clear();
     showSubmit(false);
   }
+  updatePartialMarks();
   }
 
   function attachImportToggle(entry) {
     const btn = create_box('span', {
       class: ['control-select', 'import-toggle']
-    }, entry.container);
+    });
+    entry.container.prepend(btn);
     entry.importButton = btn;
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       e.preventDefault();
       toggleMultiSelect(entry);
+    });
+    // a double-click landing on the toggle still fires two 'click' events
+    // (each stopped above) followed by one 'dblclick' - stop that too, or it
+    // bubbles up to the row and triggers the row's expand/collapse handler
+    btn.addEventListener('dblclick', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
     });
   }
 
@@ -232,6 +255,23 @@ export function JsImport(container, options = {}) {
     }
   }
 
+  // Tint the name of every unchecked folder that still has a checked entry
+  // somewhere inside it, so a selection buried in a collapsed folder stays
+  // visible. Recomputed from multiSelected on every selection change.
+  function updatePartialMarks() {
+    if (!jsDirList || !jsDirList.container) return;
+    jsDirList.container
+      .querySelectorAll('[data-name].has-selected-inside')
+      .forEach((el) => el.classList.remove('has-selected-inside'));
+    multiSelected.forEach((entry) => {
+      eachAncestor(entry, (ancestor) => {
+        const key = ancestor.getCurrentPath().join(dirseparator);
+        if (!multiSelected.has(key) && ancestor.container)
+          ancestor.container.classList.add('has-selected-inside');
+      });
+    });
+  }
+
   // True when an ancestor folder is currently selected.
   function hasSelectedAncestor(entry) {
     let parent = entry.getParent();
@@ -240,6 +280,27 @@ export function JsImport(container, options = {}) {
       parent = parent.getParent();
     }
     return false;
+  }
+
+  // After a tick, climb from the entry's parent upward: if every loaded,
+  // importable child of a folder is now checked, tick the folder itself too
+  // (it no longer needs the "has-selected-inside" dash - it's fully checked),
+  // and keep climbing since that may complete the next level up as well.
+  function promoteFullAncestors(entry) {
+    let parent = entry.getParent();
+    while (parent && parent.importButton) {
+      const key = parent.getCurrentPath().join(dirseparator);
+      if (multiSelected.has(key)) {
+        parent = parent.getParent();
+        continue;
+      }
+      const children = (Array.isArray(parent.entries) ? parent.entries : []).filter((c) => c && c.importButton);
+      if (children.length === 0) break;
+      const allChecked = children.every((c) => multiSelected.has(c.getCurrentPath().join(dirseparator)));
+      if (!allChecked) break;
+      setSelectedState(parent, true);
+      parent = parent.getParent();
+    }
   }
 
   function toggleMultiSelect(entry) {
@@ -257,8 +318,11 @@ export function JsImport(container, options = {}) {
       // Unticking anything bubbles up: an ancestor folder can no longer
       // claim that all of its contents are selected. Ticked siblings stay.
       eachAncestor(entry, (ancestor) => setSelectedState(ancestor, false));
+    } else {
+      promoteFullAncestors(entry);
     }
     showSubmit(multiSelected.size > 0);
+    updatePartialMarks();
   }
   function addImportPath(value) {
     document.getElementById(options.selector.importzone).value = value;
