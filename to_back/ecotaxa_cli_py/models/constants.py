@@ -329,7 +329,7 @@ individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)*
     def password_regexp(self):
         """Gets the password_regexp of this Constants.  # noqa: E501
 
-        8 char. minimum, at least one uppercase, one lowercase, one number and one special char in '#?!@%^&*-+'   # noqa: E501
+        8 to 64 chars, at least one uppercase, one lowercase, one number and one special char in '#?!@%^&*-+'   # noqa: E501
 
         :return: The password_regexp of this Constants.  # noqa: E501
         :rtype: str
@@ -340,7 +340,7 @@ individual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)*
     def password_regexp(self, password_regexp):
         """Sets the password_regexp of this Constants.
 
-        8 char. minimum, at least one uppercase, one lowercase, one number and one special char in '#?!@%^&*-+'   # noqa: E501
+        8 to 64 chars, at least one uppercase, one lowercase, one number and one special char in '#?!@%^&*-+'   # noqa: E501
 
         :param password_regexp: The password_regexp of this Constants.  # noqa: E501
         :type: str

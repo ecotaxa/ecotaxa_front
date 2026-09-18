@@ -5335,7 +5335,7 @@ msgstr ""
 
 #: appli/templates/v2/users/_profile_macro.html:24
 msgid ""
-"8 char. minimum, at least one uppercase, one lowercase, one number and "
+"8 to 64 chars, at least one uppercase, one lowercase, one number and "
 "one special char in "
 msgstr ""
 
