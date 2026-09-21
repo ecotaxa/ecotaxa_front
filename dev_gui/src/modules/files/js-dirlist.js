@@ -6,7 +6,8 @@ import {
   urlseparator,
   stop_on_error,
   generate_uuid,
-  set_cursor_editable
+  set_cursor_editable,
+  error_content
 }
 from '../../modules/utils.js';
 import {
@@ -201,7 +202,7 @@ function EntryAction(args, options) {
     })).catch((err) => {
       AlertBox.addAlert({
         type: AlertBox.alertconfig.types.danger,
-        content: err.status ? `${err.status} ${err.statusText}` : err,
+        content: error_content(err),
         dismissible: false,
       });
     }).finally(()=> {
@@ -396,6 +397,7 @@ function EntryAction(args, options) {
   entryaction.extraStyles = function(entry) {
     const ext = entry.name.split('.').pop();
     const cl = (entry.type === entryTypes.node) ? (filter_files.images.split(',').indexOf(ext) >= 0) ? this.options.icons.image : this.options.icons.document : null;
+    if (entry.type === entryTypes.node) entry.ftype = ext.toLowerCase();
   }
   entryaction.setDiscard = function() {
     if (this.type === entryTypes.discard) this.emitEvent(this.eventnames.isdiscard);

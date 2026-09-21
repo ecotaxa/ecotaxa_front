@@ -252,6 +252,15 @@ function decodeURIComponentSafe(uri, mod) {
     }
     return out;
 }
+// Turns a fetch/response rejection into a string safe to hand to
+// AlertBox.addAlert's `content` (it runs content through decodeURIComponentSafe,
+// which throws on anything without a .split, e.g. a raw Error object).
+function error_content(err) {
+  if (err && err.status) return `${err.status} ${err.statusText}`;
+  if (err instanceof Error) return err.message || err.toString();
+  if (typeof err === 'string') return err;
+  return 'Unknown error';
+}
 const noop = function() {};
 export {
   generate_uuid,
@@ -273,5 +282,6 @@ export {
   urlseparator,
   set_cursor_editable,
   decodeURIComponentSafe,
+  error_content,
   noop
 }

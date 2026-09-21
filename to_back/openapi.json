@@ -5706,7 +5706,7 @@
           "Taxonomy Tree"
         ],
         "summary":"Wormsification Taxa Set",
-        "description":"Returns **information about several taxa**, including their lineage.",
+        "description":"Resolve taxa to their closest WoRMS entry.\nMorphological taxa are resolved to their nearest phylogenetic parent mapped to WoRMS.",
         "operationId":"wormsification_taxa_set",
         "security":[
           {

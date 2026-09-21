@@ -11,7 +11,7 @@ TomSelect.define('clear_button', TomSelect_clear_button);
 TomSelect.define('caret_position', TomSelect_caret_position);
 TomSelect.define('drag_drop', TomSelect_drag_drop);
 import {
-  fetchSettings, create_box
+  fetchSettings, create_box, error_content
 } from '../modules/utils.js';
 import {
   models,
@@ -339,7 +339,7 @@ function createJsTomSelect() {
           }).catch((err) => {
       AlertBox.addAlert({
         type: AlertBox.alertconfig.types.danger,
-        content: err.status ? `${err.status} ${err.statusText}` : err,
+        content: error_content(err),
         dismissible: true,
       });
     }).finally(()=> {

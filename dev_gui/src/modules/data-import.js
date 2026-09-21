@@ -8,7 +8,8 @@ import {
 import {
   fetchSettings,
   unescape_html,
-  create_box
+  create_box,
+  error_content
 } from '../modules/utils.js';
 
 import {
@@ -713,7 +714,7 @@ export class DataImport {
                   this.setImportedTag(input);
                 }).catch((err)=> { AlertBox.addAlert({
         type: AlertBox.alertconfig.types.danger,
-        content: err.status ? `${err.status} ${err.statusText}` : err,
+        content: error_content(err),
         dismissible: true,
       });}).finally(()=> {this._fetching=false;});
               }

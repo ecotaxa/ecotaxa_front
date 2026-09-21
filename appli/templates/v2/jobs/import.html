@@ -63,8 +63,9 @@
 </div>
 <form method="post" class="js js-submit js-tabs js-import" action="{{request.path}}" data-event="click" data-importzoneid="import-list" data-toggle=true data-toselect="{{_('import')}}" data-textimport="{{_('import')}}" data-toggledisable=true data-toggleshared=true enctype=multipart/form-data>
     <div class="fieldset-wrapper w-full flex flex-row"><input type="hidden" name="projid" id="projid" value="{{target_proj.projid}}">
+      {% set typeimport_map = {'general': 'images-tsv', 'simple': 'images', 'update': 'tsv'} %}
       {% for type_tab,formdata in formdatas.items() %}
-    <fieldset class="w-full md:w-1/2 my-0 py-0 tab {{'tab-one' if formdatas.items()|length>1}} {{'active' if selected_type == type_tab }}"><legend class="text-center tab-control title-nav"  data-what="{{type_tab}}" >{{formdata.title}} </legend>
+    <fieldset class="w-full md:w-1/2 my-0 py-0 tab {{'tab-one' if formdatas.items()|length>1}} {{'active' if selected_type == type_tab }}"><legend class="text-center tab-control title-nav"  data-what="{{type_tab}}" data-typeimport="{{typeimport_map.get(type_tab, '')}}">{{formdata.title}} </legend>
       <div class="tab-content {{'pt-8' if selected_type==None}}" id="{{type_tab}}"  data-path="{{formdata.path}}"><em class="pb-4 block">{{formdata.legend}} <i data-for="{{'help_'+action+'_'+type_tab}}" data-request="help" data-what="help"></i></em>
       <div data-shared="import-files" data-values="{{formdata.browse_label}}|{{formdata.browse}}|{{formdata.textdrop}}" data-replaces="#browse-replace|browse|textdrop" data-browse="{{formdata.browse}}"></div>
           {{make_part_form(type_tab)}}

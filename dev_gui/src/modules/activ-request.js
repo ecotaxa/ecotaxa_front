@@ -1,6 +1,7 @@
 import DOMPurify from 'dompurify';
 import {
   fetchSettings,
+  error_content,
 } from '../modules/utils.js';
 import {
   domselectors,
@@ -234,7 +235,7 @@ function createActivRequest() {
       }).catch(err => {
         AlertBox.addAlert({
         type: AlertBox.alertconfig.types.danger,
-        content: err.status ? `${err.status} ${err.statusText}` : err,
+        content: error_content(err),
         dismissible: true,
       });
       }).finally(()=>{_fetching=false;});
@@ -245,7 +246,7 @@ function createActivRequest() {
       }).catch(err => {
         AlertBox.addAlert({
         type: AlertBox.alertconfig.types.danger,
-        content: err.status ? `${err.status} ${err.statusText}` : err,
+        content: error_content(err),
         dismissible: true,
       });
       }).finally(()=>{_fetching=false;});

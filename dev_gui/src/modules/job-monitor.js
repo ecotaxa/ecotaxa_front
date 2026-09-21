@@ -1,7 +1,8 @@
 import {
   fetchSettings,
   html_spinner,
-  create_box
+  create_box,
+  error_content
 } from '../modules/utils.js';
 import {
   css
@@ -198,7 +199,7 @@ export function jobMonitor(item, options = {}) {
     }).catch((err) => {
       AlertBox.addAlert({
         type: AlertBox.alertconfig.types.danger,
-        content: err.status ? `${err.status} ${err.statusText}` : err,
+        content: error_content(err),
         dismissible: true,
       });
     }).finally(()=> {

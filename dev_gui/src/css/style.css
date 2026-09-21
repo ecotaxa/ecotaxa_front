@@ -306,30 +306,32 @@ button.submitslider {@apply min-w-[200px]}
 .target-upload {@apply w-auto font-btn text-sm text-mainblue-700 border-stone-50 border rounded p-[0.25rem]}
 .disabled {@apply opacity-90}
 tr.disabled {@apply opacity-70}
-/* the row itself stays transparent - only the name span is tinted (see
-   .entryN/.entryB/.entryR/.entryD below), and since that span is a block
-   that fills whatever space the icon/checkbox/toolbar floats leave, the
-   tint naturally starts right at the icon and runs to the row's end */
-.has-controls > .entryN, .has-controls > .entryB, .has-controls > .entryR, .has-controls > .entryD {@apply bg-mainblue-50}
+/* the row itself stays transparent - only the icon+name is tinted. [class^="entry"]
+   matches .entryN/.entryB/.entryR/.entryD directly, or their .entry-content
+   wrapper when wrapContent is on (see the is-selected rule below for the same
+   trick) - one selector covers both cases. entrycontrols (the toolbar box,
+   prepended as a sibling into whichever row is hovered - entry.js
+   attachControls) is intentionally included here too: its class also starts
+   with "entry", so it picks up the exact same tint as the icon+name instead
+   of standing out with its own background. */
+.has-controls > [class^="entry"] {@apply bg-mainblue-50}
 /* the actually-selected row (sticks after a click, unlike the hover preview
    above) - darker so the two states read as distinct, and placed after
    .has-controls so it wins when a row is both currently hovered and selected */
-.row-selected > .entryN, .row-selected > .entryB, .row-selected > .entryR, .row-selected > .entryD {@apply bg-mainblue-100}
+.row-selected > [class^="entry"] {@apply bg-mainblue-100}
 /* mark every descendant of a selected folder semibold, so being "inside"
    the selection is still visible without tinting their background */
 .folders [data-name].row-selected .entries [class^="entry"] {@apply font-semibold}
+/* upload destination path badge (js-my-files.js dropzone hint) - same
+   bg-mainblue-100 pairing as .row-selected/#dropzone.has-target, but
+   inverted so the path reads as its own solid badge */
+.upload-destination-path {@apply inline-block bg-mainblue-100 rounded-sm px-2 py-0.5 font-semibold}
 /* browse or drop in a subdir*/
 .has-controls .boxtitle {@apply w-36 right-0 top-1 z-20 absolute small-caps truncate overflow-x-hidden}
 [data-name][data-type="R"] [data-name] {@apply ml-4 relative}
-/* import picker (wrapContent, see entry.js init()): the row itself stays
-   unindented - its icon+name wrapper (.entry-content below) carries the
-   indentation instead, so a control prepended into the row (the checkbox)
-   isn't dragged along with it. Needs higher specificity than the ml-4 rule
-   above (same attribute-selector count would tie on source order alone). */
 .dirlist {@apply h-full mt-2 }
 /* a little vertical breathing room around every row, of any type */
-[data-name] {@apply py-1}
-[data-name][data-type="R"] , [data-name][data-type="D"] {@apply ml-0  relative}
+[data-name][data-type="R"] , [data-name][data-type="D"] {@apply relative}
 .folders [data-name].removed {@apply font-normal border border-stone-300 bg-danger-200}
 .folders [data-name].dragging {@apply font-normal border border-warning-300 bg-warning-200}
 .folders [data-name].dragover {@apply font-normal border border-secondblue-100 bg-secondblue-100 min-h-32}
@@ -338,29 +340,22 @@ tr.disabled {@apply opacity-70}
 .on {@apply  block sm:max-h-[50v]  overflow-y-hidden}
 /* clear-both: always start below the icon/checkbox/toolbar floats, whatever
    their relative heights, instead of wrapping alongside them */
-.on > .entries  {@apply block clear-both overflow-y-auto }
+.on > .entries  {@apply block clear-both overflow-y-auto}
 /* import picker only (wrapContent): icon+name wrapper - block+overflow-hidden
    so it still fills the gap next to the checkbox float */
-.entry-content {@apply block overflow-hidden}
-/* per-depth indent = --indent-unit * depth, one explicit chain per level
-   anchored to the root so each only matches its exact depth (an inline
-   margin-left set from JS, and a --tree-depth custom-property counter, were
-   both tried here first and didn't take effect for reasons never pinned
-   down - plain per-depth selectors are more verbose but leave nothing to
-   debug at runtime). Tune the indent width in one place via --indent-unit. */
-.folders {--indent-unit: theme('spacing.4');}
-.folders [data-name][data-type="R"] > .entries > [data-name] > .entry-content {@apply ml-[calc(var(--indent-unit))]}
+.folders {--indent-unit: theme('spacing.1');}
+.entry-content {@apply block overflow-hidden px-1 mb-0.5 ml-[calc(var(--indent-unit))]}
 .folders .entryN {@apply relative before:icon-md before:opacity-80 before:absolute before:block before:top-1.5 before:left-0  pl-5 }
 /* block + overflow-hidden: a floated icon/checkbox (and a floated toolbar on
    the other side) leave a gap between them that this fills completely, so
    its own background (see .has-controls/.row-selected/:hover above) starts
    right at the icon and runs to the row's end - not the whole row's width */
-.entryN, .entryB, .entryR, .entryD  {@apply block overflow-hidden text-sm font-normal my-1 mr-0.5 cursor-pointer}
+.entryN, .entryB, .entryR, .entryD  {@apply block overflow-hidden text-sm font-normal py-0.5 my-0.5 mr-0.5 cursor-pointer}
 .folders .ico-entryD, .folders .ico-entryR, .folders .ico-entryB, .taxotree .ico-entryR, .taxotree .ico-entryB  {@apply relative w-4 h-4 before:icon-md before:opacity-80 before:absolute before:block before:top-1.5 before:left-0  mr-0.5  pl-5 cursor-pointer }
 .folders .ico-entryD, .folders .ico-entryR, .folders .ico-entryB {@apply float-left}
 .taxotree .ico-entryR, .taxotree .ico-entryB {@apply inline-block}
 .folders .ico-entryR, .folders .ico-entryB {@apply before:icon-folder-sm}
-.folders .entryD {@apply text-base font-normal}
+.folders .entryD {@apply text-sm font-normal}
 .folders .ico-entryD {@apply before:icon-trash-sm}
 /* two selectors each below: the row's direct child (My files) and, for the
    import picker's icon+name wrapper (wrapContent), one level deeper */
@@ -373,7 +368,7 @@ tr.disabled {@apply opacity-70}
 .on > .entryD, .on > .entry-content > .entryD {@apply font-semibold}
 .on > .ico-entryD, .on > .entry-content > .ico-entryD {@apply  before:icon-trash}
 .folders .entryN {@apply before:icon-document-sm}
-.entryN.img {@apply before:icon-image-sm }
+.entryN.img {@apply before:icon-image-sm}
 .entryN.doc {@apply before:icon-document-sm}
 .on > .entryN, .on > .entry-content > .entryN {@apply font-semibold}
 .on .entryN , .entryN {@apply  text-sm font-light}
@@ -386,6 +381,10 @@ tr.disabled {@apply opacity-70}
 .folders .wait > .entry-content > .entryB, .folders .wait > .entry-content > .entryD, .folders .wait > .entry-content > .entryR {@apply after:mr-1 after:p-0.5 after:icon after:icon-arrow-path-sm}
 .entries .editable {@apply font-normal border border-stone-300 border-dashed text-ellipsis min-w-[3rem] outline-transparent outline-none before:pl-0 after:pr-2 pl-2 bg-white}
 .entrycontrols {@apply text-sm  w-auto  mr-1 inline-block float-right relative}
+/* wrapContent rows only (entrycontrols is prepended before .entry-content,
+   hence the forward sibling combinator): match .entry-content's vertical
+   rhythm so the toolbar doesn't look shorter than the icon+name next to it */
+.entrycontrols:has(~ .entry-content) {@apply py-1}
 /* overflow-hidden + align-baseline puts the box's baseline at its bottom edge,
    so the box bottom lines up with the file-name text baseline. */
 /* floats ignore vertical-align, so align-baseline (used when this was

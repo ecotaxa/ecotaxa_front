@@ -358,7 +358,30 @@ export class JsMyFiles {
       text: this.container.dataset.textbrowsedirectoryhint ||
         'To add several directories at once, drag & drop them onto the zone.'
     }, dirhint);
-    this.dropzone.insertAdjacentElement('afterend', dirhint);
+    this.displayprogression.insertAdjacentElement('afterend', dirhint);
+
+    // right after that hint: which directory an upload actually lands in -
+    // kept in sync with the active entry by updateDestinationHint(), called
+    // from the attach/detach listeners in addDirList().
+    const destinationHint = create_box('div', {
+      class: [css.console, 'flex', 'items-center', 'gap-1.5'],
+      dataset: {
+        role: 'destination-hint'
+      }
+    });
+    create_box('i', {
+      class: ['icon', 'icon-folder', 'shrink-0']
+    }, destinationHint);
+    create_box('span', {
+      text: this.container.dataset.textuploaddestination || 'Uploading to:'
+    }, destinationHint);
+    // same background as .row-selected/#dropzone.has-target (bg-mainblue-100)
+    // but inverted, so the destination reads as its own solid badge
+    this.destinationPath = create_box('span', {
+      class: 'upload-destination-path'
+    }, destinationHint);
+    dirhint.insertAdjacentElement('afterend', destinationHint);
+    this.destinationHint = destinationHint;
 
     this.droptarget=(this.options.upload.droptarget)?this.dropzone:null;
   }
@@ -455,7 +478,14 @@ export class JsMyFiles {
   }
 
   async addDirList() {
-    if (this.container!==null) this.jsDirList = new JsDirList(this.container);
+    if (this.container!==null) this.jsDirList = new JsDirList(this.container, {
+      // group icon+name in their own wrapper (see entry.js init()), same as
+      // the import picker, so a prepended per-entry control stays unindented
+      wrapContent: true,
+      entry: {
+        tags: { tag: 'div', subtag: 'div', label: 'span' },
+      },
+    });
     this.activentry = this.jsDirList.root;
     this.rootitem = this.targetitem = this.activentry.container;
     ModuleEventEmitter.on(this.jsDirList.eventnames.attach, (e) => {
@@ -465,6 +495,7 @@ export class JsMyFiles {
       this.targetitem = this.activentry.container;
       this.dropzone.classList.add('has-target');
       if (this.activentry.isBranch(true)) this.enableUploadDialog();
+      this.updateDestinationHint();
     }, this.jsDirList.uuid);
     ModuleEventEmitter.on(this.jsDirList.eventnames.detach, (e) => {
       this.detachDropzone();
@@ -472,6 +503,7 @@ export class JsMyFiles {
       this.uploadentry = null;
       this.targetitem = null;
       this.dropzone.classList.remove('has-target');
+      this.updateDestinationHint();
     }, this.jsDirList.uuid);
     ModuleEventEmitter.on(this.jsDirList.eventnames.action, (e) => {
       switch (e.action) {
@@ -490,6 +522,14 @@ export class JsMyFiles {
     this.jsDirList.selectEntry(this.jsDirList.root);
     // deploy the "My files" root by default so its folders are visible on load
     this.jsDirList.root.setOpen(true);
+  }
+
+  // Keeps the destination-hint badge (built in addDropzone()) in sync with
+  // whichever directory is currently the upload target.
+  updateDestinationHint() {
+    if (!this.destinationPath) return;
+    this.destinationPath.textContent = (this.activentry) ?
+      (this.activentry.getCurrentPath().join(dirseparator) || dirseparator) : '';
   }
 
   addDisplayProgression(parent=null) {
@@ -830,6 +870,10 @@ export class JsMyFiles {
     }, foot);
   }
 
+  showBusy(btn, text) {
+    btn.textContent = text;
+    btn.insertAdjacentHTML('afterbegin', html_spinner('text-stone-200 ml-1 mr-2 align-text-bottom inline-block'));
+  }
   showControl(action, opts) {
     const part = (opts && opts.part) ? opts.part : false;
     const bigfile = (opts && opts.bigfile) ? opts.bigfile : false;
@@ -884,31 +928,30 @@ export class JsMyFiles {
           bigfile: bigfile
         });
         setTimeout( () => {this.emitToZip(btn);},1000);
-        if(btn.previousElementSibling && btn.previousElementSibling.tagName.toLowerCase()!=="svg")  btn.insertAdjacentHTML('beforebegin', html_spinner('text-stone-200 ml-1 mr-2 align-text-bottom inline-block'));
+        this.showBusy(btn, `Upload`);
         return;
         break;
       case this.eventnames.progress:
         if (parseFloat(opts.percentage) >= 100) {
-          btn.textContent = ` Decompressing...`;
+          this.showBusy(btn, ` Decompressing...`);
         } else {
-          btn.textContent = ` Uploading ` + ((target !== 'zip') ? ' big file' : '') + ` ${opts.percentage}%`;
+          this.showBusy(btn, ` Uploading ` + ((target !== 'zip') ? ' big file' : '') + ` ${opts.percentage}%`);
         }
         btn.disabled = true;
         message = {};
         break;
       case this.eventnames.pending:
-        btn.textContent = ` Decompressing...`;
+        this.showBusy(btn, ` Decompressing...`);
         btn.disabled = true;
         message = {};
         break;
       case this.eventnames.gzip:
         text = `compressing big file :${(opts && opts.bigfile)?filepath :``} ${(opts && opts.size)?format_bytes(opts.size):``}`;
-        btn.textContent = text;
+        this.showBusy(btn, text);
         btn.disabled = true;
         message = {};
         break;
       case this.eventnames.terminate:
-        if (btn.previousElementSibling && btn.previousElementSibling.tagName.toLowerCase()==="svg")  btn.previousElementSibling.remove();
         btn.dataset.message = JSON.stringify({
           name: this.eventnames.init,
           bigfile: bigfile,
@@ -923,9 +966,6 @@ export class JsMyFiles {
       case this.eventnames.uploaderror:
         // upload failed but the compressed archive is still in browser storage:
         // keep the button live so the user can re-send it without rebuilding
-        if (btn.previousElementSibling &&
-          btn.previousElementSibling.tagName.toLowerCase() === "svg")
-          btn.previousElementSibling.remove(); // drop the progress spinner
         btn.textContent = this.container.dataset.retry || `Retry upload`;
         btn.classList.remove(css.console);
         btn.disabled = false;
@@ -956,7 +996,6 @@ export class JsMyFiles {
       btn.classList.remove(css.hide);
       if (btn.disabled) {
         btn.classList.add(css.console);
-       if(!btn.classList.contains(css.console) && btn.previousElementSibling && btn.previousElementSibling.tagName.toLowerCase()!=="svg") btn.insertAdjacentHTML('beforebegin', html_spinner('text-stone-200 ml-1 mr-2 align-text-bottom inline-block'));
       } else btn.classList.remove(css.console);
     }
   }

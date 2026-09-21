@@ -4,7 +4,8 @@ import {
 import {
   fetchSettings,
   create_box,
-  dirseparator
+  dirseparator,
+  error_content
 } from '../modules/utils.js';
 import {
   css,
@@ -40,6 +41,18 @@ export function JsImport(container, options = {}) {
   let selected = null;
   // Multiple files/directories selected in the "My files" tree, keyed by their path.
   let multiSelected = new Map();
+  // Shared by apply_filters() (checkbox enable/disable) and processImport()
+  // (submit-time validation) so both agree on what counts as an image /
+  // an ecotaxa metadata file for the currently selected import type.
+  const imageExts = new Set(filter_files.images.split(',').map(ext => ext.trim()));
+  const allAcceptedExts = new Set([...filter_files.images.split(','), ...filter_files.tsv.split(',')].map(ext => ext.trim()));
+  const isImageExt = (ext) => imageExts.has(ext);
+  const isEcotaxaMetaExt = (ext, name) => (ext === 'tsv' || ext === 'txt') && /^ecotaxa/i.test(name || '');
+  const isAllowedExt = (ext, name) => {
+    if (typeimport === 'images') return isImageExt(ext);
+    if (typeimport === 'tsv') return isEcotaxaMetaExt(ext, name);
+    return allAcceptedExts.has(ext); // images-tsv (general): any accepted type
+  };
   container = (container instanceof HTMLElement) ? container : document.querySelector(container);
   if (!container) return;
   options = { ...defaultOptions,
@@ -68,18 +81,41 @@ export function JsImport(container, options = {}) {
   function init() {
     // init steps to display import sequence
     addImportZone();
-    container.querySelectorAll('input[name="' + options.selectors.typeimport + '"]').forEach(typeimport => {
-      typeimport.addEventListener('change', (e) => {
+    container.querySelectorAll('input[name="' + options.selectors.typeimport + '"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
         if (e.currentTarget.checked) {
           typeimport = e.currentTarget.value;
           showSelection(true);
+          syncSelectionWithType();
         }
       });
     });
+    initTypeImportTabs();
     container.formsubmit.addHandler('submit', async () => {
       return processImport();
     });
     showSelection();
+  }
+
+  // The type of import (images / tsv / images-tsv) is actually driven by the
+  // js-tabs legends in jobs/import.html (legend.tab-control[data-typeimport]),
+  // not by the typeimport radios above (kept for other/older forms). Wire
+  // those tabs the same way: switching one updates typeimport, re-applies the
+  // file-type filter, and re-syncs the selection against the newly selected
+  // type (see syncSelectionWithType).
+  function initTypeImportTabs() {
+    const tabControls = container.querySelectorAll('.tab-control[data-typeimport]');
+    if (tabControls.length === 0) return;
+    tabControls.forEach(tab => {
+      tab.addEventListener('click', () => {
+        if (!tab.dataset.typeimport || tab.dataset.typeimport === typeimport) return;
+        typeimport = tab.dataset.typeimport;
+        showSelection(true);
+        syncSelectionWithType();
+      });
+    });
+    const activeTab = container.querySelector('.tab.active .tab-control[data-typeimport]');
+    typeimport = (activeTab || tabControls[0]).dataset.typeimport;
   }
 
   function addImportZone() {
@@ -119,11 +155,9 @@ export function JsImport(container, options = {}) {
   }
   async function showSelection(refresh = false) {
     const apply_filters = () => {
-      const filters = typeimport.split('-');
-      const allowed = new Set(filters.flatMap(filter => filter_files[filter] ? filter_files[filter].split(',').map(ext => ext.trim()) : []));
       jsDirList.container.querySelectorAll('[data-ftype]').forEach(entry => {
-        if (allowed.has(entry.dataset.ftype)) entry.classList.remove('disabled');
-        else entry.classList.add('disabled');
+        const allowed = isAllowedExt(entry.dataset.ftype, entry.dataset.name);
+        entry.classList.toggle('disabled', !allowed);
       });
     }
     const displayselection = document.getElementById(options.selectors.sourcezone);
@@ -214,17 +248,31 @@ export function JsImport(container, options = {}) {
     });
     entry.container.prepend(btn);
     entry.importButton = btn;
+    // A double-click still fires two ordinary 'click' events on the same
+    // target before 'dblclick' does (standard browser behaviour), so a
+    // double-click here used to toggle the entry on then off again -
+    // queue the toggle behind a short delay and cancel it if a dblclick
+    // follows within it, same pattern as js-dirlist.js's getListeners().
+    let clickTimer = null;
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       e.preventDefault();
-      toggleMultiSelect(entry);
+      if (clickTimer) clearTimeout(clickTimer);
+      clickTimer = setTimeout(() => {
+        clickTimer = null;
+        toggleMultiSelect(entry);
+      }, 250);
     });
-    // a double-click landing on the toggle still fires two 'click' events
-    // (each stopped above) followed by one 'dblclick' - stop that too, or it
-    // bubbles up to the row and triggers the row's expand/collapse handler
+    // stop it bubbling to the row (which would otherwise trigger its own
+    // expand/collapse) and cancel the queued toggle so a double-click nets
+    // no change instead of toggling twice.
     btn.addEventListener('dblclick', (e) => {
       e.stopPropagation();
       e.preventDefault();
+      if (clickTimer) {
+        clearTimeout(clickTimer);
+        clickTimer = null;
+      }
     });
   }
 
@@ -303,18 +351,63 @@ export function JsImport(container, options = {}) {
     }
   }
 
+  // Called right after typeimport changes. Walks every loaded file entry and:
+  // - drops any ticked file that no longer matches the new type, tagging it
+  //   with entry.wasSelected so we remember the user wanted it,
+  // - restores any unticked file whose entry.wasSelected is set and which
+  //   matches the new type again (e.g. switching back to a previous tab).
+  // A manual untick (toggleMultiSelect) clears the tag, so we never resurrect
+  // something the user deliberately unchecked.
+  function syncSelectionWithType() {
+    if (!jsDirList || !jsDirList.root) return;
+    let changed = false;
+    const visit = (entry) => {
+      if (entry.type !== entryTypes.node) return;
+      const key = entry.getCurrentPath().join(dirseparator);
+      const allowed = isAllowedExt(entry.ftype, entry.name);
+      const isSelected = multiSelected.has(key);
+      if (isSelected && !allowed) {
+        entry.wasSelected = true;
+        setSelectedState(entry, false);
+        // Unticking bubbles up: an ancestor folder can no longer claim that
+        // all of its contents are selected (mirrors toggleMultiSelect).
+        eachAncestor(entry, (ancestor) => setSelectedState(ancestor, false));
+        changed = true;
+      } else if (!isSelected && allowed && entry.wasSelected) {
+        setSelectedState(entry, true);
+        promoteFullAncestors(entry);
+        changed = true;
+      }
+    };
+    eachDescendant(jsDirList.root, visit);
+    if (!changed) return;
+    showSubmit(multiSelected.size > 0);
+    updatePartialMarks();
+  }
+
   function toggleMultiSelect(entry) {
     const key = entry.getCurrentPath().join(dirseparator);
     const willSelect = !multiSelected.has(key);
+    // Block hand-picking a single file that doesn't match the current
+    // import type (mirrors the dimmed/disabled look apply_filters gives it).
+    // Bulk-selecting a folder is untouched - it still ticks everything
+    // inside it, matching today's "select this whole directory" behavior.
+    if (willSelect && entry.type === entryTypes.node && !isAllowedExt(entry.ftype, entry.name)) return;
 
     setSelectedState(entry, willSelect);
 
     const isBranch = [entryTypes.branch, entryTypes.root].indexOf(entry.type) >= 0;
     if (isBranch) {
       // Ticking/unticking a folder cascades to every loaded child.
-      eachDescendant(entry, (child) => setSelectedState(child, willSelect));
+      eachDescendant(entry, (child) => {
+        setSelectedState(child, willSelect);
+        // A manual untick is deliberate - forget any type-switch memory too,
+        // so a later tab change doesn't resurrect it (see syncSelectionWithType).
+        if (!willSelect && child.type === entryTypes.node) child.wasSelected = false;
+      });
     }
     if (!willSelect) {
+      if (entry.type === entryTypes.node) entry.wasSelected = false;
       // Unticking anything bubbles up: an ancestor folder can no longer
       // claim that all of its contents are selected. Ticked siblings stay.
       eachAncestor(entry, (ancestor) => setSelectedState(ancestor, false));
@@ -418,6 +511,28 @@ export function JsImport(container, options = {}) {
 
   async function processImport() {
     if (multiSelected.size > 0) {
+      const entries = Array.from(multiSelected.values());
+      const hasDirectory = entries.some(entry => [entryTypes.branch, entryTypes.root].indexOf(entry.type) >= 0);
+      if (!hasDirectory) {
+        const files = entries.filter(entry => entry.type === entryTypes.node);
+        const hasImage = files.some(entry => isImageExt(entry.ftype));
+        const hasEcotaxaMeta = files.some(entry => isEcotaxaMetaExt(entry.ftype, entry.name));
+        const valid = typeimport === 'images' ? hasImage
+          : typeimport === 'tsv' ? hasEcotaxaMeta
+          : hasImage && hasEcotaxaMeta; // images-tsv (general)
+        if (!valid) {
+          AlertBox.addAlert({
+            type: AlertBox.alertconfig.types.danger,
+            content: typeimport === 'images'
+              ? 'Select at least one image to import.'
+              : typeimport === 'tsv'
+              ? 'Select at least one metadata file (ecotaxa*.tsv or .txt) to import.'
+              : 'Select at least one image and one metadata file (ecotaxa*.tsv or .txt) to import.',
+            dismissible: true,
+          });
+          return false;
+        }
+      }
       const formdata = new FormData();
       const projid = document.getElementById('projid');
       formdata.append('projid', (projid) ? projid.value : '');
@@ -432,7 +547,7 @@ export function JsImport(container, options = {}) {
       })).then(response => response.json()).catch(err => {
         AlertBox.addAlert({
           type: AlertBox.alertconfig.types.danger,
-          content: err.status ? `${err.status} ${err.statusText}` : err,
+          content: error_content(err),
           dismissible: false,
         });
         return null;

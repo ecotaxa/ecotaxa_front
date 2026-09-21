@@ -3,7 +3,8 @@ import {
   generate_uuid,
   fetchSettings,
   create_box,
-  decodeURIComponentSafe
+  decodeURIComponentSafe,
+  error_content
 } from '../modules/utils.js';
 import {
   css
@@ -217,7 +218,7 @@ async function createAlertBox() {
       }).catch((err) => {
       AlertBox.addAlert({
         type: AlertBox.alertconfig.types.danger,
-        content: err.status ? `${err.status} ${err.statusText}` : err,
+        content: error_content(err),
         dismissible: false,
       });
     }).finally(()=> {
@@ -345,7 +346,7 @@ async function createAlertBox() {
       })).catch((err) => {
       AlertBox.addAlert({
         type: AlertBox.alertconfig.types.danger,
-        content: err.status ? `${err.status} ${err.statusText}` : err,
+        content: error_content(err),
         dismissible: false,
       });
     }).finally(()=> {

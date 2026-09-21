@@ -7,7 +7,8 @@ import {
   sort_items,
   is_object,
   html_spinner,
-  generate_uuid
+  generate_uuid,
+  error_content
 } from '../modules/utils.js';
 import {
   ModuleEventEmitter
@@ -312,10 +313,10 @@ export class TableComponent {
     } catch (err) {
       AlertBox.addAlert({
         type: AlertBox.alertconfig.types.danger,
-        content: err.status ? `${err.status} ${err.statusText}` : err,
+        content: error_content(err),
         dismissible: true,
       });
-      this.waitDeactivate(err.status ? `${err.status} ${err.statusText}` : 'error', 'error');
+      this.waitDeactivate(error_content(err), 'error');
     } finally {
       this._fetching = false;
     }
@@ -1314,7 +1315,7 @@ initSort() {
                 } catch (err) {
                  AlertBox.addAlert({
                   type: AlertBox.alertconfig.types.danger,
-                    content: err.status ? `${err.status} ${err.statusText}` : err,
+                    content: error_content(err),
                   dismissible: true,
                 });
                   cell = ``;
@@ -1516,7 +1517,7 @@ initSort() {
         }).catch((err) => {
       AlertBox.addAlert({
         type: AlertBox.alertconfig.types.danger,
-        content: err.status ? `${err.status} ${err.statusText}` : err,
+        content: error_content(err),
         dismissible: true,
       });
     }).finally(()=> {

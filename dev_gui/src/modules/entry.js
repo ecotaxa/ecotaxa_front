@@ -73,6 +73,7 @@ export class Entry {
   constructor(entry, options = {}) {
     this.name = entry.name;
     this.type = entry.type;
+    this.ftype = entry.ftype;
     this.id = entry.id;
     this.parent = entry.parent;
     this.options = { ...entryOptions,
@@ -97,6 +98,7 @@ export class Entry {
       type: this.type
     }
     if (this.label !== null) dataset.label = this.label;
+    if (this.ftype) dataset.ftype = this.ftype;
     const el = create_box(this.options.tags.subtag, {
       draggable: this.isDraggable(),
       dataset: dataset,
