@@ -289,7 +289,7 @@ def import_format_options(_type=None) -> dict:
                 "path": "/gui/job/create/GeneralImport",
                 "title": _("General Import"),
                 "legend": _("Import Images and TSV files"),
-                "browse_label": _("Select one directory to import"),
+                "browse_label": _("Select one or more folder to import"),
                 "browse": "directory,file",
                 "textdrop": _("or Drop Files or Folders Here"),
                 "datas": {
@@ -300,7 +300,7 @@ def import_format_options(_type=None) -> dict:
             "simple": {
                 "path": "/gui/job/create/SimpleImport",
                 "title": _("Images Import"),
-                "browse_label": _("Select one folder to import"),
+                "browse_label": _("Select one or more folder or images to import"),
                 "browse": "directory,file",
                 "textdrop": _("or Drop Files or Folders Here"),
                 "legend": _(
@@ -310,8 +310,8 @@ def import_format_options(_type=None) -> dict:
             "update": {
                 "path": "/gui/job/create/UpdateImport",
                 "title": _("Update Metadata"),
-                "legend": _("Update metada associated to already importer images"),
-                "browse_label": _("Select one file or folder to import"),
+                "legend": _("Update metadata associated to already importer images"),
+                "browse_label": _("Select one or more csv or txt file or folder to import"),
                 "browse": "directory, file",
                 "textdrop": _("or Drop Files or Folders Here"),
                 "datas": {"updateclassif": False},

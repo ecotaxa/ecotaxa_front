@@ -325,7 +325,7 @@ tr.disabled {@apply opacity-70}
 /* upload destination path badge (js-my-files.js dropzone hint) - same
    bg-mainblue-100 pairing as .row-selected/#dropzone.has-target, but
    inverted so the path reads as its own solid badge */
-.upload-destination-path {@apply inline-block bg-mainblue-100 rounded-sm px-2 py-0.5 font-semibold}
+.upload-destination-path {@apply break-all min-w-0 bg-mainblue-100 rounded-sm pr-2 py-0.5 font-semibold }
 /* browse or drop in a subdir*/
 .has-controls .boxtitle {@apply w-36 right-0 top-1 z-20 absolute small-caps truncate overflow-x-hidden}
 [data-name][data-type="R"] [data-name] {@apply ml-4 relative}

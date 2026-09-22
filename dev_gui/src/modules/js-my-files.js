@@ -364,7 +364,7 @@ export class JsMyFiles {
     // kept in sync with the active entry by updateDestinationHint(), called
     // from the attach/detach listeners in addDirList().
     const destinationHint = create_box('div', {
-      class: [css.console, 'flex', 'items-center', 'gap-1.5'],
+      class: [css.console, 'gap-1.5', 'w-full'],
       dataset: {
         role: 'destination-hint'
       }
@@ -373,7 +373,7 @@ export class JsMyFiles {
       class: ['icon', 'icon-folder', 'shrink-0']
     }, destinationHint);
     create_box('span', {
-      text: this.container.dataset.textuploaddestination || 'Uploading to:'
+      text: this.container.dataset.textuploaddestination || ' Upload to '
     }, destinationHint);
     // same background as .row-selected/#dropzone.has-target (bg-mainblue-100)
     // but inverted, so the destination reads as its own solid badge
