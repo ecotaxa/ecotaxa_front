@@ -280,6 +280,75 @@ export class Entry {
     return listeners;
   }
 
+  // Row interaction shared by JsDirList (My files) and JsTree: rollover,
+  // click and dblclick only ever respond on the icon and the name - not the
+  // whole row. Leaf entries have no separate icon span.
+  // - click runs doClick (My files: select / activate the entry)
+  // - dblclick runs doDblclick - by default expands or collapses a branch
+  //   (listing its children on first open), with no selection change of its own
+  // - mouseenter / mouseleave are emitted so the owner can show the controls
+  //   toolbar on rollover
+  // A double-click still fires two ordinary 'click' events on the same target
+  // before 'dblclick' does (standard browser behaviour), so the click's own
+  // action is queued behind a short delay and cancelled if a dblclick follows
+  // within it - otherwise both actions would run.
+  interactionListeners(doClick = null, doDblclick = undefined) {
+    const listeners = [];
+    const targets = this.icon ? ['label', 'icon'] : ['label'];
+    const isBranch = [entryTypes.root, entryTypes.branch, entryTypes.discard].indexOf(this.type) >= 0;
+    if (doDblclick === undefined) doDblclick = (isBranch) ? () => this.toggleOpen() : null;
+    let clickTimer = null;
+    if (doClick) {
+      targets.forEach((target) => {
+        listeners.push({
+          name: 'click',
+          target: target,
+          func: (e) => {
+            e.stopImmediatePropagation();
+            if (clickTimer) clearTimeout(clickTimer);
+            clickTimer = setTimeout(() => {
+              clickTimer = null;
+              doClick();
+            }, 250);
+          }
+        });
+      });
+    }
+    if (doDblclick) {
+      targets.forEach((target) => {
+        listeners.push({
+          name: 'dblclick',
+          target: target,
+          func: (e) => {
+            e.stopImmediatePropagation();
+            if (clickTimer) {
+              clearTimeout(clickTimer);
+              clickTimer = null;
+            }
+            doDblclick();
+          }
+        });
+      });
+    }
+    targets.forEach((target) => {
+      listeners.push({
+        name: 'mouseenter',
+        target: target,
+        func: () => {
+          this.emitEvent('mouseenter');
+        }
+      });
+      listeners.push({
+        name: 'mouseleave',
+        target: target,
+        func: () => {
+          this.emitEvent('mouseleave');
+        }
+      });
+    });
+    return listeners;
+  }
+
   isBranch(checkroot = true) {
     const branchtypes = [entryTypes.branch];
     if (checkroot && branchtypes.indexOf(entryTypes.root) < 0) branchtypes.push(entryTypes.root);

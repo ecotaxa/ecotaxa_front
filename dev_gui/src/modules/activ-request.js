@@ -124,6 +124,9 @@ function createActivRequest() {
               document: 'doc'
             },
           };
+          // same click / dblclick as the import "My files" list: click ticks
+          // the entry, dblclick opens it (js-tree.js)
+          options.clickselect = true;
           item.dataset.import = true;
         item.dataset.request=null;
 

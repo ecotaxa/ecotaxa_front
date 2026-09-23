@@ -297,18 +297,10 @@ function EntryAction(args, options) {
   entryaction.getListeners = function() {
     let listeners = [];
     const clickExpand = !!this.options.clickExpand;
-    // rollover/click/dblclick only ever respond on the icon and the name -
-    // not the whole row (its own padding, or - for import - the checkbox's
-    // own area). Leaf entries have no separate icon span.
-    const targets = this.icon ? ['label', 'icon'] : ['label'];
     // click always selects/activates the entry (upload target in My files,
     // checkbox toggle in the import picker); dblclick always expands or
-    // collapses a folder, with no background change of its own.
-    // A double-click still fires two ordinary 'click' events on the same
-    // target before 'dblclick' does (standard browser behaviour), so the
-    // click's own action is queued behind a short delay and cancelled if a
-    // dblclick follows within it - otherwise both actions would run.
-    let clickTimer = null;
+    // collapses a folder; rollover shows the controls - see
+    // Entry.interactionListeners() (entry.js), shared with js-tree.js.
     // import picker: toggle the checkbox's action directly (importToggle, set
     // by js-import.js) - clicking the checkbox element instead would add its
     // own click/dblclick delay on top of the one below.
@@ -338,57 +330,11 @@ function EntryAction(args, options) {
       } else listeners = listeners.concat(this.dropHandlers());
       this.listenRename();
     } else listeners = listeners.concat(this.dropHandlers());
-    const func = (e) => {
-      e.stopImmediatePropagation();
-      if (clickTimer) clearTimeout(clickTimer);
-      clickTimer = setTimeout(() => {
-        clickTimer = null;
-        doClick();
-      }, 250);
-    };
     // My files: click selects a directory as the upload target - meaningless
     // on a file, so files get no click action there at all. Import always
     // wants the click (it toggles that file's own checkbox).
     const skipClick = this.type === entryTypes.node && !clickExpand;
-    if (!skipClick) {
-      targets.forEach((target) => {
-        listeners.unshift({ name: 'click', target: target, func: func });
-      });
-    }
-    // dblclick always just expands/collapses - only meaningful on a branch
-    if ([entryTypes.root, entryTypes.branch, entryTypes.discard].indexOf(this.type) >= 0) {
-      targets.forEach((target) => {
-        listeners.push({
-          name: 'dblclick',
-          target: target,
-          func: (e) => {
-            e.stopImmediatePropagation();
-            if (clickTimer) {
-              clearTimeout(clickTimer);
-              clickTimer = null;
-            }
-            this.toggleOpen();
-          }
-        });
-      });
-    }
-    targets.forEach((target) => {
-      listeners.push({
-        name: 'mouseenter',
-        target: target,
-        func: () => {
-          this.emitEvent('mouseenter');
-        }
-      });
-      listeners.push({
-        name: 'mouseleave',
-        target: target,
-        func: () => {
-          this.emitEvent('mouseleave');
-        }
-      });
-    });
-    return listeners;
+    return this.interactionListeners(skipClick ? null : doClick).concat(listeners);
   }
   entryaction.setAttributes = function(entry) {
     // convert attributes

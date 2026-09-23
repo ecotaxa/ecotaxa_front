@@ -350,7 +350,7 @@ tr.disabled {@apply opacity-70}
 .entryN, .entryB, .entryR, .entryD  {@apply block overflow-hidden text-sm font-normal py-0.5 my-0.5 mr-0.5 cursor-pointer }
 .folders .ico-entryD, .folders .ico-entryR, .folders .ico-entryB, .taxotree .ico-entryR, .taxotree .ico-entryB  {@apply relative w-4 h-4 before:icon-md before:opacity-80 before:absolute before:block before:top-1.5 before:left-0  mr-0.5  pl-5 cursor-pointer }
 .folders .ico-entryD, .folders .ico-entryR, .folders .ico-entryB {@apply float-left}
-.taxotree .ico-entryR, .taxotree .ico-entryB {@apply inline-block}
+.taxotree .ico-entryR, .taxotree .ico-entryB {@apply float-left}
 .folders .ico-entryR, .folders .ico-entryB {@apply before:icon-folder-sm}
 .folders .entryD {@apply text-sm font-normal}
 .folders .ico-entryD {@apply before:icon-trash-sm}
@@ -392,35 +392,43 @@ tr.disabled {@apply opacity-70}
    picker's select checkbox): pinned at the row's left edge, and the rows
    themselves are not indented, so every box lines up in a single column at
    the list's left edge. Only the icon+name are indented, by nesting depth
-   (--depth, set by MultiEntryControls) plus room for the box. */
-.folders [data-name].has-rowcontrols {@apply relative}
-.folders .entries > [data-name].has-rowcontrols {@apply ml-0}
+   (--depth, set by MultiEntryControls) plus room for the box.
+   .taxotree: js-tree.js single-select checkbox, same look and behaviour. */
+:is(.folders, .taxotree) [data-name].has-rowcontrols {@apply relative}
+:is(.folders, .taxotree) .entries > [data-name].has-rowcontrols {@apply ml-0}
 .rowcontrols {@apply absolute left-0 top-0 z-10}
-.folders .has-rowcontrols > .entry-content,
-.folders .has-rowcontrols > [class^="ico-entry"],
-.folders .has-rowcontrols > .entryN {margin-left: calc(var(--depth, 0) * 1rem + 1.5rem)}
+:is(.folders, .taxotree) .has-rowcontrols > .entry-content,
+:is(.folders, .taxotree) .has-rowcontrols > [class^="ico-entry"],
+:is(.folders, .taxotree) .has-rowcontrols > .entryN {margin-left: calc(var(--depth, 0) * 1rem + 1.5rem)}
 .control-select.import-toggle {@apply relative inline-block top-1.5 overflow-hidden text-center leading-4 cursor-pointer bg-stone-200 hover:bg-stone-300 font-semibold text-xs text-stone-200 hover:text-stone-600 before:content-["\2713"] w-4 h-4 max-h-4 rounded-sm }
 .control-select.import-toggle.is-selected {@apply  bg-secondblue-50 text-secondblue-500 before:content-["\2713"]}
+/* js-tree single select: box, border and tick all stone-50 - the tick only
+   shows once toggled, or while hovering the box or the entry's icon/name
+   (preview in the selected style); clicking the box or dblclicking the
+   icon/name ticks it (js-tree.js) */
+.taxotree .control-select.import-toggle {@apply bg-stone-50 hover:bg-stone-50 border border-stone-50 text-stone-50 leading-[14px]}
+.taxotree .control-select.import-toggle.is-selected {@apply text-secondblue-500}
+.taxotree [data-name]:has(> [class^="ico-entry"]:hover, > [class^="entry"]:hover) > .rowcontrols > .control-select.import-toggle {@apply text-secondblue-500}
 /* folder not itself checked, but a descendant is - show a dash instead of the checkmark */
-.folders [data-name].has-selected-inside > .rowcontrols > .control-select.import-toggle:not(.is-selected) {@apply text-secondblue-500 before:content-["\2212"]}
+:is(.folders, .taxotree) [data-name].has-selected-inside > .rowcontrols > .control-select.import-toggle:not(.is-selected) {@apply text-secondblue-500 before:content-["\2212"]}
 /* rollover background for import rows - on the name span (see the comment
    by .entryN/.entryB/.entryR/.entryD above), not the row, so it starts at
    the icon and runs to the row's end rather than covering the checkbox too */
 /* :hover on the row itself would trigger from anywhere in its box (its own
    padding, the checkbox's area) - scope it to only the icon or the name
    actually being hovered, matching where click/dblclick actually respond */
-.folders [data-name]:has(> .rowcontrols > .control-select.import-toggle):has(> [class^="ico-entry"]:hover, > [class^="entry"]:hover) > [class^="entry"] {@apply bg-mainblue-50}
+:is(.folders, .taxotree) [data-name]:has(> .rowcontrols > .control-select.import-toggle):has(> [class^="ico-entry"]:hover, > [class^="entry"]:hover) > [class^="entry"] {@apply bg-mainblue-50}
 /* tint (and lightly shade) the entry's own name while its select toggle is
    on - target the label span, not the [data-name] li, so neither the colour
    nor the background inherit into nested rows (e.g. the trash dir, which has
    no toggle) */
-.folders [data-name]:has(> .rowcontrols > .control-select.is-selected) > [class^="entry"] {@apply text-secondblue-600 bg-mainblue-50}
+:is(.folders, .taxotree) [data-name]:has(> .rowcontrols > .control-select.is-selected) > [class^="entry"] {@apply text-secondblue-600 bg-mainblue-50}
 /* hovering the select checkbox highlights the entry it acts on - a shade
    darker than the selected tint above (and placed after it) so it still
    shows on an already-ticked entry */
-.folders [data-name]:has(> .rowcontrols > .control-select.import-toggle:hover) > .entry-content {@apply text-secondblue-600 bg-mainblue-100}
+:is(.folders, .taxotree) [data-name]:has(> .rowcontrols > .control-select.import-toggle:hover) > [class^="entry"] {@apply text-secondblue-600 bg-mainblue-100}
 /* unchecked folder that still has a checked entry inside (e.g. while collapsed) */
-.folders [data-name].has-selected-inside > [class^="entry"] {@apply text-secondblue-600}
+:is(.folders, .taxotree) [data-name].has-selected-inside > [class^="entry"] {@apply text-secondblue-600}
 .intrash {@apply bg-danger-100}
 
 /* form with tabs */

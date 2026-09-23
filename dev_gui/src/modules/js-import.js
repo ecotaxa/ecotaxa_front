@@ -40,6 +40,8 @@ export function JsImport(container, options = {}) {
     textimport: 'import'
   };
   let selected = null;
+  // server trees (js-tree.js) whose single selection lives in `selected`
+  const jstrees = [];
   // Multiple files/directories selected in the "My files" tree, keyed by their path.
   let multiSelected = new Map();
   // Shared by apply_filters() (checkbox enable/disable) and processImport()
@@ -183,13 +185,9 @@ export function JsImport(container, options = {}) {
       // Import browses "My files" read-only: no create/remove/move/rename
       // toolbar - addImportControls() replaces it with per-row select
       // checkboxes (MultiEntryControls).
-      addImportControls(jsDirList, jsDirList.uuid, null, [], true);
+      addImportControls(jsDirList);
       // deploy the "My files" root so its folders show right away
       jsDirList.root.setOpen(true);
-      // Note: NOT wired as jsDirList.detachcallback - this tree is a persistent
-      // multiselect picker, so browsing/expanding folders must not clear ticks
-      // (unlike the single-select accordion pickers below, which do want that).
-      const detachcallback=function() {deSelect();showSubmit(false);}
       // Keep the import tree in sync with changes made to the server files
       // elsewhere - typically the "My files" manager opened in a modal
       // (create / delete / rename / move a directory, or an upload). Those paths
@@ -212,11 +210,16 @@ export function JsImport(container, options = {}) {
         showSubmit(false);
         });
         if (item.jstree) {
-            item.jstree.entrycontrols.options.controls = {};
-            item.jstree.setDetachcallback(detachcallback);
-            const exclude = (item.dataset.exclude)?item.dataset.exclude.split(','):[];
-         addImportControls(item.jstree, item.jstree.uuid, [entryTypes.branch, entryTypes.node],exclude);
-         }
+          // server tree: its own single-select row checkbox (js-tree.js
+          // rowselect, same look as the "My files" multiselect) picks the
+          // entry to import
+          jstrees.push(item.jstree);
+          item.jstree.setSelectCallback((entry, on) => {
+            selected = (on) ? entry : null;
+            if (on) addImportEntry(entry);
+            else showSubmit(false);
+          });
+        }
       })
         // detach entry controls if accordion or tabs when not active
         const accordion=container.querySelector('.js-accordion')?container.querySelector('.js-accordion'):container.querySelector('.js-tabs');
@@ -231,7 +234,7 @@ export function JsImport(container, options = {}) {
     if (refresh === true) apply_filters();
   }
   function deSelect() {
-  if(selected!==null) {selected.setSelected(false);selected.active=true;selected.emitEvent();selected=null;}
+  if(selected!==null) {jstrees.forEach(jstree => jstree.clearSelection());selected=null;}
   if(multiSelected.size>0) {
     multiSelected.forEach(entry => {
       if (entry.importButton) entry.importButton.classList.remove('is-selected');
@@ -395,106 +398,62 @@ export function JsImport(container, options = {}) {
     showSubmit();
   }
 
-  function addImportControls(entrylist, uploaduuid, typentries = null,exclude=[],multiselect=false) {
-
-    if (multiselect) {
-      // Each file/directory row gets its own persistent "select" checkbox,
-      // at the row's left edge, from a MultiEntryControls replacing the
-      // dirlist's hover toolbar (see entry.js).
-      const allowed = (typentries) ? typentries : [entryTypes.branch, entryTypes.node];
-      entrylist.entrycontrols = MultiEntryControls({
-        // Never offer the trash directory, nor anything inside it, for import.
-        // (branches inside trash are already retyped to 'discarded' above, but
-        //  files keep their 'node' type, so guard explicitly.)
-        accept: (entry) => !((entry.isTrashDir && entry.isTrashDir()) ||
-          (entry.isInTrash && entry.isInTrash())),
-        controls: {
-          select: {
-            action: (entry) => toggleMultiSelect(entry),
-            class: ['control-select', 'import-toggle'],
-            exclude: exclude,
-            // the root ("My files") gets it too: ticking it cascades to every
-            // loaded child, exactly like any other directory
-            typentries: allowed.concat([entryTypes.root]),
-          }
+  // "My files" multiselect: per-row select checkboxes (the server tree has
+  // its own single-select ones, see js-tree.js rowselect)
+  function addImportControls(entrylist, typentries = null, exclude = []) {
+    // Each file/directory row gets its own persistent "select" checkbox,
+    // at the row's left edge, from a MultiEntryControls replacing the
+    // dirlist's hover toolbar (see entry.js).
+    const allowed = (typentries) ? typentries : [entryTypes.branch, entryTypes.node];
+    entrylist.entrycontrols = MultiEntryControls({
+      // Never offer the trash directory, nor anything inside it, for import.
+      // (branches inside trash are already retyped to 'discarded' above, but
+      //  files keep their 'node' type, so guard explicitly.)
+      accept: (entry) => !((entry.isTrashDir && entry.isTrashDir()) ||
+        (entry.isInTrash && entry.isInTrash())),
+      controls: {
+        select: {
+          action: (entry) => toggleMultiSelect(entry),
+          class: ['control-select', 'import-toggle'],
+          exclude: exclude,
+          // the root ("My files") gets it too: ticking it cascades to every
+          // loaded child, exactly like any other directory
+          typentries: allowed.concat([entryTypes.root]),
         }
+      }
+    });
+    const attachSelect = (entry) => {
+      if (entry.importButton) return;
+      const ctrls = entrylist.entrycontrols.attachControls(entry);
+      if (!ctrls || !ctrls.select) return;
+      entry.importButton = ctrls.select;
+      // called by the icon/name click (js-dirlist.js getListeners), which has
+      // already waited out a possible dblclick - no second delay needed
+      entry.importToggle = () => toggleMultiSelect(entry);
+      // Clicking anywhere on the entry's own line toggles it too - the icon
+      // and name already do (js-dirlist.js getListeners, clickExpand, which
+      // stops the event there), this covers the rest of the line (indent,
+      // padding). Clicks from nested rows or from the checkbox itself are
+      // left alone.
+      entry.container.addEventListener('click', (e) => {
+        if (e.target.closest('[data-name]') !== entry.container) return;
+        if (e.target.closest('.rowcontrols')) return;
+        const children = e.target.closest('.entries');
+        if (children && entry.container.contains(children)) return;
+        entry.importButton.click();
       });
-      const attachSelect = (entry) => {
-        if (entry.importButton) return;
-        const ctrls = entrylist.entrycontrols.attachControls(entry);
-        if (!ctrls || !ctrls.select) return;
-        entry.importButton = ctrls.select;
-        // called by the icon/name click (js-dirlist.js getListeners), which has
-        // already waited out a possible dblclick - no second delay needed
-        entry.importToggle = () => toggleMultiSelect(entry);
-        // Clicking anywhere on the entry's own line toggles it too - the icon
-        // and name already do (js-dirlist.js getListeners, clickExpand, which
-        // stops the event there), this covers the rest of the line (indent,
-        // padding). Clicks from nested rows or from the checkbox itself are
-        // left alone.
-        entry.container.addEventListener('click', (e) => {
-          if (e.target.closest('[data-name]') !== entry.container) return;
-          if (e.target.closest('.rowcontrols')) return;
-          const children = e.target.closest('.entries');
-          if (children && entry.container.contains(children)) return;
-          entry.importButton.click();
-        });
-        // A child loaded (lazily) under an already-ticked folder inherits the tick.
-        if (hasSelectedAncestor(entry)) setSelectedState(entry, true);
-      };
-      // onEntryCreated fires from the Entry constructor, before createEntry()
-      // appends it (container has no parent yet) and before EntryAction adds
-      // isTrashDir/isInTrash - defer until the entry is in place.
-      entrylist.root.options.onEntryCreated = (entry) => {
-        queueMicrotask(() => attachSelect(entry));
-      };
-      // The root is built before onEntryCreated is set.
-      if (entrylist.root) attachSelect(entrylist.root);
-      return;
-    }
-
-    function add_remove_import(e) {
-        if (selected) {
-        delete selected.label.dataset.selected;
-        selected.setSelected(false);
-        }
-      const activentry = entrylist.getActiventry();
-      if (selected === activentry  ) {
-        selected = null;
-        return;
-      }
-      const cl = activentry.options.css.selected;
-      activentry.setSelected(true);
-      activentry.label.dataset.selected = options.textimport;
-      entrylist.entrycontrols.showControls(false);
-      selected = activentry;
-    }
-      entrylist.entrycontrols.removeControls();
-      const control = {
-      import: {
-        action: 'import',
-        class:["control-select"],
-        exclude:exclude,
-        typentries: (typentries) ? typentries : [entryTypes.branch,entryTypes.node],
-        text: (options.toselect)?(options.toselect):'import',
-        callback: add_remove_import
-      }
+      // A child loaded (lazily) under an already-ticked folder inherits the tick.
+      if (hasSelectedAncestor(entry)) setSelectedState(entry, true);
     };
-     control.import.action = function(entry) {
-      if (entrylist.activentry) entrylist.activentry.setSelected(false);
-      addImportEntry(entry);
-      ModuleEventEmitter.emit(eventnames.select, {
-        value: false
-      }, uploaduuid);
-    }
-   entrylist.entrycontrols.options.controls = { ...entrylist.entrycontrols.options.controls,
-      ...control,
-
+    // onEntryCreated fires from the Entry constructor, before createEntry()
+    // appends it (container has no parent yet) and before EntryAction adds
+    // isTrashDir/isInTrash - defer until the entry is in place.
+    entrylist.root.options.onEntryCreated = (entry) => {
+      queueMicrotask(() => attachSelect(entry));
     };
-
-    entrylist.entrycontrols.createControls();
-    entrylist.entrycontrols.activateControls();
-    }
+    // The root is built before onEntryCreated is set.
+    if (entrylist.root) attachSelect(entrylist.root);
+  }
 
   function showSubmit(show = true) {
     const submit = container.querySelector('[type="submit"]');

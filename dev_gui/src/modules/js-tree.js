@@ -19,7 +19,8 @@ import {
   entryOptions,
   eventEntry,
   Entry,
-  EntryControls
+  EntryControls,
+  MultiEntryControls
 }
 from '../modules/entry.js';
 const jstreeOptions = {
@@ -41,15 +42,19 @@ const jstreeOptions = {
       name: 'eventEntry'
     }
   },
+  // hover toolbar - empty by default, selection is done with the per-row
+  // checkbox below
   entrycontrols: {
-    controls: {
-      select: {
-        action: 'select',
-        text: 'select entry',
-        icon: 'icon-check',
-        typentries: [entryTypes.branch, entryTypes.node],
-      },
-    },
+    controls: {},
+  },
+  // single-select checkbox on every row (MultiEntryControls), same look as the
+  // import picker's multiselect (js-import.js), pinned at the row's left edge:
+  // clicking the checkbox or dblclicking the icon/name toggles it, click on
+  // the icon/name opens the entry, hovering the icon/name previews the tick.
+  // Ticking an entry unticks the previous one.
+  rowselect: {
+    class: ['control-select', 'import-toggle'],
+    typentries: [entryTypes.branch, entryTypes.node],
   },
   droptarget: 'droptarget',
   tree: 'taxotree',
@@ -57,7 +62,9 @@ const jstreeOptions = {
 }
 
 function EntryAction(entry, options) {
-  const entryaction = new Entry(entry, options);
+  // deferListeners: getListeners() is overridden below, JsTree / createEntry()
+  // call addListeners() once the override is in place
+  const entryaction = new Entry(entry, { ...options, deferListeners: true });
   entryaction.status=entry.status;
   entryaction.eventnames = {
     attach: 'attach',
@@ -66,6 +73,26 @@ function EntryAction(entry, options) {
   };
   entryaction.newEntry = function(entry) {
     return EntryAction(entry, this.options);
+  }
+  // rollover shows the controls. With the select checkbox (rowselect): click
+  // opens the entry and lists its children, dblclick toggles its checkbox
+  // (JsTree attachSelect). Without it, same as My files (js-dirlist.js):
+  // click activates the entry, dblclick opens it.
+  entryaction.getListeners = function() {
+    if (this.options.rowselect) {
+      const open = (this.isBranch(true)) ? () => this.toggleOpen() : null;
+      // clickselect (import page server tree): like the import "My files"
+      // list - click toggles the checkbox, dblclick opens the entry
+      if (this.options.clickselect) return this.interactionListeners(() => {
+        if (this.selectToggle) this.selectToggle();
+      }, open);
+      return this.interactionListeners(open, () => {
+        if (this.selectToggle) this.selectToggle();
+      });
+    }
+    return this.interactionListeners(() => {
+      this.emitEvent(this.eventnames.attach);
+    });
   }
   entryaction.select = function() {
     this.emitEvent(this.eventnames.select);
@@ -120,7 +147,26 @@ export function JsTree(parent, options = {}) {
     class: options.tree
   }, parent);
   let root, activentry, dragentry, overitem = null;
+  let hoverLeaveTimer = null;
+  // single selection (rowselect checkbox) and who gets told about it
+  let selected = null;
+  let selectcallback = (options.actions && options.actions.select) ? (entry, on) => {
+    if (on) options.actions.select(entry);
+  } : null;
   const entrycontrols = EntryControls(container, options.entrycontrols) ;
+  // options coming from a data-exclude attribute are a comma separated string
+  const exclude = (Array.isArray(options.exclude)) ? options.exclude : ((options.exclude) ? options.exclude.split(',') : []);
+  const rowcontrols = (options.rowselect) ? MultiEntryControls({
+    accept: (entry) => entry.status !== 'D',
+    controls: {
+      select: {
+        action: (entry) => toggleSelect(entry),
+        class: options.rowselect.class,
+        exclude: exclude,
+        typentries: options.rowselect.typentries,
+      }
+    }
+  }) : null;
   init(parent);
   container.append(root.container);
   function init() {
@@ -129,8 +175,19 @@ export function JsTree(parent, options = {}) {
     Object.entries(options.entrycontrols.controls).forEach(([key, control]) => {
       obj[key] = control.action;
     });
+    obj.select = 'select';
     options.entry.actions = obj;
     options.entry.listener = uuid;
+    if (rowcontrols) {
+      options.entry.rowselect = true;
+      if (options.clickselect) options.entry.clickselect = true;
+      // onEntryCreated fires from the Entry constructor, before createEntry()
+      // appends it and before EntryAction sets its status - defer until the
+      // entry is in place (same as js-import.js multiselect)
+      options.entry.onEntryCreated = (entry) => {
+        queueMicrotask(() => attachSelect(entry));
+      };
+    }
     initEvents();
     root = EntryAction({
       type: type,
@@ -138,7 +195,8 @@ export function JsTree(parent, options = {}) {
       id: options.entry.root,
       label: options.api_parameters.rootname,
     }, options.entry);
-    root.addListeners();root.icon.dispatchEvent(new Event('click'));
+    root.addListeners();
+    root.setOpen(true);
 
   }
 
@@ -150,7 +208,24 @@ export function JsTree(parent, options = {}) {
       switch (e.action) {
         case evtnames.attach:
         if (detachcallback) detachcallback();
-          attachControls(e.entry);
+          selectEntry(e.entry);
+          break;
+        case "mouseenter":
+          // controls only ever show on rollover - selection is shown via
+          // .row-selected instead
+          if (hoverLeaveTimer) {
+            clearTimeout(hoverLeaveTimer);
+            hoverLeaveTimer = null;
+          }
+          if (entrycontrols && e.entry.status !== 'D') entrycontrols.attachControls(e.entry);
+          break;
+        case "mouseleave":
+          // debounced so moving from one row to the next doesn't flicker
+          if (hoverLeaveTimer) clearTimeout(hoverLeaveTimer);
+          hoverLeaveTimer = setTimeout(() => {
+            hoverLeaveTimer = null;
+            if (entrycontrols) entrycontrols.detachControls();
+          }, 150);
           break;
         case "dragstart":
           dragentry = activentry = e.entry;
@@ -193,8 +268,7 @@ export function JsTree(parent, options = {}) {
 
           break;
         case evtnames.select:
-           if (options.actions && options.actions.select) options.actions.select(entry);
-          else {
+          {
             const droptarget = (options.droptarget) ? document.getElementById(options.droptarget) : null;
             if (!droptarget) console.log('no-target',options);
             else {
@@ -231,6 +305,67 @@ export function JsTree(parent, options = {}) {
     }, uuid);
   }
 
+  // --- single select checkbox (rowselect) ---
+  function attachSelect(entry) {
+    if (entry.selectButton) return;
+    const ctrls = rowcontrols.attachControls(entry);
+    if (!ctrls || !ctrls.select) return;
+    entry.selectButton = ctrls.select;
+    // called by the icon/name dblclick (Entry.interactionListeners)
+    entry.selectToggle = () => toggleSelect(entry);
+    // a child re-created (list() reload) for the selected entry keeps its tick
+    if (selected && selected !== entry && selected.id === entry.id && !selected.container.isConnected) {
+      selected = entry;
+      setSelectedState(entry, true);
+    }
+  }
+
+  function setSelectedState(entry, on) {
+    if (entry.selectButton) entry.selectButton.classList.toggle('is-selected', on);
+    // dash on every ancestor, so a selection inside a collapsed branch stays visible
+    for (let parent = entry.getParent(); parent; parent = parent.getParent()) {
+      if (parent.container) parent.container.classList.toggle('has-selected-inside', on);
+    }
+  }
+
+  function toggleSelect(entry) {
+    if (entry.status === 'D') return;
+    const willSelect = (selected !== entry);
+    if (selected) setSelectedState(selected, false);
+    selected = (willSelect) ? entry : null;
+    if (selected) setSelectedState(selected, true);
+    activentry = entry;
+    if (selectcallback) selectcallback(entry, willSelect);
+    else if (willSelect) entry.select();
+    else clearDroptarget(entry);
+  }
+
+  // untick (default behaviour, no select callback): drop the value that
+  // entry.select() put into the droptarget
+  function clearDroptarget(entry) {
+    const droptarget = (options.droptarget) ? document.getElementById(options.droptarget) : null;
+    if (!droptarget) return;
+    if (droptarget.tomselect) droptarget.tomselect.removeItem(entry.id);
+    else if (['input', 'textarea'].indexOf(droptarget.tagName.toLowerCase()) >= 0) {
+      if (String(droptarget.value) === String(entry.id)) droptarget.value = '';
+    } else if (droptarget.textContent === String(entry.id)) droptarget.textContent = '';
+  }
+
+  // untick without notifying (e.g. the caller reset its own form)
+  function clearSelection() {
+    if (selected) setSelectedState(selected, false);
+    selected = null;
+  }
+
+  function getSelected() {
+    return selected;
+  }
+
+  // callback(entry, on) replaces the default droptarget filling
+  function setSelectCallback(callback) {
+    selectcallback = callback;
+  }
+
   function search(name) {
 
   }
@@ -242,9 +377,27 @@ export function JsTree(parent, options = {}) {
   function setActiventry(entry = null) {
     activentry = entry;
   }
+  // marks the truly selected row (persists while hover previews elsewhere)
+  function markSelectedRow(entry) {
+    if (activentry && activentry !== entry) activentry.container.classList.remove('row-selected');
+    entry.container.classList.add('row-selected');
+  }
+
+  // selects an entry (background only) without showing its controls toolbar -
+  // that only ever appears on an actual rollover
+  function selectEntry(entry) {
+    if (entry.status == 'D') return;
+    markSelectedRow(entry);
+    activentry = entry;
+    ModuleEventEmitter.emit(eventnames.attach, {
+      entry: activentry
+    }, options.listener);
+  }
+
   function attachControls(entry) {
   if(entry.status=='D') return;
     if (entrycontrols) entrycontrols.attachControls(entry);
+    markSelectedRow(entry);
     activentry = entry;
     ModuleEventEmitter.emit(eventnames.attach, {
       entry: activentry
@@ -264,6 +417,9 @@ export function JsTree(parent, options = {}) {
    return {
     uuid,
     setDetachcallback,
+    setSelectCallback,
+    clearSelection,
+    getSelected,
     getActiventry,
     setActiventry,
     entrycontrols,
