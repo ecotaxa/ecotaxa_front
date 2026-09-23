@@ -629,3 +629,113 @@ export function EntryControls(container = document, options = {}) {
     removeControls
   }
 }
+// Same controls definition as EntryControls, but instead of one shared toolbar
+// moved into whichever row is hovered, every entry gets its own persistent box
+// (e.g. the import picker's per-row select checkbox). attachControls() is
+// idempotent, so it can be called on creation and again on every hover.
+export function MultiEntryControls(options = {}) {
+  const controloptions = {
+    controls: {},
+    // optional (entry) => boolean, to refuse controls to some entries
+    accept: null,
+    css: {
+      rowcontrols: 'rowcontrols',
+    }
+  };
+  options = { ...controloptions,
+    ...options
+  };
+
+  function isAvailable(control, entry) {
+    if (control.exclude && control.exclude.indexOf(entry.name) >= 0) return false;
+    if (!control.typentries) return true;
+    const type = (entry.isDiscarded()) ? entryTypes.discarded : entry.container.dataset.type;
+    return control.typentries.indexOf(type) >= 0;
+  }
+
+  function addControl(control, entry, box) {
+    const ctrl = create_box('span', (control.class) ? {
+      class: control.class
+    } : {}, box);
+    if (control.icon) {
+      create_box('i', {
+        class: ['icon', control.icon]
+      }, ctrl);
+      toolTip.applyTo(ctrl, control.text);
+    } else if (control.text) ctrl.textContent = control.text;
+    const run = (e) => {
+      if (typeof control.action === 'function') control.action(entry, ctrl, e);
+      else if (typeof entry[control.action] === 'function') entry[control.action]();
+      if (control.callback) control.callback(e);
+    };
+    const evt = (control.trigger) ? control.trigger : 'click';
+    if (evt !== 'click') {
+      ctrl.addEventListener(evt, (e) => {
+        e.stopPropagation();
+        run(e);
+      });
+      return ctrl;
+    }
+    // A double-click still fires two ordinary 'click' events on the same
+    // target before 'dblclick' does (standard browser behaviour), so a toggle
+    // would flip on then off again - queue the action behind a short delay and
+    // cancel it if a dblclick follows, same pattern as js-dirlist.js's getListeners().
+    let clickTimer = null;
+    ctrl.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      if (clickTimer) clearTimeout(clickTimer);
+      clickTimer = setTimeout(() => {
+        clickTimer = null;
+        run(e);
+      }, 250);
+    });
+    ctrl.addEventListener('dblclick', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      if (clickTimer) {
+        clearTimeout(clickTimer);
+        clickTimer = null;
+      }
+    });
+    return ctrl;
+  }
+
+  // Returns the entry's controls ({key: ctrl}), or null when it gets none.
+  function attachControls(entry) {
+    if (entry.rowcontrols) return entry.rowcontrols;
+    if (typeof options.accept === 'function' && !options.accept(entry)) return null;
+    const available = Object.entries(options.controls).filter(([key, control]) => isAvailable(control, entry));
+    if (available.length === 0) return null;
+    const box = create_box('div', {
+      class: options.css.rowcontrols
+    });
+    entry.container.prepend(box);
+    entry.container.classList.add('has-rowcontrols');
+    // nesting depth as a CSS variable: the rows themselves stay unindented so
+    // every box lines up in one column, only the icon+name get indented by it
+    let depth = 0;
+    for (let parent = entry.getParent(); parent; parent = parent.getParent()) depth++;
+    entry.container.style.setProperty('--depth', depth);
+    const ctrls = {};
+    available.forEach(([key, control]) => {
+      ctrls[key] = addControl(control, entry, box);
+    });
+    entry.rowcontrols = ctrls;
+    return ctrls;
+  }
+
+  function detachControls(entry = null) {
+    if (entry === null || !entry.rowcontrols) return;
+    const box = entry.container.querySelector(':scope > .' + options.css.rowcontrols);
+    if (box) box.remove();
+    entry.container.classList.remove('has-rowcontrols');
+    delete entry.rowcontrols;
+  }
+
+  return {
+    options,
+    attachControls,
+    detachControls,
+  }
+}

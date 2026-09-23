@@ -345,44 +345,23 @@ export class JsMyFiles {
     // the native directory picker only takes one folder at a time - a persistent
     // console-style note right under the dropzone points the user at drag & drop
     // for several
-    const dirhint = create_box('div', {
-      class: [css.console, 'flex', 'items-start', 'gap-1.5'],
+    const dirhint = create_box('ul', {
+      class: [css.console,'ml-2','list-disc'],
       dataset: {
         role: 'dir-hint'
       }
     });
-    create_box('i', {
-      class: ['icon', 'icon-info', 'shrink-0']
-    }, dirhint);
-    create_box('span', {
-      text: this.container.dataset.textbrowsedirectoryhint ||
+    create_box('li', {
+       text: this.container.dataset.textbrowsedirectoryhint ||
         'To add several directories at once, drag & drop them onto the zone.'
     }, dirhint);
-    this.displayprogression.insertAdjacentElement('afterend', dirhint);
-
-    // right after that hint: which directory an upload actually lands in -
-    // kept in sync with the active entry by updateDestinationHint(), called
-    // from the attach/detach listeners in addDirList().
-    const destinationHint = create_box('div', {
-      class: [css.console, 'gap-1.5', 'w-full'],
-      dataset: {
-        role: 'destination-hint'
-      }
-    });
-    create_box('i', {
-      class: ['icon', 'icon-folder', 'shrink-0']
-    }, destinationHint);
-    create_box('span', {
-      text: this.container.dataset.textuploaddestination || ' Upload to '
-    }, destinationHint);
-    // same background as .row-selected/#dropzone.has-target (bg-mainblue-100)
-    // but inverted, so the destination reads as its own solid badge
+     const desthint =create_box('li', {
+      text: this.container.dataset.textuploaddestination || 'Destination path '
+    }, dirhint);
     this.destinationPath = create_box('span', {
       class: 'upload-destination-path'
-    }, destinationHint);
-    dirhint.insertAdjacentElement('afterend', destinationHint);
-    this.destinationHint = destinationHint;
-
+    }, desthint);
+    this.displayprogression.insertAdjacentElement('afterend', dirhint);
     this.droptarget=(this.options.upload.droptarget)?this.dropzone:null;
   }
 
@@ -889,6 +868,10 @@ export class JsMyFiles {
       case this.eventnames.ready:
         this.resetCounters();
         if (this.uploadentry)  this.uploadentry.list().then(()=>{ this.uploadentry.setOpen(true);this.uploadentry = null;});
+        // notify any other file tree on the page (e.g. the import list while
+        // this "My files" manager is open in a modal) that the server tree
+        // changed - same bus js-dirlist.js fetchAction emits on create/rename/remove
+        ModuleEventEmitter.emit('filesmutated', { action: 'upload' });
         message = null;
         break;
       case this.eventnames.follow:

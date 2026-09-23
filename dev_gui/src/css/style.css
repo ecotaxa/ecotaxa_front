@@ -328,7 +328,7 @@ tr.disabled {@apply opacity-70}
 .upload-destination-path {@apply break-all min-w-0 bg-mainblue-100 rounded-sm pr-2 py-0.5 font-semibold }
 /* browse or drop in a subdir*/
 .has-controls .boxtitle {@apply w-36 right-0 top-1 z-20 absolute small-caps truncate overflow-x-hidden}
-[data-name][data-type="R"] [data-name] {@apply ml-4 relative}
+.entries > [data-name]  {@apply ml-4 }
 .dirlist {@apply h-full mt-2 }
 /* a little vertical breathing room around every row, of any type */
 [data-name][data-type="R"] , [data-name][data-type="D"] {@apply relative}
@@ -341,16 +341,13 @@ tr.disabled {@apply opacity-70}
 /* clear-both: always start below the icon/checkbox/toolbar floats, whatever
    their relative heights, instead of wrapping alongside them */
 .on > .entries  {@apply block clear-both overflow-y-auto}
-/* import picker only (wrapContent): icon+name wrapper - block+overflow-hidden
-   so it still fills the gap next to the checkbox float */
-.folders {--indent-unit: theme('spacing.1');}
-.entry-content {@apply block overflow-hidden px-1 mb-0.5 ml-[calc(var(--indent-unit))]}
+.entry-content {@apply block overflow-hidden px-1 mb-0.5  }
 .folders .entryN {@apply relative before:icon-md before:opacity-80 before:absolute before:block before:top-1.5 before:left-0  pl-5 }
 /* block + overflow-hidden: a floated icon/checkbox (and a floated toolbar on
    the other side) leave a gap between them that this fills completely, so
    its own background (see .has-controls/.row-selected/:hover above) starts
    right at the icon and runs to the row's end - not the whole row's width */
-.entryN, .entryB, .entryR, .entryD  {@apply block overflow-hidden text-sm font-normal py-0.5 my-0.5 mr-0.5 cursor-pointer}
+.entryN, .entryB, .entryR, .entryD  {@apply block overflow-hidden text-sm font-normal py-0.5 my-0.5 mr-0.5 cursor-pointer }
 .folders .ico-entryD, .folders .ico-entryR, .folders .ico-entryB, .taxotree .ico-entryR, .taxotree .ico-entryB  {@apply relative w-4 h-4 before:icon-md before:opacity-80 before:absolute before:block before:top-1.5 before:left-0  mr-0.5  pl-5 cursor-pointer }
 .folders .ico-entryD, .folders .ico-entryR, .folders .ico-entryB {@apply float-left}
 .taxotree .ico-entryR, .taxotree .ico-entryB {@apply inline-block}
@@ -390,22 +387,38 @@ tr.disabled {@apply opacity-70}
 /* floats ignore vertical-align, so align-baseline (used when this was
    inline-block) can't nudge it to the text baseline any more - use the same
    relative top offset the icon uses for the identical alignment problem */
-.control-select.import-toggle {@apply relative top-1.5 float-left overflow-hidden text-center leading-4 cursor-pointer bg-stone-200 hover:bg-stone-300 font-semibold text-xs text-stone-200 hover:text-stone-600 before:content-["\2713"] w-4 h-4 max-h-4 rounded-sm mr-2 }
+
+/* per-row controls box (MultiEntryControls, entry.js - e.g. the import
+   picker's select checkbox): pinned at the row's left edge, and the rows
+   themselves are not indented, so every box lines up in a single column at
+   the list's left edge. Only the icon+name are indented, by nesting depth
+   (--depth, set by MultiEntryControls) plus room for the box. */
+.folders [data-name].has-rowcontrols {@apply relative}
+.folders .entries > [data-name].has-rowcontrols {@apply ml-0}
+.rowcontrols {@apply absolute left-0 top-0 z-10}
+.folders .has-rowcontrols > .entry-content,
+.folders .has-rowcontrols > [class^="ico-entry"],
+.folders .has-rowcontrols > .entryN {margin-left: calc(var(--depth, 0) * 1rem + 1.5rem)}
+.control-select.import-toggle {@apply relative inline-block top-1.5 overflow-hidden text-center leading-4 cursor-pointer bg-stone-200 hover:bg-stone-300 font-semibold text-xs text-stone-200 hover:text-stone-600 before:content-["\2713"] w-4 h-4 max-h-4 rounded-sm }
 .control-select.import-toggle.is-selected {@apply  bg-secondblue-50 text-secondblue-500 before:content-["\2713"]}
 /* folder not itself checked, but a descendant is - show a dash instead of the checkmark */
-.folders [data-name].has-selected-inside > .control-select.import-toggle:not(.is-selected) {@apply text-secondblue-500 before:content-["\2212"]}
+.folders [data-name].has-selected-inside > .rowcontrols > .control-select.import-toggle:not(.is-selected) {@apply text-secondblue-500 before:content-["\2212"]}
 /* rollover background for import rows - on the name span (see the comment
    by .entryN/.entryB/.entryR/.entryD above), not the row, so it starts at
    the icon and runs to the row's end rather than covering the checkbox too */
 /* :hover on the row itself would trigger from anywhere in its box (its own
    padding, the checkbox's area) - scope it to only the icon or the name
    actually being hovered, matching where click/dblclick actually respond */
-.folders [data-name]:has(> .control-select.import-toggle):has(> [class^="ico-entry"]:hover, > [class^="entry"]:hover) > [class^="entry"] {@apply bg-mainblue-50}
+.folders [data-name]:has(> .rowcontrols > .control-select.import-toggle):has(> [class^="ico-entry"]:hover, > [class^="entry"]:hover) > [class^="entry"] {@apply bg-mainblue-50}
 /* tint (and lightly shade) the entry's own name while its select toggle is
    on - target the label span, not the [data-name] li, so neither the colour
    nor the background inherit into nested rows (e.g. the trash dir, which has
    no toggle) */
-.folders [data-name]:has(> .control-select.is-selected) > [class^="entry"] {@apply text-secondblue-600 bg-mainblue-50}
+.folders [data-name]:has(> .rowcontrols > .control-select.is-selected) > [class^="entry"] {@apply text-secondblue-600 bg-mainblue-50}
+/* hovering the select checkbox highlights the entry it acts on - a shade
+   darker than the selected tint above (and placed after it) so it still
+   shows on an already-ticked entry */
+.folders [data-name]:has(> .rowcontrols > .control-select.import-toggle:hover) > .entry-content {@apply text-secondblue-600 bg-mainblue-100}
 /* unchecked folder that still has a checked entry inside (e.g. while collapsed) */
 .folders [data-name].has-selected-inside > [class^="entry"] {@apply text-secondblue-600}
 .intrash {@apply bg-danger-100}

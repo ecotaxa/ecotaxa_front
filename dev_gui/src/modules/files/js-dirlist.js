@@ -309,9 +309,12 @@ function EntryAction(args, options) {
     // click's own action is queued behind a short delay and cancelled if a
     // dblclick follows within it - otherwise both actions would run.
     let clickTimer = null;
+    // import picker: toggle the checkbox's action directly (importToggle, set
+    // by js-import.js) - clicking the checkbox element instead would add its
+    // own click/dblclick delay on top of the one below.
     let doClick = () => {
       if (clickExpand) {
-        if (this.importButton) this.importButton.click();
+        if (this.importToggle) this.importToggle();
         return;
       }
       this.branchListener(() => {
@@ -324,7 +327,7 @@ function EntryAction(args, options) {
       if (this.type === entryTypes.node) {
         doClick = () => {
           if (clickExpand) {
-            if (this.importButton) this.importButton.click();
+            if (this.importToggle) this.importToggle();
             return;
           }
           this.toggleActive();
