@@ -156,8 +156,16 @@ export function JsTree(parent, options = {}) {
   const entrycontrols = EntryControls(container, options.entrycontrols) ;
   // options coming from a data-exclude attribute are a comma separated string
   const exclude = (Array.isArray(options.exclude)) ? options.exclude : ((options.exclude) ? options.exclude.split(',') : []);
+  // data-selectunder: only descendants of the entry with this name get the select checkbox
+  const selectunder = (options.selectunder) ? options.selectunder : null;
+  const isUnder = (entry) => {
+    for (let parent = entry.getParent(); parent; parent = parent.getParent()) {
+      if (parent.name === selectunder) return true;
+    }
+    return false;
+  };
   const rowcontrols = (options.rowselect) ? MultiEntryControls({
-    accept: (entry) => entry.status !== 'D',
+    accept: (entry) => entry.status !== 'D' && (!selectunder || isUnder(entry)),
     controls: {
       select: {
         action: (entry) => toggleSelect(entry),
