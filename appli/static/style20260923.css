@@ -383,3 +383,7 @@ a.taxo-guide-link:hover .glyphicon {
   color: #666 !important; /* slightly darker than the default inline #999 */
   transform: scale(1.12);
 }
+
+.taxopopup {
+    z-index: 2001 !important;
+}
