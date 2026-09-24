@@ -916,17 +916,19 @@ a.disabled {@apply pointer-events-none;}
 .sticky-top .table-top {@apply sticky  top-0 z-20 h-14 bg-white }
 .sticky-top .table-table thead {@apply sticky top-14 z-20}
 /***********************/
-/* projects list      */
+/* projects & collections list      */
 /**********************/
-.prjlist .table-top {@apply sticky  top-0 z-50 h-14 bg-white }
-.prjlist .table-table thead {@apply sticky  top-14 z-20}
-.prjlist .table-table thead tr th {@apply  bg-stone-300 hover:text-secondblue-500 text-secondblue-900  border-secondblue-100 shadow-sm;}
-.prjlist .table-table th .sublabel {@apply text-xs font-light text-stone-500 }
-.prjlist .table-table tr {@apply h-8 max-h-8 overflow-hidden}
-.prjlist .table-table td {@apply  max-w-[22%]}
-.prjlist .table-table tr:nth-child(even of :not([hidden])) {@apply bg-stone-50 }
-.prjlist .table-table tr:nth-child(odd of :not([hidden])) {@apply bg-stone-100 }
-.prjlist .table-table td.tdsmall {@apply uppercase py-[0.1rem];font-size:.625rem;line-height:.575rem}
+.prjlist .table-top, .collectionlist .table-top {@apply sticky  top-0 z-50 h-14 bg-white }
+.prjlist .table-table thead, .collectionlist .table-table thead {@apply sticky  top-14 z-20}
+.prjlist .table-table thead tr th, .collectionlist .table-table thead tr th {@apply  bg-stone-300 hover:text-secondblue-500 text-secondblue-900  border-secondblue-100 shadow-sm;}
+.prjlist .table-table th .sublabel, .collectionlist .table-table th .sublabel {@apply text-xs font-light text-stone-500 }
+.prjlist .table-table tr, .collectionlist .table-table tr {@apply h-8 max-h-8 overflow-hidden}
+.prjlist .table-table td, .collectionlist .table-table td {@apply  max-w-[22%]}
+.prjlist .table-table tr:nth-child(even of :not([hidden])), .collectionlist .table-table tr:nth-child(even of :not([hidden])) {@apply bg-stone-50 }
+.prjlist .table-table tr:nth-child(odd of :not([hidden])), .collectionlist .table-table tr:nth-child(odd of :not([hidden])) {@apply bg-stone-100 }
+.prjlist .table-table td.tdsmall, .collectionlist .table-table td.tdsmall {@apply uppercase py-[0.1rem];font-size:.625rem;line-height:.575rem}
+/* about panel is placed from the tbody (prjlist gets it from the virtual scroll transform) */
+.collectionlist .table-table tbody {@apply relative}
 /* last_used_project */
 .prjlist .table-table tr.last-used {@apply  bg-white text-stone-900  border-stone-100 }
 .prjlist .table-table tr.last-used .ellipsis {@apply font-normal}
@@ -943,7 +945,7 @@ td details:not([open]) summary > a {@apply float-right text-sm}
 td details[open] summary, td details.open summary {@apply text-stone-800 font-semibold whitespace-normal overflow-hidden !important}
 td details[open], td details.open {@apply static;}
 /*about */
-.prjlist td details summary {@apply hover:font-normal cursor-pointer  }
+.prjlist td details summary, .collectionlist td details summary {@apply hover:font-normal cursor-pointer  }
 /* progress bar */
 /*data.progress {@apply relative before:float-right after:text-left after:text-xs after:text-stone-700 before:bg-stone-700 before:h-0.5 before:bottom-0  before:overflow-x-hidden before:absolute z-10 before:block after:block after:content-[attr(data-v)] after:z-20 after:absolute after:bottom-0.5 after:left-0 after:overflow-x-visible max-w-[64px] before:w-full bg-stone-200 h-0.5 block overflow-hidden }*/
 td.progress {@apply min-w-[96px] }
@@ -1302,8 +1304,8 @@ table tr {@apply border-t border-stone-300 max-w-full overflow-auto}
   table tbody tr td:nth-of-type(n+1) {@apply inline-block;
 }
 table tbody tr td:before { @apply font-semibold block content-[attr('data-name')]  }
-.prjlist .table-table tr, .jobs.table-table tr , table tr {@apply block h-auto max-h-full overflow-y-visible;contain:none}
-.prjlist .table-table td, .jobs.table-table td, table td {@apply block h-auto max-h-full px-1 py-1  w-auto border-r border-stone-100 inline-block;contain:none}
+.prjlist .table-table tr, .collectionlist .table-table tr, .jobs.table-table tr , table tr {@apply block h-auto max-h-full overflow-y-visible;contain:none}
+.prjlist .table-table td, .collectionlist .table-table td, .jobs.table-table td, table td {@apply block h-auto max-h-full px-1 py-1  w-auto border-r border-stone-100 inline-block;contain:none}
 /*table tbody tr td:last-child {@apply  w-auto inline-block}*/
 .top-title {@apply max-w-[58%]}
 }
