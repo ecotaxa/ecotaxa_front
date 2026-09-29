@@ -25,6 +25,8 @@ def searchsamples():
     with ApiClient(SamplesApi, request) as api:
         samples: List[SampleModel] = api.samples_search(project_ids=project_ids,
                                                         id_pattern=pattern)
+    # Sort samples alphabetically by origin ID, case-sensitive on purpose
+    samples.sort(key=lambda s: s.orig_id)
     if gvg("format", 'J') == 'J':  # version JSon par defaut
         return json.dumps([dict(id=s.sampleid, text=s.orig_id) for s in samples])
     else:
