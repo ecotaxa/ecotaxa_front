@@ -67,6 +67,76 @@ function createJsTomSelect() {
       option.settings.allowEmptyOption = true;
     }
     option.settings.maxItems =(item.dataset.hasOwnProperty('maxitems'))? parseInt(item.dataset.maxitems):(multiple) ? null : 1;
+        const personurl="/gui/persons/create/";
+        const open_new_person= async function() {
+        if(_fetching[personurl]) return;
+        _fetching[personurl]=true;
+        const response = await fetch(personurl,fetchSettings);
+        _fetching[personurl]=false;
+        return response;
+        }
+        const wait_for_input=async function(resp,newone,callback,persontype=null) {
+               let response;
+            const reply=(resp.ok) ?await resp.text():await Promise.reject(resp);
+        const parent=item.form.parentElement;
+        parent.classList.remove("relative");
+        document.body.classList.add(css.hidevscroll);
+        const popup =create_box("div", {class:["absolute","z-[100]","bg-white","w-96","h-48","p-8","rounded","drop-shadow","centered"],src:personurl},parent);
+        parent.disabled=true;
+        const close=create_box("div",{class:[domselectors.close.slice(1)],text:"x"},popup);
+        const content=create_box("div",{class:["h-full","w-full"]},popup);
+        close.addEventListener('click', (e)=> {popup.remove();delete parent.disabled;  document.body.classList.remove(css.hidevscroll); });
+        content.insertAdjacentHTML('afterbegin',reply);
+        popup.querySelectorAll('[data-href]').forEach(btn=> {
+        popup.classList.remove('h-48');
+        popup.classList.add('h-auto');
+        popup.classList.add('overflow-y-auto');
+        popup.classList.add('max-h-full');
+        btn.addEventListener('click',async(e)=>{
+        const url=btn.dataset.href + '?type=' + btn.dataset.type;
+        if(_fetching[url]) return;
+        _fetching[url]=true;
+        response =await fetch(url,fetchSettings);
+        _fetching[url]=false;
+        const reply=(response.ok) ?await response.text():await Promise.reject(response);
+        content.innerHTML=reply;
+        content.querySelectorAll(funcselector).forEach(el=> {applyTo(el);});
+        // EDMO suggestions on a new organization name
+        const edmofields=content.querySelectorAll('.js-edmo');
+        if (edmofields.length) {
+          const {JsEdmoSearch} = await import('../modules/js-edmo-search.js');
+          edmofields.forEach(el=> {JsEdmoSearch.applyTo(el);});
+        }
+        const form2submit=popup.querySelector('form');
+        form2submit.dataset.fetch=true;
+        const formSubmit = new FormSubmit(form2submit);
+        let namefield=popup.querySelector("[id='name']");
+        if (namefield !==null) namefield.value=newone;
+        else {
+            namefield=popup.querySelector("[id='lastname']");
+            if (namefield !==null) namefield.value=newone;
+        }
+        content.querySelector("[type='submit']").addEventListener('click', async(e) => {
+        e.preventDefault();
+        response=await formSubmit.submitForm();
+        if (response.success) {
+        newone=response[btn.dataset.type];
+        const newitem={id:newone.id, "name":newone.name};
+        if (btn.dataset.type=="guest") newitem["name+email"]= newone.name+" "+newone.email;
+        else if(option.settings.itemprefix) newitem.id=option.settings.itemprefix+newitem.id;
+         if(callback) callback(newitem);
+        popup.remove();
+        document.body.classList.remove(css.hidevscroll);
+        } else popup.insertAdjacentHTML('afterbegin',response.message);
+
+         })
+        })})
+        // open directly the form of this type of person
+        if (persontype) {
+          const btn=popup.querySelector("[data-href][data-type='"+persontype+"']");
+          if (btn!==null) btn.click();
+        }
+        }
     switch (type) {
       case models.project:
       case models.renamingrules:
@@ -94,69 +164,17 @@ function createJsTomSelect() {
             allowEmptyOption: false,
           }
         };
+        // same popup as for persons, organizations are selected by name
+        if (item.dataset.createorg) {
+            option.settings.create=function(e,callback) {
+              open_new_person(e).then(response => { wait_for_input(response,e,(newitem)=> {callback({id:newitem.name, text:newitem.name});},'organization');
+              });
+            }
+        }
         break;
       case models.person:
         option.url = "/gui/search_persons?name=";
-        const personurl="/gui/persons/create/";
         if (item.dataset.prefix) option.settings.itemprefix=item.dataset.prefix;
-        const open_new_person= async function() {
-        if(_fetching[personurl]) return;
-        _fetching[personurl]=true;
-        const response = await fetch(personurl,fetchSettings);
-        _fetching[personurl]=false;
-        return response;
-        }
-        const wait_for_input=async function(resp,newone,callback) {
-               let response;
-            const reply=(resp.ok) ?await resp.text():await Promise.reject(resp);
-        const parent=item.form.parentElement;
-        parent.classList.remove("relative");
-        document.body.classList.add(css.hidevscroll);
-        const popup =create_box("div", {class:["absolute","z-[100]","bg-white","w-96","h-48","p-8","rounded","drop-shadow","centered"],src:personurl},parent);
-        parent.disabled=true;
-        const close=create_box("div",{class:[domselectors.close.slice(1)],text:"x"},popup);
-        const content=create_box("div",{class:["h-full","w-full"]},popup);
-        close.addEventListener('click', (e)=> {popup.remove();delete parent.disabled;  document.body.classList.remove(css.hidevscroll); });
-        content.insertAdjacentHTML('afterbegin',reply);
-        popup.querySelectorAll('[data-href]').forEach(btn=> {
-        popup.classList.remove('h-48');
-        popup.classList.add('h-auto');
-        popup.classList.add('overflow-y-auto');
-        popup.classList.add('max-h-full');
-        btn.addEventListener('click',async(e)=>{
-        const url=btn.dataset.href + '?type=' + btn.dataset.type;
-        if(_fetching[url]) return;
-        _fetching[url]=true;
-        response =await fetch(url,fetchSettings);
-        _fetching[url]=false;
-        const reply=(response.ok) ?await response.text():await Promise.reject(response);
-        content.innerHTML=reply;
-        content.querySelectorAll(funcselector).forEach(el=> {applyTo(el);});
-        const form2submit=popup.querySelector('form');
-        form2submit.dataset.fetch=true;
-        const formSubmit = new FormSubmit(form2submit);
-        let namefield=popup.querySelector("[id='name']");
-        if (namefield !==null) namefield.value=newone;
-        else {
-            namefield=popup.querySelector("[id='lastname']");
-            if (namefield !==null) namefield.value=newone;
-        }
-        content.querySelector("[type='submit']").addEventListener('click', async(e) => {
-        e.preventDefault();
-        response=await formSubmit.submitForm();
-        if (response.success) {
-        newone=response[btn.dataset.type];
-        const newitem={id:newone.id, "name":newone.name};
-        if (btn.dataset.type=="guest") newitem["name+email"]= newone.name+" "+newone.email;
-        else if(option.settings.itemprefix) newitem.id=option.settings.itemprefix+newitem.id;
-         if(callback) callback(newitem);
-        popup.remove();
-        document.body.classList.remove(css.hidevscroll);
-        } else popup.insertAdjacentHTML('afterbegin',response.message);
-
-         })
-        })})
-        }
         option.settings = { ...option.settings,
           ...{
             valueField: 'id',

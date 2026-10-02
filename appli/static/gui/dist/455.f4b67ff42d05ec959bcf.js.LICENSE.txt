@@ -2,11 +2,15 @@
 
 /*! ../modules/form-submit.js */
 
+/*! ../modules/js-edmo-search.js */
+
 /*! ../modules/modules-config.js */
 
 /*! ../modules/utils.js */
 
 /*! dompurify */
+
+/*! import() */
 
 /*! tom-select/dist/js/plugins/caret_position.js */
 

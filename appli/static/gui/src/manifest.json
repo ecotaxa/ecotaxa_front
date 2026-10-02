@@ -4,6 +4,7 @@
   "src_modules_table-component_js.js": "/static/gui/src/src_modules_table-component_js.js",
   "src_modules_project-privileges_js.js": "/static/gui/src/src_modules_project-privileges_js.js",
   "src_modules_form-submit_js.js": "/static/gui/src/src_modules_form-submit_js.js",
+  "src_modules_js-edmo-search_js.js": "/static/gui/src/src_modules_js-edmo-search_js.js",
   "src_modules_js-captcha_js.js": "/static/gui/src/src_modules_js-captcha_js.js",
   "src_modules_js-accordion_js.js": "/static/gui/src/src_modules_js-accordion_js.js",
   "src_modules_js-taxomapping_js.js": "/static/gui/src/src_modules_js-taxomapping_js.js",

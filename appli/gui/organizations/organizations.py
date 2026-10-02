@@ -1,6 +1,6 @@
 from flask import request, render_template
 from werkzeug.exceptions import NotFound
-from typing import Union, Dict
+from typing import Union, Dict, Optional
 from appli import gvp
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException, OrganizationsApi, OrganizationModel
@@ -9,6 +9,30 @@ from appli.gui.staticlistes import py_user
 from appli.gui.guests.guests import ACCOUNT_CREATE, ACCOUNT_EDIT, check_is_guests_admin
 
 ORGANIZATION_FIELDS = ["name", "edmo"]
+# Organization directories are comma-separated "<directory>:<code>", e.g. "edmo:1278"
+DIRECTORIES_SEP = ","
+EDMO_PREFIX = "edmo:"
+
+
+def edmo_code(directories: Optional[str]) -> str:
+    """The EDMO code in directories, empty if none"""
+    for an_entry in (directories or "").split(DIRECTORIES_SEP):
+        an_entry = an_entry.strip()
+        if an_entry.startswith(EDMO_PREFIX):
+            return an_entry[len(EDMO_PREFIX) :]
+    return ""
+
+
+def directories_with_edmo(directories: Optional[str], code: str) -> Optional[str]:
+    """Directories with the EDMO reference replaced, added or removed if no code, others kept"""
+    entries = [
+        an_entry.strip()
+        for an_entry in (directories or "").split(DIRECTORIES_SEP)
+        if an_entry.strip() and not an_entry.strip().startswith(EDMO_PREFIX)
+    ]
+    if code != "":
+        entries.insert(0, EDMO_PREFIX + code)
+    return DIRECTORIES_SEP.join(entries) if entries else None
 
 
 def organization_create():
@@ -65,10 +89,17 @@ def organization_account(id: int, action: str = None) -> tuple:
     posted: Dict = {}
     posted.update({a_field: gvp(a_field).strip() for a_field in fields})
     posted["id"] = id
+    code = gvp("edmo", "").strip()
+    if code != "" and not code.isdigit():
+        return make_person_response(1, py_user["invaliddata"], None, "organization")
     if action == ACCOUNT_EDIT:
         if id == -1:
             return 1, "noorgname"
         else:
+            # Keep the other directories, e.g. ROR
+            current = api_get_organization(id)
+            current_directories = getattr(current, "directories", None)
+            posted["directories"] = directories_with_edmo(current_directories, code)
             api_organization = OrganizationModel(**posted).to_dict()
         with ApiClient(OrganizationsApi, request) as api:
             try:
@@ -95,6 +126,8 @@ def organization_account(id: int, action: str = None) -> tuple:
                 {"id": id, "name": posted["name"]},
             )
         else:
+            # The back end completes name and code from EDMO when it finds the organization there
+            posted["directories"] = directories_with_edmo(None, code)
             response = api_organization_create(posted)
             return response
     else:
@@ -119,6 +152,7 @@ def account_page(action: str, id: int, template: str, partial: bool = False) -> 
     return render_template(
         template,
         organization=organization,
+        edmo=edmo_code(getattr(organization, "directories", None)),
         createaccount=(action == ACCOUNT_CREATE),
         partial=partial,
     )

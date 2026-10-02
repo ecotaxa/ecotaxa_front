@@ -4,10 +4,10 @@
         <legend class="tab-control">{{legend if legend else ''}}</legend>
           <div class="form-box">
           <label for="name">{{_('Name')}}</label>
-          <input type="text" id="name" name="name" class="form-input" value="{{ organization.name if organization}}" required data-required="{{_('a name is required')}}" placeholder="{{_('Name')}}"></div>
+          <input type="text" id="name" name="name" class="form-input{{ ' js js-edmo' if createaccount }}" value="{{ organization.name if organization}}" required data-required="{{_('a name is required')}}" placeholder="{{_('Name')}}" data-edmotarget="edmo" {% if createaccount %}title="{{_('Type at least 3 characters for suggestions from EcoTaxa and EDMO')}}"{% endif %}></div>
           <div class="form-box">
             <label for="edmo"><a href="https://edmo.seadatanet.org/search" target="_blank">{{_('EDMO ID')}}</a> <i data-for="help_organization_edmo" data-request="help"></i></label>
-            <input type="text" id="edmo" name="edmo" class="form-input" value="{{ organization.edmo if organization }}" maxlength=250 placeholder="{{_('EDMO ID')}}"></div>
+            <input type="text" id="edmo" name="edmo" class="form-input" value="{{ edmo if edmo }}" maxlength=250 pattern="[0-9]*" placeholder="{{_('EDMO ID')}}"></div>
            </fieldset>
       <fieldset>
 <div class="w-full text-left mb-8">

@@ -87,6 +87,15 @@ function createJsComponents() {
               }
               const formSubmit = new dynamics.FormSubmit(item);
               break;
+            case 'js-edmo':
+              if (!dynamics.JsEdmoSearch) {
+                const {
+                  JsEdmoSearch
+                } = await import('../modules/js-edmo-search.js');
+                dynamics.JsEdmoSearch = JsEdmoSearch;
+              }
+              dynamics.JsEdmoSearch.applyTo(item);
+              break;
             case 'js-captcha':
               if (!dynamics.JsCaptcha) {
                 const {

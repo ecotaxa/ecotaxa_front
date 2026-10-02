@@ -18,6 +18,8 @@
 
 /*! ../modules/js-dragdrop.js */
 
+/*! ../modules/js-edmo-search.js */
+
 /*! ../modules/js-import.js */
 
 /*! ../modules/js-my-files.js */
