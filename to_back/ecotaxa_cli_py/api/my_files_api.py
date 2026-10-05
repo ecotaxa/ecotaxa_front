@@ -39,14 +39,14 @@ class MyFilesApi(object):
     def create_user_file(self, **kwargs):  # noqa: E501
         """Create User File  # noqa: E501
 
-        **Create a new file or directory in the current user files directory.** The returned text will contain a server-side path which is usable for some file-related operations.  # noqa: E501
+        **Create a new directory in the current user files directory.** The returned text will contain a server-side path which is usable for some file-related operations.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
         >>> thread = api.create_user_file(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
-        :param str source_path: The path of the file or directory to be created.
+        :param str source_path: The path of the directory to be created.
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
@@ -64,14 +64,14 @@ class MyFilesApi(object):
     def create_user_file_with_http_info(self, **kwargs):  # noqa: E501
         """Create User File  # noqa: E501
 
-        **Create a new file or directory in the current user files directory.** The returned text will contain a server-side path which is usable for some file-related operations.  # noqa: E501
+        **Create a new directory in the current user files directory.** The returned text will contain a server-side path which is usable for some file-related operations.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
         >>> thread = api.create_user_file_with_http_info(async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
-        :param str source_path: The path of the file or directory to be created.
+        :param str source_path: The path of the directory to be created.
         :param _return_http_data_only: response data without head status code
                                        and headers
         :param _preload_content: if False, the urllib3.HTTPResponse object will

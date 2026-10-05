@@ -1,7 +1,7 @@
 from flask import request, render_template
 from werkzeug.exceptions import NotFound
 from typing import Union, Dict, Optional
-from appli import gvp
+from appli import gvp, gvg
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException, OrganizationsApi, OrganizationModel
 from appli.gui.users.users import make_person_response
@@ -57,9 +57,13 @@ def api_get_organization(id: int) -> Union[OrganizationModel, tuple]:
 
 def api_organization_create(posted: dict) -> tuple:
     new_org = OrganizationModel(**posted)
+    # an unlogged user creating an account has the token received by email
+    token = gvg("token", "").strip() or None
     with ApiClient(OrganizationsApi, request) as api:
         try:
-            organization = api.create_organization(organization_model=new_org)
+            organization = api.create_organization(
+                organization_model=new_org, token=token
+            )
             if organization is None:
                 return make_person_response(
                     1, py_user["profileerror"]["create"], None, "organization"

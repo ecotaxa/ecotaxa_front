@@ -64,6 +64,10 @@
 </div>
 <form method="post" class="js js-submit js-tabs" action="{{request.path}}" data-event="click"  data-toggle=true  data-toggledisable=true data-toggleshared=true enctype=multipart/form-data>
     <div class="block mb-4">{{display_filters(filters)}}</div>
+    {%- if temporary_taxa -%}
+    <div class="alert warning inverse text-sm mb-4">{{_('You are exporting data with objects sorted in temporary classes.')}} <strong>{{temporary_taxa|join(', ')}}</strong><br>
+    {{_("We encourage you to move these objects into existing taxonomic categories if you can find their name or to create a new category, with a name describing its morphology (e.g. 'elongated dark'), branch it as deep as possible in the taxonomy, and move the objects there. This will ensure better consistency of datasets in the long run and will help even you when, in a few months, you cannot remember what t001 was looking like compared to t002.")}}</div>
+    {%- endif -%}
     <div class="fieldset-wrapper w-full flex flex-row"><input type="hidden" name="collection_id" value="{{collection_id}}"><input type="hidden" name="projid" id="projid" value="{{projid}}">
       {% for type_export,formdata in formdatas.items() %}
     <fieldset class="w-full md:w-1/2 my-0 py-0 tab {{'tab-one' if formdatas.items()|length>1}} {{'active' if export_type == type_export }}"><legend class="text-center tab-control title-nav"  data-what="{{type_export}}" >{{formdata.title}} </legend>

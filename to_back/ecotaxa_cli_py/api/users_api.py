@@ -181,7 +181,7 @@ class UsersApi(object):
     def create_user(self, user_model_with_rights, **kwargs):  # noqa: E501
         """Create User  # noqa: E501
 
-        **Create a new user**, return **NULL upon success.**  🔒 Depending on logged user, different authorizations apply: - An administrator or user administrator can create a user. - An unlogged user can self-create an account. But must eventually provide a no-robot proof. - An ordinary logged user cannot create another account.  If back-end configuration for self-creation check is Google reCAPTCHA, then no_bot is a pair [remote IP, reCAPTCHA response].  # noqa: E501
+        **Create a new user**, return **NULL upon success.**  🔒 Depending on the logged user, different authorizations apply: - An administrator or user administrator can create a user. - An unlogged user can self-create an account. But must eventually provide a no-robot proof. - An ordinary logged user cannot create another account.  If back-end configuration for self-creation check is Google reCAPTCHA, then no_bot is a pair [remote IP, reCAPTCHA response].  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
         >>> thread = api.create_user(user_model_with_rights, async_req=True)
@@ -208,7 +208,7 @@ class UsersApi(object):
     def create_user_with_http_info(self, user_model_with_rights, **kwargs):  # noqa: E501
         """Create User  # noqa: E501
 
-        **Create a new user**, return **NULL upon success.**  🔒 Depending on logged user, different authorizations apply: - An administrator or user administrator can create a user. - An unlogged user can self-create an account. But must eventually provide a no-robot proof. - An ordinary logged user cannot create another account.  If back-end configuration for self-creation check is Google reCAPTCHA, then no_bot is a pair [remote IP, reCAPTCHA response].  # noqa: E501
+        **Create a new user**, return **NULL upon success.**  🔒 Depending on the logged user, different authorizations apply: - An administrator or user administrator can create a user. - An unlogged user can self-create an account. But must eventually provide a no-robot proof. - An ordinary logged user cannot create another account.  If back-end configuration for self-creation check is Google reCAPTCHA, then no_bot is a pair [remote IP, reCAPTCHA response].  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
         >>> thread = api.create_user_with_http_info(user_model_with_rights, async_req=True)
@@ -872,7 +872,7 @@ class UsersApi(object):
     def reset_user_password(self, reset_password_req, **kwargs):  # noqa: E501
         """Reset User Password  # noqa: E501
 
-        reset user password **return NULL on success**  🔒 Depending on logged user, different authorizations apply: - An administrator or user administrator can reset a user password. - An unlogged user can ask for a reset  in two steps. and receive a mail with a token. But must eventually provide a no-robot proof.  If back-end configuration for self-creation check is Google reCAPTCHA, then no_bot is a pair [remote IP, reCAPTCHA response].  # noqa: E501
+        reset user password **return NULL on success**  An unlogged user can ask for a reset in two steps and receive a mail with a token.     But must eventually provide a no-robot proof.  If back-end configuration for self-creation check is Google reCAPTCHA, then no_bot is a pair [remote IP, reCAPTCHA response].  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
         >>> thread = api.reset_user_password(reset_password_req, async_req=True)
@@ -899,7 +899,7 @@ class UsersApi(object):
     def reset_user_password_with_http_info(self, reset_password_req, **kwargs):  # noqa: E501
         """Reset User Password  # noqa: E501
 
-        reset user password **return NULL on success**  🔒 Depending on logged user, different authorizations apply: - An administrator or user administrator can reset a user password. - An unlogged user can ask for a reset  in two steps. and receive a mail with a token. But must eventually provide a no-robot proof.  If back-end configuration for self-creation check is Google reCAPTCHA, then no_bot is a pair [remote IP, reCAPTCHA response].  # noqa: E501
+        reset user password **return NULL on success**  An unlogged user can ask for a reset in two steps and receive a mail with a token.     But must eventually provide a no-robot proof.  If back-end configuration for self-creation check is Google reCAPTCHA, then no_bot is a pair [remote IP, reCAPTCHA response].  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
         >>> thread = api.reset_user_password_with_http_info(reset_password_req, async_req=True)

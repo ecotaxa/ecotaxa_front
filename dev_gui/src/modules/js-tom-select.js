@@ -68,10 +68,13 @@ function createJsTomSelect() {
     }
     option.settings.maxItems =(item.dataset.hasOwnProperty('maxitems'))? parseInt(item.dataset.maxitems):(multiple) ? null : 1;
         const personurl="/gui/persons/create/";
+        // an unlogged user creating an account can add an organization, with the token received by email
+        const tokenfield=(item.form)?item.form.querySelector('[name="token"]'):null;
+        const token=(tokenfield)?tokenfield.value:'';
         const open_new_person= async function() {
         if(_fetching[personurl]) return;
         _fetching[personurl]=true;
-        const response = await fetch(personurl,fetchSettings);
+        const response = await fetch(personurl+((token)?'?token='+encodeURIComponent(token):''),fetchSettings);
         _fetching[personurl]=false;
         return response;
         }
@@ -93,7 +96,7 @@ function createJsTomSelect() {
         popup.classList.add('overflow-y-auto');
         popup.classList.add('max-h-full');
         btn.addEventListener('click',async(e)=>{
-        const url=btn.dataset.href + '?type=' + btn.dataset.type;
+        const url=btn.dataset.href + '?type=' + btn.dataset.type + ((token)?'&token='+encodeURIComponent(token):'');
         if(_fetching[url]) return;
         _fetching[url]=true;
         response =await fetch(url,fetchSettings);
@@ -101,18 +104,14 @@ function createJsTomSelect() {
         const reply=(response.ok) ?await response.text():await Promise.reject(response);
         content.innerHTML=reply;
         content.querySelectorAll(funcselector).forEach(el=> {applyTo(el);});
-        // EDMO suggestions on a new organization name
-        const edmofields=content.querySelectorAll('.js-edmo');
-        if (edmofields.length) {
-          const {JsEdmoSearch} = await import('../modules/js-edmo-search.js');
-          edmofields.forEach(el=> {JsEdmoSearch.applyTo(el);});
-        }
         const form2submit=popup.querySelector('form');
         form2submit.dataset.fetch=true;
         const formSubmit = new FormSubmit(form2submit);
         let namefield=popup.querySelector("[id='name']");
-        if (namefield !==null) namefield.value=newone;
-        else {
+        if (namefield !==null) {
+          if (namefield.tomselect) namefield.tomselect.createItem(newone);
+          else namefield.value=newone;
+        } else {
             namefield=popup.querySelector("[id='lastname']");
             if (namefield !==null) namefield.value=newone;
         }
@@ -154,14 +153,21 @@ function createJsTomSelect() {
         };
         break;
       case models.organisation:
-        option.url = "/api/organizations/search?name=";
         option.settings = { ...option.settings,
           ...{
             valueField: 'id',
-            searchField: 'text',
-            labelField: 'text',
+            // options of the select have their name in labelField
+            searchField: ['text', 'text+codes'],
+            // EDMO / ROR codes in the suggestions, not in the chosen item
+            labelField: 'text+codes',
             openOnFocus: false,
             allowEmptyOption: false,
+            // EDMO code of the chosen organization in the field data-edmotarget, if any
+            onChange: function(value) {
+              const codefield=(item.dataset.edmotarget)?item.form.querySelector('#'+item.dataset.edmotarget):null;
+              const chosen=this.options[value];
+              if (codefield && chosen && chosen.code) codefield.value=chosen.code;
+            },
           }
         };
         // same popup as for persons, organizations are selected by name
@@ -309,10 +315,14 @@ function createJsTomSelect() {
           callback();
           return;
         }
+        if (type === models.organisation) {
+          import('../modules/js-edmo-search.js').then(({searchOrganizations}) => searchOrganizations(query, token))
+            .then(found => callback(found.map(org => ({id: org.name, text: org.name, codes: org.label, code: org.code})))).catch(() => callback());
+          return;
+        }
         let url = option.url;
         switch (type) {
           case models.user:
-          case models.organisation:
           case models.person:
             url += encodeURIComponent('%' + query + '%');
           break;
@@ -343,7 +353,7 @@ function createJsTomSelect() {
                 }
 
               });
-            } else if ([models.instr, models.organisation].indexOf(type) >= 0 && json.length) json = json.reduce((result, a, v) => {
+            } else if (type === models.instr && json.length) json = json.reduce((result, a, v) => {
               a = DOMPurify.sanitize(a);
               let obj = {
                 id: a,
@@ -372,7 +382,7 @@ function createJsTomSelect() {
           const optgroup = (el.hasOwnProperty('optgroup')) ? `data-optgroup=${el.optgroup}` : ``;
           const label = _get_label(el, option.settings.labelField);
           const itemprefix =(this.settings.itemprefix  && el[this.settings.valueField].length>this.settings.itemprefix.length)?((el[this.settings.valueField].slice(0,this.settings.itemprefix.length)===this.settings.itemprefix)?this.settings.itemprefix.replace('_',''):""):"";
-          return `<div class="py-2 flex  ${ ((multiple)?'inline-flex':'') } ${itemprefix}  ${((el.status && el.status=='D')?'deprecated':'')} " ${optgroup}  data-value="${el[option.settings.valueField]}">${ escape(label) }</div>`;
+          return `<div class="py-2 flex  ${ ((multiple)?'inline-flex':'') } ${itemprefix}  ${((el.status && el.status=='D')?'deprecated':'')} " ${optgroup}  data-value="${el[option.settings.valueField]}"><span>${ escape(label) }</span></div>`;
         },
         item: function(el, escape) {
           if (el === undefined || el === null) return ``; // add optgroup

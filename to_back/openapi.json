@@ -330,7 +330,7 @@
           "users"
         ],
         "summary":"Create User",
-        "description":"**Create a new user**, return **NULL upon success.**\n\n🔒 Depending on logged user, different authorizations apply:\n- An administrator or user administrator can create a user.\n- An unlogged user can self-create an account. But must eventually provide a no-robot proof.\n- An ordinary logged user cannot create another account.\n\nIf back-end configuration for self-creation check is Google reCAPTCHA,\nthen no_bot is a pair [remote IP, reCAPTCHA response].",
+        "description":"**Create a new user**, return **NULL upon success.**\n\n🔒 Depending on the logged user, different authorizations apply:\n- An administrator or user administrator can create a user.\n- An unlogged user can self-create an account. But must eventually provide a no-robot proof.\n- An ordinary logged user cannot create another account.\n\nIf back-end configuration for self-creation check is Google reCAPTCHA,\nthen no_bot is a pair [remote IP, reCAPTCHA response].",
         "operationId":"create_user",
         "security":[
           {
@@ -742,7 +742,7 @@
           "users"
         ],
         "summary":"Reset User Password",
-        "description":"reset user password **return NULL on success**\n\n🔒 Depending on logged user, different authorizations apply:\n- An administrator or user administrator can reset a user password.\n- An unlogged user can ask for a reset  in two steps. and receive a mail with a token. But must eventually provide a no-robot proof.\n\nIf back-end configuration for self-creation check is Google reCAPTCHA,\nthen no_bot is a pair [remote IP, reCAPTCHA response].",
+        "description":"reset user password **return NULL on success**\n\nAn unlogged user can ask for a reset in two steps and receive a mail with a token.\n    But must eventually provide a no-robot proof.\n\nIf back-end configuration for self-creation check is Google reCAPTCHA,\nthen no_bot is a pair [remote IP, reCAPTCHA response].",
         "operationId":"reset_user_password",
         "security":[
           {
@@ -872,7 +872,7 @@
           "organizations"
         ],
         "summary":"Search Edmo Organizations",
-        "description":"**Search for organizations in EDMO** (European Directory of Marine Organisations), returns their EDMO code and official name.\n\nMeant for suggesting an official organization when creating a new one. Empty list if EDMO is not reachable.",
+        "description":"**Search for organizations in EDMO** (European Directory of Marine Organisations), returns their EDMO code and official name.\n\nMeant for suggesting an official organization when creating a new one. Empty list if EDMO is not reachable.\n\n🔒 Any logged user, or an unlogged user creating an account, with the token received by email.",
         "operationId":"search_edmo_organizations",
         "security":[
           {
@@ -891,6 +891,18 @@
               "example":"sorbonne"
             },
             "description":"Part of the name, at least 3 characters, case-insensitive."
+          },
+          {
+            "name":"token",
+            "in":"query",
+            "required":false,
+            "schema":{
+              "title":"Token",
+              "description":"token in the url to validate request",
+              "type":"string",
+              "nullable":true
+            },
+            "description":"token in the url to validate request"
           }
         ],
         "responses":{
@@ -988,17 +1000,36 @@
           "organizations"
         ],
         "summary":"Create Organization",
-        "description":"**Create a new organization**, return **NULL upon success.**\n\n🔒 Depending on logged user, different authorizations apply:\n- An administrator or user administrator or logged project manager can create an organization.\n- An ordinary logged user cannot create another organization this way.",
+        "description":"**Create a new organization**, return **NULL upon success.**\n\n🔒 Depending on logged user, different authorizations apply:\n- An administrator or user administrator or logged project manager can create an organization.\n- An ordinary logged user cannot create another organization this way.\n- An unlogged user creating an account can, with the token received by email.",
         "operationId":"create_organization",
+        "security":[
+          {
+            "BearerOrCookieAuth":[]
+          }
+        ],
+        "parameters":[
+          {
+            "name":"token",
+            "in":"query",
+            "required":false,
+            "schema":{
+              "title":"Token",
+              "description":"token in the url to validate request",
+              "type":"string",
+              "nullable":true
+            },
+            "description":"token in the url to validate request"
+          }
+        ],
         "requestBody":{
+          "required":true,
           "content":{
             "application/json":{
               "schema":{
                 "$ref":"#/components/schemas/OrganizationModel"
               }
             }
-          },
-          "required":true
+          }
         },
         "responses":{
           "200":{
@@ -1022,12 +1053,7 @@
               }
             }
           }
-        },
-        "security":[
-          {
-            "BearerOrCookieAuth":[]
-          }
-        ]
+        }
       }
     },
     "/organizations/{organization_id}":{
@@ -1212,7 +1238,7 @@
         "tags":[
           "guests"
         ],
-        "summary":"Update Guests",
+        "summary":"Update Guest",
         "description":"**Update the guest**, return **NULL upon success.**\n\n🔒 Depending on logged user, different authorizations apply:\n- An administrator or user administrator or manager user can change any field with respect of consistency.",
         "operationId":"update_guest",
         "security":[
@@ -7079,7 +7105,7 @@
           "MyFiles"
         ],
         "summary":"Create User File",
-        "description":"**Create a new file or directory in the current user files directory.**\nThe returned text will contain a server-side path which is usable for some file-related operations.",
+        "description":"**Create a new directory in the current user files directory.**\nThe returned text will contain a server-side path which is usable for some file-related operations.",
         "operationId":"create_user_file",
         "requestBody":{
           "content":{
@@ -7455,7 +7481,7 @@
           "source_path":{
             "type":"string",
             "title":"Source Path",
-            "description":"The path of the file or directory to be created."
+            "description":"The path of the directory to be created."
           }
         },
         "type":"object",
@@ -12392,7 +12418,7 @@
         },
         "type":"object",
         "title":"UserActivateReq",
-        "description":"Request to modify status of a user by a Users Administrator or confirm email_status, or resend emails (when token is expired) to confirm email or modify pending profile by a user."
+        "description":"Request to modify status of a user by a Users Administrator\n    or confirm email_status\n    or resend emails (when token is expired) to confirm email\n    or modify pending profile by a user."
       },
       "UserActivity":{
         "properties":{

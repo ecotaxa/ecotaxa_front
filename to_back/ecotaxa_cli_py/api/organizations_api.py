@@ -39,7 +39,7 @@ class OrganizationsApi(object):
     def create_organization(self, organization_model, **kwargs):  # noqa: E501
         """Create Organization  # noqa: E501
 
-        **Create a new organization**, return **NULL upon success.**  🔒 Depending on logged user, different authorizations apply: - An administrator or user administrator or logged project manager can create an organization. - An ordinary logged user cannot create another organization this way.  # noqa: E501
+        **Create a new organization**, return **NULL upon success.**  🔒 Depending on logged user, different authorizations apply: - An administrator or user administrator or logged project manager can create an organization. - An ordinary logged user cannot create another organization this way. - An unlogged user creating an account can, with the token received by email.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
         >>> thread = api.create_organization(organization_model, async_req=True)
@@ -47,6 +47,7 @@ class OrganizationsApi(object):
 
         :param async_req bool: execute request asynchronously
         :param OrganizationModel organization_model: (required)
+        :param str token: token in the url to validate request
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
@@ -64,7 +65,7 @@ class OrganizationsApi(object):
     def create_organization_with_http_info(self, organization_model, **kwargs):  # noqa: E501
         """Create Organization  # noqa: E501
 
-        **Create a new organization**, return **NULL upon success.**  🔒 Depending on logged user, different authorizations apply: - An administrator or user administrator or logged project manager can create an organization. - An ordinary logged user cannot create another organization this way.  # noqa: E501
+        **Create a new organization**, return **NULL upon success.**  🔒 Depending on logged user, different authorizations apply: - An administrator or user administrator or logged project manager can create an organization. - An ordinary logged user cannot create another organization this way. - An unlogged user creating an account can, with the token received by email.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
         >>> thread = api.create_organization_with_http_info(organization_model, async_req=True)
@@ -72,6 +73,7 @@ class OrganizationsApi(object):
 
         :param async_req bool: execute request asynchronously
         :param OrganizationModel organization_model: (required)
+        :param str token: token in the url to validate request
         :param _return_http_data_only: response data without head status code
                                        and headers
         :param _preload_content: if False, the urllib3.HTTPResponse object will
@@ -89,7 +91,8 @@ class OrganizationsApi(object):
         local_var_params = locals()
 
         all_params = [
-            'organization_model'
+            'organization_model',
+            'token'
         ]
         all_params.extend(
             [
@@ -118,6 +121,8 @@ class OrganizationsApi(object):
         path_params = {}
 
         query_params = []
+        if 'token' in local_var_params and local_var_params['token'] is not None:  # noqa: E501
+            query_params.append(('token', local_var_params['token']))  # noqa: E501
 
         header_params = {}
 
@@ -267,7 +272,7 @@ class OrganizationsApi(object):
     def search_edmo_organizations(self, name, **kwargs):  # noqa: E501
         """Search Edmo Organizations  # noqa: E501
 
-        **Search for organizations in EDMO** (European Directory of Marine Organisations), returns their EDMO code and official name.  Meant for suggesting an official organization when creating a new one. Empty list if EDMO is not reachable.  # noqa: E501
+        **Search for organizations in EDMO** (European Directory of Marine Organisations), returns their EDMO code and official name.  Meant for suggesting an official organization when creating a new one. Empty list if EDMO is not reachable.  🔒 Any logged user, or an unlogged user creating an account, with the token received by email.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
         >>> thread = api.search_edmo_organizations(name, async_req=True)
@@ -275,6 +280,7 @@ class OrganizationsApi(object):
 
         :param async_req bool: execute request asynchronously
         :param str name: Part of the name, at least 3 characters, case-insensitive. (required)
+        :param str token: token in the url to validate request
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
@@ -292,7 +298,7 @@ class OrganizationsApi(object):
     def search_edmo_organizations_with_http_info(self, name, **kwargs):  # noqa: E501
         """Search Edmo Organizations  # noqa: E501
 
-        **Search for organizations in EDMO** (European Directory of Marine Organisations), returns their EDMO code and official name.  Meant for suggesting an official organization when creating a new one. Empty list if EDMO is not reachable.  # noqa: E501
+        **Search for organizations in EDMO** (European Directory of Marine Organisations), returns their EDMO code and official name.  Meant for suggesting an official organization when creating a new one. Empty list if EDMO is not reachable.  🔒 Any logged user, or an unlogged user creating an account, with the token received by email.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
         >>> thread = api.search_edmo_organizations_with_http_info(name, async_req=True)
@@ -300,6 +306,7 @@ class OrganizationsApi(object):
 
         :param async_req bool: execute request asynchronously
         :param str name: Part of the name, at least 3 characters, case-insensitive. (required)
+        :param str token: token in the url to validate request
         :param _return_http_data_only: response data without head status code
                                        and headers
         :param _preload_content: if False, the urllib3.HTTPResponse object will
@@ -317,7 +324,8 @@ class OrganizationsApi(object):
         local_var_params = locals()
 
         all_params = [
-            'name'
+            'name',
+            'token'
         ]
         all_params.extend(
             [
@@ -348,6 +356,8 @@ class OrganizationsApi(object):
         query_params = []
         if 'name' in local_var_params and local_var_params['name'] is not None:  # noqa: E501
             query_params.append(('name', local_var_params['name']))  # noqa: E501
+        if 'token' in local_var_params and local_var_params['token'] is not None:  # noqa: E501
+            query_params.append(('token', local_var_params['token']))  # noqa: E501
 
         header_params = {}
 

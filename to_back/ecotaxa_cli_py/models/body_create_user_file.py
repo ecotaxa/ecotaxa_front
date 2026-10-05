@@ -56,7 +56,7 @@ class BodyCreateUserFile(object):
     def source_path(self):
         """Gets the source_path of this BodyCreateUserFile.  # noqa: E501
 
-        The path of the file or directory to be created.  # noqa: E501
+        The path of the directory to be created.  # noqa: E501
 
         :return: The source_path of this BodyCreateUserFile.  # noqa: E501
         :rtype: str
@@ -67,7 +67,7 @@ class BodyCreateUserFile(object):
     def source_path(self, source_path):
         """Sets the source_path of this BodyCreateUserFile.
 
-        The path of the file or directory to be created.  # noqa: E501
+        The path of the directory to be created.  # noqa: E501
 
         :param source_path: The source_path of this BodyCreateUserFile.  # noqa: E501
         :type: str

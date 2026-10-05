@@ -1,10 +1,16 @@
+{% from "./v2/macros/macros.html" import inputdict with context %}
 <form method="post" action="{{request.full_path}}" id="formuorg" class="js js-submit relative mt-12 md:mt-8"  data-required="{{_('this field is required')}}" data-isinvalid="{{_('this field is invalid')}}">
    {%-if not partial-%} <input type="hidden" name="crsf_token" value="{{ crsf_token }}">{%-endif-%}
+   {%-if request.args.get('token') -%}<input type="hidden" name="token" value="{{ request.args.get('token') }}">{%-endif-%}
     <fieldset class="w-full  mx-{{'auto' if createaccount==True else '0 md:w-1/2'}}">
         <legend class="tab-control">{{legend if legend else ''}}</legend>
           <div class="form-box">
           <label for="name">{{_('Name')}}</label>
-          <input type="text" id="name" name="name" class="form-input{{ ' js js-edmo' if createaccount }}" value="{{ organization.name if organization}}" required data-required="{{_('a name is required')}}" placeholder="{{_('Name')}}" data-edmotarget="edmo" {% if createaccount %}title="{{_('Type at least 3 characters for suggestions from EcoTaxa and EDMO')}}"{% endif %}></div>
+          {%- if createaccount -%}
+          {{inputdict('name','name','',type="organisation",label=_('Name'),required=True,autocomplete=True,data=' data-create=true data-edmotarget=edmo ')}}
+          {%- else -%}
+          <input type="text" id="name" name="name" class="form-input" value="{{ organization.name if organization}}" required data-required="{{_('a name is required')}}" placeholder="{{_('Name')}}">
+          {%- endif -%}</div>
           <div class="form-box">
             <label for="edmo"><a href="https://edmo.seadatanet.org/search" target="_blank">{{_('EDMO ID')}}</a> <i data-for="help_organization_edmo" data-request="help"></i></label>
             <input type="text" id="edmo" name="edmo" class="form-input" value="{{ edmo if edmo }}" maxlength=250 pattern="[0-9]*" placeholder="{{_('EDMO ID')}}"></div>

@@ -494,7 +494,7 @@ class GuestsApi(object):
             collection_formats=collection_formats)
 
     def update_guest(self, guest_id, guest_model, **kwargs):  # noqa: E501
-        """Update Guests  # noqa: E501
+        """Update Guest  # noqa: E501
 
         **Update the guest**, return **NULL upon success.**  🔒 Depending on logged user, different authorizations apply: - An administrator or user administrator or manager user can change any field with respect of consistency.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
@@ -520,7 +520,7 @@ class GuestsApi(object):
         return self.update_guest_with_http_info(guest_id, guest_model, **kwargs)  # noqa: E501
 
     def update_guest_with_http_info(self, guest_id, guest_model, **kwargs):  # noqa: E501
-        """Update Guests  # noqa: E501
+        """Update Guest  # noqa: E501
 
         **Update the guest**, return **NULL upon success.**  🔒 Depending on logged user, different authorizations apply: - An administrator or user administrator or manager user can change any field with respect of consistency.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
