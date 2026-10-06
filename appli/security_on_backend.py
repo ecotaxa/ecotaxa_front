@@ -10,6 +10,8 @@ from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import (
     UserModelWithRights,
     LoginReq,
+    TokenRsp,
+    RefreshReq,
     ApiException,
     MinUserModel,
 )
@@ -162,11 +164,21 @@ def login_validate(email: str, password: str, remember: bool = False):
         RECAPTCHAID,
         OPENID_CONFIGURED
     ) = get_user_constants()
-    req = LoginReq(username=email, password=password)
-
     try:
         with ApiClient(AuthentificationApi, "") as api:
-            token: str = api.login(req)
+            try:
+                rsp: TokenRsp = api.token(email, password)
+                token: str = rsp.access_token
+                # GUI session lives in the Flask cookie, free the refresh token at once
+                try:
+                    api.revoke_token(RefreshReq(refresh_token=rsp.refresh_token))
+                except ApiException:
+                    pass
+            except ApiException as ae:
+                if ae.status not in (404, 405):
+                    raise
+                # Deprecated: back-end without /token
+                token = api.login(LoginReq(username=email, password=password))
         with ApiClient(UsersApi, token) as api:
             curr_user: UserModelWithRights = api.show_current_user()
     except ApiException as ae:

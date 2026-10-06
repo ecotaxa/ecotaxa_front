@@ -39,7 +39,7 @@ class AuthentificationApi(object):
     def login(self, login_req, **kwargs):  # noqa: E501
         """Login  # noqa: E501
 
-        **Login barrier,**  If successful, the login will return a **JWT** which will have to be used in bearer authentication scheme for subsequent calls.  # noqa: E501
+        **Login barrier,**  If successful, the login will return a **JWT** which will have to be used in bearer authentication scheme for subsequent calls.  *Deprecated*, use **/token** which returns a short-lived access token and a refresh token.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
         >>> thread = api.login(login_req, async_req=True)
@@ -64,7 +64,7 @@ class AuthentificationApi(object):
     def login_with_http_info(self, login_req, **kwargs):  # noqa: E501
         """Login  # noqa: E501
 
-        **Login barrier,**  If successful, the login will return a **JWT** which will have to be used in bearer authentication scheme for subsequent calls.  # noqa: E501
+        **Login barrier,**  If successful, the login will return a **JWT** which will have to be used in bearer authentication scheme for subsequent calls.  *Deprecated*, use **/token** which returns a short-lived access token and a refresh token.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
         >>> thread = api.login_with_http_info(login_req, async_req=True)
@@ -147,6 +147,391 @@ class AuthentificationApi(object):
             post_params=form_params,
             files=local_var_files,
             response_type='str',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=local_var_params.get('async_req'),
+            _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501
+            _preload_content=local_var_params.get('_preload_content', True),
+            _request_timeout=local_var_params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def refresh_token(self, refresh_req, **kwargs):  # noqa: E501
+        """Refresh Token  # noqa: E501
+
+        **Exchange a refresh token for a new access + refresh pair.**  The presented refresh token becomes invalid. Presenting it again revokes the whole session.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.refresh_token(refresh_req, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool: execute request asynchronously
+        :param RefreshReq refresh_req: (required)
+        :param _preload_content: if False, the urllib3.HTTPResponse object will
+                                 be returned without reading/decoding response
+                                 data. Default is True.
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :return: TokenRsp
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        return self.refresh_token_with_http_info(refresh_req, **kwargs)  # noqa: E501
+
+    def refresh_token_with_http_info(self, refresh_req, **kwargs):  # noqa: E501
+        """Refresh Token  # noqa: E501
+
+        **Exchange a refresh token for a new access + refresh pair.**  The presented refresh token becomes invalid. Presenting it again revokes the whole session.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.refresh_token_with_http_info(refresh_req, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool: execute request asynchronously
+        :param RefreshReq refresh_req: (required)
+        :param _return_http_data_only: response data without head status code
+                                       and headers
+        :param _preload_content: if False, the urllib3.HTTPResponse object will
+                                 be returned without reading/decoding response
+                                 data. Default is True.
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :return: tuple(TokenRsp, status_code(int), headers(HTTPHeaderDict))
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        local_var_params = locals()
+
+        all_params = [
+            'refresh_req'
+        ]
+        all_params.extend(
+            [
+                'async_req',
+                '_return_http_data_only',
+                '_preload_content',
+                '_request_timeout'
+            ]
+        )
+
+        for key, val in six.iteritems(local_var_params['kwargs']):
+            if key not in all_params:
+                raise ApiTypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method refresh_token" % key
+                )
+            local_var_params[key] = val
+        del local_var_params['kwargs']
+        # verify the required parameter 'refresh_req' is set
+        if self.api_client.client_side_validation and ('refresh_req' not in local_var_params or  # noqa: E501
+                                                        local_var_params['refresh_req'] is None):  # noqa: E501
+            raise ApiValueError("Missing the required parameter `refresh_req` when calling `refresh_token`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        if 'refresh_req' in local_var_params:
+            body_params = local_var_params['refresh_req']
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/json'])  # noqa: E501
+
+        # HTTP header `Content-Type`
+        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
+            ['application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/token/refresh', 'POST',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='TokenRsp',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=local_var_params.get('async_req'),
+            _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501
+            _preload_content=local_var_params.get('_preload_content', True),
+            _request_timeout=local_var_params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def revoke_token(self, refresh_req, **kwargs):  # noqa: E501
+        """Revoke Token  # noqa: E501
+
+        **Logout: revoke a refresh token and all its predecessors/successors.**  Always succeeds, whatever the token.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.revoke_token(refresh_req, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool: execute request asynchronously
+        :param RefreshReq refresh_req: (required)
+        :param _preload_content: if False, the urllib3.HTTPResponse object will
+                                 be returned without reading/decoding response
+                                 data. Default is True.
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :return: object
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        return self.revoke_token_with_http_info(refresh_req, **kwargs)  # noqa: E501
+
+    def revoke_token_with_http_info(self, refresh_req, **kwargs):  # noqa: E501
+        """Revoke Token  # noqa: E501
+
+        **Logout: revoke a refresh token and all its predecessors/successors.**  Always succeeds, whatever the token.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.revoke_token_with_http_info(refresh_req, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool: execute request asynchronously
+        :param RefreshReq refresh_req: (required)
+        :param _return_http_data_only: response data without head status code
+                                       and headers
+        :param _preload_content: if False, the urllib3.HTTPResponse object will
+                                 be returned without reading/decoding response
+                                 data. Default is True.
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :return: tuple(object, status_code(int), headers(HTTPHeaderDict))
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        local_var_params = locals()
+
+        all_params = [
+            'refresh_req'
+        ]
+        all_params.extend(
+            [
+                'async_req',
+                '_return_http_data_only',
+                '_preload_content',
+                '_request_timeout'
+            ]
+        )
+
+        for key, val in six.iteritems(local_var_params['kwargs']):
+            if key not in all_params:
+                raise ApiTypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method revoke_token" % key
+                )
+            local_var_params[key] = val
+        del local_var_params['kwargs']
+        # verify the required parameter 'refresh_req' is set
+        if self.api_client.client_side_validation and ('refresh_req' not in local_var_params or  # noqa: E501
+                                                        local_var_params['refresh_req'] is None):  # noqa: E501
+            raise ApiValueError("Missing the required parameter `refresh_req` when calling `revoke_token`")  # noqa: E501
+
+        collection_formats = {}
+
+        path_params = {}
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+
+        body_params = None
+        if 'refresh_req' in local_var_params:
+            body_params = local_var_params['refresh_req']
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/json'])  # noqa: E501
+
+        # HTTP header `Content-Type`
+        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
+            ['application/json'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/token/revoke', 'POST',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='object',  # noqa: E501
+            auth_settings=auth_settings,
+            async_req=local_var_params.get('async_req'),
+            _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501
+            _preload_content=local_var_params.get('_preload_content', True),
+            _request_timeout=local_var_params.get('_request_timeout'),
+            collection_formats=collection_formats)
+
+    def token(self, username, password, **kwargs):  # noqa: E501
+        """Token  # noqa: E501
+
+        **Login barrier, OAuth2 password flow.**  Returns a short-lived **access_token**, to use in bearer authentication scheme, and a **refresh_token** to obtain a new pair from **/token/refresh** when it expires.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.token(username, password, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool: execute request asynchronously
+        :param str username: (required)
+        :param str password: (required)
+        :param str grant_type:
+        :param str scope:
+        :param str client_id:
+        :param str client_secret:
+        :param _preload_content: if False, the urllib3.HTTPResponse object will
+                                 be returned without reading/decoding response
+                                 data. Default is True.
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :return: TokenRsp
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+        kwargs['_return_http_data_only'] = True
+        return self.token_with_http_info(username, password, **kwargs)  # noqa: E501
+
+    def token_with_http_info(self, username, password, **kwargs):  # noqa: E501
+        """Token  # noqa: E501
+
+        **Login barrier, OAuth2 password flow.**  Returns a short-lived **access_token**, to use in bearer authentication scheme, and a **refresh_token** to obtain a new pair from **/token/refresh** when it expires.  # noqa: E501
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please pass async_req=True
+        >>> thread = api.token_with_http_info(username, password, async_req=True)
+        >>> result = thread.get()
+
+        :param async_req bool: execute request asynchronously
+        :param str username: (required)
+        :param str password: (required)
+        :param str grant_type:
+        :param str scope:
+        :param str client_id:
+        :param str client_secret:
+        :param _return_http_data_only: response data without head status code
+                                       and headers
+        :param _preload_content: if False, the urllib3.HTTPResponse object will
+                                 be returned without reading/decoding response
+                                 data. Default is True.
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :return: tuple(TokenRsp, status_code(int), headers(HTTPHeaderDict))
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        local_var_params = locals()
+
+        all_params = [
+            'username',
+            'password',
+            'grant_type',
+            'scope',
+            'client_id',
+            'client_secret'
+        ]
+        all_params.extend(
+            [
+                'async_req',
+                '_return_http_data_only',
+                '_preload_content',
+                '_request_timeout'
+            ]
+        )
+
+        for key, val in six.iteritems(local_var_params['kwargs']):
+            if key not in all_params:
+                raise ApiTypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method token" % key
+                )
+            local_var_params[key] = val
+        del local_var_params['kwargs']
+        # verify the required parameter 'username' is set
+        if self.api_client.client_side_validation and ('username' not in local_var_params or  # noqa: E501
+                                                        local_var_params['username'] is None):  # noqa: E501
+            raise ApiValueError("Missing the required parameter `username` when calling `token`")  # noqa: E501
+        # verify the required parameter 'password' is set
+        if self.api_client.client_side_validation and ('password' not in local_var_params or  # noqa: E501
+                                                        local_var_params['password'] is None):  # noqa: E501
+            raise ApiValueError("Missing the required parameter `password` when calling `token`")  # noqa: E501
+
+        if self.api_client.client_side_validation and 'grant_type' in local_var_params and not re.search(r'^password$', local_var_params['grant_type']):  # noqa: E501
+            raise ApiValueError("Invalid value for parameter `grant_type` when calling `token`, must conform to the pattern `/^password$/`")  # noqa: E501
+        collection_formats = {}
+
+        path_params = {}
+
+        query_params = []
+
+        header_params = {}
+
+        form_params = []
+        local_var_files = {}
+        if 'grant_type' in local_var_params:
+            form_params.append(('grant_type', local_var_params['grant_type']))  # noqa: E501
+        if 'username' in local_var_params:
+            form_params.append(('username', local_var_params['username']))  # noqa: E501
+        if 'password' in local_var_params:
+            form_params.append(('password', local_var_params['password']))  # noqa: E501
+        if 'scope' in local_var_params:
+            form_params.append(('scope', local_var_params['scope']))  # noqa: E501
+        if 'client_id' in local_var_params:
+            form_params.append(('client_id', local_var_params['client_id']))  # noqa: E501
+        if 'client_secret' in local_var_params:
+            form_params.append(('client_secret', local_var_params['client_secret']))  # noqa: E501
+
+        body_params = None
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.select_header_accept(
+            ['application/json'])  # noqa: E501
+
+        # HTTP header `Content-Type`
+        header_params['Content-Type'] = self.api_client.select_header_content_type(  # noqa: E501
+            ['application/x-www-form-urlencoded'])  # noqa: E501
+
+        # Authentication setting
+        auth_settings = []  # noqa: E501
+
+        return self.api_client.call_api(
+            '/token', 'POST',
+            path_params,
+            query_params,
+            header_params,
+            body=body_params,
+            post_params=form_params,
+            files=local_var_files,
+            response_type='TokenRsp',  # noqa: E501
             auth_settings=auth_settings,
             async_req=local_var_params.get('async_req'),
             _return_http_data_only=local_var_params.get('_return_http_data_only'),  # noqa: E501

@@ -60,6 +60,7 @@ from to_back.ecotaxa_cli_py.models.body_move_user_file_user_files_mv_post import
 from to_back.ecotaxa_cli_py.models.body_predict_object_set_object_set_predict_post import BodyPredictObjectSetObjectSetPredictPost
 from to_back.ecotaxa_cli_py.models.body_put_user_file_user_files_post import BodyPutUserFileUserFilesPost
 from to_back.ecotaxa_cli_py.models.body_remove_user_file_user_files_rm_post import BodyRemoveUserFileUserFilesRmPost
+from to_back.ecotaxa_cli_py.models.body_token import BodyToken
 from to_back.ecotaxa_cli_py.models.bulk_update_req import BulkUpdateReq
 from to_back.ecotaxa_cli_py.models.classify_auto_req import ClassifyAutoReq
 from to_back.ecotaxa_cli_py.models.classify_auto_req_mult import ClassifyAutoReqMult
@@ -120,6 +121,7 @@ from to_back.ecotaxa_cli_py.models.project_summary_model import ProjectSummaryMo
 from to_back.ecotaxa_cli_py.models.project_taxo_stats_model import ProjectTaxoStatsModel
 from to_back.ecotaxa_cli_py.models.project_user_stats_model import ProjectUserStatsModel
 from to_back.ecotaxa_cli_py.models.recast_operation import RecastOperation
+from to_back.ecotaxa_cli_py.models.refresh_req import RefreshReq
 from to_back.ecotaxa_cli_py.models.reset_password_req import ResetPasswordReq
 from to_back.ecotaxa_cli_py.models.sample_model import SampleModel
 from to_back.ecotaxa_cli_py.models.sample_taxo_stats_model import SampleTaxoStatsModel
@@ -141,6 +143,7 @@ from to_back.ecotaxa_cli_py.models.taxon_model import TaxonModel
 from to_back.ecotaxa_cli_py.models.taxon_usage_model import TaxonUsageModel
 from to_back.ecotaxa_cli_py.models.taxonomy_recast_req import TaxonomyRecastReq
 from to_back.ecotaxa_cli_py.models.taxonomy_tree_status import TaxonomyTreeStatus
+from to_back.ecotaxa_cli_py.models.token_rsp import TokenRsp
 from to_back.ecotaxa_cli_py.models.user_activate_req import UserActivateReq
 from to_back.ecotaxa_cli_py.models.user_activity import UserActivity
 from to_back.ecotaxa_cli_py.models.user_model_with_rights import UserModelWithRights
