@@ -51,9 +51,20 @@
             <label for="cnn_network_id" >{{_('Deep feature extractor')}}<i data-for="help_cnn_network_id" data-request="help"></i></label>
             <select id="cnn_network_id" name="cnn_network_id" class="form-select" data-hotmodif>
               <option value=""></option>
-              {% for k,v in scn.items() %}
-              <option value="{{ k }}" {{'selected' if target_proj.cnn_network_id==k}}>{{v.name}}</option>
-              {% endfor %}
+              {%- set suggested = scn.items()|selectattr('1.suggested')|list -%}
+              {%- macro scn_option(k, v) -%}
+              <option value="{{ k }}" {{'selected' if target_proj and target_proj.cnn_network_id==k}}>{{v.name}}</option>
+              {%- endmacro -%}
+              {% if suggested %}
+              <optgroup label="{{ _('Suggested for') }} {{ target_proj.instrument }}">
+                {% for k,v in suggested %}{{ scn_option(k, v) }}{% endfor %}
+              </optgroup>
+              <optgroup label="{{ _('Other networks') }}">
+                {% for k,v in scn.items() if not v.suggested %}{{ scn_option(k, v) }}{% endfor %}
+              </optgroup>
+              {% else %}
+              {% for k,v in scn.items() %}{{ scn_option(k, v) }}{% endfor %}
+              {% endif %}
             </select></div>
          <div class="form-box">
             <div class="label" data-for="access">{{ _('Access') }}<i data-for="help_project_access" data-request="help"></i> {{badge('success',_('new'),True)}}</div>
