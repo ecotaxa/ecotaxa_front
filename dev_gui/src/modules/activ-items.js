@@ -301,9 +301,10 @@ function createActivItems() {
         break;
         case "suggest": {
           // regroup the options of a select: the ones matching the trigger value (in option data-<suggestby>, | separated) first
-          // only a suggestion, the selected value is kept
+          // only a suggestion: when the trigger value changes, the selection is reset and the data-warning element shown
           const source = (item.dataset.trigger) ? document.getElementById(item.dataset.trigger) : null;
           if (source === null || !item.dataset.suggestby) return;
+          const warning = (item.dataset.warning) ? document.getElementById(item.dataset.warning) : null;
           // initial order, kept whatever the grouping
           const options = [...item.querySelectorAll('option')].filter(opt => opt.value !== '');
           const suggest = () => {
@@ -322,7 +323,14 @@ function createActivItems() {
             } else options.forEach(opt => item.append(opt));
             item.value = selected;
           }
-          source.addEventListener((item.dataset.event) ? item.dataset.event : 'change', suggest);
+          source.addEventListener((item.dataset.event) ? item.dataset.event : 'change', () => {
+            suggest();
+            item.value = '';
+            if (warning) warning.classList.remove(css.hide);
+          });
+          item.addEventListener('change', () => {
+            if (warning && item.value !== '') warning.classList.add(css.hide);
+          });
           suggest();
         }
         break;
