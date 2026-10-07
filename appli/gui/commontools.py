@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
+import re
 from typing import Dict, List
 from flask import (
     render_template,
@@ -67,13 +68,15 @@ def possible_models():
         for a_network in networks:
             instruments_by_network.setdefault(a_network, []).append(an_instrument)
 
-    scn = {
-        a_model.name: {
+    scn = {}
+    for a_model in possibles:
+        # Models are dated in their name, e.g. UVP5HD-2024-01 or uvp6_beta_2022-01-26
+        date = re.search(r"\d{4}-\d{2}(?:-\d{2})?", a_model.name)
+        scn[a_model.name] = {
             "name": a_model.name,
             "instruments": instruments_by_network.get(a_model.name, []),
+            "date": date.group(0) if date else "",
         }
-        for a_model in possibles
-    }
     return scn
 
 

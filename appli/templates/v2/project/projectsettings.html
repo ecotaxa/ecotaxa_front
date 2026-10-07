@@ -49,10 +49,10 @@
             </div></div>
           <div class="form-box">
             <label for="cnn_network_id" >{{_('Deep feature extractor')}}<i data-for="help_cnn_network_id" data-request="help"></i></label>
-            <select id="cnn_network_id" name="cnn_network_id" class="form-select" data-hotmodif data-action="suggest" data-event="change" data-trigger="instrument" data-suggestby="instruments" data-suggestedlabel="{{ _('Suggested for') }}" data-otherlabel="{{ _('Other networks') }}" data-warning="cnn_network_warning">
+            <select id="cnn_network_id" name="cnn_network_id" class="form-select" data-hotmodif data-action="suggest" data-event="change" data-trigger="instrument" data-suggestby="instruments" data-sortby="date" data-suggestedlabel="{{ _('Suggested for') }}" data-otherlabel="{{ _('Other networks') }}" data-warning="cnn_network_warning">
               <option value=""></option>
               {% for k,v in scn.items() %}
-              <option value="{{ k }}" data-instruments="{{ v.instruments|join('|') }}" {{'selected' if target_proj.cnn_network_id==k}}>{{v.name}}</option>
+              <option value="{{ k }}" data-instruments="{{ v.instruments|join('|') }}" data-date="{{ v.date }}" {{'selected' if target_proj.cnn_network_id==k}}>{{v.name}}</option>
               {% endfor %}
             </select>
             <div id="cnn_network_warning" class="hide">{{ alertbox(type='warning', message="selectcnnwarning",inverse = True,extra = {'small': True} )}}</div></div>
