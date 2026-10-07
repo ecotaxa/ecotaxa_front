@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
-from typing import Dict, Optional
+from typing import Dict, List
 from flask import (
     render_template,
     request,
@@ -52,23 +52,26 @@ def possible_access() -> dict:
     return access
 
 
-def possible_models(instrument: Optional[str] = None):
+def possible_models():
     """
-    All usable models, the ones made for the instrument flagged as suggested.
-    Only a suggestion, any model can still be chosen.
+    All usable models, each with the instruments it was made for (to suggest it, not impose it).
     """
     from to_back.ecotaxa_cli_py.api import MiscApi, InstrumentsApi
 
     with ApiClient(MiscApi, request) as api:
         possibles = api.query_ml_models()
-    suggested = []
-    if instrument:
-        with ApiClient(InstrumentsApi, request) as api:
-            networks = api.instrument_cnn_networks(instrument=instrument)
-        suggested = networks.get(instrument, [])
+    with ApiClient(InstrumentsApi, request) as api:
+        networks_by_instrument: Dict[str, List[str]] = api.instrument_cnn_networks()
+    instruments_by_network: Dict[str, List[str]] = {}
+    for an_instrument, networks in networks_by_instrument.items():
+        for a_network in networks:
+            instruments_by_network.setdefault(a_network, []).append(an_instrument)
 
     scn = {
-        a_model.name: {"name": a_model.name, "suggested": a_model.name in suggested}
+        a_model.name: {
+            "name": a_model.name,
+            "instruments": instruments_by_network.get(a_model.name, []),
+        }
         for a_model in possibles
     }
     return scn

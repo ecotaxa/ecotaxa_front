@@ -387,7 +387,7 @@ def prj_edit(prjid: int, new: bool = False):
 
     predeftaxo = taxo_with_names(lst)
 
-    scn = possible_models(target_proj.instrument)
+    scn = possible_models()
 
     # TODO: Cache of course, it's constants!
     access = possible_access()

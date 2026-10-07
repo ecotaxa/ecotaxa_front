@@ -299,6 +299,33 @@ function createActivItems() {
                   trgt.textContent = item.textContent;
               });
         break;
+        case "suggest": {
+          // regroup the options of a select: the ones matching the trigger value (in option data-<suggestby>, | separated) first
+          // only a suggestion, the selected value is kept
+          const source = (item.dataset.trigger) ? document.getElementById(item.dataset.trigger) : null;
+          if (source === null || !item.dataset.suggestby) return;
+          // initial order, kept whatever the grouping
+          const options = [...item.querySelectorAll('option')].filter(opt => opt.value !== '');
+          const suggest = () => {
+            const selected = item.value;
+            const key = source.value;
+            item.querySelectorAll('optgroup').forEach(grp => grp.remove());
+            const matching = options.filter(opt => key !== '' && (opt.dataset[item.dataset.suggestby] || '').split('|').indexOf(key) >= 0);
+            if (matching.length) {
+              const suggested = document.createElement('optgroup');
+              suggested.label = ((item.dataset.suggestedlabel) ? item.dataset.suggestedlabel + ' ' : '') + key;
+              matching.forEach(opt => suggested.append(opt));
+              const others = document.createElement('optgroup');
+              others.label = (item.dataset.otherlabel) ? item.dataset.otherlabel : '';
+              options.filter(opt => matching.indexOf(opt) < 0).forEach(opt => others.append(opt));
+              item.append(suggested, others);
+            } else options.forEach(opt => item.append(opt));
+            item.value = selected;
+          }
+          source.addEventListener((item.dataset.event) ? item.dataset.event : 'change', suggest);
+          suggest();
+        }
+        break;
           }
 
     });
