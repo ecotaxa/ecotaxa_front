@@ -9,6 +9,7 @@ from appli.gui.taxonomy.tools import (
     posted_dwca_taxo_recast,
     posted_taxo_recast,
     update_taxo_recast,
+    temporary_taxa,
 )
 
 
@@ -41,6 +42,10 @@ class ExportJob(Job):
             )
 
         filters = cls._extract_filters_from_url()
+        if collection_id > 0:
+            project_ids = ",".join([str(p) for p in target_obj.project_ids])
+        else:
+            project_ids = str(projid)
         # always return every export possibilities
         formdatas, formoptions, export_links = export_format_options(
             target=cls.TARGET_TYPE, target_obj=target_obj
@@ -59,6 +64,7 @@ class ExportJob(Job):
             target_type=cls.TARGET_TYPE,
             target_obj=target_obj,
             recast_operation=cls.RECAST_OPERATION,
+            temporary_taxa=temporary_taxa(project_ids, dict(filters)),
         )
 
     @classmethod

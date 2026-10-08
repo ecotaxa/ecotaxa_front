@@ -14,6 +14,7 @@
   "src_modules_modal-container_js.js": "/static/gui/src/src_modules_modal-container_js.js",
   "src_modules_js-tree_js.js": "/static/gui/src/src_modules_js-tree_js.js",
   "src_modules_job-monitor_js.js": "/static/gui/src/src_modules_job-monitor_js.js",
+  "src_modules_js-edmo-search_js.js": "/static/gui/src/src_modules_js-edmo-search_js.js",
   "src_modules_table-collection_js.js": "/static/gui/src/src_modules_table-collection_js.js",
   "src_modules_table-project_js.js": "/static/gui/src/src_modules_table-project_js.js",
   "src_modules_table-sample_js.js": "/static/gui/src/src_modules_table-sample_js.js",

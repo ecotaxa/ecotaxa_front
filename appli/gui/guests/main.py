@@ -1,5 +1,5 @@
 from typing import List, Dict
-from flask_login import login_required
+from flask_login import login_required, current_user
 from flask import make_response, request, jsonify, render_template
 from appli import app, gvg
 import json
@@ -148,9 +148,16 @@ def gui_search_persons():
 
 @app.route("/gui/persons/create", methods=["GET", "POST"])
 @app.route("/gui/persons/create/", methods=["GET", "POST"])
-@login_required
 def gui_person_create():
     _type = gvg("type", "")
+    if not current_user.is_authenticated:
+        # an unlogged user creating an account can add an organization, with the token received by email
+        from appli.gui.users.users import is_registration_token
+
+        if _type not in ("", "organization") or not is_registration_token(
+            gvg("token", "")
+        ):
+            return app.login_manager.unauthorized()
     if request.method == "POST":
         response: Dict = {}
         if _type == "organization":

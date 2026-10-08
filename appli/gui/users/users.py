@@ -615,6 +615,16 @@ def get_value_from_token(
     return False, None
 
 
+def is_registration_token(token: str) -> bool:
+    """
+    The token sent by email to an unlogged user creating an account, who is not in DB yet
+    """
+    if token.strip() == "":
+        return False
+    err, usrid = get_value_from_token(token, "id", age=PROFILE_TOKEN_AGE)
+    return not err and usrid == str(-1)
+
+
 def _get_mail_from_token(token: str, age: int = SHORT_TOKEN_AGE) -> tuple:
     err, email = get_value_from_token(token, "email", age)
     if email is None:
