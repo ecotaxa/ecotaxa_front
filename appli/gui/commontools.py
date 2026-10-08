@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
-from typing import Dict
+import re
+from typing import Dict, List
 from flask import (
     render_template,
     request,
@@ -53,12 +54,29 @@ def possible_access() -> dict:
 
 
 def possible_models():
-    from to_back.ecotaxa_cli_py.api import MiscApi
+    """
+    All usable models, each with the instruments it was made for (to suggest it, not impose it).
+    """
+    from to_back.ecotaxa_cli_py.api import MiscApi, InstrumentsApi
 
     with ApiClient(MiscApi, request) as api:
         possibles = api.query_ml_models()
+    with ApiClient(InstrumentsApi, request) as api:
+        networks_by_instrument: Dict[str, List[str]] = api.instrument_cnn_networks()
+    instruments_by_network: Dict[str, List[str]] = {}
+    for an_instrument, networks in networks_by_instrument.items():
+        for a_network in networks:
+            instruments_by_network.setdefault(a_network, []).append(an_instrument)
 
-    scn = {a_model.name: {"name": a_model.name} for a_model in possibles}
+    scn = {}
+    for a_model in possibles:
+        # Models are dated in their name, e.g. UVP5HD-2024-01 or uvp6_beta_2022-01-26
+        date = re.search(r"\d{4}-\d{2}(?:-\d{2})?", a_model.name)
+        scn[a_model.name] = {
+            "name": a_model.name,
+            "instruments": instruments_by_network.get(a_model.name, []),
+            "date": date.group(0) if date else "",
+        }
     return scn
 
 

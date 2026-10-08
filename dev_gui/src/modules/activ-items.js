@@ -299,6 +299,58 @@ function createActivItems() {
                   trgt.textContent = item.textContent;
               });
         break;
+        case "suggest": {
+          // regroup the options of a select: the ones matching the trigger value (in option data-<suggestby>, | separated) first
+          // only a suggestion: when the trigger value changes, the selection is reset and the data-warning element shown
+          const source = (item.dataset.trigger) ? document.getElementById(item.dataset.trigger) : null;
+          if (source === null || !item.dataset.suggestby) return;
+          const warning = (item.dataset.warning) ? document.getElementById(item.dataset.warning) : null;
+          // order: by first data-<suggestby> value asc (none last), then by data-<sortby> desc (none last)
+          const sortby = item.dataset.sortby;
+          const first_key = (opt) => (opt.dataset[item.dataset.suggestby] || '').split('|').filter(k => k !== '').sort((a, b) => a.localeCompare(b, undefined, {sensitivity: 'base'}))[0] || null;
+          const by_sort_desc = (a, b) => {
+            const va = (sortby) ? (a.dataset[sortby] || '') : '';
+            const vb = (sortby) ? (b.dataset[sortby] || '') : '';
+            return (va < vb) ? 1 : ((va > vb) ? -1 : 0);
+          };
+          const by_key_then_sort = (a, b) => {
+            const ka = first_key(a), kb = first_key(b);
+            if (ka !== kb) {
+              if (ka === null) return 1;
+              if (kb === null) return -1;
+              const cmp = ka.localeCompare(kb, undefined, {sensitivity: 'base'});
+              if (cmp !== 0) return cmp;
+            }
+            return by_sort_desc(a, b) || a.value.localeCompare(b.value);
+          };
+          const options = [...item.querySelectorAll('option')].filter(opt => opt.value !== '').sort(by_key_then_sort);
+          const suggest = () => {
+            const selected = item.value;
+            const key = source.value;
+            item.querySelectorAll('optgroup').forEach(grp => grp.remove());
+            const matching = options.filter(opt => key !== '' && (opt.dataset[item.dataset.suggestby] || '').split('|').indexOf(key) >= 0).sort(by_sort_desc);
+            if (matching.length) {
+              const suggested = document.createElement('optgroup');
+              suggested.label = ((item.dataset.suggestedlabel) ? item.dataset.suggestedlabel + ' ' : '') + key;
+              matching.forEach(opt => suggested.append(opt));
+              const others = document.createElement('optgroup');
+              others.label = (item.dataset.otherlabel) ? item.dataset.otherlabel : '';
+              options.filter(opt => matching.indexOf(opt) < 0).forEach(opt => others.append(opt));
+              item.append(suggested, others);
+            } else options.forEach(opt => item.append(opt));
+            item.value = selected;
+          }
+          source.addEventListener((item.dataset.event) ? item.dataset.event : 'change', () => {
+            suggest();
+            item.value = '';
+            if (warning) warning.classList.remove(css.hide);
+          });
+          item.addEventListener('change', () => {
+            if (warning && item.value !== '') warning.classList.add(css.hide);
+          });
+          suggest();
+        }
+        break;
           }
 
     });
