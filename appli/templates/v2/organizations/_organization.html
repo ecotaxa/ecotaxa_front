@@ -4,6 +4,7 @@
    {%-if request.args.get('token') -%}<input type="hidden" name="token" value="{{ request.args.get('token') }}">{%-endif-%}
     <fieldset class="w-full  mx-{{'auto' if createaccount==True else '0 md:w-1/2'}}">
         <legend class="tab-control">{{legend if legend else ''}}</legend>
+          {%- if createaccount -%}<div class="alert info inverse text-xs">{{_('Only the first matches are listed: if your organization is not there, type more of its name to narrow the search.')}}</div>{%- endif -%}
           <div class="form-box">
           <label for="name">{{_('Name')}}</label>
           {%- if createaccount -%}

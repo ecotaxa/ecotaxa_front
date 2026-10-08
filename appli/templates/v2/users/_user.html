@@ -71,8 +71,8 @@
             {% if (createaccount==True and user.id==-1 ) or not createaccount %}
                  {{password_box()}}
              {%endif%}
-             {#- registering user can add an organization with the token received by email -#}
-             <div class="form-box"><label for="organisation">{{_('Organisation')}}</label>{{inputdict('organisation','organisation',user.organisation,type="organisation",label=_('Organisation'),required=True, autocomplete=True , data=" data-create=true data-createorg=true " if (current_user.is_authenticated and current_user.is_admin) or (current_user.is_anonymous and token) else " data-create=true ",options=organisations)}}</div>
+             {#- admin, user in own profile, or registering user with the token received by email can add an organization -#}
+             <div class="form-box"><label for="organisation">{{_('Organisation')}}</label>{{inputdict('organisation','organisation',user.organisation,type="organisation",label=_('Organisation'),required=True, autocomplete=True , data=" data-create=true data-createorg=true " if (current_user.is_authenticated and (current_user.is_admin or current_user.id==user.id)) or (current_user.is_anonymous and token) else " data-create=true ",options=organisations)}}</div>
               <div class="form-box"><label for="country">{{_('Country')}}</label>{{inputdict('country','country',user.country,type="country",label=_('Country'),required=True, autocomplete=True, data=" data-create=true ",options=countries)}}</div>
           <div class="form-box">
             <label for="usercreationreason">{{ _('Planned usage of EcoTaxa')}} <i data-for="help_profile_planned_usage" data-request="help"></i></label>

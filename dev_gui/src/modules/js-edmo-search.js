@@ -1,12 +1,11 @@
 'use strict';
-// Search organizations: first the ones already in EcoTaxa, then official ones from EDMO (https://edmo.seadatanet.org/).
-// Suggestions show their EDMO and/or ROR codes, the ones not yet in EcoTaxa are marked with NEW_MARK.
+// Search organizations: the ones already in EcoTaxa, or official ones from EDMO (https://edmo.seadatanet.org/) when creating one.
+// Suggestions show their EDMO and/or ROR codes.
 import {
   fetchSettings
 } from '../modules/utils.js';
 const LOCAL_SEARCH_URL = '/api/organizations/search?name=';
 const EDMO_SEARCH_URL = '/api/organizations/edmo_search?name=';
-const NEW_MARK = '★';
 
 // The code of a directory, e.g. 'edmo', in organization directories, e.g. "edmo:1278,ror:xxx", empty if none
 function directoryCode(directories, directory) {
@@ -25,13 +24,14 @@ async function fetchJson(url) {
   return response.json();
 }
 
-// Organizations matching query: the ones in EcoTaxa then the ones from EDMO not yet in EcoTaxa, as {name, code, label}.
+// Organizations matching query, as {name, code, label}:
+// the ones in EcoTaxa, or with withedmo (for creating one) the ones from EDMO not yet in EcoTaxa.
 // token: the registration token, which gives an unlogged user access to EDMO search
-export async function searchOrganizations(query, token = '') {
+export async function searchOrganizations(query, token = '', withedmo = false) {
   // Suggestions are a help, the organization can be created without them, so one source failing does not hide the other
   const [local, edmo] = (await Promise.allSettled([
     fetchJson(LOCAL_SEARCH_URL + encodeURIComponent('%' + query + '%')),
-    fetchJson(EDMO_SEARCH_URL + encodeURIComponent(query) + ((token) ? '&token=' + encodeURIComponent(token) : ''))
+    (withedmo) ? fetchJson(EDMO_SEARCH_URL + encodeURIComponent(query) + ((token) ? '&token=' + encodeURIComponent(token) : '')) : []
   ])).map(result => {
     if (result.status === 'fulfilled') return result.value;
     console.log('organization search', result.reason);
@@ -42,7 +42,8 @@ export async function searchOrganizations(query, token = '') {
   const localcodes = new Set();
   local.forEach(organization => {
     const code = directoryCode(organization.directories, 'edmo');
-    found.push({
+    // when creating, the ones in EcoTaxa are only used to leave them out of EDMO ones
+    if (!withedmo) found.push({
       name: organization.name,
       code: code,
       label: codesLabel(code, directoryCode(organization.directories, 'ror'))
@@ -56,7 +57,7 @@ export async function searchOrganizations(query, token = '') {
     found.push({
       name: organization.name,
       code: code,
-      label: NEW_MARK + ' ' + codesLabel(code, '')
+      label: codesLabel(code, '')
     });
   });
   return found;
