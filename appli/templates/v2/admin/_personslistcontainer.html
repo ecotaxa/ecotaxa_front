@@ -2,7 +2,7 @@
 {% if not partial %}
 <div class="container mx-auto px-4  block" data-block="{{person}}s">
   <div class="w-100 relative h-auto mx-auto py-4 block text-left " id="{{ tableid }}-header">
-    <a  class="button is-action float-left clear-left" href="/gui/admin/{{person}}s/create">{{_('Create a user') if person=="user" else _('Create a guest')}} </a>
+    <a  class="button is-action float-left clear-left" href="/gui/admin/{{person}}s/create">{%- if person=="user"-%}{{_('Create a user')}}{%-elif person=="guest"-%}{{_('Create a guest')}}{%-else-%}{{_('Create an organization') }}{%-endif-%}</a>
     {% from './v2/macros/macros.html' import modal with context %}
     {{ modal(id='help-'+person+'-access',modal_title=modal_title,type='modal-help',position='modal-aside modal-right',summary_pos={'float':'right','clear':'right'},data = {'file':'help_'+person+'s.html'}) }}
   </div>

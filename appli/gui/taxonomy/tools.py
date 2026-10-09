@@ -252,6 +252,38 @@ def get_taxostats(project_ids: str):
     return taxalist, taxaids
 
 
+TEMPORARY_TAXON = "temporary"
+
+
+def temporary_taxa(project_ids: str, filters: Optional[Dict] = None) -> list:
+    """display names of the temporary categories (under 'temporary' in the taxonomy) of the objects
+    exported from the projects with the filters"""
+    with ApiClient(ProjectsApi, request) as api:
+        stats: List[ProjectTaxoStatsModel] = api.project_set_get_stats(ids=project_ids)
+    taxaids = list(set([str(t) for res in stats for t in res.used_taxa if t > 0]))
+    if len(taxaids) == 0:
+        return []
+    with ApiClient(TaxonomyTreeApi, request) as api:
+        taxalist: List[TaxonModel] = api.query_taxa_set(",".join(taxaids))
+    # lineage begins with the taxon itself
+    temporaries = {
+        t.id: t.display_name for t in taxalist if TEMPORARY_TAXON in t.lineage[1:]
+    }
+    if len(temporaries) and filters:
+        # keep only the temporary categories of the filtered objects
+        from to_back.ecotaxa_cli_py.api import ObjectsApi
+
+        exported = set()
+        with ApiClient(ObjectsApi, request) as api:
+            for projid in project_ids.split(","):
+                res = api.get_object_set(
+                    int(projid), filters, fields="obj.classif_id"
+                )
+                exported.update([row[0] for row in res.details])
+        temporaries = {k: v for k, v in temporaries.items() if k in exported}
+    return sorted(temporaries.values())
+
+
 def posted_dwca_taxo_recast(
     recast_operation: Dict[str, str],
 ) -> Dict[str, TaxoRecastRsp]:

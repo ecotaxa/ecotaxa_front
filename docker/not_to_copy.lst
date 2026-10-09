@@ -19,6 +19,7 @@ config/*
 to_back/ecotaxa_cli_py/test
 to_back/ecotaxa_cli_py/docs
 dev_gui
+docker
 messages
 QA
 *.tar.gz

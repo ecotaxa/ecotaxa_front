@@ -104,6 +104,9 @@ py_messages = dict(
         "modinstrumentwarning": _(
             "Changing the instrument associated with a project may affect the behaviour of EcoTaxa in various ways and should not be done except to correct a mistake."
         ),
+        "selectcnnwarning": _(
+            "The instrument has changed, please select a deep feature extractor fit for this instrument."
+        ),
         "errorprojectcreate": _("Error in project creation"),
         "scnerased": _("SCN features erased"),
         "memberexistdifferentpriv": _(

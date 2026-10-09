@@ -31,7 +31,7 @@
             <div class="form-box">
             <label for="orcid">{{_('ORCID')}} <i data-for="help_profile_orcid" data-request="help"></i></label>
             <input type="text" id="orcid" name="orcid" class="form-input" value="{{ guest.orcid }}" maxlength=20 placeholder="0000-0000-0000-0000"></div>
-             <div class="form-box"><label for="organisation">{{_('Organisation')}} </label>{{inputdict('organisation','organisation',guest.organisation,type="organisation",label=_('Organisation'),required=True, autocomplete=True , data=" data-create=true ",options=organisations)}}</div>
+             <div class="form-box"><label for="organisation">{{_('Organisation')}} </label>{{inputdict('organisation','organisation',guest.organisation,type="organisation",label=_('Organisation'),required=True, autocomplete=True , data=" data-create=true data-createorg=true " if current_user.is_authenticated and current_user.is_admin else " data-create=true ",options=organisations)}}</div>
               <div class="form-box"><label for="country">{{_('Country')}}</label>{{inputdict('country','country',guest.country,type="country",label=_('Country'),required=True, autocomplete=True, data=" data-create=true ",options=countries)}}</div>
 
 
