@@ -128,7 +128,9 @@ const browser = detect();
       } else console.log('partly finished '+properties.hashandlers+ 'follow='+properties.follow, e);
     }, uuid);
     ModuleEventEmitter.on(eventnames.endzip, async(e) => {
-      if (!e.bigfile && properties.zip) {
+      // end() only once per archive: a second call fails with fflate "stream finishing"
+      if (!e.bigfile && properties.zip && !properties.zip.ending) {
+        properties.zip.ending = true;
         properties.zip.end();
         properties.closed = true;
       }
@@ -520,7 +522,7 @@ const browser = detect();
       part: properties.part
     }, _listener);
   }
-  async function readFile(file, filepath, zippedstream, count = true) {
+  async function readFile(file, filepath, zippedstream, count = true, done = null) {
     const reader = file.stream().getReader();
     let pause = false;
     /*  onBackpressure(zippedstream, this.streamhandle, should_apply_backpressure => {
@@ -534,6 +536,7 @@ const browser = detect();
       } = await reader.read();
       if (done) {
         zippedstream.push(new Uint8Array(0), true);
+        if (done) await done;
         if (count === true) ModuleEventEmitter.emit(eventnames.counter, {
           name: 'zip',
           path: filepath,
@@ -555,7 +558,16 @@ const browser = detect();
         level: 6
       });
       properties.zip.add(zippedstream);
-    await readFile(file, filepath, zippedstream);
+    // the file is zipped once its last compressed chunk is out, which comes
+    // later than the last push for AsyncZipDeflate (compresses in a worker)
+    const zipped = new Promise((resolve) => {
+      const ondata = zippedstream.ondata;
+      zippedstream.ondata = (err, dat, final) => {
+        ondata(err, dat, final);
+        if (err || final) resolve();
+      };
+    });
+    await readFile(file, filepath, zippedstream, true, zipped);
   }
   function compressed_estimate(file) {
     const ext = file.name.slice(file.name.lastIndexOf('.') + 1);

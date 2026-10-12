@@ -222,14 +222,16 @@ export class JsMyFiles {
   emitToZip(btn) {
     const message = (btn.dataset.message) ? JSON.parse(btn.dataset.message) : null;
     if (!message) btn.classList.add(css.hide);
-    if (message) {
-      if (message.name) {
-        const name = message.name;
-        delete message.name;
-        ModuleEventEmitter.emit(name, message, this.jsDirToZip.uuid);
-      }
+    if (message && message.name) {
+      const name = message.name;
+      delete message.name;
+      // one click only: closing or sending the archive twice fails
+      if (name === this.eventnames.endzip) {
+        btn.disabled = true;
+        this.showBusy(btn, `Finalizing archive...`);
+      } else if (name === this.eventnames.sendfile) btn.disabled = true;
+      ModuleEventEmitter.emit(name, message, this.jsDirToZip.uuid);
     }
-    if (name === this.eventnames.sendfile) btn.disabled = true;
   }
 
   quotaEstimate(obj) {
