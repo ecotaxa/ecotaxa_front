@@ -123,7 +123,7 @@ def before_request_security() -> Optional[ResponseReturnValue]:
 def after_request(response):
     response.headers["Content-Security-Policy"] = (
         "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: "
-        "cdnjs.cloudflare.com server.arcgisonline.com www.google.com *.googletagmanager.com *.google-analytics.com *.analytics.google.com "
+        "cdnjs.cloudflare.com server.arcgisonline.com gibs.earthdata.nasa.gov www.google.com *.googletagmanager.com *.google-analytics.com *.analytics.google.com "
         " www.gstatic.com cdn.ckeditor.com  "
         "cdn.jsdelivr.net unpkg.com fonts.googleapis.com fonts.gstatic.com;"
         "frame-ancestors 'self'; "

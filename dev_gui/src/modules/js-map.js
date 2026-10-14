@@ -6,27 +6,75 @@ import {
 } from '../modules/utils.js';
 // Global map of samples, OpenLayers full build loaded from cdnjs
 const OL_URL = 'https://cdnjs.cloudflare.com/ajax/libs/openlayers/10.6.1/';
+// polar projections definitions for OpenLayers
+const PROJ4_URL = 'https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.22.0/proj4.min.js';
 const TILES_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer';
-let ol_loading = null;
+// NASA GIBS polar basemaps
+const GIBS_URL = 'https://gibs.earthdata.nasa.gov/wmts/';
+const POLAR_EXTENT = [-4194304, -4194304, 4194304, 4194304];
+const POLAR = {
+  north: {
+    code: 'EPSG:3413',
+    def: '+proj=stere +lat_0=90 +lat_ts=70 +lon_0=-45 +k=1 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs',
+    gibs: 'epsg3413',
+    // samples of the hemisphere
+    visible: (lat) => lat > 0
+  },
+  south: {
+    code: 'EPSG:3031',
+    def: '+proj=stere +lat_0=-90 +lat_ts=-71 +lon_0=0 +k=1 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs',
+    gibs: 'epsg3031',
+    visible: (lat) => lat < 0
+  }
+};
+const loadings = {};
 
-function load_ol() {
-  if (window.ol) return Promise.resolve(window.ol);
-  if (ol_loading) return ol_loading;
-  ol_loading = new Promise((resolve, reject) => {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = OL_URL + 'ol.css';
-    document.head.append(link);
+function load_script(url) {
+  if (loadings[url]) return loadings[url];
+  loadings[url] = new Promise((resolve, reject) => {
     const script = document.createElement('script');
-    script.src = OL_URL + 'dist/ol.js';
-    script.onload = () => resolve(window.ol);
+    script.src = url;
+    script.onload = () => resolve();
     script.onerror = () => {
-      ol_loading = null;
+      delete loadings[url];
       reject();
     };
     document.head.append(script);
   });
-  return ol_loading;
+  return loadings[url];
+}
+
+async function load_ol() {
+  if (window.ol) return window.ol;
+  if (!loadings[OL_URL + 'dist/ol.js']) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = OL_URL + 'ol.css';
+    document.head.append(link);
+  }
+  await load_script(OL_URL + 'dist/ol.js');
+  return window.ol;
+}
+
+async function load_polar(ol) {
+  if (ol.proj.get(POLAR.north.code)) return;
+  await load_script(PROJ4_URL);
+  Object.values(POLAR).forEach(polar => window.proj4.defs(polar.code, polar.def));
+  ol.proj.proj4.register(window.proj4);
+}
+
+function polar_source(ol, polar) {
+  return new ol.source.XYZ({
+    attributions: 'Imagery © <a href="https://earthdata.nasa.gov/gibs">NASA EOSDIS GIBS</a>',
+    projection: polar.code,
+    tileGrid: new ol.tilegrid.TileGrid({
+      extent: POLAR_EXTENT,
+      origin: [POLAR_EXTENT[0], POLAR_EXTENT[3]],
+      resolutions: [8192, 4096, 2048, 1024, 512],
+      tileSize: 512
+    }),
+    url: GIBS_URL + polar.gibs + '/best/BlueMarble_ShadedRelief_Bathymetry/default/500m/{z}/{y}/{x}.jpeg'
+  });
 }
 
 async function JsMap(item) {
@@ -45,15 +93,17 @@ async function JsMap(item) {
     return;
   }
   const samples = new ol.source.Vector();
+  const world_source = new ol.source.XYZ({
+    attributions: 'Tiles © <a href="' + TILES_URL + '">ArcGIS</a>',
+    url: TILES_URL + '/tile/{z}/{y}/{x}'
+  });
+  const base = new ol.layer.Tile({
+    source: world_source
+  });
   const map = new ol.Map({
     target: item,
     layers: [
-      new ol.layer.Tile({
-        source: new ol.source.XYZ({
-          attributions: 'Tiles © <a href="' + TILES_URL + '">ArcGIS</a>',
-          url: TILES_URL + '/tile/{z}/{y}/{x}'
-        })
-      }),
+      base,
       new ol.layer.Vector({
         source: samples,
         style: new ol.style.Style({
@@ -83,7 +133,9 @@ async function JsMap(item) {
     })
   });
   map.getViewport().classList.add('opacity-50');
-  if (item.dataset.projects) select_samples(ol, map, samples, item);
+  // redraws the selected samples, after a change of projection
+  let refresh_selection = () => {};
+  if (item.dataset.projects) refresh_selection = select_samples(ol, map, samples, item);
   else popover(ol, map, item);
   let data = [];
   try {
@@ -94,17 +146,74 @@ async function JsMap(item) {
   }
   samples.addFeatures(data.map(sam => new ol.Feature({
     geometry: new ol.geom.Point(ol.proj.fromLonLat([sam.long, sam.lat])),
+    lonlat: [sam.long, sam.lat],
     sampleid: sam.id,
     projid: sam.projid
   })));
   // once loaded, the whole world width fills the map width
-  if (item.dataset.fitwidth) {
+  function fit_width() {
+    if (!item.dataset.fitwidth) return;
     map.updateSize();
     const size = map.getSize();
     if (size && size[0] > 0) map.getView().setResolution(ol.extent.getWidth(ol.proj.get('EPSG:3857').getExtent()) / size[0]);
   }
+  fit_width();
+  if (item.dataset.views) views_switch(ol, map, base, world_source, samples, item, fit_width, refresh_selection);
   map.getViewport().classList.remove('opacity-50');
   loading.remove();
+}
+
+// world or polar views, the samples are displayed in the projection of the view
+function views_switch(ol, map, base, world_source, samples, item, fit_width, refresh_selection) {
+  const sources = {
+    world: world_source
+  };
+  const control = document.createElement('div');
+  control.className = 'absolute top-9 right-2 z-10 flex rounded shadow-sm bg-white text-sm overflow-hidden';
+  item.append(control);
+  // [[name, label], ...]
+  const labels = JSON.parse(item.dataset.views);
+  function active(button, on) {
+    button.classList.toggle('bg-mainblue-700', on);
+    button.classList.toggle('text-white', on);
+    button.classList.toggle('hover:bg-stone-100', !on);
+  }
+  async function set_view(name, button) {
+    let projection = 'EPSG:3857';
+    if (name !== 'world') {
+      try {
+        await load_polar(ol);
+      } catch (err) {
+        return;
+      }
+      const polar = POLAR[name];
+      projection = polar.code;
+      if (!sources[name]) sources[name] = polar_source(ol, polar);
+    }
+    control.querySelectorAll('button').forEach(btn => active(btn, btn === button));
+    base.setSource(sources[name]);
+    map.setView(new ol.View({
+      projection: projection,
+      center: [0, 0]
+    }));
+    samples.getFeatures().forEach(f => {
+      const lonlat = f.get('lonlat');
+      const visible = name === 'world' || POLAR[name].visible(lonlat[1]);
+      f.setGeometry(visible ? new ol.geom.Point(ol.proj.fromLonLat(lonlat, projection)) : undefined);
+    });
+    refresh_selection();
+    if (name === 'world') fit_width();
+    else map.getView().fit(POLAR_EXTENT);
+  }
+  labels.forEach(([name, label]) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'px-2 py-1';
+    button.textContent = label;
+    active(button, name === 'world');
+    button.addEventListener('click', () => set_view(name, button));
+    control.append(button);
+  });
 }
 
 // sample information on click
@@ -155,6 +264,10 @@ function select_samples(ol, map, samples, item) {
   }));
   // selected sample features by sample id
   let selection = new Map();
+  function redraw() {
+    selected.clear();
+    selected.addFeatures(Array.from(selection.values()).map(f => f.clone()));
+  }
   async function show(features, toggle = false) {
     if (!toggle) selection = new Map();
     features.forEach(f => {
@@ -194,8 +307,7 @@ function select_samples(ol, map, samples, item) {
     selection.forEach((f, sampleid) => {
       if (f.get('projid') === projid) selection.delete(sampleid);
     });
-    selected.clear();
-    selected.addFeatures(Array.from(selection.values()).map(f => f.clone()));
+    redraw();
     const box = close.closest('[data-projid]');
     if (box) box.remove();
   });
@@ -220,6 +332,7 @@ function select_samples(ol, map, samples, item) {
     });
     show(features);
   });
+  return redraw;
 }
 
 export {
