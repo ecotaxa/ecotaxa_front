@@ -9,7 +9,7 @@ from appli.constants import DayTimeList
 from appli.project.main import FilterList, MONTH_LABELS, LoadRightPaneForProj
 from appli.search.leftfilters import getcommonfilters
 ######################################################################################################################
-from appli.utils import ApiClient
+from appli.utils import ApiClient, can_read_visible_project
 from to_back.ecotaxa_cli_py import SamplesApi, SampleModel, ApiException, TaxonomyTreeApi, \
     TaxonModel, ProjectsApi, ProjectModel
 
@@ -109,7 +109,8 @@ def _random_project() -> Optional[ProjectModel]:
                                                                    window_size=RANDOM_PAGE_SIZE)
                 except ApiException:
                     continue
-                visible = [p for p in prjs if getattr(p, "access", "0") != "0"]
+                # readable only: an anonymous user gets "Access Denied" on a public, not open, project
+                visible = [p for p in prjs if can_read_visible_project(p)]
                 with_validated = [p for p in visible
                                   if getattr(p, "objcount", None) and getattr(p, "pctvalidated", None)]
                 if with_validated:

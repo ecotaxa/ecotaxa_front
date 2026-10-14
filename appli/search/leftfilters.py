@@ -2,10 +2,9 @@
 from typing import List
 
 from flask import render_template, g, request, json
-from flask_login import current_user
 
 from appli import app, gvg, XSSEscape
-from appli.utils import ApiClient, get_all_visible_projects
+from appli.utils import ApiClient, get_all_visible_projects, can_read_visible_project
 from to_back.ecotaxa_cli_py import (
     SamplesApi,
     SampleModel,
@@ -58,7 +57,7 @@ def search_mappopup_samples():
         projids = [
             a_proj.projid
             for a_proj in get_all_visible_projects()
-            if current_user.is_authenticated or a_proj.access == "2"
+            if can_read_visible_project(a_proj)
         ]
     if not projids:
         return json.dumps([])

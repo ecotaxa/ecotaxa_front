@@ -15,6 +15,7 @@ from to_back.ecotaxa_cli_py import (
     ApiException,
     MinUserModel,
 )
+from to_back.ecotaxa_cli_py.models.access_level_enum import AccessLevelEnum
 from to_back.ecotaxa_cli_py.api import (
     AuthentificationApi,
     ProjectsApi,
@@ -120,6 +121,17 @@ def get_all_visible_projects() -> List[ProjectModel]:
             return prjs
         except ApiException as ae:
             return []
+
+
+def can_read_visible_project(prj: ProjectModel) -> bool:
+    """
+    Same rule as back-end READ rights for a visible project:
+    anonymous users can only read open projects, logged users public and open ones.
+    """
+    access = getattr(prj, "access", AccessLevelEnum._0)
+    if current_user.is_authenticated:
+        return access != AccessLevelEnum._0
+    return access == AccessLevelEnum._2
 
 
 def ScaleForDisplay(v) -> str:

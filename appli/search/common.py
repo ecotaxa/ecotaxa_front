@@ -4,7 +4,7 @@ from typing import List
 from flask import render_template, request, json, jsonify
 
 from appli import app, gvg
-from appli.utils import ApiClient, DecodeEqualList
+from appli.utils import ApiClient, DecodeEqualList, can_read_visible_project
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import SamplesApi, InstrumentsApi, TaxonomyTreeApi, ProjectsApi
 from to_back.ecotaxa_cli_py.models import ProjectModel, SampleModel, TaxonModel, ProjectUserStatsModel
@@ -46,14 +46,20 @@ def searchexploreproject():
             prjs: List[ProjectModel] = api.search_projects(title_filter=qry)
             if options == 'all_visible':
                 # Explore page: also the visible projects the user has no right on
+                # (anonymous: both searches return the same public list, deduplicated below)
+                known = {prj.projid for prj in prjs}
                 prjs += [prj for prj in api.search_projects(title_filter=qry, not_granted=True)
-                         if prj.access != "0"]
+                         if prj.projid not in known]
         except ApiException:
             prjs = []
 
     # Do a variable filtering depending on the options
     def prj_filter(prj):
         return True
+
+    if options == 'all_visible':
+        # only the projects the user can display, an anonymous one gets "Access Denied" on a public project
+        prj_filter = can_read_visible_project
 
     if options == 'with_prediction_pre_mapping':
         def prj_filter(prj):
