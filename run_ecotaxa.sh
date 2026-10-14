@@ -13,7 +13,7 @@ while getopts "B:P:" flag
       esac
 done
 
-gnome-terminal -- /bin/bash -c 'source venv/bin/activate && python3 runserver.py'
+gnome-terminal -- /bin/bash -c 'source venv/bin/activate && python3.14 runserver.py'
 cd $DEV_BACK
 docker stop ecotaxa_db
 if [ "$DB" == docker ]
@@ -25,4 +25,4 @@ else
 fi
 cd py
 source myvenv/bin/activate
-python3.8 run.py uvicorn
+python3.14 run.py uvicorn
