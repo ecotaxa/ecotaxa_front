@@ -105,9 +105,13 @@ def format_date_time(
 def get_all_visible_projects() -> List[ProjectModel]:
     with ApiClient(ProjectsApi, request) as api:
         try:
-            projects: List[ProjectModel] = api.search_projects(title_filter="%")
+            # only the fields used by callers, not members and settings of every project
+            fields = "projid,title,access"
+            projects: List[ProjectModel] = api.search_projects(
+                title_filter="%", fields=fields
+            )
             otherprojects: List[ProjectModel] = api.search_projects(
-                title_filter="%", not_granted=True
+                title_filter="%", not_granted=True, fields=fields
             )
             prjs = [prj for prj in projects if prj.access != "0"] + [
                 prj for prj in otherprojects if prj.access != "0"

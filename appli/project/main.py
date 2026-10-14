@@ -618,12 +618,15 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
                 return "Invalid project"
             elif ae.status in (401, 403):
                 return "Access Denied"
+            return "Error retrieving project"
     # get filter values from POST
     Filt: Dict[str, str] = {}
     for col, v in FilterList.items():
         Filt[col] = gvp(col, v)
 
-    _set_prefs_from_filters(Filt, PrjId)
+    # Explore page (read_only) must not change the user's project preferences
+    if not read_only:
+        _set_prefs_from_filters(Filt, PrjId)
 
     # Public view is when the project is visible, but the current user has no right on it.
     g.PublicViewMode = proj.highest_right == ""
@@ -933,7 +936,7 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
         name_chunk = FormatNameForVignetteDisplay(
             display_name, taxostatus, hyphenator, categ_cache
         )
-        if g.PublicViewMode:
+        if g.PublicViewMode or read_only:
             simsrch_btn = ""
         else:
             simsrch_btn = "\n<div class='simsrch'><span title='Search similar objects' class='simsrchs'><span class='glyphicon glyphicon-screenshot'></span></div></td>"

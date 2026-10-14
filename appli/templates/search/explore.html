@@ -177,22 +177,6 @@ Tips for searching a category in the classification hierarchy:
         <script src="/static/jstree/jstree.min.js"></script>
 
         <style>
-            .tree li a {
-                padding-right: 20px !important;
-                background: url(icons/Star-icon.png) top right no-repeat;
-            }
-
-            .tree li.clicked a {
-                padding-right: 20px !important;
-                background: url(icons/Star-icon.png) top right no-repeat #BEEBFF;
-            }
-
-            .tree li a.hover,
-            .tree li a:hover {
-                padding-right: 20px !important;
-                background: url(icons/Star-icon.png) top right no-repeat #D8F0FA;
-            }
-
             .taxo_tree_selected .v {
                 background-color: #777777;
             }
@@ -239,8 +223,8 @@ Tips for searching a category in the classification hierarchy:
                         $('#taxolb').change();
                     });
 
-                $("#jstree").bind("select_node.jstree", function (e, data) {
-                    $("#jstree").jstree('open_node', data.node);
+                $("#jstreeexp").bind("select_node.jstree", function (e, data) {
+                    $("#jstreeexp").jstree('open_node', data.node);
                 });
                 {# Quand on ouvre une branche de l'arbre on met à jours les background pour les nouveaux noeuds  #}
                 $("#jstreeexp").on('after_open.jstree', function () {
@@ -342,12 +326,16 @@ Tips for searching a category in the classification hierarchy:
     <script>
         var PrevTxtFilter = "INITIAL"
 
+        function EscapeTxt(txt) {
+            return $('<span>').text(txt).html();
+        }
+
         function LoadRightPane(NoAjax) {
             var TxtFilter = ""
-            req = {taxo: $("#taxolb").val(), resultwidth: $("#column-right").width(), windowheight: $(window).height()};
+            var req = {taxo: ($("#taxolb").val() || []).join(","), resultwidth: $("#column-right").width(), windowheight: $(window).height()};
             var taxofilterarray = [];
             $('#taxolb :selected').each(function (i, selected) {
-                taxofilterarray[i] = $(selected).text();
+                taxofilterarray[i] = EscapeTxt($(selected).text());
             });
             req['taxochild'] = $("#taxochild").prop("checked") ? "1" : "0";
             if (taxofilterarray.length > 0) {
@@ -385,11 +373,11 @@ Tips for searching a category in the classification hierarchy:
             else req['samples'] = "";
             if (req['samples'] != "")
                 TxtFilter += " Samples=" + $.map($('#sampleid  option:selected'), function (element) {
-                    return $(element).text()
+                    return EscapeTxt($(element).text())
                 }).join(', ');
             req['instrum'] = $("#filt_instrum").val();
             if (req['instrum'] != "")
-                TxtFilter += " Instrument =" + req['instrum'];
+                TxtFilter += " Instrument =" + EscapeTxt(req['instrum']);
             var jqmonth = $('#month');
             if (jqmonth.val() != null) {
                 req['month'] = String(jqmonth.val());
@@ -403,27 +391,27 @@ Tips for searching a category in the classification hierarchy:
             else req['projid'] = "";
             if (req['projid'] != "")
                 TxtFilter += " Project=" + $.map($('#projid  option:selected'), function (element) {
-                    return "<a href='/prj/" + $(element).val() + "'>" + $(element).text() + "</a>"
+                    return "<a href='/prj/" + parseInt($(element).val()) + "'>" + EscapeTxt($(element).text()) + "</a>"
                 }).join(', ');
 
             req['fromdate'] = $("#filt_fromdate").val();
             if (req['fromdate'] != "")
-                TxtFilter += " Date >= " + req['fromdate'];
+                TxtFilter += " Date >= " + EscapeTxt(req['fromdate']);
             else delete req['fromdate'];
 
             req['todate'] = $("#filt_todate").val();
             if (req['todate'] != "")
-                TxtFilter += " Date <= " + req['todate'];
+                TxtFilter += " Date <= " + EscapeTxt(req['todate']);
             else delete req['todate'];
 
             req['fromtime'] = $("#filt_fromtime").val();
             if (req['fromtime'] != "")
-                TxtFilter += " Time >= " + req['fromtime'];
+                TxtFilter += " Time >= " + EscapeTxt(req['fromtime']);
             else delete req['fromtime'];
 
             req['totime'] = $("#filt_totime").val();
             if (req['totime'] != "")
-                TxtFilter += " Time <= " + req['totime'];
+                TxtFilter += " Time <= " + EscapeTxt(req['totime']);
             else delete req['totime'];
 
             req['inverttime'] = $("#filt_inverttime").prop("checked") ? "1" : "";
@@ -454,6 +442,8 @@ Tips for searching a category in the classification hierarchy:
                 window.location = "mailto:?subject=Ecotaxa%20page%20share&body=" + encodeURIComponent("Hello,\n\nAn Ecotaxa user want share this page with you \n" + url);
                 return;
             }
+            // back-end expects Y for children, the checkbox value (1) is kept in shared links
+            req['taxochild'] = (req['taxochild'] == "1") ? "Y" : "";
             $("#column-right").html("<img src='/static/spinningred.gif'> Loading");
             $("#column-right").load("/explore/LoadRightPane", req);
             $('#headersubtitle').html(TxtFilter);
@@ -461,11 +451,6 @@ Tips for searching a category in the classification hierarchy:
 
 
         $(document).ready(function () {
-            if ("{{data.sortorder}}" == "desc")
-                SortToggle();
-            $('#statuslabelspan').popover({html: true, trigger: 'hover', placement: "left", container: 'body'});
-            $('#statusfilter').data('content', $('#statuslabelspan').data('content'))
-            $('#statusfilter').popover({html: true, trigger: 'hover', placement: "left", container: 'body'});
             $("#taxofilter").val("");
 
 
@@ -475,15 +460,21 @@ Tips for searching a category in the classification hierarchy:
                     dataType: 'json',
                     delay: 250,
                     data: function (params) {
-                        return {q: params.term};
+                        return {q: params.term, opts: 'all_visible'};
                     },
                     processResults: function (data, page) {
                         return {results: data};
                     },
                     cache: true
                 },
+                // the right pane displays one project only
+                maximumSelectionLength: 1,
                 dropdownCssClass: "width400"
             }); // Select2 Ajax
+            $('#PopupDetails').on('hidden.bs.modal', function (e) {
+                $("#PopupDetails .modal-content").html("CLEAN");
+                $(".zoomContainer").remove();
+            })
 
         });
 
@@ -521,10 +512,6 @@ Tips for searching a category in the classification hierarchy:
                 $('#PopupDetails').modal(options);
                 $("#PopupDetails .modal-content").load(url);
             });
-            $('#PopupDetails').on('hidden.bs.modal', function (e) {
-                $("#PopupDetails .modal-content").html("CLEAN");
-                $(".zoomContainer").remove();
-            })
 
         }  //PostAddImages
 

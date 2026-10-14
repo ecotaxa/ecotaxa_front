@@ -2,8 +2,9 @@
 from typing import List
 
 from flask import render_template, g, request, json
+from flask_login import current_user
 
-from appli import app, gvg
+from appli import app, gvg, XSSEscape
 from appli.utils import ApiClient, get_all_visible_projects
 from to_back.ecotaxa_cli_py import (
     SamplesApi,
@@ -51,14 +52,25 @@ def search_mappopup_samples():
     """
     app.logger.info("Search mappopup req: %s", request.args)
     if gvg("projid"):
-        projids = [int(x) for x in gvg("projid").split(",")]
+        projids = [int(x) for x in gvg("projid").split(",") if x.strip().isdigit()]
     else:
-        projids = [a_proj.projid for a_proj in get_all_visible_projects()]
+        # anonymous users can only read samples of open projects, a public one refuses the whole search
+        projids = [
+            a_proj.projid
+            for a_proj in get_all_visible_projects()
+            if current_user.is_authenticated or a_proj.access == "2"
+        ]
+    if not projids:
+        return json.dumps([])
     str_project_ids = "+".join([str(p) for p in projids])
     with ApiClient(SamplesApi, request) as api:
-        samples: List[SampleModel] = api.samples_search(
-            project_ids=str_project_ids, id_pattern="%"
-        )
+        try:
+            samples: List[SampleModel] = api.samples_search(
+                project_ids=str_project_ids, id_pattern="%"
+            )
+        except ApiException as ae:
+            app.logger.error("Search mappopup samples error: %s", ae.status)
+            return json.dumps([])
 
     # TODO: Put into API one day
     #     if gvg('taxoid'):
@@ -77,6 +89,9 @@ def search_mappopup_samples():
 
     ores = []
     for sam in samples:
+        # no point on the map without coordinates
+        if sam.latitude is None or sam.longitude is None:
+            continue
         ores.append(
             {
                 "id": sam.sampleid,
@@ -106,8 +121,8 @@ def search_mappopup_samplepopover(sampleid: int):
     Lat/Lon : {latitude}/{longitude}
     """.format(
         sampleid=sample.sampleid,
-        orig_id=sample.orig_id,
-        title=project.title,
+        orig_id=XSSEscape(sample.orig_id),
+        title=XSSEscape(project.title),
         projid=project.projid,
         latitude=round(sample.latitude, 4),
         longitude=round(sample.longitude, 4),
