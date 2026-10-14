@@ -4,7 +4,7 @@ import os
 import urllib.parse
 from collections import OrderedDict
 from json import JSONDecodeError
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 
 from flask import render_template, g, flash, json, request, url_for
 
@@ -608,6 +608,45 @@ def LoadRightPane():
     return LoadRightPaneForProj(int(PrjId), False, False)
 
 
+def vignette_size(
+    origwidth: Optional[int],
+    origheight: Optional[int],
+    zoom: int,
+    page_width: int,
+    window_height: int,
+) -> Tuple[int, int]:
+    """
+    Displayed size of an object image: zoomed, at least 75px, at most the page width and window height.
+    """
+    if (
+        origwidth is None or origheight is None
+    ):  # pas d'image associée, pas trés normal mais arrive pour les subset sans images
+        origwidth = width = 80
+        origheight = height = 40
+    else:
+        width = origwidth * zoom // 100
+        height = origheight * zoom // 100
+    if max(width, height) < 75:  # en dessous de 75 px de coté on ne fait plus le scaling
+        if max(origwidth, origheight) < 75:
+            width = origwidth  # si l'image originale est petite on l'affiche telle quelle
+            height = origheight
+        elif max(origwidth, origheight) == origwidth:
+            width = 75
+            height = max(origheight * 75 // origwidth, 1)
+        else:
+            height = 75
+            width = max(origwidth * 75 // origheight, 1)
+
+    # On limite les images pour qu'elles tiennent toujours dans l'écran
+    if width > page_width:
+        width = page_width
+        height = max(math.trunc(origheight * width / origwidth), 1)
+    if height > window_height:
+        height = window_height
+        width = max(math.trunc(origwidth * height / origheight), 1)
+    return width, height
+
+
 def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
     # Security & sanity checks
     with ApiClient(ProjectsApi, request) as papi:
@@ -814,43 +853,9 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
         display_name: Optional[str] = dtl["txo.display_name"]
         taxostatus: Optional[int] = dtl["txo.taxostatus"]
         imgcount: int = dtl["obj.imgcount"]
-        if (
-            origwidth is None
-        ):  # pas d'image associée, pas trés normal mais arrive pour les subset sans images
-            origwidth = width = 80
-            origheight = height = 40
-        else:
-            assert origheight is not None
-            width = origwidth * zoom // 100
-            height = origheight * zoom // 100
-        if (
-            max(width, height) < 75
-        ):  # en dessous de 75 px de coté on ne fait plus le scaling
-            if max(origwidth, origheight) < 75:
-                width = origwidth  # si l'image originale est petite on l'affiche telle quelle
-                height = origheight
-            elif max(origwidth, origheight) == origwidth:
-                width = 75
-                height = origheight * 75 // origwidth
-                if height < 1:
-                    height = 1
-            else:
-                height = 75
-                width = origwidth * 75 // origheight
-                if width < 1:
-                    width = 1
-
-        # On limite les images pour qu'elles tiennent toujours dans l'écran
-        if width > PageWidth:
-            width = PageWidth
-            height = math.trunc(origheight * width / origwidth)
-            if height == 0:
-                height = 1
-        if height > WindowHeight:
-            height = WindowHeight
-            width = math.trunc(origwidth * height / origheight)
-            if width == 0:
-                width = 1
+        width, height = vignette_size(
+            origwidth, origheight, zoom, PageWidth, WindowHeight
+        )
         if WidthOnRow != 0 and (WidthOnRow + width) > PageWidth:
             trcount += 1
             fitheight += fitcurrentlinemaxheight

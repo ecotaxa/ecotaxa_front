@@ -1,0 +1,69 @@
+{% from "./v2/macros/macros.html" import alertbox with context %}
+{# Projects of the samples selected on the map, returned by /gui/explore/map/projects #}
+{% if truncated %}
+<div class="w-full">{{ alertbox('warning', _('Only the first %(nb)s selected samples are displayed.', nb=max_samples)) }}</div>
+{% endif %}
+{% for prj in projects %}
+{% set project = prj.project %}
+<div class="relative border border-stone-200 rounded-sm shadow-sm p-3 bg-white min-w-0 w-full{% if not single %} pr-8 lg:w-[calc((100%-2rem)/3)]{% endif %}" data-projid="{{ project.projid }}">
+  {% if not single %}
+  <button type="button" class="absolute top-1 right-2 text-xl leading-none text-stone-500 hover:text-stone-800" data-closeproject="{{ project.projid }}" aria-label="{{ _('Close') }}" title="{{ _('Close') }}"><span aria-hidden="true">&times;</span></button>
+  {% endif %}
+  <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+    <span class="font-semibold">[{{ project.projid }}] {{ project.title }}</span>
+    <span><span class="text-stone-500">{{ _('Instrument') }}:</span> {{ project.instrument or '' }}</span>
+    {% set contact = project.contact or (project.managers[0] if project.managers else none) %}
+    {% if contact %}
+    <span><span class="text-stone-500">{{ _('Contact') }}:</span> {{ contact.name }}{% if contact.email %} <a href="mailto:{{ contact.email }}" class="text-mainblue-700 hover:underline">{{ contact.email }}</a>{% endif %}</span>
+    {% endif %}
+    <a href="/prj/{{ project.projid }}" class="text-sm text-stone-600 hover:underline ml-auto"><i class="icon icon-link-sm"></i>{{ _('dedicated page') }}</a>
+  </div>
+  {% set stats = prj.stats %}
+  {% if stats %}
+  <div class="text-sm mt-1">
+    <span class="text-stone-500">{{ _('Objects') }}:</span>
+    {{ _('validated') }} {{ stats.validated }} · {{ _('predicted') }} {{ stats.predicted }} · {{ _('dubious') }} {{ stats.dubious }} · {{ _('unclassified') }} {{ stats.unclassified }}
+  </div>
+  {% if stats.taxa %}
+  <div class="text-sm mt-1">
+    <span class="text-stone-500">{{ _('Most validated taxa') }} ({{ _('%(nb)s taxa', nb=stats.nbtaxa) }}):</span>
+    <ul class="flex flex-wrap gap-x-3">
+      {% for name, nb in stats.taxa %}<li>{{ name }} <span class="text-stone-400">{{ nb }}</span></li>{% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+  {% endif %}
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm mt-2">
+      <thead class="text-left text-stone-500">
+        <tr>
+          <th class="pr-4 font-normal">{{ _('Sample') }}</th>
+          <th class="pr-4 font-normal">{{ _('Lat/Lon') }}</th>
+          <th class="pr-4 font-normal">{{ _('Depth') }}</th>
+          <th class="pr-4 font-normal">{{ _('Date time') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in prj.samples %}
+        {% set sample = row.sample %}
+        <tr class="border-t border-stone-100">
+          <td class="pr-4">{{ sample.orig_id }} <span class="text-stone-400">({{ sample.sampleid }})</span></td>
+          <td class="pr-4 whitespace-nowrap">{% if sample.latitude is not none %}{{ '%.4f'|format(sample.latitude) }} / {{ '%.4f'|format(sample.longitude) }}{% endif %}</td>
+          <td class="pr-4 whitespace-nowrap">{% if row.depthmin is not none or row.depthmax is not none %}{{ row.depthmin if row.depthmin is not none else '' }} – {{ row.depthmax if row.depthmax is not none else '' }}{% endif %}</td>
+          <td class="pr-4 whitespace-nowrap">{% if row.fromdate %}{{ row.fromdate }}{% if row.todate and row.todate != row.fromdate %} – {{ row.todate }}{% endif %}{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if single %}
+  {% set sample = prj.samples[0].sample %}
+  <div class="flex flex-wrap items-baseline gap-2 mt-4 mb-2">
+    <span class="text-sm text-stone-500">{{ _('%(nb)s displayed of %(total)s validated objects', nb=prj.images|length, total=prj.total) }}</span>
+  </div>
+  {% with images = prj.images, empty_message = _('No validated object in this sample.') %}
+  {% include "./v2/explore/_images_grid.html" %}
+  {% endwith %}
+  {% endif %}
+</div>
+{% endfor %}

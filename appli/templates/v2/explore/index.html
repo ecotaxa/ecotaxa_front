@@ -1,0 +1,18 @@
+{% extends "./v2/layout.html" %}
+{% block body %}
+{# Full width map of the samples, the projects of the selected samples are displayed below #}
+<div class="px-4">
+  <div class="flex flex-wrap items-baseline gap-4 mt-4">
+    <h2 class="h2">{{ _('Explore') }}</h2>
+    <span class="text-sm text-stone-500">{{ _('Click on a sample to display its project. Shift+click or Ctrl+drag (Cmd+drag on Mac) to select several samples.') }}</span>
+  </div>
+  <div id="explore-map" class="js js-map w-full h-[70vh] relative mt-2 border border-stone-200 rounded"
+       data-samples="/search/mappopup/samples/"
+       data-projects="/gui/explore/map/projects"
+       data-fitwidth="true"
+       data-target="map-projects"
+       data-nomap="{{ _('Displaying the map requires an Internet access to https://server.arcgisonline.com') }}">
+  </div>
+  <div id="map-projects" class="flex flex-wrap gap-4 mt-4 mb-8"></div>
+</div>
+{% endblock %}

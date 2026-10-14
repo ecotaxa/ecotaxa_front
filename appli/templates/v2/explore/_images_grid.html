@@ -1,0 +1,16 @@
+{% from "./v2/macros/macros.html" import alertbox with context %}
+{# Grid of object images, included with images and empty_message #}
+{% if images %}
+<div class="flex flex-wrap items-end gap-3">
+  {% for img in images %}
+  <figure class="flex flex-col items-center" style="max-width: {{ [img.width, 80]|max + 8 }}px">
+    <a href="/objectdetails/{{ img.objid }}" target="_blank" title="{{ _('Object details') }}">
+      <img src="/vault/{{ img.src }}" width="{{ img.width }}" height="{{ img.height }}" loading="lazy" alt="{{ img.taxon or '' }}" class="block">
+    </a>
+    <figcaption class="text-xs text-center text-stone-700 break-words w-full">{{ img.taxon or '' }}{% if img.imgcount and img.imgcount > 1 %} ({{ img.imgcount }}){% endif %}</figcaption>
+  </figure>
+  {% endfor %}
+</div>
+{% else %}
+{{ alertbox(type='info', message=empty_message, inverse=True) }}
+{% endif %}

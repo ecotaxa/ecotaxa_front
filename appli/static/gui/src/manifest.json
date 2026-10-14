@@ -1,6 +1,7 @@
 {
   "main.js": "/static/gui/src/main.js",
   "src_modules_js-tom-select_js.js": "/static/gui/src/src_modules_js-tom-select_js.js",
+  "src_modules_js-map_js.js": "/static/gui/src/src_modules_js-map_js.js",
   "src_modules_table-component_js.js": "/static/gui/src/src_modules_table-component_js.js",
   "src_modules_project-privileges_js.js": "/static/gui/src/src_modules_project-privileges_js.js",
   "src_modules_form-submit_js.js": "/static/gui/src/src_modules_form-submit_js.js",
