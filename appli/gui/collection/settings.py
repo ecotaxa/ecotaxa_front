@@ -267,9 +267,13 @@ def collection_edit(collection_id: int, new: bool = False):
             varlist.remove(prefix + "organisations")
         varlist.extend(["creator_persons", "associate_persons"])
         print("form", request.form)
+        # title and short title are frozen once the DOI is set
+        published = _is_published(collection)
         for a_var in request.form:
             if a_var in varlist:
-                if a_var in ["provider_user", "contact_user"]:
+                if a_var in ["title", "short_title"] and published:
+                    continue
+                elif a_var in ["provider_user", "contact_user"]:
                     u = gvp(a_var, "")
                     if u != "" and getattr(collection, a_var) != _user_format(int(u)):
                         setattr(collection, a_var, _user_format(int(u)))

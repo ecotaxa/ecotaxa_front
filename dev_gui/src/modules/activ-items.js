@@ -95,11 +95,11 @@ function createActivItems() {
           if (item.value.trim()!=="") target.value=normalize_title(item.value);
           break;
           case "replace":
-          const toreplace=(item.dataset.replace)?item.dataset.replace:null;
+          const toreplace=(item.dataset.toreplace)?item.dataset.toreplace:null;
           const replaceby=(item.dataset.replaceby)?item.dataset.replaceby:"";
           if(toreplace===null) return;
            item.addEventListener("input",(e)=> {
-           if (item.value!=="") item.value=item.value.replace(toreplace,replaceby,g);
+           if (item.value!=="") item.value=item.value.replaceAll(toreplace,replaceby);
           });
           break;
         case 'wrapeye':

@@ -76,17 +76,22 @@ export class FormSubmit {
   hotModifs() {
     // display a message when one og this fields is modified
     this.form.querySelectorAll('[data-hotmodif]').forEach(field => {
-      const evt = (field.tagName.toLowerCase() == 'input' && field.type === 'text') ? 'keydown' : 'change';
+      const evt = (field.tagName.toLowerCase() == 'input' && field.type === 'text') ? 'input' : 'change';
       const message = (field.dataset.modifmessage) ? field.dataset.modifmessage : this.options.modifmessage;
-      let parent = field.closest(domselectors.formbox);
-      parent = (parent) ? parent : field.closest(domselectors.messagepos);
+      const initial = field.value;
+      // ask once - again only after a cancel or when the initial value is back
+      let asked = false;
       field.addEventListener(evt, () => {
-        AlertBox.addMessage({
-          type: AlertBox.alertconfig.types.warning,
-          parent: parent,
-          content: message,
-          duration: 4000
-        })
+        if (field.value === initial) asked = false;
+        if (asked || field.value === initial) return;
+        asked = true;
+        AlertBox.addConfirm(message, {
+          callback_cancel: () => {
+            if (field.tomselect) field.tomselect.setValue(initial, true);
+            else field.value = initial;
+            asked = false;
+          }
+        });
       })
     })
   }
