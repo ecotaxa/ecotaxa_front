@@ -654,6 +654,8 @@ def utility_processor():
             if isinstance(messages, dict):
                 # build messages param for template {"type":,"content":,"date":,"dismissible":, duration:}
                 for key, message in messages.items():
+                    if not isinstance(message, dict):
+                        continue
                     name = key + cookiename
                     # homepage active message stays
                     delta = 10
