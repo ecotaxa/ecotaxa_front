@@ -12,7 +12,7 @@ import {
   AsyncZipDeflate,
   ZipPassThrough,
   ZipDeflate,
-} from 'fflate';
+} from '@antonbks/fflate';
 import {
   ModuleEventEmitter
 } from '../../modules/module-event-emitter.js';
@@ -233,6 +233,7 @@ const browser = detect();
         }
       }
     });
+    properties.zip.zip64 = true;
     // hack for memory usage
     zipOnData();
     if (properties.follow) await properties.follow();
@@ -551,23 +552,27 @@ const browser = detect();
   async function zipStream(file, filepath) {
     const ext = filepath.slice(filepath.lastIndexOf('.') + 1);
     const iscompressed = already_compressed.has(ext);
-    const zippedstream = (iscompressed) ? new ZipPassThrough(filepath) : file.size > options.largefile ?
+    const zippedstream =
+        (iscompressed) ? new AsyncZipDeflate(filepath, {
+        level: 0, zip64: true
+      }) : file.size > options.largefile ?
       new AsyncZipDeflate(filepath, {
-        level: 6,
+        level: 6, zip64: true
       }) : new ZipDeflate(filepath, {
-        level: 6
+        level: 6, zip64: true
       });
-      properties.zip.add(zippedstream);
+    zippedstream.zip64 = true;
+    properties.zip.add(zippedstream);
     // the file is zipped once its last compressed chunk is out, which comes
     // later than the last push for AsyncZipDeflate (compresses in a worker)
-    const zipped = new Promise((resolve) => {
-      const ondata = zippedstream.ondata;
-      zippedstream.ondata = (err, dat, final) => {
-        ondata(err, dat, final);
-        if (err || final) resolve();
-      };
-    });
-    await readFile(file, filepath, zippedstream, true, zipped);
+    // const zipped = new Promise((resolve) => {
+    //   const ondata = zippedstream.ondata;
+    //   zippedstream.ondata = (err, dat, final) => {
+    //     ondata(err, dat, final);
+    //     if (err || final) resolve();
+    //   };
+    // });
+    await readFile(file, filepath, zippedstream, true);
   }
   function compressed_estimate(file) {
     const ext = file.name.slice(file.name.lastIndexOf('.') + 1);
