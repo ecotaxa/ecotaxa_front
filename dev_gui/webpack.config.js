@@ -51,7 +51,7 @@ let config = {
     minimize: true,
   },
   plugins: [
-    new BundleAnalyzerPlugin(),
+    new BundleAnalyzerPlugin({ analyzerMode: 'static', openAnalyzer: false }),
     new WebpackManifestPlugin(),
     new HtmlWebpackPlugin({
       filename: path.resolve(__dirname, '../appli/templates/v2/partials/_head.html'),
