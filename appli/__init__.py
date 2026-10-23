@@ -21,6 +21,15 @@ from appli.security_on_backend import user_from_api
 app = Flask("appli")
 app.config.from_pyfile("../config/config.cfg")
 augment_from_env(app.config)
+# The Flask session cookie also acts as the API bearer token (see ApiClient), and
+# the "remember me" cookie can restore a session for 30 days. Harden both.
+app.config.setdefault("SESSION_COOKIE_HTTPONLY", True)
+app.config.setdefault("SESSION_COOKIE_SAMESITE", "Lax")
+app.config.setdefault("REMEMBER_COOKIE_HTTPONLY", True)
+app.config.setdefault("REMEMBER_COOKIE_SAMESITE", "Lax")
+if not app.config.get("DEBUG"):
+    app.config.setdefault("SESSION_COOKIE_SECURE", True)
+    app.config.setdefault("REMEMBER_COOKIE_SECURE", True)
 app.logger.setLevel(INFO if app.config["DEBUG"] else WARNING)
 
 # Read more config
