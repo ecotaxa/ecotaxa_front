@@ -7,12 +7,9 @@ import {
 } from '../../modules/utils.js';
 
 import {
-  AsyncGzip,
-  Zip,
-  AsyncZipDeflate,
-  ZipPassThrough,
-  ZipDeflate,
-} from 'fflate';
+  ZipWriter,
+  BlobReader,
+} from '@zip.js/zip.js';
 import {
   ModuleEventEmitter
 } from '../../modules/module-event-emitter.js';
@@ -128,11 +125,11 @@ const browser = detect();
       } else console.log('partly finished '+properties.hashandlers+ 'follow='+properties.follow, e);
     }, uuid);
     ModuleEventEmitter.on(eventnames.endzip, async(e) => {
-      // end() only once per archive: a second call fails with fflate "stream finishing"
+      // end() only once per archive
       if (!e.bigfile && properties.zip && !properties.zip.ending) {
         properties.zip.ending = true;
-        properties.zip.end();
         properties.closed = true;
+        await properties.zip.close();
       }
       const evtsend=async function() {
       const zipclosed = await listStorage(null,properties.zipname);
@@ -218,23 +215,7 @@ const browser = detect();
   async function initZip() {
     properties.pos = 0;
     properties.sizetozip = 0;
-    properties.zip = new Zip((error, chunk, final) => {
-      if (error) {
-        onError(eventnames.errorfile, {
-                message: error}, _listener);
-        return false;
-      } else {
-        properties.streamhandle.write(chunk, {
-          at: self.pos
-        });
-        properties.pos += chunk.length;
-        if (final) {
-          properties.streamhandle.close();
-        }
-      }
-    });
-    // hack for memory usage
-    zipOnData();
+    properties.zip = new ZipWriter(properties.streamhandle, { zip64: true });
     if (properties.follow) await properties.follow();
   }
 
@@ -259,18 +240,6 @@ const browser = detect();
         // reading finished with nothing left to zip (e.g. every dropped file
         // was rejected) - release the batch so more can be added
         emitEndZip(e);
-      }
-    }
-  }
-
-  function zipOnData(zip = null) {
-    zip = (zip === null) ? properties.zip : zip;
-    const ondata = zip.ondata;
-    zip.ondata = (error, data, final) => {
-      ondata(error, data, final);
-      if (final) {
-        zip.d = null;
-        if (zip.u && zip.u.at(-1)) zip.u.at(-1).d = null; // Object created in `zip.add()`
       }
     }
   }
@@ -439,22 +408,22 @@ const browser = detect();
     }
     return;
   }
-    async function gzipBigFile(file, filepath) {
+  async function gzipBigFile(file, filepath) {
     let dt = Date.now();
     filepath = (filepath.indexOf(dirseparator) === 0) ? filepath.slice(1) : filepath;
     const parts = filepath.split(dirseparator);
     parts.pop();
-    const sendpath = uploadpath + dirseparator +parts.join(dirseparator);
-    const ext = file.name.slice(file.name.lastIndexOf('.') + 1);
+    const sendpath = uploadpath + dirseparator + parts.join(dirseparator);
+    const ext = file.name.slice(file.name.lastIndexOf('.') + 1).toLowerCase();
     if (already_compressed.has(ext)) {
-       ModuleEventEmitter.emit(eventnames.counter, {
+      ModuleEventEmitter.emit(eventnames.counter, {
         name: 'zip',
         path: filepath,
-        bigfile:file.name,
+        bigfile: file.name,
         size: file.size
       }, uuid);
       addHandler(async () => {
-        await sendChunk(sendpath,file);
+        await sendChunk(sendpath, file);
       });
     } else {
       let zipname = file.name + '.gz';
@@ -464,110 +433,64 @@ const browser = detect();
       } = await createLocalStream(zipname, {
         'application/gzip': ['.gz'],
       });
-      let pos = 0;
-
-      const gzipped = new AsyncGzip({
-        level: 6,
-        filename: filepath
-      });
-      gzipped.ondata = (err, data, final) => {
-       if(pos > MAXSIZE)  {
-                properties.counter.error+=1;
-              onError(AlertBox.alertconfig.types.error, {
-
-                name:AlertBox.alertconfig.types.error,
-                bigfile:file.name,
-                path:filepath,
-                message:'File '+file.name+' size exceeds maxsize. Cannot be sent in chunks for the moment.'}, _listener);
-          streamhandle.close();gzipped.ondata= (err, data, final) => {}; return endProcess();
-          }
-        if (err) {
-            properties.counter.error+=1;
-          onError(AlertBox.alertconfig.types.error, {
-            name:AlertBox.alertconfig.types.error,
-            bigfile: file.name,
-            path: filepath,
-            size: file.size,
-            message: 'Error compressing file '+ file.name +' '+err
-          });
-        } else {
-          streamhandle.write(data, {
-            at: pos
-          });
-          pos += data.length;
-          if (final) {
-            streamhandle.close();
-                 filepath+='.gz';
-                ModuleEventEmitter.emit(eventnames.counter, {
-              name: 'zip',
-              path: filepath,
-              size: file.size,
-              bigfile:file.name
-            }, uuid);
-
-         addHandler(async () => {
-         await sendChunk(sendpath,filestream);
-            });
-          }
-        }
-      };
-      const count = false;
-      await readFile(file, filepath, gzipped, count);
+      try {
+        const stream = file.stream().pipeThrough(new CompressionStream('gzip'));
+        await stream.pipeTo(streamhandle);
+        filepath += '.gz';
+        ModuleEventEmitter.emit(eventnames.counter, {
+          name: 'zip',
+          path: filepath,
+          size: file.size,
+          bigfile: file.name
+        }, uuid);
+        addHandler(async () => {
+          await sendChunk(sendpath, filestream);
+        });
+      } catch (err) {
+        properties.counter.error += 1;
+        onError(AlertBox.alertconfig.types.error, {
+          name: AlertBox.alertconfig.types.error,
+          bigfile: file.name,
+          path: filepath,
+          size: file.size,
+          message: 'Error compressing file ' + file.name + ' ' + ((err && err.message) ? err.message : err)
+        });
+      }
     }
   }
   async function partZip() {
     properties.part += 1;
     ModuleEventEmitter.emit(eventnames.complete, {
-     name: eventnames.endzip,
+      name: eventnames.endzip,
       part: properties.part
     }, _listener);
   }
-  async function readFile(file, filepath, zippedstream, count = true, done = null) {
-    const reader = file.stream().getReader();
-    let pause = false;
-    /*  onBackpressure(zippedstream, this.streamhandle, should_apply_backpressure => {
-        if (should_apply_backpressure) pause = true;
-        else if (pause) pause = false;
-      });*/
-    while (true) {
-      const {
-        done,
-        value
-      } = await reader.read();
-      if (done) {
-        zippedstream.push(new Uint8Array(0), true);
-        if (done) await done;
-        if (count === true) ModuleEventEmitter.emit(eventnames.counter, {
-          name: 'zip',
-          path: filepath,
-          size: (zippedstream.size) ? zippedstream.size : file.size
-        }, uuid);
-        break;
-      }
-      zippedstream.push(value);
-    }
-  }
 
   async function zipStream(file, filepath) {
-    const ext = filepath.slice(filepath.lastIndexOf('.') + 1);
+    const relativePath = (filepath.indexOf(dirseparator) === 0) ? filepath.slice(1) : filepath;
+    const ext = relativePath.slice(relativePath.lastIndexOf('.') + 1).toLowerCase();
     const iscompressed = already_compressed.has(ext);
-    const zippedstream = (iscompressed) ? new ZipPassThrough(filepath) : file.size > options.largefile ?
-      new AsyncZipDeflate(filepath, {
-        level: 6,
-      }) : new ZipDeflate(filepath, {
-        level: 6
+    const level = iscompressed ? 0 : 6;
+    try {
+      await properties.zip.add(relativePath, new BlobReader(file), {
+        level,
+        zip64: true,
+        bufferedWrite: false
       });
-      properties.zip.add(zippedstream);
-    // the file is zipped once its last compressed chunk is out, which comes
-    // later than the last push for AsyncZipDeflate (compresses in a worker)
-    const zipped = new Promise((resolve) => {
-      const ondata = zippedstream.ondata;
-      zippedstream.ondata = (err, dat, final) => {
-        ondata(err, dat, final);
-        if (err || final) resolve();
-      };
-    });
-    await readFile(file, filepath, zippedstream, true, zipped);
+      ModuleEventEmitter.emit(eventnames.counter, {
+        name: 'zip',
+        path: filepath,
+        size: file.size
+      }, uuid);
+    } catch (err) {
+      properties.counter.error += 1;
+      onError(eventnames.errorfile, {
+        name: eventnames.error,
+        path: filepath,
+        message: 'Error zipping file ' + file.name + ': ' + ((err && err.message) ? err.message : err)
+      }, _listener);
+      endProcess(true);
+    }
   }
   function compressed_estimate(file) {
     const ext = file.name.slice(file.name.lastIndexOf('.') + 1);

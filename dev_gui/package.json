@@ -48,7 +48,7 @@
     "deep-equal": "^2.2.3",
     "detect-browser": "^5.3.0",
     "dompurify": "^3.3.1",
-    "fflate": "^0.8.2",
+    "@zip.js/zip.js": "^2.24.0",
     "n": "^10.2.0",
     "path": "^0.12.7",
     "tom-select": "^2.4.3",
