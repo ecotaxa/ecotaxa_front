@@ -6,9 +6,9 @@
 
 /*! ../files/js-scandir.js */
 
-/*! detect-browser */
+/*! @zip.js/zip.js */
 
-/*! fflate */
+/*! detect-browser */
 
 /*! import() */
 
