@@ -743,12 +743,12 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
                     sort_col_signed = (
                         "-" if sortorder.lower() != "desc" else ""
                     ) + sortby
-        needed_fields = ",".join(api_cols)
+        # fields in body: the list can be too long for the URL
+        query_filters = {**filtres, "fields": ",".join(api_cols)}
         while True:
             objs: ObjectSetQueryRsp = api.get_object_set(
                 project_id=PrjId,
-                project_filters=filtres,
-                fields=needed_fields,
+                project_filters=query_filters,
                 order_field=sort_col_signed,
                 window_size=ippdb,
                 window_start=pageoffset * ippdb,
