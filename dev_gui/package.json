@@ -4,7 +4,8 @@
     "reinstall": "npm run clean && npm install",
     "dev": "gnome-terminal -- /bin/bash -c 'cd .. && bash run_ecotaxa.sh' && webpack  --mode development --watch",
     "devdockerdb": "gnome-terminal -- /bin/bash -c 'cd .. && bash run_ecotaxa.sh -B docker' && webpack  --mode development --watch",
-    "build": "webpack build --mode production --config webpack.config.js "
+    "build": "webpack build --mode production --config webpack.config.js ",
+    "test": "npm --prefix ../QA/dev_gui test"
   },
   "devDependencies": {
     "@babel/core": "^7.28.5",
@@ -25,7 +26,6 @@
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.6.5",
     "mini-css-extract-plugin": "^2.9.4",
-    "mocha": "^12.0.3",
     "postcss": "^8.5.6",
     "postcss-loader": "^7.3.4",
     "postcss-preset-env": "^9.6.0",
@@ -42,13 +42,13 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.28.4",
+    "@zip.js/zip.js": "^2.24.0",
     "core-js": "^3.47.0",
     "dayjs": "^1.11.19",
     "debounce": "^2.2.0",
     "deep-equal": "^2.2.3",
     "detect-browser": "^5.3.0",
     "dompurify": "^3.3.1",
-    "@zip.js/zip.js": "^2.24.0",
     "n": "^10.2.0",
     "path": "^0.12.7",
     "tom-select": "^2.4.3",

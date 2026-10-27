@@ -1,4 +1,3 @@
-hyphenator
 # To ensure all is installed and only them:
 # (venv)$ pip freeze | xargs pip uninstall -y
 # (venv)$ pip install -r requirements.txt

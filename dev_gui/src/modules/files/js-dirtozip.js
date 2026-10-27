@@ -22,7 +22,20 @@ const already_compressed = new Set([
   'mp4', 'mov', 'mp3', 'aifc'
 ]);
 const can_be_compressed = new Set(['tsv','txt','log','csv']);
-const accept = '.tsv,.png,.jpg, .jpeg,.zip,.gz,.7z,.bz2';
+const accept = '.tsv,.png,.jpg,.jpeg,.zip,.gz,.7z,.bz2';
+
+export function compressed_estimate(file) {
+  const ext = file.name.slice(file.name.lastIndexOf('.') + 1);
+  if (can_be_compressed.has(ext)) return Math.floor(file.size/2);
+  return file.size;
+}
+
+export function acceptFile(entry) {
+  const filepath = entry.name;
+  // whole extension, dot included, any case: '.ts' must not match '.tsv'
+  const ext = filepath.slice(filepath.lastIndexOf('.')).toLowerCase();
+  return accept.split(',').includes(ext);
+}
 
 export function JsDirToZip(options = {}) {
   const MAXSIZE = (document.querySelector('[data-max_upload_size]'))?parseInt(document.querySelector('[data-max_upload_size]').dataset['max_upload_size']):1073741824;//681574400;//681574400; // 650M //1073741824; //4294967296; //// 3221225472; // 2147483648;
@@ -207,8 +220,20 @@ const browser = detect();
      }
   }
   async function reset() {
+    await releaseArchive();
     properties = initProps();
     await initStorage();
+  }
+
+  // an archive still being written (e.g. stopped by a "too large" error) keeps an exclusive
+  // lock on its file: close it, so the file can be removed and its name reused
+  async function releaseArchive() {
+    if (properties.zip === null || properties.closed) return;
+    try {
+      await properties.zip.close();
+    } catch (err) {
+      if (properties.streamhandle) await properties.streamhandle.abort().catch(() => {});
+    }
   }
 
   function isActive() {
@@ -442,11 +467,6 @@ const browser = detect();
       endProcess(true);
     }
   }
-  function compressed_estimate(file) {
-    const ext = file.name.slice(file.name.lastIndexOf('.') + 1);
-    if (can_be_compressed.has(ext)) return Math.floor(file.size/2);
-    return file.size;
-  }
   async function addFileToZipStream(file, filepath, count = true) {
     if (count === true) ModuleEventEmitter.emit(eventnames.counter, {
       name: 'scan',
@@ -491,12 +511,6 @@ const browser = detect();
         await zipStream(file, filepath);
       }
     }
-  }
-
-  function acceptFile(entry) {
-    const filepath = entry.name;
-    const ext = filepath.slice(filepath.lastIndexOf('.') + 1);
-    return accept.includes(ext);
   }
 
   function rejectFile(file, callback = null) {

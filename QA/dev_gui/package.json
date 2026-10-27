@@ -1,0 +1,19 @@
+{
+  "name": "ecotaxa-dev-gui-tests",
+  "private": true,
+  "description": "Unit and browser tests of the dev_gui JS modules (Vitest)",
+  "scripts": {
+    "test": "vitest run",
+    "test:unit": "vitest run --project unit",
+    "test:browser": "vitest run --project browser",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@vitest/browser-playwright": "^5.0.5",
+    "happy-dom": "^21.0.4",
+    "vitest": "^5.0.5"
+  },
+  "engines": {
+    "node": "^22.12.0 || >=24.0.0"
+  }
+}

@@ -1,6 +1,3 @@
-import {
-  add_custom_events
-} from '../../modules/utils.js';
 export const objectEntry = {
   UUID: "",
   entry: {},

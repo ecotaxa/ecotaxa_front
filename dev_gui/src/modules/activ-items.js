@@ -8,10 +8,6 @@ import {
   css
 } from '../modules/modules-config.js';
 import {
-  get_catcha_reponse,
-  decode_HTMLEntities,fetchSettings
-} from '../modules/utils.js';
-import {
   export_html2word
 } from '../modules/export-html2word.js';
 const localcss = {

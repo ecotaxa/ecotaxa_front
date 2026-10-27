@@ -4,7 +4,6 @@ import {
  fetchSettings,
   download_url,
   string_to_boolean,
-  sort_items,
   is_object,
   html_spinner,
   generate_uuid,

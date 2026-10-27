@@ -17,7 +17,6 @@ import {
 import {
   entryTypes,
   entryOptions,
-  eventEntry,
   Entry,
   EntryControls,
   MultiEntryControls
