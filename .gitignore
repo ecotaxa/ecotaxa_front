@@ -10,6 +10,5 @@ __pycache__/
 /dev_gui/src/html/
 /dev_gui/node_modules/
 /testsandbox/*
-/dev_gui/package-lock.json
 /py
 appli/static/gui/data/

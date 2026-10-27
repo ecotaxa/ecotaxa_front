@@ -1,0 +1,3 @@
+node_modules/
+# screenshots of failed browser tests
+.vitest/
