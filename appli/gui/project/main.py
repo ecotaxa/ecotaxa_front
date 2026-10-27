@@ -245,16 +245,40 @@ def gui_prj_merge(projid):
                             source_project_id=source_proj.projid,
                             dry_run=False,
                         )
-                    return render_template(
-                        "/v2/project/merge.html",
-                        target_proj=target_proj,
-                        processstep="end",
-                    )
+                    for an_error in _rsp.errors:
+                        flash(an_error, "error")
+                    if len(_rsp.errors) == 0:
+                        return render_template(
+                            "/v2/project/merge.html",
+                            target_proj=target_proj,
+                            processstep="end",
+                        )
+                    flash(_("Pick another source project."), "info")
+                    excludeprjs.append(source_proj.projid)
             except ApiException as ae:
                 if ae.status == 404:
                     flash(_("Source project doesn't exist"), "warning")
                 elif ae.status in (401, 403):
                     flash(_("You cannot merge from this project"), "error")
+                    excludeprjs.append(srcprojid)
+                else:
+                    from flask import current_app
+                    from appli.gui.commontools import format_exception
+
+                    current_app.logger.error(
+                        "project_merge failed (%s) - target=%s source=%s - body=%s",
+                        ae.reason,
+                        target_proj.projid,
+                        srcprojid,
+                        ae.body,
+                    )
+                    try:
+                        message = format_exception(ae)[1]
+                    except (ValueError, TypeError):
+                        message = None
+                    if not message:
+                        message = "%s - %s" % (ae.status, ae.reason)
+                    flash(message, "error")
                     excludeprjs.append(srcprojid)
 
     # Fetch the potential merge sources
