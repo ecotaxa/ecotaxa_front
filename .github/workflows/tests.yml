@@ -1,0 +1,46 @@
+name: tests
+
+on:
+  # reused by build_docker.yml: no image is pushed if tests fail
+  workflow_call:
+  # same triggers as ecotaxa_back auto_tests.yml, except tags (tested via build_docker.yml)
+  push:
+    branches: [ '**' ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  # dev_gui JS tests (QA/dev_gui)
+  dev_gui_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            dev_gui/package-lock.json
+            QA/dev_gui/package-lock.json
+      # npm ci: exactly the versions of the committed package-lock.json files
+      - name: Install dev_gui dependencies (modules under test)
+        working-directory: dev_gui
+        run: npm ci --no-audit --no-fund
+      - name: Install test tooling
+        working-directory: QA/dev_gui
+        run: npm ci --no-audit --no-fund
+      - name: Install Chromium for the browser tests
+        working-directory: QA/dev_gui
+        run: npx playwright install --with-deps chromium
+      - name: Run dev_gui tests
+        working-directory: QA/dev_gui
+        run: npm test
+      - name: Keep screenshots of failed browser tests
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dev_gui-test-screenshots
+          path: QA/dev_gui/.vitest/
+          if-no-files-found: ignore

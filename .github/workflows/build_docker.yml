@@ -5,7 +5,12 @@ on:
     tags: [ v* ]
 
 jobs:
+  # dev_gui JS tests (tests.yml): no image is pushed if they fail
+  dev_gui_tests:
+    uses: ./.github/workflows/tests.yml
+
   docker_front:
+    needs: dev_gui_tests
     runs-on: ubuntu-latest
     steps:
       - name: Check out
