@@ -1,5 +1,5 @@
 'use strict';
-import tomSelectcss from "../css/tom-select.css";
+import "../css/tom-select.css";
 import DOMPurify from 'dompurify';
 import TomSelect from 'tom-select/dist/js/tom-select.base.min.js';
 import TomSelect_remove_button from 'tom-select/dist/js/plugins/remove_button.js';
@@ -468,8 +468,9 @@ function createJsTomSelect() {
           ts.on('item_add', (v, el) => {
             if (el !== null) {
                 el.classList.add('new');
-                const opt=ts.getOption(v);
-                if (opt!==null && opt.status && opt.status=='D') el.classList.add(css.deprecated);
+                // option data (getOption() returns the dropdown element, which has no status)
+                const opt=ts.options[v];
+                if (opt && opt.status && opt.status=='D') el.classList.add(css.deprecated);
                }
           });
           ts.on("load", (v,el) => {

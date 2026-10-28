@@ -5,7 +5,7 @@
           <label for="inittaxo">{{_('Definition of preset for manual sorting')}}<i data-for="help_initclassiflist" data-request="help"></i></label>
           <select id='inittaxo' class="form-multiselect js js-autocomplete" name="inittaxo[]" data-importfield="init_classif_list"  data-type="taxo" multiple readonly  autocomplete=off>
            {% for r in agg.predeftaxo %}
-            <option value="{{ r[0] }}" selected="selected"> {{ r[1] }}</option>
+            <option value="{{ r[0] }}" data-status="{{ r[2] }}" selected="selected"> {{ r[1] }}</option>
             {% endfor %}
           </select>
         </div>
