@@ -489,7 +489,8 @@ export class TableComponent {
     if (!phantom) {
       phantom = document.createElement('div');
       phantom.className = 'virtual-scroll-phantom';
-      phantom.style.position = 'relative';
+      // pure height spacer: once the translated tbody overlaps it, it must not catch clicks on the rows' links
+      phantom.style.pointerEvents = 'none';
       wrapper.style.position = 'relative';
       wrapper.style.overflowY = 'auto';
       // in the table, not after it: the sticky thead can't leave the table, which must span the whole scroll height
