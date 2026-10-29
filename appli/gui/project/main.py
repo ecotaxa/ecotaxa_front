@@ -550,6 +550,9 @@ def _get_field_list(prj_model: ProjectModel) -> list:
 
     excluded = set()
     for k in ObjectHeaderModel.openapi_types.keys():
+        # Back-end ignores classification columns in updates, since 2024-03-01, use reclassify/classify instead
+        if k.startswith("classif_"):
+            continue
         # TODO: Hardcoded, not rename-friendly
         if k not in ("objid",):
             fieldlist.append({"id": "h" + k, "text": "object." + k})
@@ -629,9 +632,6 @@ def gui_prj_edit_datamass(projid):
         updates = [{"ucol": field, "uval": new_value}]
         if tablecode in ("h", "f"):
             # Object update
-            if field == "classif_id":
-                updates.append({"ucol": "classif_when", "uval": "current_timestamp"})
-                updates.append({"ucol": "classif_who", "uval": str(current_user.id)})
             try:
                 with ApiClient(ObjectsApi, request) as api:
                     nb_rows = api.update_object_set(

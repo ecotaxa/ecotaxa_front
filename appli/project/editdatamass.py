@@ -1,7 +1,7 @@
 from typing import List, Dict
 
 from flask import render_template, g, flash, request
-from flask_login import current_user, login_required
+from flask_login import login_required
 
 import appli.project.sharedfilter as sharedfilter
 from appli import app, PrintInCharte, gvg, gvp, XSSEscape
@@ -22,6 +22,9 @@ def GetFieldList(prj_model: ProjectModel):
 
     excluded = set()
     for k in ObjectHeaderModel.openapi_types.keys():
+        # Back-end ignores classification columns in updates, since 2024-03-01, use reclassify/classify instead
+        if k.startswith("classif_"):
+            continue
         # TODO: Hardcoded, not rename-friendly
         if k not in ("objid",):
             fieldlist.append({"id": "h" + k, "text": "object." + k})
@@ -99,9 +102,6 @@ def PrjEditDataMass(PrjId):
         updates = [{"ucol": field, "uval": new_value}]
         if tablecode in ("h", "f"):
             # Object update
-            if field == "classif_id":
-                updates.append({"ucol": "classif_when", "uval": "current_timestamp"})
-                updates.append({"ucol": "classif_who", "uval": str(current_user.id)})
             with ApiClient(ObjectsApi, request) as api:
                 nb_rows = api.update_object_set(
                     BulkUpdateReq(target_ids=res.object_ids, updates=updates)
