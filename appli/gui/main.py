@@ -50,14 +50,72 @@ def gui_logout():
         from appli import backend_url
         import requests
 
+        id_token = session.get("_id_token")
+        headers = {"X-Ecotaxa-Id-Token": id_token} if id_token else {}
         r = requests.get(
             backend_url + "/openid/logout",
             allow_redirects=False,
-            cookies={"id_token": session.get("_id_token")},
+            headers=headers,
         )
         if r.status_code in [302, 303, 307]:
             resp = redirect(r.headers["Location"])
+            # Propagate the oid_session cookie deletion
+            copy_cookies(r, resp)
         session.pop("_id_token")
+    return resp
+
+
+OPENID_RETRY_COOKIE = "oid_force_login"
+OPENID_RETRY_MAX_AGE = 600
+
+
+def _set_openid_retry_cookie(resp):
+    """Force a fresh provider login on the next attempt."""
+    resp.set_cookie(
+        OPENID_RETRY_COOKIE,
+        "1",
+        max_age=OPENID_RETRY_MAX_AGE,
+        httponly=True,
+        secure=bool(app.config.get("SESSION_COOKIE_SECURE", False)),
+        samesite="Lax",
+        path="/",
+    )
+    return resp
+
+
+def _openid_error_text(r) -> str:
+    """Extract a readable message from the backend's JSON error response."""
+    try:
+        payload = r.json()
+    except ValueError:
+        return r.text
+    detail = payload.get("detail") if isinstance(payload, dict) else None
+    if isinstance(detail, list):
+        return "; ".join(str(item) for item in detail)
+    if detail:
+        return str(detail)
+    return r.text
+
+
+def _openid_error_redirect(message: str):
+    """
+    Clear the local authentication traces but keep the error message.
+
+    The Flask session is cleared (OpenID ID token, Flask-Login keys, ...) before
+    flashing, so the message survives in the freshly written session cookie.
+    The provider SSO session cannot be deleted from here; the retry cookie makes
+    the next authorization request use prompt=login instead.
+    """
+    from flask_login import logout_user
+
+    session.clear()
+    # Also drops the Flask-Login "remember me" cookie on the response.
+    logout_user()
+    flash(message, "error")
+    resp = redirect(url_for("gui_login"))
+    resp.headers["Cache-Control"] = "no-store"
+    _set_openid_retry_cookie(resp)
+    resp.delete_cookie("oid_session", path="/")
     return resp
 
 
@@ -66,21 +124,23 @@ def openid_login():
     from appli import backend_url
     import requests
 
-    r = requests.get(
-        backend_url + "/openid/login", allow_redirects=False, cookies=request.cookies
+    force_login = (
+        request.args.get("force_login") == "1"
+        or request.cookies.get(OPENID_RETRY_COOKIE) == "1"
     )
+    login_url = backend_url + "/openid/login"
+    if force_login:
+        login_url += "?force_login=1"
+    r = requests.get(login_url, allow_redirects=False, cookies=request.cookies)
     # The backend should return a redirect to the OpenID provider
     if r.status_code in [302, 303, 307]:
         resp = redirect(r.headers["Location"])
         copy_cookies(r, resp)
+        if force_login:
+            resp.delete_cookie(OPENID_RETRY_COOKIE, path="/")
         return resp
-    else:
-        # If it's not a redirect, it's an error
-        flash("OpenID login error: " + r.text, "error")
-        resp = redirect(url_for("gui_login"))
-        resp.delete_cookie("session")
-        resp.delete_cookie("oid_session")
-        return resp
+    # If it's not a redirect, it's an error
+    return _openid_error_redirect("OpenID login error: " + _openid_error_text(r))
 
 
 @app.route("/openid/callback")
@@ -94,15 +154,17 @@ def openid_callback():
     if qs:
         url = url + "?" + qs
     r = requests.get(url, allow_redirects=False, cookies=request.cookies)
-    if r.status_code in [302, 303, 307, 200]:
-        if r.status_code != 200:  # If backend asks to redirect, follow it
-            location = r.headers.get("Location", HOMEPAGE)
-        else:
-            location = HOMEPAGE
+    if r.status_code in [302, 303, 307]:
+        location = r.headers.get("Location", HOMEPAGE)
         resp = redirect(location)
         copy_cookies(r, resp)
-        # Build flask cookie in session from auth information received from the backend
-        token = r.cookies.get("token")
+        # Credentials come in response headers, they are never put in the browser
+        # cookie jar.
+        token = r.headers.get("X-Ecotaxa-Token")
+        if not token:
+            return _openid_error_redirect(
+                "OpenID callback error: no authentication token"
+            )
         with ApiClient(UsersApi, token) as api:
             curr_user: UserModelWithRights = api.show_current_user()
         LOGIN_DURATION = timedelta(days=30)
@@ -112,16 +174,14 @@ def openid_callback():
             duration=LOGIN_DURATION,
         )
         # Add a marker that this session comes from OpenID
-        id_token = r.cookies.get("id_token")
-        session["_id_token"] = id_token
+        session["_id_token"] = r.headers.get("X-Ecotaxa-Id-Token")
+        resp.delete_cookie(OPENID_RETRY_COOKIE, path="/")
         return resp
 
     # Otherwise, surface error and go back to login
-    flash("OpenID callback error: " + r.text, "error")
-    resp = redirect(url_for("gui_login"))
-    resp.delete_cookie("session")
-    resp.delete_cookie("oid_session")
-    return resp
+    return _openid_error_redirect(
+        "OpenID callback error: " + _openid_error_text(r)
+    )
 
 
 def copy_cookies(from_rsp: Response, to_rsp: Response):
@@ -655,6 +715,8 @@ def utility_processor():
             if isinstance(messages, dict):
                 # build messages param for template {"type":,"content":,"date":,"dismissible":, duration:}
                 for key, message in messages.items():
+                    if not isinstance(message, dict):
+                        continue
                     name = key + cookiename
                     # homepage active message stays
                     delta = 10

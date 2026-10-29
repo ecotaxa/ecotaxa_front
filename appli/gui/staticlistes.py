@@ -190,6 +190,9 @@ py_user = dict(
             "emailchanged": _(
                 "You have changed your email address and need to verify this new address. A confirmation email has been sent to this new address. Click on the link therein to verify it. "
             ),
+            "pendingemail": _(
+                "You have been logged out. Until the new address is confirmed, you can log in again with your current email address. "
+            ),
         },
     }
 )

@@ -1,7 +1,8 @@
 /** @type {import('tailwindcss').Config} */
 const path = require("path");
 module.exports = {
-  content: ["./src/**/*.{html,js}", "../appli/static/gui/dist/**/*.js",
+  // not the build output (static/gui/dist): the CSS would depend on the previous build's minified JS
+  content: ["./src/**/*.{html,js}",
     "../appli/templates/v2/**/*.html"
   ],
   exclude: '/node-modules/',

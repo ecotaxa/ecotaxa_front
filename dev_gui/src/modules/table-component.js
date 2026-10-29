@@ -4,7 +4,6 @@ import {
  fetchSettings,
   download_url,
   string_to_boolean,
-  sort_items,
   is_object,
   html_spinner,
   generate_uuid,
@@ -490,10 +489,12 @@ export class TableComponent {
     if (!phantom) {
       phantom = document.createElement('div');
       phantom.className = 'virtual-scroll-phantom';
-      phantom.style.position = 'relative';
+      // pure height spacer: once the translated tbody overlaps it, it must not catch clicks on the rows' links
+      phantom.style.pointerEvents = 'none';
       wrapper.style.position = 'relative';
       wrapper.style.overflowY = 'auto';
-      wrapper.appendChild(phantom);
+      // in the table, not after it: the sticky thead can't leave the table, which must span the whole scroll height
+      this.dom.appendChild(phantom);
     }
 
     this._virtualScroll.enabled = true;
@@ -510,7 +511,8 @@ export class TableComponent {
     const renderVisibleRows = (scrollTop) => {
       const totalRows = this.getVisibleRowCount();
       const startIndex = Math.floor(scrollTop / rowHeight);
-      const visibleCount = Math.ceil(wrapper.clientHeight / rowHeight);
+      // not wrapper.clientHeight: the first render is done while the table (and the phantom in it) is still hidden
+      const visibleCount = visibleRows;
       const bufferStart = Math.max(0, startIndex - this._virtualScroll.bufferRows);
       const bufferEnd = Math.min(totalRows, startIndex + visibleCount + this._virtualScroll.bufferRows);
       if( bufferStart===lastStartIndex && bufferEnd===lastEndIndex) {rafid=null;return;}
@@ -1646,8 +1648,8 @@ initSort() {
         btn.querySelectorAll('span').forEach(span => {
           span.classList.toggle(tablecss.hidden);
         });
-        if (ishidden) container.style.height = h + 'px';
-        else container.style.height = 'auto';
+        if (ishidden) container.style.height = 'auto';
+        else container.style.height = h + 'px';
       }, 100);
       make_expand();
     });

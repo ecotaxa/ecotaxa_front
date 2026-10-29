@@ -1,11 +1,10 @@
-hyphenator
 # To ensure all is installed and only them:
 # (venv)$ pip freeze | xargs pip uninstall -y
 # (venv)$ pip install -r requirements.txt
 
 # Web
 Flask==3.1.2
-Werkzeug==3.1.2
+Werkzeug==3.1.9
 Flask-Babel==4.0.0
 Flask-Login==0.6.3
 # For json parsing in generated to_back/* code.

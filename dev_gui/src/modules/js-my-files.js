@@ -846,9 +846,11 @@ export class JsMyFiles {
     create_box('span', {
       text: `${scan.counter || 0} read / ${zip.counter || 0} compressed`
     }, foot);
-    create_box('span', {
+    const sizes = create_box('span', {
       text: `${format_bytes(scan.size || 0)} read / ${format_bytes(zip.size || 0)} compressed`
     }, foot);
+    // files read but not compressed yet: compression of a big file can take a while
+    if ((scan.counter || 0) > (zip.counter || 0)) sizes.insertAdjacentHTML('afterbegin', html_spinner('text-stone-500 mr-1 align-text-bottom inline-block', 'h-4 w-4'));
   }
 
   showBusy(btn, text) {

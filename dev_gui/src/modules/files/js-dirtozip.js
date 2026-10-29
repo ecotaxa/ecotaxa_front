@@ -7,12 +7,9 @@ import {
 } from '../../modules/utils.js';
 
 import {
-  AsyncGzip,
-  Zip,
-  AsyncZipDeflate,
-  ZipPassThrough,
-  ZipDeflate,
-} from 'fflate';
+  ZipWriter,
+  BlobReader,
+} from '@zip.js/zip.js';
 import {
   ModuleEventEmitter
 } from '../../modules/module-event-emitter.js';
@@ -25,17 +22,34 @@ const already_compressed = new Set([
   'mp4', 'mov', 'mp3', 'aifc'
 ]);
 const can_be_compressed = new Set(['tsv','txt','log','csv']);
-const accept = '.tsv,.png,.jpg, .jpeg,.zip,.gz,.7z,.bz2';
+const accept = '.tsv,.png,.jpg,.jpeg,.zip,.gz,.7z,.bz2';
+
+export function compressed_estimate(file) {
+  const ext = file.name.slice(file.name.lastIndexOf('.') + 1);
+  if (can_be_compressed.has(ext)) return Math.floor(file.size/2);
+  return file.size;
+}
+
+export function acceptFile(entry) {
+  const filepath = entry.name;
+  // whole extension, dot included, any case: '.ts' must not match '.tsv'
+  const ext = filepath.slice(filepath.lastIndexOf('.')).toLowerCase();
+  return accept.split(',').includes(ext);
+}
 
 export function JsDirToZip(options = {}) {
   const MAXSIZE = (document.querySelector('[data-max_upload_size]'))?parseInt(document.querySelector('[data-max_upload_size]').dataset['max_upload_size']):1073741824;//681574400;//681574400; // 650M //1073741824; //4294967296; //// 3221225472; // 2147483648;
   const UPLOADINPARTS = (document.querySelector('[data-uploadinparts]'))?true:false;
+  // translated messages from the template, {file} and {max} are replaced
+  const TOOLARGE = {
+    file: (document.querySelector('[data-toolargefile]')) ? document.querySelector('[data-toolargefile]').dataset['toolargefile'] : 'The file {file} is too large to upload (over {max}).',
+    archive: (document.querySelector('[data-toolargearchive]')) ? document.querySelector('[data-toolargearchive]').dataset['toolargearchive'] : 'The archive is too large to upload (over {max}). Remove some files, or add them in several separate uploads.'
+  };
   const eventnames = {
     ready: 'ready',
     follow: 'follow',
     complete: 'complete',
     endreaddir: 'endreaddir',
-    gzip: 'gzip',
     endzip: 'endzip',
     sendfile: 'sendfile',
     bigfile: 'bigfile',
@@ -128,11 +142,11 @@ const browser = detect();
       } else console.log('partly finished '+properties.hashandlers+ 'follow='+properties.follow, e);
     }, uuid);
     ModuleEventEmitter.on(eventnames.endzip, async(e) => {
-      // end() only once per archive: a second call fails with fflate "stream finishing"
+      // end() only once per archive
       if (!e.bigfile && properties.zip && !properties.zip.ending) {
         properties.zip.ending = true;
-        properties.zip.end();
         properties.closed = true;
+        await properties.zip.close();
       }
       const evtsend=async function() {
       const zipclosed = await listStorage(null,properties.zipname);
@@ -184,7 +198,6 @@ const browser = detect();
       zipname: null,
       filestream: null,
       streamhandle: null,
-      gzipped: null,
       sizetozip: 0,
       part: 0,
       follow: null,
@@ -207,8 +220,20 @@ const browser = detect();
      }
   }
   async function reset() {
+    await releaseArchive();
     properties = initProps();
     await initStorage();
+  }
+
+  // an archive still being written (e.g. stopped by a "too large" error) keeps an exclusive
+  // lock on its file: close it, so the file can be removed and its name reused
+  async function releaseArchive() {
+    if (properties.zip === null || properties.closed) return;
+    try {
+      await properties.zip.close();
+    } catch (err) {
+      if (properties.streamhandle) await properties.streamhandle.abort().catch(() => {});
+    }
   }
 
   function isActive() {
@@ -218,23 +243,7 @@ const browser = detect();
   async function initZip() {
     properties.pos = 0;
     properties.sizetozip = 0;
-    properties.zip = new Zip((error, chunk, final) => {
-      if (error) {
-        onError(eventnames.errorfile, {
-                message: error}, _listener);
-        return false;
-      } else {
-        properties.streamhandle.write(chunk, {
-          at: self.pos
-        });
-        properties.pos += chunk.length;
-        if (final) {
-          properties.streamhandle.close();
-        }
-      }
-    });
-    // hack for memory usage
-    zipOnData();
+    properties.zip = new ZipWriter(properties.streamhandle, { zip64: true });
     if (properties.follow) await properties.follow();
   }
 
@@ -259,18 +268,6 @@ const browser = detect();
         // reading finished with nothing left to zip (e.g. every dropped file
         // was rejected) - release the batch so more can be added
         emitEndZip(e);
-      }
-    }
-  }
-
-  function zipOnData(zip = null) {
-    zip = (zip === null) ? properties.zip : zip;
-    const ondata = zip.ondata;
-    zip.ondata = (error, data, final) => {
-      ondata(error, data, final);
-      if (final) {
-        zip.d = null;
-        if (zip.u && zip.u.at(-1)) zip.u.at(-1).d = null; // Object created in `zip.add()`
       }
     }
   }
@@ -425,11 +422,6 @@ const browser = detect();
     }, uuid);
   }
 
-  function addHandler(handler) {
-    properties.handlers.push(handler);
-    properties.hashandlers= (properties.handlers.length>0)
-  }
-
   async function execHandler() {
     // serie
     if (properties.hashandlers) {
@@ -439,140 +431,41 @@ const browser = detect();
     }
     return;
   }
-    async function gzipBigFile(file, filepath) {
-    let dt = Date.now();
-    filepath = (filepath.indexOf(dirseparator) === 0) ? filepath.slice(1) : filepath;
-    const parts = filepath.split(dirseparator);
-    parts.pop();
-    const sendpath = uploadpath + dirseparator +parts.join(dirseparator);
-    const ext = file.name.slice(file.name.lastIndexOf('.') + 1);
-    if (already_compressed.has(ext)) {
-       ModuleEventEmitter.emit(eventnames.counter, {
-        name: 'zip',
-        path: filepath,
-        bigfile:file.name,
-        size: file.size
-      }, uuid);
-      addHandler(async () => {
-        await sendChunk(sendpath,file);
-      });
-    } else {
-      let zipname = file.name + '.gz';
-      const {
-        filestream,
-        streamhandle
-      } = await createLocalStream(zipname, {
-        'application/gzip': ['.gz'],
-      });
-      let pos = 0;
-
-      const gzipped = new AsyncGzip({
-        level: 6,
-        filename: filepath
-      });
-      gzipped.ondata = (err, data, final) => {
-       if(pos > MAXSIZE)  {
-                properties.counter.error+=1;
-              onError(AlertBox.alertconfig.types.error, {
-
-                name:AlertBox.alertconfig.types.error,
-                bigfile:file.name,
-                path:filepath,
-                message:'File '+file.name+' size exceeds maxsize. Cannot be sent in chunks for the moment.'}, _listener);
-          streamhandle.close();gzipped.ondata= (err, data, final) => {}; return endProcess();
-          }
-        if (err) {
-            properties.counter.error+=1;
-          onError(AlertBox.alertconfig.types.error, {
-            name:AlertBox.alertconfig.types.error,
-            bigfile: file.name,
-            path: filepath,
-            size: file.size,
-            message: 'Error compressing file '+ file.name +' '+err
-          });
-        } else {
-          streamhandle.write(data, {
-            at: pos
-          });
-          pos += data.length;
-          if (final) {
-            streamhandle.close();
-                 filepath+='.gz';
-                ModuleEventEmitter.emit(eventnames.counter, {
-              name: 'zip',
-              path: filepath,
-              size: file.size,
-              bigfile:file.name
-            }, uuid);
-
-         addHandler(async () => {
-         await sendChunk(sendpath,filestream);
-            });
-          }
-        }
-      };
-      const count = false;
-      await readFile(file, filepath, gzipped, count);
-    }
-  }
   async function partZip() {
     properties.part += 1;
     ModuleEventEmitter.emit(eventnames.complete, {
-     name: eventnames.endzip,
+      name: eventnames.endzip,
       part: properties.part
     }, _listener);
   }
-  async function readFile(file, filepath, zippedstream, count = true, done = null) {
-    const reader = file.stream().getReader();
-    let pause = false;
-    /*  onBackpressure(zippedstream, this.streamhandle, should_apply_backpressure => {
-        if (should_apply_backpressure) pause = true;
-        else if (pause) pause = false;
-      });*/
-    while (true) {
-      const {
-        done,
-        value
-      } = await reader.read();
-      if (done) {
-        zippedstream.push(new Uint8Array(0), true);
-        if (done) await done;
-        if (count === true) ModuleEventEmitter.emit(eventnames.counter, {
-          name: 'zip',
-          path: filepath,
-          size: (zippedstream.size) ? zippedstream.size : file.size
-        }, uuid);
-        break;
-      }
-      zippedstream.push(value);
-    }
-  }
 
   async function zipStream(file, filepath) {
-    const ext = filepath.slice(filepath.lastIndexOf('.') + 1);
+    const relativePath = (filepath.indexOf(dirseparator) === 0) ? filepath.slice(1) : filepath;
+    const ext = relativePath.slice(relativePath.lastIndexOf('.') + 1).toLowerCase();
     const iscompressed = already_compressed.has(ext);
-    const zippedstream = (iscompressed) ? new ZipPassThrough(filepath) : file.size > options.largefile ?
-      new AsyncZipDeflate(filepath, {
-        level: 6,
-      }) : new ZipDeflate(filepath, {
-        level: 6
+    const level = iscompressed ? 0 : 6;
+    try {
+      // stored entries (level 0) only need a crc32: a web worker would just add copy overhead per file
+      await properties.zip.add(relativePath, new BlobReader(file), {
+        level,
+        zip64: true,
+        bufferedWrite: false,
+        useWebWorkers: !iscompressed
       });
-      properties.zip.add(zippedstream);
-    // the file is zipped once its last compressed chunk is out, which comes
-    // later than the last push for AsyncZipDeflate (compresses in a worker)
-    const zipped = new Promise((resolve) => {
-      const ondata = zippedstream.ondata;
-      zippedstream.ondata = (err, dat, final) => {
-        ondata(err, dat, final);
-        if (err || final) resolve();
-      };
-    });
-    await readFile(file, filepath, zippedstream, true, zipped);
-  }
-  function compressed_estimate(file) {
-    const ext = file.name.slice(file.name.lastIndexOf('.') + 1);
-    if (can_be_compressed.has(ext)) return Math.floor(file.size/2);
-    return file.size;
+      ModuleEventEmitter.emit(eventnames.counter, {
+        name: 'zip',
+        path: filepath,
+        size: file.size
+      }, uuid);
+    } catch (err) {
+      properties.counter.error += 1;
+      onError(eventnames.errorfile, {
+        name: eventnames.error,
+        path: filepath,
+        message: 'Error zipping file ' + file.name + ': ' + ((err && err.message) ? err.message : err)
+      }, _listener);
+      endProcess(true);
+    }
   }
   async function addFileToZipStream(file, filepath, count = true) {
     if (count === true) ModuleEventEmitter.emit(eventnames.counter, {
@@ -585,10 +478,15 @@ const browser = detect();
     // check file size > max post size
     const compressed_size = compressed_estimate(file);
     if (compressed_size >= MAXSIZE ) {
-    // to prevent errors and uncomplete zip send error
-      properties.counter.error+=1;
-      if(UPLOADINPARTS) gzipBigFile(file, filepath);
-      else endProcess();
+      // a single file over the server limit can't be sent
+      const message = TOOLARGE.file.replace('{file}', filepath).replace('{max}', format_bytes(MAXSIZE));
+      properties.counter.error += 1;
+      onError(eventnames.errorfile, {
+        name: eventnames.error,
+        path: filepath,
+        message: message,
+      }, _listener);
+      return endProcess(true);
     } else {
       // check zip file size > total zip size
       properties.sizetozip += compressed_size;
@@ -600,11 +498,12 @@ const browser = detect();
         partZip();
         } else {
           // the archive being built is over the server limit: alert and stop
+          const message = TOOLARGE.archive.replace('{max}', format_bytes(MAXSIZE));
           properties.counter.error += 1;
           onError(eventnames.errorfile, {
             name: eventnames.error,
             path: filepath,
-            message: `The archive is too large to upload (over ${format_bytes(MAXSIZE)}). Remove some files, or add them in several separate uploads.`,
+            message: message,
           }, _listener);
           return endProcess(true);
         }
@@ -612,12 +511,6 @@ const browser = detect();
         await zipStream(file, filepath);
       }
     }
-  }
-
-  function acceptFile(entry) {
-    const filepath = entry.name;
-    const ext = filepath.slice(filepath.lastIndexOf('.') + 1);
-    return accept.includes(ext);
   }
 
   function rejectFile(file, callback = null) {
@@ -705,31 +598,6 @@ async function listStorage(entry = null,name=null) {
     if (!properties.hashandlers) {message.name = eventnames.terminate;ModuleEventEmitter.emit(eventnames.complete, message, _listener);}
   }
 
-  async function sendChunk(path,gzipped, start = 0, chunknum = 0, chunksize = MAXSIZE) {
-    const ext = gzipped.name.slice(gzipped.name.lastIndexOf('.') + 1);
-    const file = (already_compressed.has(ext))?gzipped:await gzipped.getFile();
-    const end = Math.min(start + chunksize, file.size);
-    if (end === file.size) {
-    path=path.replace(file.name,'');
-     sendZipFile(file, path, null, true);
-    } else {
-        properties.counter.error+=1;
-    onError(eventnames.errorfile, {
-          name: eventnames.error,
-          message:'File '+path+dirseparator+file.name+' size exceeds capacity. Chunk functionality not supported for the moment.'
-        }, _listener);
-    return endProcess() ;
-    // for the moment ecotaxaback does not support chunks
-      const partfile = file.slice(start, end);
-      partfile.name = chunknum + '_' + file.name;
-      await sendZipFile(partfile, path, async () => {
-        start += end;
-        chunknum++;
-        if (start <= file.size) await sendChunk(path, gzipped,start, chunknum, chunksize);
-      }, true)
-    }
-    return chunknum;
-  }
   async function getFile(filestream = null) {
     filestream = (filestream === null) ? properties.filestream : filestream;
     const file = await filestream.getFile();

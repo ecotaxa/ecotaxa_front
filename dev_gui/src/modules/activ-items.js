@@ -8,10 +8,6 @@ import {
   css
 } from '../modules/modules-config.js';
 import {
-  get_catcha_reponse,
-  decode_HTMLEntities,fetchSettings
-} from '../modules/utils.js';
-import {
   export_html2word
 } from '../modules/export-html2word.js';
 const localcss = {
@@ -228,8 +224,8 @@ function createActivItems() {
                     document.querySelectorAll(domselectors.component.tomselect.line).forEach(line=> {
                     const auto = line.querySelector('[data-'+resetaction.dataset.reset+']') ;
                     if (auto!==null && auto.dataset.auto!=='') {
-                    const values = auto.dataset.auto.split('|'); // id, display_name, lineage, id_lineage
-                    const obj= {id:values[0],display_name:values[1],lineage:values[2],id_lineage:values[3]};
+                    const values = auto.dataset.auto.split('|'); // id, display_name, lineage, id_lineage, status
+                    const obj= {id:values[0],display_name:values[1],lineage:values[2],id_lineage:values[3],status:values[4]};
                     line.querySelectorAll('['+target+']').forEach(el=> {
                     if (el.tomselect.items.length>0  && values[0]!=el.tomselect.items[0]) {
                        let opt =el.tomselect.getOption(values[0]);

@@ -245,16 +245,40 @@ def gui_prj_merge(projid):
                             source_project_id=source_proj.projid,
                             dry_run=False,
                         )
-                    return render_template(
-                        "/v2/project/merge.html",
-                        target_proj=target_proj,
-                        processstep="end",
-                    )
+                    for an_error in _rsp.errors:
+                        flash(an_error, "error")
+                    if len(_rsp.errors) == 0:
+                        return render_template(
+                            "/v2/project/merge.html",
+                            target_proj=target_proj,
+                            processstep="end",
+                        )
+                    flash(_("Pick another source project."), "info")
+                    excludeprjs.append(source_proj.projid)
             except ApiException as ae:
                 if ae.status == 404:
                     flash(_("Source project doesn't exist"), "warning")
                 elif ae.status in (401, 403):
                     flash(_("You cannot merge from this project"), "error")
+                    excludeprjs.append(srcprojid)
+                else:
+                    from flask import current_app
+                    from appli.gui.commontools import format_exception
+
+                    current_app.logger.error(
+                        "project_merge failed (%s) - target=%s source=%s - body=%s",
+                        ae.reason,
+                        target_proj.projid,
+                        srcprojid,
+                        ae.body,
+                    )
+                    try:
+                        message = format_exception(ae)[1]
+                    except (ValueError, TypeError):
+                        message = None
+                    if not message:
+                        message = "%s - %s" % (ae.status, ae.reason)
+                    flash(message, "error")
                     excludeprjs.append(srcprojid)
 
     # Fetch the potential merge sources
@@ -526,6 +550,9 @@ def _get_field_list(prj_model: ProjectModel) -> list:
 
     excluded = set()
     for k in ObjectHeaderModel.openapi_types.keys():
+        # Back-end ignores classification columns in updates, since 2024-03-01, use reclassify/classify instead
+        if k.startswith("classif_"):
+            continue
         # TODO: Hardcoded, not rename-friendly
         if k not in ("objid",):
             fieldlist.append({"id": "h" + k, "text": "object." + k})
@@ -605,9 +632,6 @@ def gui_prj_edit_datamass(projid):
         updates = [{"ucol": field, "uval": new_value}]
         if tablecode in ("h", "f"):
             # Object update
-            if field == "classif_id":
-                updates.append({"ucol": "classif_when", "uval": "current_timestamp"})
-                updates.append({"ucol": "classif_who", "uval": str(current_user.id)})
             try:
                 with ApiClient(ObjectsApi, request) as api:
                     nb_rows = api.update_object_set(

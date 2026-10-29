@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-24 11:15+0200\n"
+"POT-Creation-Date: 2026-10-27 10:53+0100\n"
 "PO-Revision-Date: 2022-11-23 10:53+0100\n"
 "Last-Translator: \n"
 "Language: zh\n"
@@ -277,7 +277,7 @@ msgid "Job"
 msgstr ""
 
 #: appli/gui/project/projects_list_interface_json.py:466
-#: appli/gui/staticlistes.py:42 appli/gui/staticlistes.py:197
+#: appli/gui/staticlistes.py:42 appli/gui/staticlistes.py:203
 #: appli/templates/v2/jobs/listall.html:61 appli/templates/v2/jobs/show.html:87
 #: appli/templates/v2/jobs/show.html:104
 #: appli/templates/v2/partials/_collection_nav.html:24
@@ -340,7 +340,7 @@ msgstr "至少需要一名人员具有管理权限和联系方式  "
 msgid "privilege is missing"
 msgstr "权限缺失"
 
-#: appli/gui/staticlistes.py:75 appli/gui/staticlistes.py:142
+#: appli/gui/staticlistes.py:75 appli/gui/staticlistes.py:145
 #, fuzzy
 msgid "Not authorized"
 msgstr "注释"
@@ -389,7 +389,7 @@ msgid "The page does not exists."
 msgstr "页面不存在。"
 
 #: appli/gui/jobs/staticlistes.py:15 appli/gui/staticlistes.py:92
-#: appli/gui/staticlistes.py:180
+#: appli/gui/staticlistes.py:183
 msgid "Access denied "
 msgstr ""
 
@@ -442,235 +442,247 @@ msgid ""
 "correct a mistake."
 msgstr "改变与项目相关的仪器可能会以各种方式影响EcoTaxa的行为，除非纠正错误，否则不应这样做。"
 
-#: appli/gui/staticlistes.py:107
+#: appli/gui/staticlistes.py:108
+msgid ""
+"The instrument has changed, please select a deep feature extractor fit "
+"for this instrument."
+msgstr ""
+
+#: appli/gui/staticlistes.py:110
 msgid "Error in project creation"
 msgstr "创建项目中出错"
 
-#: appli/gui/staticlistes.py:108
+#: appli/gui/staticlistes.py:111
 msgid "SCN features erased"
 msgstr "SCN特性删除"
 
-#: appli/gui/staticlistes.py:110
+#: appli/gui/staticlistes.py:113
 msgid "Member already registered with differents privileges "
 msgstr "会员已使用不同权限注册 "
 
-#: appli/gui/staticlistes.py:112
+#: appli/gui/staticlistes.py:115
 msgid "Privileges are not set for member "
 msgstr "未为会员设置权限 "
 
-#: appli/gui/staticlistes.py:113
+#: appli/gui/staticlistes.py:116
 msgid "Error member to be added is no more in users list "
 msgstr "要添加的错误会员已不在用户列表中 "
 
-#: appli/gui/staticlistes.py:115
+#: appli/gui/staticlistes.py:118
 msgid ""
 "A contact person needs to be designated among the current project "
 "managers. "
 msgstr "需要在当前的项目管理人中指定一个联系人。 "
 
-#: appli/gui/staticlistes.py:117
+#: appli/gui/staticlistes.py:120
 msgid "At least one manager is needed"
 msgstr "至少需要一个管理人员"
 
-#: appli/gui/staticlistes.py:118
+#: appli/gui/staticlistes.py:121
 msgid "Update problem: "
 msgstr "更新问题： "
 
-#: appli/gui/staticlistes.py:119
+#: appli/gui/staticlistes.py:122
 #, fuzzy
 msgid "Project created"
 msgstr "项目更新"
 
-#: appli/gui/staticlistes.py:120
+#: appli/gui/staticlistes.py:123
 msgid "Project updated"
 msgstr "项目更新"
 
-#: appli/gui/staticlistes.py:121
+#: appli/gui/staticlistes.py:124
 msgid "Privileges where not imported correctly."
 msgstr "没有正确导入权限。"
 
-#: appli/gui/staticlistes.py:122
+#: appli/gui/staticlistes.py:125
 #: appli/templates/v2/partials/_alert_message.html:13
 msgid "view full message"
 msgstr ""
 
-#: appli/gui/staticlistes.py:124 appli/gui/staticlistes.py:216
+#: appli/gui/staticlistes.py:127 appli/gui/staticlistes.py:222
 #: appli/templates/v2/macros/macros.html:94
 msgid "IMPORTANT :"
 msgstr "重要提示："
 
-#: appli/gui/staticlistes.py:125 appli/gui/staticlistes.py:217
+#: appli/gui/staticlistes.py:128 appli/gui/staticlistes.py:223
 #: appli/templates/v2/macros/macros.html:94
 msgid "WARNING:"
 msgstr ""
 
-#: appli/gui/staticlistes.py:126 appli/gui/staticlistes.py:218
+#: appli/gui/staticlistes.py:129 appli/gui/staticlistes.py:224
 #: appli/templates/v2/macros/macros.html:94
 msgid "INFORMATION:"
 msgstr "信息："
 
-#: appli/gui/staticlistes.py:127 appli/gui/staticlistes.py:219
+#: appli/gui/staticlistes.py:130 appli/gui/staticlistes.py:225
 #: appli/templates/v2/macros/macros.html:94
 msgid "SUCCESS:"
 msgstr "成功："
 
-#: appli/gui/staticlistes.py:128 appli/gui/staticlistes.py:220
+#: appli/gui/staticlistes.py:131 appli/gui/staticlistes.py:226
 #: appli/templates/v2/macros/macros.html:94
 msgid "ERROR:"
 msgstr "错误："
 
-#: appli/gui/staticlistes.py:129 appli/templates/v2/macros/macros.html:94
+#: appli/gui/staticlistes.py:132 appli/templates/v2/macros/macros.html:94
 msgid "MAINTENANCE"
 msgstr ""
 
-#: appli/gui/staticlistes.py:131
+#: appli/gui/staticlistes.py:134
 msgid "User not found"
 msgstr ""
 
-#: appli/gui/staticlistes.py:136
+#: appli/gui/staticlistes.py:139
 msgid "Invalid credentials"
 msgstr ""
 
-#: appli/gui/staticlistes.py:137
+#: appli/gui/staticlistes.py:140
 msgid "Data are not valid"
 msgstr ""
 
-#: appli/gui/staticlistes.py:138
+#: appli/gui/staticlistes.py:141
 msgid "Not an administrator"
 msgstr ""
 
-#: appli/gui/staticlistes.py:139
+#: appli/gui/staticlistes.py:142
 msgid "Not found"
 msgstr ""
 
-#: appli/gui/staticlistes.py:140
+#: appli/gui/staticlistes.py:143
 #, fuzzy
 msgid "User exists"
 msgstr "无用户列表"
 
-#: appli/gui/staticlistes.py:141
+#: appli/gui/staticlistes.py:144
 msgid "Service is not active"
 msgstr ""
 
-#: appli/gui/staticlistes.py:144
+#: appli/gui/staticlistes.py:147
 #: appli/templates/v2/security/_reply_register.html:14
 msgid ""
 "Please, check spam and junk mails if you can't find this email in your "
 "inbox."
 msgstr ""
 
-#: appli/gui/staticlistes.py:146
+#: appli/gui/staticlistes.py:149
 #, fuzzy
 msgid "Token is not valid"
 msgstr "需要一个标题"
 
-#: appli/gui/staticlistes.py:147
+#: appli/gui/staticlistes.py:150
 msgid "Signature expired"
 msgstr ""
 
-#: appli/gui/staticlistes.py:155
+#: appli/gui/staticlistes.py:158
 #, fuzzy
 msgid "Account created"
 msgstr "项目更新"
 
-#: appli/gui/staticlistes.py:156
+#: appli/gui/staticlistes.py:159
 #, fuzzy
 msgid "Account updated"
 msgstr "项目更新"
 
-#: appli/gui/staticlistes.py:157
+#: appli/gui/staticlistes.py:160
 msgid "Thank you for the confirmation. You can log in."
 msgstr ""
 
-#: appli/gui/staticlistes.py:160
+#: appli/gui/staticlistes.py:163
 msgid ""
 " A confirmation email has been sent to the email address provided. Click "
 "on the link therein to verify it."
 msgstr ""
 
-#: appli/gui/staticlistes.py:163
+#: appli/gui/staticlistes.py:166
 msgid "Account not created"
 msgstr ""
 
-#: appli/gui/staticlistes.py:164
+#: appli/gui/staticlistes.py:167
 #, fuzzy
 msgid "Account not updated"
 msgstr "项目更新"
 
-#: appli/gui/staticlistes.py:165
+#: appli/gui/staticlistes.py:168
 msgid "Account not activated."
 msgstr ""
 
-#: appli/gui/staticlistes.py:167
+#: appli/gui/staticlistes.py:170
 msgid "Confirmation email  not sent."
 msgstr ""
 
-#: appli/gui/staticlistes.py:168
+#: appli/gui/staticlistes.py:171
 #, fuzzy
 msgid "Wrong user id"
 msgstr "无用户列表"
 
-#: appli/gui/staticlistes.py:169
+#: appli/gui/staticlistes.py:172
 msgid "No action specified"
 msgstr ""
 
-#: appli/gui/staticlistes.py:170
+#: appli/gui/staticlistes.py:173
 #, fuzzy
 msgid "Password required"
 msgstr "需要一个标题"
 
-#: appli/gui/staticlistes.py:172
+#: appli/gui/staticlistes.py:175
 msgid ""
 "An activation request has been sent to the administrator. You will "
 "receive instructions to modify your email which is no longer accepted."
 msgstr ""
 
-#: appli/gui/staticlistes.py:175
+#: appli/gui/staticlistes.py:178
 msgid ""
 "The password must be : - minimum length 8 - 1 or more numeric - 1 or more"
 " uppercase - 1 or more lowercase - 1 or more  "
 msgstr ""
 
-#: appli/gui/staticlistes.py:177
+#: appli/gui/staticlistes.py:180
 msgid "Status value error"
 msgstr ""
 
-#: appli/gui/staticlistes.py:179
+#: appli/gui/staticlistes.py:182
 msgid "Please modify your personal data as requested before by email."
 msgstr ""
 
-#: appli/gui/staticlistes.py:181
+#: appli/gui/staticlistes.py:184
 #, fuzzy
 msgid "Account desactivated."
 msgstr "项目更新"
 
-#: appli/gui/staticlistes.py:182
+#: appli/gui/staticlistes.py:185
 msgid "Account desactivated. Could be waiting for email confirmation."
 msgstr ""
 
-#: appli/gui/staticlistes.py:184
+#: appli/gui/staticlistes.py:187
 msgid ""
 "Account waiting for validation. We will verify your informations and "
 "activate your account. You will be informed by email of any issue."
 msgstr ""
 
-#: appli/gui/staticlistes.py:186
+#: appli/gui/staticlistes.py:189
 msgid "Account is waiting for mail confirmation."
 msgstr ""
 
-#: appli/gui/staticlistes.py:188
+#: appli/gui/staticlistes.py:191
 msgid ""
 "You have changed your email address and need to verify this new address. "
 "A confirmation email has been sent to this new address. Click on the link"
 " therein to verify it. "
 msgstr ""
 
-#: appli/gui/staticlistes.py:195
+#: appli/gui/staticlistes.py:194
+msgid ""
+"You have been logged out. Until the new address is confirmed, you can log"
+" in again with your current email address. "
+msgstr ""
+
+#: appli/gui/staticlistes.py:201
 msgid "Manage"
 msgstr ""
 
 #: appli/gui/project/projects_list_interface_json.py:465
-#: appli/gui/staticlistes.py:196 appli/gui/staticlistes.py:209
+#: appli/gui/staticlistes.py:202 appli/gui/staticlistes.py:215
 #: appli/templates/v2/collection/_settings_aggregated.html:24
 #: appli/templates/v2/partials/_collection_nav.html:24
 #: appli/templates/v2/partials/_project_nav.html:30
@@ -678,53 +690,53 @@ msgstr ""
 msgid "Annotate"
 msgstr "注释"
 
-#: appli/gui/staticlistes.py:202
+#: appli/gui/staticlistes.py:208
 msgid "Manager"
 msgstr ""
 
-#: appli/gui/staticlistes.py:203
+#: appli/gui/staticlistes.py:209
 #, fuzzy
 msgid "Annotator"
 msgstr "注释"
 
-#: appli/gui/staticlistes.py:204
+#: appli/gui/staticlistes.py:210
 msgid "Viewer"
 msgstr ""
 
-#: appli/gui/staticlistes.py:210
+#: appli/gui/staticlistes.py:216
 #: appli/templates/v2/collection/_settings_aggregated.html:24
 #: appli/templates/v2/project/projectsettings.html:46
 msgid "Explore Only"
 msgstr "仅检索"
 
-#: appli/gui/staticlistes.py:211
+#: appli/gui/staticlistes.py:217
 #: appli/templates/v2/collection/_settings_aggregated.html:24
 #: appli/templates/v2/project/projectsettings.html:46
 msgid "Annotate No Prediction"
 msgstr "注释没有预测"
 
-#: appli/gui/staticlistes.py:221 appli/templates/v2/partials/_alertbox.html:5
+#: appli/gui/staticlistes.py:227 appli/templates/v2/partials/_alertbox.html:5
 msgid "Close"
 msgstr "关闭"
 
-#: appli/gui/staticlistes.py:222 appli/templates/v2/admin/activate.html:17
+#: appli/gui/staticlistes.py:228 appli/templates/v2/admin/activate.html:17
 #: appli/templates/v2/admin/messages.html:22
 #: appli/templates/v2/collection/erase.html:19
 #: appli/templates/v2/collection/settings.html:106
 #: appli/templates/v2/guests/_guest.html:47
-#: appli/templates/v2/jobs/export.html:78
+#: appli/templates/v2/jobs/export.html:82
 #: appli/templates/v2/jobs/import.html:103
 #: appli/templates/v2/jobs/subset_create.html:47
-#: appli/templates/v2/organizations/_organization.html:14
+#: appli/templates/v2/organizations/_organization.html:21
 #: appli/templates/v2/partials/_alertbox.html:16
 #: appli/templates/v2/project/merge.html:50
-#: appli/templates/v2/project/projectsettings.html:135
+#: appli/templates/v2/project/projectsettings.html:136
 #: appli/templates/v2/project/purge.html:27
-#: appli/templates/v2/users/_user.html:100
+#: appli/templates/v2/users/_user.html:101
 msgid "Cancel"
 msgstr "取消"
 
-#: appli/gui/staticlistes.py:223 appli/templates/v2/partials/_alertbox.html:16
+#: appli/gui/staticlistes.py:229 appli/templates/v2/partials/_alertbox.html:16
 msgid "Ok"
 msgstr "Ok"
 
@@ -820,10 +832,11 @@ msgstr ""
 #: appli/templates/v2/collection/macros.html:10
 #: appli/templates/v2/guests/_guest.html:18
 #: appli/templates/v2/guests/_guest.html:19
-#: appli/templates/v2/organizations/_organization.html:6
-#: appli/templates/v2/organizations/_organization.html:7
+#: appli/templates/v2/organizations/_organization.html:9
+#: appli/templates/v2/organizations/_organization.html:11
+#: appli/templates/v2/organizations/_organization.html:13
 #: appli/templates/v2/project/macros.html:35
-#: appli/templates/v2/project/projectsettings.html:94
+#: appli/templates/v2/project/projectsettings.html:95
 #: appli/templates/v2/taxonomy/browse.html:33
 #: appli/templates/v2/users/_user.html:53
 #: appli/templates/v2/users/_user.html:54
@@ -845,7 +858,7 @@ msgstr "电子邮件"
 #: appli/gui/admin/users_list_interface_json.py:82
 #: appli/templates/v2/admin/activate.html:11
 #: appli/templates/v2/guests/_guest.html:34
-#: appli/templates/v2/users/_user.html:74
+#: appli/templates/v2/users/_user.html:75
 msgid "Organisation"
 msgstr ""
 
@@ -862,7 +875,7 @@ msgstr ""
 #: appli/gui/admin/users_list_interface_json.py:85
 #: appli/templates/v2/admin/activate.html:11
 #: appli/templates/v2/guests/_guest.html:35
-#: appli/templates/v2/users/_user.html:75
+#: appli/templates/v2/users/_user.html:76
 msgid "Country"
 msgstr ""
 
@@ -920,7 +933,7 @@ msgstr "标题"
 #: appli/templates/v2/collection/about.html:10
 #: appli/templates/v2/help/_help_projectsettings.html:67
 #: appli/templates/v2/project/macros.html:44
-#: appli/templates/v2/project/projectsettings.html:96
+#: appli/templates/v2/project/projectsettings.html:97
 msgid "Contact"
 msgstr "联系"
 
@@ -1108,7 +1121,7 @@ msgstr ""
 #: appli/templates/v2/help/_help_job_export.html:30
 #: appli/templates/v2/help/_help_job_export.html:47
 #: appli/templates/v2/help/_help_projectsettings.html:74
-#: appli/templates/v2/project/projectsettings.html:122
+#: appli/templates/v2/project/projectsettings.html:123
 msgid "Formulae"
 msgstr ""
 
@@ -1335,33 +1348,33 @@ msgstr ""
 msgid "Import from a folder or zip file on the server"
 msgstr ""
 
-#: appli/gui/project/main.py:237
+#: appli/gui/project/main.py:237 appli/gui/project/main.py:256
 #, fuzzy
 msgid "Pick another source project."
 msgstr "新项目"
 
-#: appli/gui/project/main.py:255 appli/gui/project/staticlistes.py:8
+#: appli/gui/project/main.py:260 appli/gui/project/staticlistes.py:8
 #, fuzzy
 msgid "Source project doesn't exist"
 msgstr "项目不存在"
 
-#: appli/gui/project/main.py:257 appli/gui/project/staticlistes.py:7
+#: appli/gui/project/main.py:262 appli/gui/project/staticlistes.py:7
 #, fuzzy
 msgid "You cannot merge from this project"
 msgstr "您不能编辑此项目的设置"
 
-#: appli/gui/project/main.py:282
+#: appli/gui/project/main.py:306
 msgid ""
 "Project status is Explore Only. You cannot do mass annotation edition on "
 "this project"
 msgstr ""
 
-#: appli/gui/project/main.py:397
+#: appli/gui/project/main.py:421
 msgid "You must select at least one category to do the replacement"
 msgstr ""
 
-#: appli/gui/project/main.py:479 appli/gui/project/main.py:574
-#: appli/gui/project/main.py:708
+#: appli/gui/project/main.py:503 appli/gui/project/main.py:598
+#: appli/gui/project/main.py:732
 msgid "Project status is Explore Only. You cannot do this action on this project"
 msgstr ""
 
@@ -1396,7 +1409,7 @@ msgstr "米"
 #: appli/templates/v2/collection/_settings_aggregated.html:33
 #: appli/templates/v2/help/_help_projectsettings.html:53
 #: appli/templates/v2/project/_fullstats.html:73
-#: appli/templates/v2/project/projectsettings.html:59
+#: appli/templates/v2/project/projectsettings.html:60
 msgid "Access"
 msgstr ""
 
@@ -1945,7 +1958,7 @@ msgid ""
 "Google Analytics will keep information during 26 Months."
 msgstr ""
 
-#: appli/templates/v2/privacy.html:137 appli/templates/v2/users/_user.html:91
+#: appli/templates/v2/privacy.html:137 appli/templates/v2/users/_user.html:92
 msgid "Security"
 msgstr ""
 
@@ -1998,7 +2011,7 @@ msgstr ""
 #: appli/templates/v2/register.html:26
 #: appli/templates/v2/security/activate.html:13
 #: appli/templates/v2/users/_user.html:13
-#: appli/templates/v2/users/_user.html:83
+#: appli/templates/v2/users/_user.html:84
 #, fuzzy
 msgid "a password is required"
 msgstr "需要一个标题"
@@ -2007,7 +2020,7 @@ msgstr "需要一个标题"
 #: appli/templates/v2/security/activate.html:13
 #: appli/templates/v2/users/_user.html:12
 #: appli/templates/v2/users/_user.html:13
-#: appli/templates/v2/users/_user.html:83
+#: appli/templates/v2/users/_user.html:84
 #, fuzzy
 msgid "Password"
 msgstr "忘记密码？"
@@ -2067,6 +2080,11 @@ msgstr "创建一个项目"
 msgid "Create a guest"
 msgstr "创建一个项目"
 
+#: appli/templates/v2/admin/_personslistcontainer.html:5
+#, fuzzy
+msgid "Create an organization"
+msgstr "选取一个分类"
+
 #: appli/templates/v2/admin/_personslistcontainer.html:10
 #, fuzzy
 msgid "List all "
@@ -2098,7 +2116,7 @@ msgstr "剖面"
 #: appli/templates/v2/guests/_guest.html:2
 #: appli/templates/v2/guests/_guest.html:14
 #: appli/templates/v2/jobs/_import_form.html:7
-#: appli/templates/v2/organizations/_organization.html:1
+#: appli/templates/v2/organizations/_organization.html:2
 #: appli/templates/v2/project/projectsettings.html:12
 #: appli/templates/v2/users/_user.html:22
 #: appli/templates/v2/users/_user.html:38
@@ -2109,7 +2127,7 @@ msgstr "此字段必填"
 #: appli/templates/v2/collection/settings.html:9
 #: appli/templates/v2/guests/_guest.html:2
 #: appli/templates/v2/jobs/_import_form.html:7
-#: appli/templates/v2/organizations/_organization.html:1
+#: appli/templates/v2/organizations/_organization.html:2
 #: appli/templates/v2/project/projectsettings.html:12
 #: appli/templates/v2/users/_user.html:22
 msgid "this field is invalid"
@@ -2122,7 +2140,7 @@ msgstr ""
 
 #: appli/templates/v2/admin/activate.html:11
 #: appli/templates/v2/help/_help_user_profile.html:9
-#: appli/templates/v2/users/_user.html:77
+#: appli/templates/v2/users/_user.html:78
 msgid "Planned usage of EcoTaxa"
 msgstr ""
 
@@ -2130,14 +2148,14 @@ msgstr ""
 #: appli/templates/v2/admin/messages.html:22
 #: appli/templates/v2/collection/settings.html:106
 #: appli/templates/v2/guests/_guest.html:47
-#: appli/templates/v2/organizations/_organization.html:14
-#: appli/templates/v2/project/projectsettings.html:135
-#: appli/templates/v2/users/_user.html:100
+#: appli/templates/v2/organizations/_organization.html:21
+#: appli/templates/v2/project/projectsettings.html:136
+#: appli/templates/v2/users/_user.html:101
 msgid "Save"
 msgstr "保存"
 
 #: appli/templates/v2/admin/activate.html:17
-#: appli/templates/v2/users/_user.html:100
+#: appli/templates/v2/users/_user.html:101
 #, fuzzy
 msgid "Cancel, back to users list"
 msgstr "取消，返回项目 "
@@ -2258,12 +2276,12 @@ msgstr ""
 #: appli/templates/v2/collection/_settings_aggregated.html:5
 #: appli/templates/v2/help/_help_projectsettings.html:32
 #: appli/templates/v2/project/_stats.html:42
-#: appli/templates/v2/project/projectsettings.html:72
+#: appli/templates/v2/project/projectsettings.html:73
 msgid "Definition of preset for manual sorting"
 msgstr "手动排序的预设定义"
 
 #: appli/templates/v2/collection/_settings_aggregated.html:15
-#: appli/templates/v2/project/projectsettings.html:84
+#: appli/templates/v2/project/projectsettings.html:85
 msgid "Fields available for sorting & Display In the manual classification page"
 msgstr ""
 
@@ -2278,18 +2296,18 @@ msgstr "深度特征提取器"
 #: appli/templates/v2/collection/_settings_aggregated.html:50
 #: appli/templates/v2/project/_fullstats.html:82
 #: appli/templates/v2/project/macros.html:37
-#: appli/templates/v2/project/projectsettings.html:95
+#: appli/templates/v2/project/projectsettings.html:96
 msgid "Privilege"
 msgstr "权限"
 
 #: appli/templates/v2/collection/_settings_aggregated.html:76
-#: appli/templates/v2/project/projectsettings.html:119
+#: appli/templates/v2/project/projectsettings.html:120
 msgid "New privilege"
 msgstr "新的权限"
 
 #: appli/templates/v2/collection/_settings_aggregated.html:78
 #: appli/templates/v2/help/_help_projectsettings.html:76
-#: appli/templates/v2/project/projectsettings.html:127
+#: appli/templates/v2/project/projectsettings.html:128
 msgid "Mapping"
 msgstr ""
 
@@ -2414,6 +2432,12 @@ msgstr ""
 msgid "Digital Object Identifier"
 msgstr ""
 
+#: appli/templates/v2/collection/settings.html:28
+msgid ""
+"Once the DOI is set, the title and the short title cannot be modified "
+"anymore."
+msgstr ""
+
 #: appli/templates/v2/collection/settings.html:31
 msgid "select a provider user"
 msgstr ""
@@ -2491,7 +2515,7 @@ msgid "Last name"
 msgstr "名称"
 
 #: appli/templates/v2/guests/_guest.html:19
-#: appli/templates/v2/organizations/_organization.html:7
+#: appli/templates/v2/organizations/_organization.html:13
 #: appli/templates/v2/users/_user.html:54
 #, fuzzy
 msgid "a name is required"
@@ -2510,12 +2534,12 @@ msgid "ORCID"
 msgstr ""
 
 #: appli/templates/v2/guests/_guest.html:41
-#: appli/templates/v2/users/_user.html:94
+#: appli/templates/v2/users/_user.html:95
 msgid "Account info"
 msgstr ""
 
 #: appli/templates/v2/guests/_guest.html:47
-#: appli/templates/v2/organizations/_organization.html:14
+#: appli/templates/v2/organizations/_organization.html:21
 #, fuzzy
 msgid "Cancel, back to guests list"
 msgstr "取消，返回项目 "
@@ -3709,7 +3733,7 @@ msgid ""
 msgstr ""
 
 #: appli/templates/v2/help/_help_projectsettings.html:16
-#: appli/templates/v2/project/projectsettings.html:82
+#: appli/templates/v2/project/projectsettings.html:83
 #, fuzzy
 msgid "Pick sorting fields from other projects"
 msgstr "从其他项目中选择权限"
@@ -3720,7 +3744,7 @@ msgid "Replace sorting fields by sorting fields of another project."
 msgstr "从其他项目中选择权限"
 
 #: appli/templates/v2/help/_help_projectsettings.html:17
-#: appli/templates/v2/project/projectsettings.html:91
+#: appli/templates/v2/project/projectsettings.html:92
 msgid "Pick privileges from other projects"
 msgstr "从其他项目中选择权限"
 
@@ -3817,7 +3841,7 @@ msgstr ""
 
 #: appli/templates/v2/help/_help_projectsettings.html:56
 #: appli/templates/v2/project/_stats.html:25
-#: appli/templates/v2/project/projectsettings.html:90
+#: appli/templates/v2/project/projectsettings.html:91
 #, fuzzy
 msgid "Privileges"
 msgstr "权限"
@@ -4205,7 +4229,22 @@ msgstr "从其他项目中选择预设"
 msgid "How to export data"
 msgstr "如何准备数据"
 
-#: appli/templates/v2/jobs/export.html:77
+#: appli/templates/v2/jobs/export.html:68
+msgid "You are exporting data with objects sorted in temporary classes."
+msgstr ""
+
+#: appli/templates/v2/jobs/export.html:69
+msgid ""
+"We encourage you to move these objects into existing taxonomic categories"
+" if you can find their name or to create a new category, with a name "
+"describing its morphology (e.g. 'elongated dark'), branch it as deep as "
+"possible in the taxonomy, and move the objects there. This will ensure "
+"better consistency of datasets in the long run and will help even you "
+"when, in a few months, you cannot remember what t001 was looking like "
+"compared to t002."
+msgstr ""
+
+#: appli/templates/v2/jobs/export.html:81
 #: appli/templates/v2/jobs/import.html:53
 #: appli/templates/v2/jobs/import.html:103
 #: appli/templates/v2/jobs/subset_create.html:47
@@ -4678,6 +4717,18 @@ msgid "Drop Files or Folders"
 msgstr ""
 
 #: appli/templates/v2/my_files/_list.html:5
+#, python-brace-format
+msgid "The file {file} is too large to upload (over {max})."
+msgstr ""
+
+#: appli/templates/v2/my_files/_list.html:5
+#, python-brace-format
+msgid ""
+"The archive is too large to upload (over {max}). Remove some files, or "
+"add them in several separate uploads."
+msgstr ""
+
+#: appli/templates/v2/my_files/_list.html:5
 msgid "Browse local directories"
 msgstr ""
 
@@ -4691,8 +4742,14 @@ msgstr "剖面"
 msgid "My remote Files"
 msgstr "剖面"
 
-#: appli/templates/v2/organizations/_organization.html:9
-#: appli/templates/v2/organizations/_organization.html:10
+#: appli/templates/v2/organizations/_organization.html:7
+msgid ""
+"Only the first matches are listed: if your organization is not there, "
+"type more of its name to narrow the search."
+msgstr ""
+
+#: appli/templates/v2/organizations/_organization.html:16
+#: appli/templates/v2/organizations/_organization.html:17
 msgid "EDMO ID"
 msgstr ""
 
@@ -4809,8 +4866,8 @@ msgstr "如何创建项目"
 #: appli/templates/v2/project/_formulae.html:24
 #: appli/templates/v2/project/_formulae.html:28
 #: appli/templates/v2/project/projectsettings.html:31
-#: appli/templates/v2/project/projectsettings.html:59
-#: appli/templates/v2/project/projectsettings.html:128
+#: appli/templates/v2/project/projectsettings.html:60
+#: appli/templates/v2/project/projectsettings.html:129
 msgid "new"
 msgstr ""
 
@@ -5651,28 +5708,36 @@ msgstr "项目"
 msgid "new project"
 msgstr "新项目"
 
-#: appli/templates/v2/project/projectsettings.html:68
+#: appli/templates/v2/project/projectsettings.html:52
+msgid "Suggested for"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:52
+msgid "Other networks"
+msgstr ""
+
+#: appli/templates/v2/project/projectsettings.html:69
 msgid "Taxonomy"
 msgstr "分类法"
 
-#: appli/templates/v2/project/projectsettings.html:70
+#: appli/templates/v2/project/projectsettings.html:71
 msgid "Pick taxonomy from other projects"
 msgstr "从其他项目中选择分类法"
 
-#: appli/templates/v2/project/projectsettings.html:73
+#: appli/templates/v2/project/projectsettings.html:74
 msgid "select a category"
 msgstr "选取一个分类"
 
-#: appli/templates/v2/project/projectsettings.html:81
+#: appli/templates/v2/project/projectsettings.html:82
 msgid "Sorting tools"
 msgstr ""
 
-#: appli/templates/v2/project/projectsettings.html:123
+#: appli/templates/v2/project/projectsettings.html:124
 #, fuzzy
 msgid "Pick formulae from other projects"
 msgstr "从其他项目中选择权限"
 
-#: appli/templates/v2/project/projectsettings.html:135
+#: appli/templates/v2/project/projectsettings.html:136
 msgid "Cancel, back to project "
 msgstr "取消，返回项目 "
 
@@ -6130,11 +6195,11 @@ msgid ""
 "planned usage of EcoTaxa"
 msgstr ""
 
-#: appli/templates/v2/users/_user.html:78
+#: appli/templates/v2/users/_user.html:79
 msgid "A few sentences describing how in which context you will use EcoTaxa"
 msgstr ""
 
-#: appli/templates/v2/users/_user.html:82
+#: appli/templates/v2/users/_user.html:83
 #, fuzzy
 msgid "Your password"
 msgstr "忘记密码？"

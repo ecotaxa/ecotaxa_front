@@ -1,4 +1,4 @@
-import treecss from "../css/js-tree.css";
+import "../css/js-tree.css";
 import {
   dom_purify,
   fetchSettings,
@@ -17,7 +17,6 @@ import {
 import {
   entryTypes,
   entryOptions,
-  eventEntry,
   Entry,
   EntryControls,
   MultiEntryControls

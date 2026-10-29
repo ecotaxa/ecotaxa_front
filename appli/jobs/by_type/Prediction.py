@@ -200,10 +200,10 @@ class PredictionJob(Job):
 
         # Check a bit
         errors = []
-        if len(obj_vars) == 0 and use_scn is False:
-            errors.append("You must select some variable")
+        if len(obj_vars) <= 1:  # Comply with API minimum
+            errors.append("You must select some variables")
         if len(categories) == 0:
-            errors.append("You must select some category")
+            errors.append("You must select some categories")
 
         # Use the API entry point for querying the impacted objects. At this point we just need
         # to know if it's != 0

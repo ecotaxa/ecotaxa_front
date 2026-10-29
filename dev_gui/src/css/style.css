@@ -981,6 +981,12 @@ ul.lineage-list > li {@apply before:inline before:content-['<'] before:mx-1 befo
 #tip-inline {@apply absolute z-10  w-full h-auto shadow-inner bg-stone-100 p-4 mt-4 text-stone-700 block px-4 py-2 left-0 overflow-hidden }
 #tip-inline.hide {@apply max-h-0 hidden relative}
 .button-expand {@apply w-auto mx-auto text-center block border-stone-200 border-dotted  p-1 mb-1 text-stone-700}
+/* expandable table (makeExpandable inserts .button-expand after it): sticky header.
+   collapsed (overflow-y-hidden): it sticks in .table-wrapper, where the rows scroll;
+   all rows: no scroll container up to the page (clip, not hidden/auto), it sticks to the page.
+   [class~=…] and not .overflow-y-hidden: tailwind copies a rule naming a class for each rule that @applies this class */
+.js-datatable:has(+ .button-expand) .table-table thead {@apply sticky top-0 z-20}
+.js-datatable:has(+ .button-expand):not([class~="overflow-y-hidden"]), .js-datatable:has(+ .button-expand):not([class~="overflow-y-hidden"]) .table-wrapper {@apply overflow-x-clip overflow-y-visible}
 .max-tabstat-h {@apply  md:max-h-[500px]}
 .button-export {@apply float-right}
 .short-stats {@apply overflow-hidden}

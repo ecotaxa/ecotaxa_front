@@ -466,9 +466,18 @@ def user_account(
                             message = (
                                 message + " " + py_user["statusnotauthorized"]["00"]
                             )
-                    else:
-                        # should not comme here
-                        pass
+                    elif api_user["email"] != currentemail and not current_user.is_admin:
+                        # the new email replaces the current one once confirmed, the user is disconnected until then
+                        from flask_login import logout_user
+
+                        logout_user()
+                        message = (
+                            message
+                            + " "
+                            + py_user["statusnotauthorized"]["emailchanged"]
+                            + py_user["statusnotauthorized"]["pendingemail"]
+                            + py_user["checkspam"]
+                        )
             return make_person_response(0, message)
     elif action == ACCOUNT_USER_CREATE:
         if usrid != -1:

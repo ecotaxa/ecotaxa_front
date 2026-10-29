@@ -4,8 +4,7 @@ import {
 } from '../modules/modules-config.js';
 import {
   unescape_html,
-  fetchSettings,
-  exec_handlers
+  fetchSettings
 } from '../modules/utils.js';
 
 

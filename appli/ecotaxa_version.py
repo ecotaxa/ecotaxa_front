@@ -1,3 +1,3 @@
-ecotaxa_version = dict({"version": "3.3.3", "date": "2026-10-14"})
+ecotaxa_version = dict({"version": "3.3.5", "date": "2026-10-24"})
 
 
