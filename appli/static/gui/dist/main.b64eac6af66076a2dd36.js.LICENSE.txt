@@ -20,6 +20,8 @@
 
 /*! ../modules/js-import.js */
 
+/*! ../modules/js-map.js */
+
 /*! ../modules/js-my-files.js */
 
 /*! ../modules/js-tabs.js */
