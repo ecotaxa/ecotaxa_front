@@ -111,7 +111,6 @@ from to_back.ecotaxa_cli_py.models.prediction_info_rsp import PredictionInfoRsp
 from to_back.ecotaxa_cli_py.models.prediction_req import PredictionReq
 from to_back.ecotaxa_cli_py.models.prediction_rsp import PredictionRsp
 from to_back.ecotaxa_cli_py.models.process_model import ProcessModel
-from to_back.ecotaxa_cli_py.models.project_columns_model import ProjectColumnsModel
 from to_back.ecotaxa_cli_py.models.project_filters import ProjectFilters
 from to_back.ecotaxa_cli_py.models.project_filters_dict import ProjectFiltersDict
 from to_back.ecotaxa_cli_py.models.project_model import ProjectModel

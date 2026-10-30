@@ -10,7 +10,6 @@ from to_back.ecotaxa_cli_py.api import ProjectsApi, ObjectsApi
 from to_back.ecotaxa_cli_py.models import (
     ProjectModel,
     MergeRsp,
-    ProjectColumnsModel,
     ProjectUserStatsModel,
 )
 
@@ -805,21 +804,3 @@ def gui_deprecation_management(projid):
             advised_targets=advised_targets,
             community_targets=community_targets,
         )
-
-
-#######################Project set##########################################
-@app.route("/gui/projectset/projects", methods=["GET"])
-# TODO - fresh_login_required
-def gui_projectset_projects():
-    ids = gvg("project_ids")
-    py_messages = py_get_messages("project")
-    with ApiClient(ProjectsApi, request) as api:
-        try:
-            prjs: List[ProjectColumnsModel] = api.project_set_get_projects(ids)
-            ret = [prj.to_dict() for prj in prjs]
-            return make_response(json.dumps(ret))
-        except ApiException as ae:
-            if ae.status in (401, 403):
-                err = py_messages["projectnotyours"]
-            else:
-                raise
