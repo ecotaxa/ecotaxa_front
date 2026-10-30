@@ -469,6 +469,10 @@ a.contact[data-contact] {@apply  text-secondblue-800 hover:bg-secondblue-100 hov
 .pageup {@apply bottom-16}
 /*tooltips */
 [data-title]:hover:after , [data-title]:active:after, .tooltip {@apply  absolute top-0 -mt-6 -ml-6  whitespace-nowrap w-auto left-0 block z-[999999999] content-[attr(data-title)] rounded font-sans tracking-normal text-xs font-light bg-info-900 rounded text-stone-50 px-2 py-0.5 drop-shadow;}
+/* map colors, read by js-map.js when the map is created; the sea goes from ocean (shore) to ocean-deep (10000m) */
+.js-map {--map-ocean:#dbeafe;--map-ocean-deep:#3b82f6;--map-land:#e7e5e4;--map-border:#a8a29e;--map-graticule:rgba(87,83,78,0.35);--map-sample:theme('colors.danger.500');--map-sample-stroke:#ffffff;--map-selected:theme('colors.danger.800')}
+.js-map .ol-mouse-position {@apply top-2 right-2 px-2 py-0.5 rounded shadow-sm bg-white/90 text-stone-800 font-mono text-xs whitespace-pre pointer-events-none}
+.js-map .ol-mouse-position:empty {@apply hidden}
 }
 @layer utilities {
  /**********************************************/

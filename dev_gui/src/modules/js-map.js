@@ -11,12 +11,40 @@ const PROJ4_URL = 'https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.22.0/proj4.m
 // land and countries of Natural Earth, as vectors so that they can be drawn in any projection
 const WORLD_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-50m.json';
 const WORLD_ATTRIBUTION = '© <a href="https://www.naturalearthdata.com">Natural Earth</a>';
+// depth steps of Natural Earth 10m bathymetry (200m to 10000m, planar lon/lat), made from ne_10m_bathymetry_all.zip with
+// mapshaper -i ne_10m_bathymetry_[A-K]_*.shp combine-files -merge-layers force name=bathymetry -filter-fields depth
+//   -simplify 3% keep-shapes -filter-slivers -dissolve depth -o bathymetry.json format=topojson quantization=100000
+const BATHY_URL = '/static/map/bathymetry.json';
+const MAX_DEPTH = 10000;
+// default colors, the map ones are the --map-* css variables of the map element
 const COLORS = {
   ocean: '#dbeafe',
+  'ocean-deep': '#3b82f6',
   land: '#e7e5e4',
   border: '#a8a29e',
-  graticule: 'rgba(87,83,78,0.35)'
+  graticule: 'rgba(87,83,78,0.35)',
+  // danger colors of the theme
+  // opaque: a translucent red turns muddy over the blue sea
+  sample: '#d35643',
+  'sample-stroke': '#ffffff',
+  selected: '#661f18'
 };
+
+function map_colors(item) {
+  const style = getComputedStyle(item);
+  const colors = {};
+  Object.entries(COLORS).forEach(([name, color]) => {
+    colors[name] = style.getPropertyValue('--map-' + name).trim() || color;
+  });
+  return colors;
+}
+
+// color between c1 and c2, t from 0 to 1
+function mix(ol, c1, c2, t) {
+  const a = ol.color.asArray(c1);
+  const b = ol.color.asArray(c2);
+  return a.map((v, i) => (i < 3 ? Math.round(v + (b[i] - v) * t) : v + (b[i] - v) * t));
+}
 // round polar maps, from the pole down to the edge latitude
 const POLAR = {
   north: {
@@ -77,17 +105,18 @@ async function load_polar(ol) {
   });
 }
 
-function load_world() {
-  if (!loadings[WORLD_URL]) {
-    loadings[WORLD_URL] = fetch(WORLD_URL).then(response => {
+// null if not available, the map is displayed without it
+function load_json(url) {
+  if (!loadings[url]) {
+    loadings[url] = fetch(url).then(response => {
       if (!response.ok) throw new Error(response.statusText);
       return response.json();
     }).catch(err => {
-      delete loadings[WORLD_URL];
+      delete loadings[url];
       return null;
     });
   }
-  return loadings[WORLD_URL];
+  return loadings[url];
 }
 
 // world-atlas polygons are spherical (d3-geo): rings cross the antimeridian and Antarctica goes around the pole.
@@ -208,6 +237,36 @@ function world_source(ol, world, projection, polar = null) {
   return source;
 }
 
+// depth steps, in lon/lat
+let bathy_features = null;
+
+// one feature by depth step, the step polygons cover the deeper ones
+function bathy_source(ol, bathy, projection, polar = null) {
+  const source = new ol.source.Vector();
+  if (!bathy) return source;
+  if (!bathy_features) bathy_features = new ol.format.TopoJSON().readFeatures(bathy);
+  let inside = () => true;
+  let cut = 0;
+  if (polar) {
+    cut = polar.edge + (polar.edge > 0 ? -5 : 5);
+    inside = polar.edge > 0 ? (p) => p[1] >= cut : (p) => p[1] <= cut;
+  }
+  // unlike world-atlas, the rings are planar: cut along the antimeridian, closed through the poles
+  source.addFeatures(bathy_features.map(feature => {
+    const geometry = feature.getGeometry();
+    const coords = geometry.getType() === 'Polygon' ? [geometry.getCoordinates()] : geometry.getCoordinates();
+    const polygons = [];
+    coords.forEach(polygon => {
+      const clipped = polar ? polygon.map(ring => clip_ring(ring, inside, cut)) : polygon;
+      if (clipped.length && clipped[0]) polygons.push(clipped.filter(ring => ring));
+    });
+    const step = new ol.Feature(new ol.geom.MultiPolygon(polygons).transform('EPSG:4326', projection));
+    step.set('depth', feature.get('depth'));
+    return step;
+  }));
+  return source;
+}
+
 // the sea under the land: the whole world, or the polar disk
 function ocean_source(ol, polar) {
   const geometry = polar ? new ol.geom.Circle([0, 0], polar.radius) : ol.geom.Polygon.fromExtent(ol.proj.get('EPSG:3857').getExtent());
@@ -249,23 +308,40 @@ async function JsMap(item) {
     return;
   }
   const samples = new ol.source.Vector();
-  const world = load_world();
+  const world = load_json(WORLD_URL);
+  const bathy_data = load_json(BATHY_URL);
+  const colors = map_colors(item);
   const ocean = new ol.layer.Vector({
     source: ocean_source(ol, null),
     style: new ol.style.Style({
       fill: new ol.style.Fill({
-        color: COLORS.ocean
+        color: colors.ocean
       })
     })
   });
+  // style by depth step
+  const bathy_styles = {};
+  const bathy = new ol.layer.Vector({
+    source: new ol.source.Vector(),
+    renderOrder: (a, b) => a.get('depth') - b.get('depth'),
+    style: (feature) => {
+      const depth = feature.get('depth');
+      if (!bathy_styles[depth]) bathy_styles[depth] = new ol.style.Style({
+        fill: new ol.style.Fill({
+          color: mix(ol, colors.ocean, colors['ocean-deep'], Math.min(depth / MAX_DEPTH, 1))
+        })
+      });
+      return bathy_styles[depth];
+    }
+  });
   const land_style = new ol.style.Style({
     fill: new ol.style.Fill({
-      color: COLORS.land
+      color: colors.land
     })
   });
   const border_style = new ol.style.Style({
     stroke: new ol.style.Stroke({
-      color: COLORS.border,
+      color: colors.border,
       width: 0.5
     })
   });
@@ -275,7 +351,7 @@ async function JsMap(item) {
   });
   const graticule = new ol.layer.Graticule({
     strokeStyle: new ol.style.Stroke({
-      color: COLORS.graticule,
+      color: colors.graticule,
       width: 0.5,
       lineDash: [2, 4]
     }),
@@ -285,18 +361,22 @@ async function JsMap(item) {
     target: item,
     layers: [
       ocean,
+      bathy,
       land,
       graticule,
       new ol.layer.Vector({
         source: samples,
+        // the points overlap a lot: outlined
         style: new ol.style.Style({
-          image: new ol.style.Icon({
-            anchor: [0.5, 0.5],
-            size: [40, 40],
-            offset: [52, 0],
-            opacity: 1,
-            scale: 0.19,
-            src: '/static/dots.png'
+          image: new ol.style.Circle({
+            radius: 3.5,
+            fill: new ol.style.Fill({
+              color: colors.sample
+            }),
+            stroke: new ol.style.Stroke({
+              color: colors['sample-stroke'],
+              width: 0.75
+            })
           })
         })
       })
@@ -306,8 +386,10 @@ async function JsMap(item) {
         collapsible: false
       }
     }).extend([new ol.control.MousePosition({
-      coordinateFormat: ol.coordinate.createStringXY(4),
-      projection: 'EPSG:4326'
+      coordinateFormat: (coord) => ol.coordinate.format(coord, 'lat {y}°  lon {x}°', 4),
+      projection: 'EPSG:4326',
+      // emptied, so hidden, when the mouse leaves the map
+      placeholder: ''
     })]),
     view: new ol.View({
       center: [0, 47],
@@ -320,11 +402,12 @@ async function JsMap(item) {
   const disk = {
     radius: null
   };
+  clip_to_disk(ol, map, bathy, disk);
   clip_to_disk(ol, map, land, disk);
   clip_to_disk(ol, map, graticule, disk);
   // redraws the selected samples, after a change of projection
   let refresh_selection = () => {};
-  if (item.dataset.projects) refresh_selection = select_samples(ol, map, samples, item);
+  if (item.dataset.projects) refresh_selection = select_samples(ol, map, samples, item, colors.selected);
   else popover(ol, map, item);
   let data = [];
   try {
@@ -342,6 +425,8 @@ async function JsMap(item) {
   // without the world data, the samples are displayed on the sea only
   const world_data = await world;
   land.setSource(world_source(ol, world_data, 'EPSG:3857'));
+  const bathy_json = await bathy_data;
+  bathy.setSource(bathy_source(ol, bathy_json, 'EPSG:3857'));
   // once loaded, the whole world width fills the map width
   function fit_width() {
     if (!item.dataset.fitwidth) return;
@@ -352,19 +437,21 @@ async function JsMap(item) {
   fit_width();
   if (item.dataset.views) views_switch(ol, map, {
     ocean: ocean,
+    bathy: bathy,
     land: land
-  }, world_data, disk, samples, item, fit_width, refresh_selection);
+  }, world_data, bathy_json, disk, samples, item, fit_width, refresh_selection);
   map.getViewport().classList.remove('opacity-50');
   loading.remove();
 }
 
 // world or polar views, the samples are displayed in the projection of the view
 // polar views are round, from the pole to the edge latitude
-function views_switch(ol, map, layers, world_data, disk, samples, item, fit_width, refresh_selection) {
-  // ocean and land sources by view, the land features are read once for each projection
+function views_switch(ol, map, layers, world_data, bathy_json, disk, samples, item, fit_width, refresh_selection) {
+  // ocean, depth and land sources by view, the features are read once for each projection
   const sources = {
     world: {
       ocean: layers.ocean.getSource(),
+      bathy: layers.bathy.getSource(),
       land: layers.land.getSource()
     }
   };
@@ -391,12 +478,14 @@ function views_switch(ol, map, layers, world_data, disk, samples, item, fit_widt
       projection = polar.code;
       if (!sources[name]) sources[name] = {
         ocean: ocean_source(ol, polar),
+        bathy: bathy_source(ol, bathy_json, projection, polar),
         land: world_source(ol, world_data, projection, polar)
       };
     }
     control.querySelectorAll('button').forEach(btn => active(btn, btn === button));
     disk.radius = polar ? polar.radius : null;
     layers.ocean.setSource(sources[name].ocean);
+    layers.bathy.setSource(sources[name].bathy);
     layers.land.setSource(sources[name].land);
     const disk_extent = polar ? [-polar.radius, -polar.radius, polar.radius, polar.radius] : undefined;
     map.setView(new ol.View({
@@ -454,7 +543,7 @@ function popover(ol, map, item) {
 
 // the projects of the clicked samples are displayed in the target element,
 // shift+click adds or removes samples, ctrl+drag selects the samples in a box, a box close button deselects its samples
-function select_samples(ol, map, samples, item) {
+function select_samples(ol, map, samples, item, color) {
   const target = document.getElementById(item.dataset.target);
   const selected = new ol.source.Vector();
   map.addLayer(new ol.layer.Vector({
@@ -463,11 +552,11 @@ function select_samples(ol, map, samples, item) {
       image: new ol.style.Circle({
         radius: 5,
         fill: new ol.style.Fill({
-          color: '#dc2626'
+          color: color
         }),
         stroke: new ol.style.Stroke({
           color: '#ffffff',
-          width: 1
+          width: 1.5
         })
       })
     })
