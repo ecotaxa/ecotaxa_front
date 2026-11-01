@@ -1,26 +1,23 @@
 # -*- coding: utf-8 -*-
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
-# Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
+# Copyright (C) 2015-2026  Picheral, Colin, Irisson (UPMC-CNRS)
+#
+# Development server launcher
 
 
-import logging.handlers
-import sys
+import logging
 
 from appli import app
+from logging_conf import setup_logging
 
 if __name__ == "__main__":
-    # app.debug = True
-    handler = logging.StreamHandler()
-    # handler = logging.handlers.RotatingFileHandler('MyAppli.log', maxBytes=1000000, backupCount=1)
-    # handler = logging.FileHandler('MyAppli.log')
-    handler.setLevel(logging.INFO)
-    LoggingFormat = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    handler.setFormatter(logging.Formatter(LoggingFormat))
-    app.logger.addHandler(handler)
+    setup_logging(app)
+    werkzeug_logger = logging.getLogger('werkzeug')
+    werkzeug_logger.setLevel(logging.CRITICAL)  # Basically turn off Werkzeug logging
     app.logger.info("EcoTaxa (dev) Startup")
     import ssl
 
-    context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+    # context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
     context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
     context.load_cert_chain("localhost+3.pem", "localhost+3-key.pem")
     context.verify_mode = ssl.CERT_OPTIONAL

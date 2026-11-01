@@ -1,8 +1,8 @@
 #
-# Utility defs not depending on the Flask app.
+# Utility defs not depending (too much...) on the Flask app.
 #
 import urllib.parse
-from typing import Type, TypeVar, Generic, Union, Dict, List, Optional, Tuple
+from typing import Type, TypeVar, Generic, Union, Dict, List, Optional, Tuple, Any
 
 from flask import Request, request
 from flask_login import current_user
@@ -57,6 +57,7 @@ class ApiClient(Generic[A]):
     def __init__(self, api_class: Type[A], token: Union[str, LocalProxy, Request]):
         api_client = _ApiClient()
         booster.boost(api_client)
+        self._piggyback_call_api(api_client)
         if isinstance(token, LocalProxy):
             token = token.cookies.get("session")  # type: ignore
         api_client.configuration.access_token = token
@@ -66,6 +67,40 @@ class ApiClient(Generic[A]):
         api_client.configuration.host = backend_url
         # Call constructor on base class
         self.under: A = api_class(api_client)
+
+    @classmethod
+    def _piggyback_call_api(cls, api_client: _ApiClient) -> None:
+        # Don't accumulate, just in case
+        if getattr(api_client, "_is_piggybacked", False):
+            return
+
+        orig_call_api = api_client.call_api
+        from appli import app
+
+        def call_api_piggybacked(resource_path: str, method: str, *args: Any, **kwargs: Any) -> Any:
+            try:
+                res = orig_call_api(resource_path, method, *args, **kwargs)
+                status: int | None = (
+                    res[1] if isinstance(res, tuple) and len(res) >= 2
+                    else getattr(res, "status", getattr(res, "status_code", None))
+                )
+                if status and 400 <= status <= 599:
+                    app.logger.warning("API call %s %s returned %d", method, resource_path, status)
+                return res
+            except ApiException as ae:
+                status = ae.status
+                if status and 400 <= int(status) <= 599:
+                    app.logger.warning(
+                        "API call %s %s returned %s: %s",
+                        method,
+                        resource_path,
+                        status,
+                        ae.reason or ae.body,
+                    )
+                raise
+
+        api_client.call_api = call_api_piggybacked  # type: ignore
+        api_client._is_piggybacked = True
 
     def __enter__(self) -> A:
         return self.under

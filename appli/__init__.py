@@ -10,6 +10,15 @@ import traceback
 import urllib.parse
 from logging import INFO, WARNING
 from typing import List, Optional
+import flask
+# Replace the flash function with our own version that logs errors
+_original_flash = flask.flash
+def _augmented_flash(message: str, category: str = "message") -> None:
+    if category == "error":
+        user_info = f" | U:{current_user.id}" if getattr(current_user, "is_authenticated", False) else ""
+        app.logger.error(f"in UI: {message}{user_info}")
+    _original_flash(message, category)
+flask.flash = _augmented_flash
 from flask import Flask, render_template, request, g
 from flask_login import current_user, LoginManager
 
