@@ -6,6 +6,7 @@ from typing import Type, TypeVar, Generic, Union, Dict, List, Optional, Tuple, A
 
 from flask import Request, request
 from flask_login import current_user
+from urllib3.response import HTTPResponse
 from werkzeug.local import LocalProxy
 
 from to_back import booster
@@ -15,7 +16,6 @@ from to_back.ecotaxa_cli_py import (
     ApiException,
     MinUserModel,
 )
-from to_back.ecotaxa_cli_py.models.access_level_enum import AccessLevelEnum
 from to_back.ecotaxa_cli_py.api import (
     AuthentificationApi,
     ProjectsApi,
@@ -31,6 +31,8 @@ from to_back.ecotaxa_cli_py.api import (
     JobsApi,
     AdminApi,
 )
+from to_back.ecotaxa_cli_py.models.access_level_enum import AccessLevelEnum
+from to_back.ecotaxa_cli_py.rest import RESTResponse
 
 # Lol, generics in python
 A = TypeVar(
@@ -80,10 +82,11 @@ class ApiClient(Generic[A]):
         def call_api_piggybacked(resource_path: str, method: str, *args: Any, **kwargs: Any) -> Any:
             try:
                 res = orig_call_api(resource_path, method, *args, **kwargs)
-                status: int | None = (
-                    res[1] if isinstance(res, tuple) and len(res) >= 2
-                    else getattr(res, "status", getattr(res, "status_code", None))
-                )
+                status: int | None = None
+                if isinstance(res, tuple) and len(res) >= 2 and isinstance(res[1], int):
+                    status = res[1]
+                elif isinstance(res, (RESTResponse, HTTPResponse)):
+                    status = res.status
                 if status and 400 <= status <= 599:
                     app.logger.warning("API call %s %s returned %d", method, resource_path, status)
                 return res
