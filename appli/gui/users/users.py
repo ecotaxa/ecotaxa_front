@@ -1,6 +1,7 @@
 from flask import request, render_template, flash, redirect, url_for, Response, jsonify
 from werkzeug.exceptions import NotFound, Forbidden, UnprocessableEntity
-from typing import Union, Optional, List, Dict
+from typing import Union, Optional, List, Dict, Any
+from werkzeug.wrappers import Response as BaseResponse
 from flask_login import current_user
 from appli import app, gvp, gvpm, constants
 from appli.utils import ApiClient
@@ -83,7 +84,9 @@ def make_person_response(
         return code, message, person
 
 
-def user_register(token: str = None, partial: bool = False) -> str:
+def user_register(
+    token: Optional[str] = None, partial: bool = False
+) -> Union[str, tuple, BaseResponse]:
     if token is None and current_user.is_authenticated:
         raise UnprocessableEntity()
     recaptchaid = None
@@ -180,14 +183,14 @@ def _verify_pending_user_throw(_id: int, email: str):
 
 def user_create(
     usrid: int, isfrom: bool = False, token: Optional[str] = None, partial: bool = False
-) -> Union[str, tuple, Response]:
+) -> Union[str, tuple, BaseResponse]:
     action = ACCOUNT_USER_CREATE
     posted = {}
     if token is not None:
         token = token.strip()
         if token == "":
             token = None
-    resp = []
+    resp: tuple = ()
     if usrid == -1:
         age = SHORT_TOKEN_AGE
     else:
@@ -310,7 +313,11 @@ def api_user_create(posted: dict, token: Optional[str] = None) -> tuple:
 
 
 def api_user_activate(
-    user_id: int, status: int, token: str = None, reason: str = None, bot: bool = False
+    user_id: int,
+    status: int,
+    token: Optional[str] = None,
+    reason: Optional[str] = None,
+    bot: bool = False,
 ) -> tuple:
     if API_EMAIL_VERIFICATION != True and API_ACCOUNT_VALIDATION != True:
         return make_person_response(403, py_user["novalidationservices"])
@@ -342,7 +349,6 @@ def api_user_activate(
             api_current_user()
             # if current_user.is_authenticated:
             #   message = None
-            status = gvp("status", "None")
             if token:
                 if API_ACCOUNT_VALIDATION:
                     message = py_user["statusnotauthorized"]["0"]
@@ -384,12 +390,12 @@ def person_posted_data(usrid: int, isfrom: bool, fields: list) -> dict:
             del posted["newpassword"]
     if isfrom:
         posted["status"] = gvp("status", "0")
-        posted["can_do"]: List[str] = gvpm("can_do")
+        posted["can_do"] = gvpm("can_do")
     return posted
 
 
 def user_account(
-    usrid: int, isfrom: bool = False, action: str = "", token: str = None
+    usrid: int, isfrom: bool = False, action: str = "", token: Optional[str] = None
 ) -> tuple:
     if isfrom and (not check_is_users_admin()):
         return None, py_user["notadmin"]
@@ -494,6 +500,7 @@ def account_page(action: str, usrid: int, isfrom: bool, template: str, token: st
     recaptchaid = None
     if action != ACCOUNT_USER_CREATE and not isinstance(usrid, int):
         raise NotFound()
+    user: Union[Dict[str, Any], UserModelWithRights, None]
     if action == ACCOUNT_USER_CREATE:
         user = {"id": -1}
         if not isfrom:
@@ -548,7 +555,9 @@ def account_page(action: str, usrid: int, isfrom: bool, template: str, token: st
     )
 
 
-def reset_password(email: str, token: str = None, pwd: str = None) -> tuple:
+def reset_password(
+    email: Optional[str], token: Optional[str] = None, pwd: Optional[str] = None
+) -> tuple:
     no_bot = _get_captcha()
     if token:
         email = None
@@ -582,7 +591,11 @@ def get_country_list() -> list:
 
 
 def get_value_from_token(
-    token: str, name: str, age: int = SHORT_TOKEN_AGE, salt: str = None, verifip=False
+    token: str,
+    name: str,
+    age: int = SHORT_TOKEN_AGE,
+    salt: Optional[str] = None,
+    verifip=False,
 ) -> tuple:
     token = token.strip()
     if token == "":
@@ -619,8 +632,7 @@ def get_value_from_token(
         description.append(py_user["badsignature"])
     # return None
     if len(description):
-        description = set(description)
-        return True, ", ".join(description)
+        return True, ", ".join(set(description))
     return False, None
 
 
@@ -705,11 +717,10 @@ def check_homecaptcha(token: str) -> Response:
         token, "action", salt=app.config["MAILSERVICE_SECRET_KEY"]
     )
     code = 403
-    response = dict({"detail": ["Not authorized"]})
+    body: Dict[str, Any] = {"detail": ["Not authorized"]}
     # tempo to test
     if err == False and verif_ip == _public_ip() and verif_response == "REPONSE":
         code = 200
-        response = dict({"success": True})
-    response = make_response(jsonify(response), code)
-    return response
+        body = {"success": True}
+    return make_response(jsonify(body), code)
     # format_exception

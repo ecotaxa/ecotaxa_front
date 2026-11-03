@@ -8,10 +8,10 @@ from flask import (
     make_response,
 )
 from markupsafe import escape
-from werkzeug.exceptions import Forbidden
+from werkzeug.exceptions import Forbidden, NotFound
 from flask_login import current_user, login_required
 from flask_babel import _
-from typing import List
+from typing import List, Optional
 from appli import app, gvg, gvp
 from appli.constants import (
     AdministratorLabel,
@@ -162,7 +162,9 @@ def gui_users_list_page() -> str:
 )
 @gui_roles_accepted(AdministratorLabel, UserAdministratorLabel)
 @login_required
-def gui_user_activate(usrid: int, status_name: str = ""):
+def gui_user_activate(
+    usrid: int, status_name: Optional[str] = "", token: Optional[str] = None
+):
     if not current_user.is_authenticated:
         from appli.gui.staticlistes import py_user
 
@@ -182,6 +184,10 @@ def gui_user_activate(usrid: int, status_name: str = ""):
     ) = get_user_constants()
     if request.method == "GET" and status_name != ApiUserStatus["active"]:
         user = api_get_user(usrid)
+        if user is None:
+            from appli.gui.staticlistes import py_user
+
+            raise NotFound(description=py_user["notfound"])
         if status_name != "" and status_name in ApiUserStatus.keys():
             user.status = ApiUserStatus[status_name]
         return render_template(

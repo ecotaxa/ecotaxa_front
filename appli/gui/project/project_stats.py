@@ -1,5 +1,5 @@
 from flask import request, render_template, flash, redirect, url_for
-from typing import List
+from typing import List, Dict, Any
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py.api import ProjectsApi
 from to_back.ecotaxa_cli_py import ApiException
@@ -20,7 +20,9 @@ def prj_stats(prjid: int, partial: bool):
     from appli.gui.project.projectsettings import get_target_prj
 
     prj = get_target_prj(prjid)
-    if prj is None:
+    # full=True (default): a project model, or None
+    # no isinstance(prj, ProjectModel): the boosted API client returns mocked classes (ProjectModel2)
+    if prj is None or isinstance(prj, dict):
         if partial:
             return render_template(
                 "v2/partials/_error.html",
@@ -33,7 +35,7 @@ def prj_stats(prjid: int, partial: bool):
             flash(py_messages["selectotherproject"], "info")
             return redirect(url_for("gui_prj"))
     used_taxa = list([])
-    taxastats = list(dict({}))
+    taxastats: List[Dict[str, Any]] = []
     annotators = None
     initclassiflist = None
     if partial:
@@ -53,17 +55,20 @@ def prj_stats(prjid: int, partial: bool):
                 taxastats.extend(map(lambda x: x.to_dict(), taxo_stats))
                 used_taxa.extend([str(t.used_taxa[0]) for t in taxo_stats])
             else:
-                taxastats = taxo_stats[0]
-                used_taxa.extend([str(t) for t in taxastats.used_taxa])
-                taxastats = [taxastats.to_dict()]
+                first_stats = taxo_stats[0]
+                used_taxa.extend([str(t) for t in first_stats.used_taxa])
+                taxastats = [first_stats.to_dict()]
         collections: List[MinimalCollectionBO] = api.project_collections(prjid)
-        from appli.gui.taxonomy.tools import taxo_with_names, taxo_with_lineage
+        from appli.gui.taxonomy.tools import taxo_with_lineage
 
         usedtaxa = taxo_with_lineage(used_taxa)
     if not partial:
         annotators = list()
-        if isinstance(initclassiflist, Iterable):
-            initclassiflist = taxo_with_names(prj.init_classif_list)
+        if prj.init_classif_list:
+            # (id, name, lineage, lineage_status), as the taxo_list macro reads taxon[3][0]
+            initclassiflist = taxo_with_lineage(
+                [str(tid) for tid in prj.init_classif_list]
+            )
         # format list for template
         for i, taxastat in enumerate(taxastats):
             n = list(filter(lambda x: (x[0] == taxastat["used_taxa"][0]), usedtaxa))
@@ -171,7 +176,9 @@ def prj_samples_stats(project_ids: str, partial: bool, _format: str = "json"):
     tabledef = dict(
         {
             "columns": columns,
-            "data": render_samples_stats(samples, samplestats, partial, _format),
+            "data": render_samples_stats(
+                samples, samplestats, withtaxa=partial, partial=partial, _format=_format
+            ),
             "type": "json",
         }
     )

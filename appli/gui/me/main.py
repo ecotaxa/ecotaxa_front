@@ -89,6 +89,7 @@ def gui_me_activate(token: str):
         partial = is_partial_request()
 
         if token:
+            response: tuple
             err, user_id = get_value_from_token(token, "id")
             if err == True or user_id is None:
                 if partial:

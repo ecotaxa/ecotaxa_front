@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import time
 from pathlib import Path
-from typing import ClassVar
+from typing import ClassVar, Optional, Union, Any
 from flask import render_template, redirect, request, url_for
 from appli import gvp, app
 from appli.gui.jobs.Job import Job
@@ -13,7 +13,13 @@ from to_back.ecotaxa_cli_py.api import (
     UsersApi,
     JobsApi,
 )
-from to_back.ecotaxa_cli_py.models import ImportReq, ImportRsp, JobModel, TaxoRecastRsp
+from to_back.ecotaxa_cli_py.models import (
+    ImportReq,
+    ImportRsp,
+    JobModel,
+    TaxoRecastRsp,
+    SimpleImportReq,
+)
 from appli.gui.jobs.job_interface import import_format_options
 from appli.back_config import get_back_constants
 from appli.gui.taxonomy.tools import update_taxo_recast, get_taxo_recast
@@ -31,7 +37,7 @@ class ImportJob(Job):
     STEP0_TEMPLATE: ClassVar = "/v2/jobs/import.html"
     FINAL_TEMPLATE: ClassVar = "/v2/jobs/_import_final.html"
     TAXO_TEMPLATE: ClassVar = "/v2/jobs/_import_question.html"
-    IMPORT_TYPE: ClassVar = None
+    IMPORT_TYPE: ClassVar[Optional[str]] = None
     ACTION = "import"
 
     @classmethod
@@ -74,12 +80,12 @@ class ImportJob(Job):
         )
 
     @classmethod
-    def job_req(cls) -> ImportReq:
+    def job_req(cls) -> Optional[Union[ImportReq, SimpleImportReq]]:
         """get post params and create api request object"""
-        pass
+        return None
 
     @classmethod
-    def api_job_call(cls, req: ImportReq):
+    def api_job_call(cls, req: Any):
         # second phase after upload to my_files - put follwing code elsewhere
         projid = int(gvp("projid"))
         with ApiClient(ProjectsApi, request) as api:

@@ -25,7 +25,7 @@ def render_content_json(content):
 
 def allguests_list(ids: str = ""):
     with ApiClient(GuestsApi, request) as api:
-        guests = api.guet_guests(ids)
+        guests = api.get_guests(ids=ids)
     from appli.gui.admin.users_list_interface_json import (
         guest_table_columns,
         render_for_js,

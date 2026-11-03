@@ -5,6 +5,7 @@
 #
 # V2 new font interface projects list
 #
+from typing import Optional, Dict, Any
 from flask import request, render_template
 from flask_login import current_user
 
@@ -20,14 +21,14 @@ from to_back.ecotaxa_cli_py.models import (
 from appli.gui.staticlistes import py_messages
 
 
-def _collections_list_api_toback(project_ids: str = None) -> list:
+def _collections_list_api_toback(project_ids: Optional[str] = None) -> list:
     with ApiClient(CollectionsApi, request) as apicoll:
 
         colls: list[CollectionModel] = apicoll.list_collections(project_ids=project_ids)
     return colls
 
 
-def _collections_list_api(project_ids: str = None) -> list:
+def _collections_list_api(project_ids: Optional[str] = None) -> list:
     import requests
 
     colls = list([])
@@ -57,11 +58,9 @@ def _collections_list_api(project_ids: str = None) -> list:
 def collections_list(
     partial: bool = False,
     selection="list",
-    project_ids: str = None,
+    project_ids: Optional[str] = None,
     typeimport: str = "",
-) -> str:
-    import datetime
-
+) -> Dict[str, Any]:
     # projects ids and rights for current_user
     if not current_user.is_authenticated:
         return dict(
@@ -73,16 +72,8 @@ def collections_list(
             }
         )
 
-    can_access = {}
-    colls = []
-    # current_user is either an ApiUserWrapper or an anonymous one from flask,
-    # but we're in @login_required, so
-    user: UserModelWithRights = current_user.api_user
-    isadmin = current_user.is_app_admin == True
     colls = _collections_list_api(project_ids=project_ids)
-    # from appli.gui.collection.collist import colls
 
-    now = datetime.datetime.now()
     from appli.gui.collection.collections_list_interface_json import (
         collection_table_columns,
         render_for_js,

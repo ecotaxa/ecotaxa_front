@@ -1,6 +1,8 @@
 # list : full project list table def - homepage
 # import-[...] settings table def - projectsettings page create or update
 
+from typing import Any
+
 from to_back.ecotaxa_cli_py.models import CollectionModel
 
 from flask_babel import _
@@ -34,16 +36,8 @@ def collection_table_columns(typeimport: str, selection: str = "list") -> dict:
         "import": {},
     }
 
-    if selection == "import":
-        ths = dict(
-            {
-                **select[typeimport],
-                **columns["import"]["commons"],
-                **columns["import"][typeimport],
-            }
-        )
-        return ths
-    elif selection == "list":
+    # no import columns are defined for collections, "import" gives an empty columns dict
+    if selection == "list":
         cols = {
             **{"select": {"select": "select", "field": "id"}},
             **columns[selection],
@@ -96,6 +90,7 @@ def render_for_js(colljs: list, columns: dict) -> list:
                 )
             else:
                 # if subfield  append object which will be formatted by the js component
+                attrvalue: Any
                 if key == "select":
                     if "select" in column and column["select"] == "select":
                         select = dict({"edit": _("Edit")})
@@ -155,11 +150,13 @@ def render_coll_summary(collection: CollectionModel) -> dict:
         {
             "id": collection.id,
             "title": collection.title,
-            "contact": collection.contact,
+            "contact": collection.contact_user,
         }
     )
 
 
 def render_coll_summary_json(collection: dict) -> dict:
     # for jobs
-    return _extract_items(collection, ["id", "title", "contact"])
+    summary = _extract_items(collection, ["id", "title"])
+    summary["contact"] = collection.get("contact_user")
+    return summary

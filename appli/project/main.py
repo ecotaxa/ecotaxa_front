@@ -812,7 +812,7 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
         thumbfilename: Optional[str] = dtl["img.thumb_file_name"]
         thumbwidth: Optional[int] = dtl["img.thumb_width"]
         display_name: Optional[str] = dtl["txo.display_name"]
-        taxostatus: Optional[int] = dtl["txo.taxostatus"]
+        taxostatus: Optional[str] = dtl["txo.taxostatus"]
         imgcount: int = dtl["obj.imgcount"]
         if (
             origwidth is None

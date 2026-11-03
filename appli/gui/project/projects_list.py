@@ -6,7 +6,7 @@
 # V2 new font interface projects list
 #
 
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 from flask import request, render_template
 from flask_login import current_user
@@ -132,7 +132,7 @@ def projects_list(
             }
         )
 
-    can_access = {}
+    can_access: Dict[str, List[int]] = {}
     if filt is None:
         filt = _get_projects_filters()
 
@@ -290,8 +290,8 @@ def projects_list_page(
 
 # new import taxo ( no more separate ids and text)
 def _prj_import_taxo_api(
-    prjid: int = 0, filt: dict = None, not_granted: bool = False
-) -> List[ProjectModel]:
+    prjid: int = 0, filt: Optional[dict] = None, not_granted: bool = False
+) -> List[Dict[str, Any]]:
     import requests
 
     prjs = list([])

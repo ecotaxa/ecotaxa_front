@@ -187,10 +187,8 @@ def login_validate(email: str, password: str, remember: bool = False):
         if ae.status == 401 and "detail" in ae.body:
             userdata = json.loads(ae.body)["detail"][0]
             if (
-                API_ACCOUNT_VALIDATION == True
-                or API_EMAIL_VERIFICATION == True
-                and isinstance(userdata, "dict")
-            ):
+                API_ACCOUNT_VALIDATION == True or API_EMAIL_VERIFICATION == True
+            ) and isinstance(userdata, dict):
                 if int(userdata["status"]) == ApiUserStatus["pending"]:
                     return True, userdata
                 elif str(userdata["status"]) in py_user["statusnotauthorized"]:

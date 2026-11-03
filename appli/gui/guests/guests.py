@@ -1,7 +1,7 @@
 from flask import request, render_template
 from werkzeug.exceptions import NotFound
 from flask_login import current_user
-from typing import Union, Optional
+from typing import Union, Optional, Dict, Any
 
 from appli.gui.users.users import get_organizations
 from appli.utils import ApiClient
@@ -50,7 +50,7 @@ def person_create():
     return guest_account(guestid=-1, action=ACCOUNT_CREATE)
 
 
-def api_get_guest(guestid: int) -> Union[GuestModel, tuple]:
+def api_get_guest(guestid: int) -> Union[GuestModel, tuple, None]:
     try:
         with ApiClient(GuestsApi, request) as api:
             if isinstance(guestid, int) and guestid > 0:
@@ -60,6 +60,7 @@ def api_get_guest(guestid: int) -> Union[GuestModel, tuple]:
                         return guest[0]
     except ApiException as ae:
         return make_person_response(None, "", ae, "guest")
+    return None
 
 
 def api_guest_create(posted: dict) -> tuple:
@@ -89,7 +90,7 @@ def api_guest_create(posted: dict) -> tuple:
             return make_person_response(None, "", ae)
 
 
-def guest_account(guestid: int, action: str = None) -> tuple:
+def guest_account(guestid: int, action: Optional[str] = None) -> tuple:
     if action is not None:
         if not isinstance(guestid, int):
             return make_person_response(None, py_user["invaliddata"], None, "guest")
@@ -118,7 +119,7 @@ def guest_account(guestid: int, action: str = None) -> tuple:
                 message,
                 None,
                 "guest",
-                {"id": id, "name": posted["name"], "email": posted["email"]},
+                {"id": guestid, "name": posted["name"], "email": posted["email"]},
             )
     elif action == ACCOUNT_CREATE:
         if guestid != -1:
@@ -128,8 +129,8 @@ def guest_account(guestid: int, action: str = None) -> tuple:
                 None,
                 "guest",
                 {
-                    "id": id,
-                    "name": posted["firstname"] + " " + posted["lastname"],
+                    "id": guestid,
+                    "name": posted["name"],
                     "email": posted["email"],
                 },
             )
@@ -145,6 +146,7 @@ def account_page(
 ) -> str:
     if action != ACCOUNT_CREATE and not isinstance(guestid, int):
         raise NotFound()
+    guest: Union[Dict[str, Any], GuestModel, tuple, None]
     if action == ACCOUNT_CREATE:
         guest = {"id": -1}
     else:

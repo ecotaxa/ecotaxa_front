@@ -2,7 +2,8 @@
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
 # Copyright (C) 2015-2016  Picheral, Colin, Irisson (UPMC-CNRS)
 import re
-from typing import Dict, List
+from typing import Dict, List, Optional, Union
+from datetime import datetime
 from flask import (
     render_template,
     request,
@@ -22,17 +23,16 @@ from to_back.ecotaxa_cli_py.models import (
 )
 
 
-def _get_last_refresh() -> int:
+def _get_last_refresh() -> Optional[datetime]:
     if not current_user.is_authenticated:
-        return 0
-    from datetime import datetime
-
+        return None
+    last_refresh: Optional[datetime]
     try:
         with ApiClient(TaxonomyTreeApi, request) as apiTaxo:
             status: TaxonomyTreeStatus = apiTaxo.taxa_tree_status()
             last_refresh = datetime.strptime(status.last_refresh, "%Y-%m-%dT%H:%M:%S")
     except (ValueError, TypeError, ApiException):
-        last_refresh = 0
+        last_refresh = None
 
     return last_refresh
 
@@ -102,7 +102,6 @@ def build_mail(emails: str, typ: str = "", text: str = "") -> str:
 def last_taxo_refresh(cookiename):
     if not current_user.is_authenticated:
         return None
-    from datetime import datetime
 
     typ = "warning"
     # cookie for messages  is type+cookiename but for warnings a suffix is needed
@@ -112,7 +111,7 @@ def last_taxo_refresh(cookiename):
         if (datetime.strptime(dailyinfo, dformat) - datetime.now()).days < 1:
             return None
     last_refresh = _get_last_refresh()
-    if last_refresh != 0 and (datetime.now() - last_refresh).days > 7:
+    if last_refresh is not None and (datetime.now() - last_refresh).days > 7:
         py_messages = py_get_messages()
         return dict(
             {
@@ -244,7 +243,7 @@ def alert_box(
     dismissible: bool = False,
     inverse: bool = False,
     is_safe: bool = False,
-    extra: str = None,
+    extra: Optional[str] = None,
 ):
     return render_template(
         "v2/partials/_alertbox.html",
@@ -261,7 +260,7 @@ def alert_box(
 
 
 # new_ui_error
-def new_ui_error(e, is_exception: bool = False, trace: str = None):
+def new_ui_error(e, is_exception: bool = False, trace: Optional[str] = None):
     resp_json = "application/json"
     new_ui = request.path.find("/gui/") >= 0
     description = []
@@ -365,7 +364,7 @@ def format_exception(ae) -> tuple:
         elif isinstance(ae.body, object):
             detail = json.dumps(ae.body)
         msg = msg + " - " + detail
-        return ae.status, msg
+    return getattr(ae, "status", None), msg
 
 
 def safe_url_redir(url: str):
@@ -386,5 +385,5 @@ def safe_url_redir(url: str):
     return redirect(url)
 
 
-def make_response(status: int, message: str) -> dict:
+def make_response(status: int, message: Union[str, dict]) -> dict:
     return dict({"status": status, "message": message})

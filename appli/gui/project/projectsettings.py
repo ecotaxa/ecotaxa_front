@@ -58,10 +58,10 @@ def get_target_prj(
 
 
 def _get_prj_collections(prjid: int) -> List[MinimalCollectionBO]:
-    collections = list([])
+    collections: List[MinimalCollectionBO] = []
     with ApiClient(ProjectsApi, request) as api:
         try:
-            collections: List[MinimalCollectionBO] = api.project_collections(prjid)
+            collections = api.project_collections(prjid)
         except ApiException:
             pass
 
@@ -229,7 +229,9 @@ def prj_edit(prjid: int, new: bool = False):
     from appli.gui.staticlistes import py_messages
 
     target_proj = get_target_prj(prjid, for_managing=True)
-    if target_proj is None:
+    # full=True (default): a project model, or None
+    # no isinstance(.., ProjectModel): the boosted API client returns mocked classes (ProjectModel2)
+    if target_proj is None or isinstance(target_proj, dict):
         flash(py_messages["selectotherproject"], "info")
         return redirect(url_for("gui_prj_noright", projid=prjid))
     target_proj.formulae = _formulae_str_to_dict(target_proj.formulae)
@@ -249,9 +251,9 @@ def prj_edit(prjid: int, new: bool = False):
         # other
         posted_classif_list = gvpm("inittaxo[]")
         # The original list is displayed using str(list), so there is a bit of formatting inside
-        posted_classif_list = ",".join(posted_classif_list).replace(" ", "")
+        posted_classif_str = ",".join(posted_classif_list).replace(" ", "")
         target_proj.init_classif_list = [
-            int(cl_id) for cl_id in posted_classif_list.split(",") if cl_id.isdigit()
+            int(cl_id) for cl_id in posted_classif_str.split(",") if cl_id.isdigit()
         ]
 
         posted_contact_id = gvp("contact_user_id")
@@ -273,7 +275,7 @@ def prj_edit(prjid: int, new: bool = False):
         do_update = True
         contact_user = None
         err_msg = []
-        data = {"member": [], "privilege": []}
+        data: Dict[str, List[str]] = {"member": [], "privilege": []}
         members_by_right = {
             "Manage": target_proj.managers,
             "Annotate": target_proj.annotators,

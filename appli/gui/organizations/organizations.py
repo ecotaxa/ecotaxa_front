@@ -1,6 +1,6 @@
 from flask import request, render_template
 from werkzeug.exceptions import NotFound
-from typing import Union, Dict, Optional
+from typing import Union, Dict, Optional, Any
 from appli import gvp, gvg
 from appli.utils import ApiClient
 from to_back.ecotaxa_cli_py import ApiException, OrganizationsApi, OrganizationModel
@@ -43,7 +43,7 @@ def organization_edit(id: int) -> tuple:
     return organization_account(id, action=ACCOUNT_EDIT)
 
 
-def api_get_organization(id: int) -> Union[OrganizationModel, tuple]:
+def api_get_organization(id: int) -> Union[OrganizationModel, tuple, None]:
     try:
         with ApiClient(OrganizationsApi, request) as api:
             if isinstance(id, int) and id != -1:
@@ -53,6 +53,7 @@ def api_get_organization(id: int) -> Union[OrganizationModel, tuple]:
                         return organization[0]
     except ApiException as ae:
         return make_person_response(None, "", ae, "organization")
+    return None
 
 
 def api_organization_create(posted: dict) -> tuple:
@@ -81,7 +82,7 @@ def api_organization_create(posted: dict) -> tuple:
             return make_person_response(None, "", ae, "organization")
 
 
-def organization_account(id: int, action: str = None) -> tuple:
+def organization_account(id: int, action: Optional[str] = None) -> tuple:
     if action is not None:
         if not isinstance(id, int):
             return make_person_response(
@@ -102,8 +103,15 @@ def organization_account(id: int, action: str = None) -> tuple:
         else:
             # Keep the other directories, e.g. ROR
             current = api_get_organization(id)
-            current_directories = getattr(current, "directories", None)
-            posted["directories"] = directories_with_edmo(current_directories, code)
+            if isinstance(current, tuple):
+                # API error response
+                return current
+            if current is None:
+                # do not update, the other directories would be lost
+                return make_person_response(
+                    1, py_user["notfound"], None, "organization"
+                )
+            posted["directories"] = directories_with_edmo(current.directories, code)
             api_organization = OrganizationModel(**posted).to_dict()
         with ApiClient(OrganizationsApi, request) as api:
             try:
@@ -147,6 +155,7 @@ def organization_account(id: int, action: str = None) -> tuple:
 def account_page(action: str, id: int, template: str, partial: bool = False) -> str:
     if action != ACCOUNT_CREATE and not isinstance(id, int):
         raise NotFound()
+    organization: Union[Dict[str, Any], OrganizationModel, tuple, None]
     if action == ACCOUNT_CREATE:
         organization = {"id": -1}
     else:

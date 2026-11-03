@@ -5,12 +5,13 @@ import json
 import os
 import urllib
 from datetime import timedelta
-from typing import List
+from typing import List, Dict, Any, Optional
 
 from flask import make_response
 from flask import request, url_for, render_template, redirect, flash, session
 from flask_login import current_user, login_required, login_user
-from requests import Response
+import requests
+from werkzeug.wrappers import Response
 
 from appli import app, gvg, gvp, ApiClient
 from appli.back_config import (
@@ -184,10 +185,10 @@ def openid_callback():
     )
 
 
-def copy_cookies(from_rsp: Response, to_rsp: Response):
-    for h, v in from_rsp.headers.items():
-        if h.lower() == "set-cookie":
-            to_rsp.headers.add("Set-Cookie", v)
+def copy_cookies(from_rsp: requests.Response, to_rsp: Response):
+    # from_rsp.headers joins several Set-Cookie headers in one, read them one by one
+    for v in from_rsp.raw.headers.getlist("Set-Cookie"):
+        to_rsp.headers.add("Set-Cookie", v)
 
 
 @app.route("/gui/login", methods=["GET", "POST"])
@@ -619,7 +620,7 @@ def utility_processor():
 
         return get_locale()
 
-    def g_status(key: str = None) -> dict:
+    def g_status(key: Optional[str] = None) -> Any:
         # vars for google and other global data previously stored in g
         g_data = dict(
             {
@@ -687,12 +688,10 @@ def utility_processor():
         flashed = get_flashed_messages(True)
         if len(flashed):
             for f in flashed:
-                message = dict(
-                    {
-                        "type": f[0],
-                        "content": f[1],
-                    }
-                )
+                message: Dict[str, Any] = {
+                    "type": f[0],
+                    "content": f[1],
+                }
                 if f[0] == "success":
                     message["duration"] = 4000
                 else:
@@ -703,11 +702,11 @@ def utility_processor():
         from datetime import datetime
 
         file = app.config.get("APP_GUI_MESSAGE_FILE")
-        if os.path.exists(file):
+        if file and os.path.exists(file):
             messages = None
-            with open(file, "r", encoding="utf-8") as f:
+            with open(file, "r", encoding="utf-8") as msg_file:
                 try:
-                    messages = json.load(f)
+                    messages = json.load(msg_file)
                 except json.JSONDecodeError as e:
                     print("Invalid JSON syntax:", e)
 
@@ -763,7 +762,7 @@ def utility_processor():
 
         return api_password_regexp()
 
-    def license_texts() -> dict:
+    def license_texts() -> list:
         from appli.gui.commontools import possible_licenses
 
         licenses = possible_licenses()

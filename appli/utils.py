@@ -30,6 +30,10 @@ from to_back.ecotaxa_cli_py.api import (
     InstrumentsApi,
     JobsApi,
     AdminApi,
+    CollectionsApi,
+    GuestsApi,
+    OrganizationsApi,
+    MyFilesApi,
 )
 from to_back.ecotaxa_cli_py.models.access_level_enum import AccessLevelEnum
 from to_back.ecotaxa_cli_py.rest import RESTResponse
@@ -50,6 +54,10 @@ A = TypeVar(
     InstrumentsApi,
     JobsApi,
     AdminApi,
+    CollectionsApi,
+    GuestsApi,
+    OrganizationsApi,
+    MyFilesApi,
 )
 
 
@@ -103,7 +111,7 @@ class ApiClient(Generic[A]):
                 raise
 
         api_client.call_api = call_api_piggybacked  # type: ignore
-        api_client._is_piggybacked = True
+        setattr(api_client, "_is_piggybacked", True)
 
     def __enter__(self) -> A:
         return self.under

@@ -35,7 +35,7 @@ class ExportIdentificationJob(ExportGeneralJob):
         return req
 
     @classmethod
-    def api_job_call(cls, export_req: GeneralExportReq) -> str:
+    def api_job_call(cls, export_req: GeneralExportReq) -> ExportRsp:
         with ApiClient(ObjectsApi, request) as api:
             rsp: ExportRsp = api.export_object_set_general(export_req)
         return rsp

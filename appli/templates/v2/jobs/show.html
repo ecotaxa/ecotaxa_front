@@ -39,7 +39,7 @@ is-done
   <div class="mt-8 flex flex-col mb-2 sm:flex-row  sm:mb-0">
     <a href="{{ url_for('gui_job_cleanup', jobid=job.id)}}" class="button is-danger inverse mb-2 sm:mb-0">{{_('Clean task data')}}</a>
     <a href="{{url_for('gui_list_jobs')}}" class="button sm:ml-4  mb-2 sm:mb-0">{{_('Back to tasks list')}}</a>
-    {%if collection_id and collection_id != 0  %}<a href="{{url_for('gui_collection_classify',collection_id=collection_id)}}" class="button sm:ml-4 ">{{_('Back to collection')}} {{collection_id}}</a>
+    {%if collection_id and collection_id != 0  %}<a href="{{url_for('gui_collection_view',collection_id=collection_id)}}" class="button sm:ml-4 ">{{_('Back to collection')}} {{collection_id}}</a>
     {%- else-%}<a href="{{url_for('gui_prj_classify',projid=projid)}}" class="button sm:ml-4 ">{{_('Back to project')}} {{projid}}</a>{%-endif-%}
 </div>
 
