@@ -1,0 +1,67 @@
+{
+ "license_texts": {
+  "CC0 1.0": "<a href=\"https://creativecommons.org/publicdomain/zero/1.0/\" rel=\"nofollow\"><strong>CC-0</strong></a>: all registered EcoTaxa users are free to download, redistribute, modify, and build upon the data, with no conditions. Other databases can index the data. The data falls into the worldwide public domain. This is the license preferred by <a href=\"https://obis.org/manual/policy/\" rel=\"nofollow\">OBIS</a> and <a href=\"https://www.gbif.org/terms\" rel=\"nofollow\">GBIF</a>.",
+  "CC BY 4.0": "<a href=\"https://creativecommons.org/licenses/by/4.0/\" rel=\"nofollow\"><strong>CC-BY</strong></a>: all registered EcoTaxa users are free to download, redistribute, modify, and build upon the data, as long as they cite the dataset and its authors. Other databases can index the data.",
+  "CC BY-NC 4.0": "<a href=\"https://creativecommons.org/licenses/by-nc/4.0/\" rel=\"nofollow\"><strong>CC-BY-NC</strong></a>: all registered EcoTaxa users are free to download, redistribute, modify, and build upon the data, as long as they cite the dataset and its authors, and do not use it for commercial purpose (\"primarily intended for or directed toward commercial advantage or monetary compensation\"). Other databases can index the data.",
+  "Copyright": "<strong>Copyright</strong>: only contributors to this project have rights on this data. This prevents its distribution in any kind of database.",
+  "": "Not chosen"
+ },
+ "access": {
+  "PUBLIC": "1",
+  "OPEN": "2",
+  "PRIVATE": "0"
+ },
+ "app_manager": [
+  "App Manager",
+  "manager@example.org"
+ ],
+ "countries": [
+  "France",
+  "Italy"
+ ],
+ "people_organization_directories": {
+  "orcid": "https://orcid.org/",
+  "edmo": "https://edmo.seadatanet.org/",
+  "ror": "https://ror.org/"
+ },
+ "user_status": {
+  "blocked": -1,
+  "inactive": 0,
+  "active": 1,
+  "pending": 2
+ },
+ "user_type": {
+  "guest": "guest",
+  "user": "user"
+ },
+ "password_regexp": "^(?:(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#?%^&+*-])).{8,64}$",
+ "email_verification": true,
+ "account_validation": false,
+ "short_token_age": 1,
+ "profile_token_age": 24,
+ "recaptchaid": false,
+ "formulae": "subsample_coef: 1/ssm.sub_part\ntotal_water_volume: sam.tot_vol/1000\nindividual_volume: 4.0/3.0*math.pi*(math.sqrt(obj.area/math.pi)*ssm.pixel_size)**3",
+ "default_project_access": "1",
+ "max_upload_size": 681574400,
+ "time_to_live": "60",
+ "accepted_mime_types": [
+  "application/zip",
+  "text/tab-separated-values"
+ ],
+ "archive_extensions": [
+  "zip",
+  "gz"
+ ],
+ "all_in_one": false,
+ "taxoserver_url": "https://ecotaxoserver.obs-vlfr.fr/",
+ "openid_configured": false,
+ "recast_operation": {
+  "prediction_input": "pre_predict",
+  "prediction_output": "post_predict",
+  "project_export": "project_export",
+  "collection_export": "collection_export",
+  "dwca_export_occurrence": "dwca_export_occurrence",
+  "dwca_export_emof": "dwca_export_emof",
+  "project_import": "project_import"
+ }
+}

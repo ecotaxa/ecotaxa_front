@@ -335,7 +335,7 @@ def prj_edit(prjid: int, new: bool = False):
             flash(msg, "error")
         if contact_user is None:
             flash(
-                "getcontactuserinmanagers",
+                py_messages["getcontactuserinmanagers"],
                 "error",
             )
             do_update = False
@@ -344,7 +344,7 @@ def prj_edit(prjid: int, new: bool = False):
             target_proj.contact = contact_user
         # Managers sanity check
         if len(target_proj.managers) == 0:
-            flash("managerrequired", "error")
+            flash(py_messages["managerrequired"], "error")
             do_update = False
         # Update on back-end
         if do_update:

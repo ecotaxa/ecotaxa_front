@@ -24,17 +24,6 @@ def gui_me_files() -> str:
     return render_template("/v2/my_files/list.html",dirlist_id=dirlist_id,partial=is_partial_request())
 
 
-@app.route("/gui/me/upload", methods=["GET"])
-@login_required
-async def gui_me_upload() -> dict:
-
-    from appli.gui.files.tools import upload_file
-
-    response, err = await upload_file()
-
-    return {"err": err, "response": response}
-
-
 @app.route("/gui/me/profile", methods=["GET", "POST"])
 @login_required
 def gui_me_profile():

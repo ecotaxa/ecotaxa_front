@@ -1,5 +1,5 @@
 from typing import Optional, Dict, Union, List, Tuple, Any
-from flask import render_template, flash, request, redirect, url_for
+from flask import render_template, flash, request, redirect, url_for, current_app
 from flask_login import current_user
 from appli import gvp, gvpm
 from appli.gui.staticlistes import py_messages
@@ -33,7 +33,6 @@ from appli.gui.commontools import (
     possible_access,
     py_get_messages,
     is_partial_request,
-    new_ui_error,
 )
 
 ###############################################common for create && edit  #######################################################################
@@ -135,7 +134,8 @@ def collection_create() -> str:
             if ae.status in (401, 403):
                 flash(py_messages["notauthorized"], "error")
             else:
-                new_ui_error(ae)
+                current_app.logger.error("create_collection failed (%s) - body=%s", ae.reason, ae.body)
+                flash(py_messages["updateexception"] + "%s - %s" % (ae.reason, ae.body))
         external_id = gvp("external_id", "?")
         target_coll = CollectionModel(
             0, external_id, "", title, "", "", "", "", "", project_ids
@@ -270,7 +270,6 @@ def collection_edit(collection_id: int, new: bool = False):
             varlist.remove(prefix + "users")
             varlist.remove(prefix + "organisations")
         varlist.extend(["creator_persons", "associate_persons"])
-        print("form", request.form)
         # title and short title are frozen once the DOI is set
         published = _is_published(collection)
         for a_var in request.form:
@@ -338,9 +337,10 @@ def collection_edit(collection_id: int, new: bool = False):
                     "success",
                 )
 
-            return redirect(request.referrer)
+            return redirect(request.referrer or url_for("gui_collection_edit", collection_id=collection_id))
         except ApiException as ae:
-            new_ui_error(ae)
+            current_app.logger.error("patch_collection failed (%s) - body=%s", ae.reason, ae.body)
+            flash(py_messages["updateexception"] + "%s - %s" % (ae.reason, ae.body))
     licenses = possible_licenses()
     # licenses[0] licenses texts , licenses[1] licenses restriction
     from appli.gui.commontools import crsf_token

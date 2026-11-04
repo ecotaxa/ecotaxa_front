@@ -151,8 +151,9 @@ def gui_prj_list_for_prediction(projid):
     response = make_response(content)
 
     response.headers["Content-length"] = len(content)
-    response.headers["Content-Encoding"] = encoding
-    response.headers["Content-Type"] = "application/json"
+    if gz:
+        response.headers["Content-Encoding"] = "gzip"
+    response.headers["Content-Type"] = "application/json; charset=utf-8"
 
     return response
 
@@ -716,6 +717,7 @@ def gui_prj_edit_datamass(projid):
 
 ######################################################################################################################
 @app.route("/gui/prj/taxofix/<int:projid>", methods=["GET", "POST"])
+@login_required
 # TODO - fresh_login_required
 def gui_deprecation_management(projid):
     from to_back.ecotaxa_cli_py.api import ObjectsApi, TaxonomyTreeApi

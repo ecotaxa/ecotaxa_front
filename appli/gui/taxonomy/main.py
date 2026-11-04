@@ -11,8 +11,8 @@ from to_back.ecotaxa_cli_py.models import TaxonModel
 from flask_babel import _
 
 
-@login_required
 @app.route("/gui/search/taxotreejson")
+@login_required
 def gui_taxotree_root_json():
     parent = gvg("id", "")
     if parent == "#":
@@ -70,8 +70,8 @@ def gui_taxotree_root_json():
     )
 
 
-@login_required
 @app.route("/gui/taxonomy/worms")
+@login_required
 def gui_taxonomy_worms():
     return render_template("v2/taxonomy/worms.html")
 
