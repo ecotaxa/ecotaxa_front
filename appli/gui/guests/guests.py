@@ -65,7 +65,6 @@ def api_get_guest(guestid: int) -> Union[GuestModel, tuple, None]:
 
 def api_guest_create(posted: dict) -> tuple:
     new_guest = GuestModel(**posted)
-    print("_____posted", posted)
     with ApiClient(GuestsApi, request) as api:
         try:
             guest_id = api.create_guest(guest_model=new_guest)

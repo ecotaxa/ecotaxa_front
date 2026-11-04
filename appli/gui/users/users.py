@@ -73,6 +73,7 @@ def make_person_response(
 ) -> tuple:
     if ae is not None:
         if ae.status in (401, 403):
+            code = ae.status
             message = py_messages["notauthorized"]
         elif ae.status == 404:
             message = py_messages["notfound"]

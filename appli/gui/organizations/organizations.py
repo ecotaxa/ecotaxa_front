@@ -118,7 +118,6 @@ def organization_account(id: int, action: Optional[str] = None) -> tuple:
                 id = api.update_organization(
                     organization_id=id, organization_model=api_organization
                 )
-                print("____id", id)
             except ApiException as ae:
                 return make_person_response(None, "", ae, "organization")
         if id == -1:

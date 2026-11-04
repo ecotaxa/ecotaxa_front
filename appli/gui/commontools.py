@@ -146,12 +146,8 @@ def breadcrumbs(default=None) -> list:
             url.append(crumb)
             if crumbvalue is not None:
                 crumbdict = dict({"url": "/".join(url), "text": crumbvalue})
-                if (
-                    i + 2 == len(crumbs)
-                    and isinstance(crumbs[i + 1], int)
-                    or crumb.isdigit()
-                ):
-                    crumbdict.update(dict({"id": crumbs[i + 1]}))
+                if i + 2 == len(crumbs) and crumbs[i + 1].isdigit():
+                    crumbdict["id"] = crumbs[i + 1]
                 crumblist.append(crumbdict)
             if childtree is not None:
                 tree = childtree
@@ -358,8 +354,13 @@ def format_exception(ae) -> tuple:
             if ae.status == 500:
                 detail = ae.body
             else:
-                body = json.loads(ae.body)
-                if "detail" in body:
+                try:
+                    body = json.loads(ae.body)
+                except ValueError:
+                    # not JSON, e.g. a proxy error page: keep it as is
+                    body = None
+                    detail = ae.body
+                if isinstance(body, dict) and "detail" in body:
                     detail = str(body["detail"])
         elif isinstance(ae.body, object):
             detail = json.dumps(ae.body)
@@ -377,8 +378,10 @@ def safe_url_redir(url: str):
     from urllib.parse import urlparse
 
     redir = urlparse(url)
+    # one leading "/" only: "//host" or "/\host" would leave the site
+    path = "/" + redir.path.replace("\\", "/").lstrip("/")
     url = (
-        redir.path
+        path
         + str("?" + redir.query if redir.query != "" else "")
         + str("#" + redir.fragment if redir.fragment != "" else "")
     )

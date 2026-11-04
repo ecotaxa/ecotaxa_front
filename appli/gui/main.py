@@ -318,8 +318,9 @@ def gui_prjlist():
     response = make_response(content)
 
     response.headers["Content-length"] = len(content)
-    response.headers["Content-Encoding"] = encoding
-    response.headers["Content-Type"] = "application/json"
+    if gz:
+        response.headers["Content-Encoding"] = "gzip"
+    response.headers["Content-Type"] = "application/json; charset=utf-8"
     return response
 
 
@@ -381,8 +382,7 @@ def gui_prj_aboutsamples(projid):
         content = json.dumps(content, separators=(",", ":")).encode(encoding)
         response = make_response(content)
         response.headers["Content-length"] = len(content)
-        response.headers["Content-Encoding"] = encoding
-        response.headers["Content-Type"] = "application/json"
+        response.headers["Content-Type"] = "application/json; charset=utf-8"
         return response
     else:
         return content
@@ -391,7 +391,7 @@ def gui_prj_aboutsamples(projid):
 # help
 @app.route("/gui/help/register")
 def gui_help_nologin():
-    return render_template(".v2/help/_help_user_profile.html")
+    return render_template("v2/help/_help_user_profile.html")
 
 
 @app.route("/gui/help/<path:filename>")
@@ -467,7 +467,7 @@ def gui_other(filename):
         filename = filename.replace("/", "")
         if exists("templates/v2/" + filename):
             return render_template("v2/" + filename)
-    return render_template("v2/" + template + ".html", error=404, message="page404")
+    return render_template("v2/" + template + ".html", error=404, message="page404"), 404
 
 
 @app.route("/gui/jobssummary/", methods=["GET", "POST"])
@@ -560,8 +560,7 @@ def gui_i18n():
     )
     response = make_response(content)
     response.headers["Content-length"] = len(content)
-    response.headers["Content-Encoding"] = encoding
-    response.headers["Content-Type"] = "application/json"
+    response.headers["Content-Type"] = "application/json; charset=utf-8"
     return response
 
 
@@ -708,7 +707,7 @@ def utility_processor():
                 try:
                     messages = json.load(msg_file)
                 except json.JSONDecodeError as e:
-                    print("Invalid JSON syntax:", e)
+                    app.logger.warning("Invalid JSON in %s: %s", file, e)
 
             if isinstance(messages, dict):
                 # build messages param for template {"type":,"content":,"date":,"dismissible":, duration:}

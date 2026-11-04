@@ -229,7 +229,6 @@ class ImportJob(Job):
 
     @classmethod
     def make_recast(cls, target_id: int, values: dict):
-        print('values', values)
         newrecast = TaxoRecastRsp(from_to=values, doc={})
         recast_operation = get_back_constants("RECAST_OPERATION")
         operation = recast_operation["project_import"]

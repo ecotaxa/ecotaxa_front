@@ -362,7 +362,6 @@ def posted_modified_recast(dwca: bool) -> bool:
         while idx <= int(taxanum):
             to = gvp(prefix + "item-" + k + "-" + str(idx))
             frm = gvp(prefix + "item-from-" + str(idx))
-            print(" to=" + to + " from=", frm)
             if frm in data:
                 keep = data[frm]
                 if str(to) != str(keep):

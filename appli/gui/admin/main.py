@@ -44,8 +44,8 @@ def admins_list(role=None):
 
 @app.route("/gui/admin", methods=["GET"])
 @app.route("/gui/admin/", methods=["GET"])
-@gui_roles_accepted(AdministratorLabel, UserAdministratorLabel)
 @login_required
+@gui_roles_accepted(AdministratorLabel, UserAdministratorLabel)
 def gui_admin():
     admin_users = dict(
         {
@@ -117,8 +117,8 @@ def _organizations_list_page() -> str:
 
 
 @app.route("/gui/admin/userslist/", methods=["GET"])
-@gui_roles_accepted(AdministratorLabel, UserAdministratorLabel)
 @login_required
+@gui_roles_accepted(AdministratorLabel, UserAdministratorLabel)
 def gui_userlist():
     # gzip not really necessary - jsonifiy with separators
     import json
@@ -135,16 +135,17 @@ def gui_userlist():
     response = make_response(content)
 
     response.headers["Content-length"] = len(content)
-    response.headers["Content-Encoding"] = encoding
-    response.headers["Content-Type"] = "application/json"
+    if gz:
+        response.headers["Content-Encoding"] = "gzip"
+    response.headers["Content-Type"] = "application/json; charset=utf-8"
 
     return response
 
 
 @app.route("/gui/admin/users/", methods=["GET"])
 @app.route("/gui/admin/users", methods=["GET"])
-@gui_roles_accepted(AdministratorLabel, UserAdministratorLabel)
 @login_required
+@gui_roles_accepted(AdministratorLabel, UserAdministratorLabel)
 def gui_users_list_page() -> str:
     return _persons_list_page()
 
@@ -160,8 +161,8 @@ def gui_users_list_page() -> str:
 @app.route(
     "/gui/admin/users/activate/<int:usrid>/<status_name>", methods=["GET", "POST"]
 )
-@gui_roles_accepted(AdministratorLabel, UserAdministratorLabel)
 @login_required
+@gui_roles_accepted(AdministratorLabel, UserAdministratorLabel)
 def gui_user_activate(
     usrid: int, status_name: Optional[str] = "", token: Optional[str] = None
 ):
@@ -213,8 +214,8 @@ def gui_user_activate(
 
 @app.route("/gui/admin/users/create", methods=["GET", "POST"])
 @app.route("/gui/admin/users/create/", methods=["GET", "POST"])
-@gui_roles_accepted(AdministratorLabel, UserAdministratorLabel)
 @login_required
+@gui_roles_accepted(AdministratorLabel, UserAdministratorLabel)
 def gui_user_create():
     from appli.gui.users.users import (
         user_create,
@@ -239,8 +240,8 @@ def gui_user_create():
 
 @app.route("/gui/admin/users/edit/", defaults={"usrid": -1}, methods=["GET", "POST"])
 @app.route("/gui/admin/users/edit/<int:usrid>", methods=["GET", "POST"])
-@gui_roles_accepted(AdministratorLabel, UserAdministratorLabel)
 @login_required
+@gui_roles_accepted(AdministratorLabel, UserAdministratorLabel)
 def gui_user_edit(usrid):
     if usrid == -1:
         return redirect(url_for("gui_user_create"))
@@ -270,8 +271,8 @@ def gui_user_edit(usrid):
 @app.route("/gui/admin/messages", defaults={"msgkey": None}, methods=["GET"])
 @app.route("/gui/admin/messages/", defaults={"msgkey": None}, methods=["GET"])
 @app.route("/gui/admin/messages/<msgkey>", methods=["GET", "POST"])
-@gui_roles_accepted(AdministratorLabel, UserAdministratorLabel)
 @login_required
+@gui_roles_accepted(AdministratorLabel, UserAdministratorLabel)
 def gui_site_message(msgkey):
     import json
 
@@ -423,8 +424,6 @@ def gui_dbadmin_recomputestat():
 @gui_roles_accepted(AdministratorLabel)
 def gui_dbadmin_console():
     sql = gvp("sql")
-    print("req", request.referrer)
-    print("full_path", request.url.replace("http:", "https:"))
     if len(request.form) > 0 and request.referrer != request.url.replace(
         "http:", "https:"
     ):  # si post doit venir de cette page
@@ -574,8 +573,8 @@ def utility_admin_processor():
 
 
 @app.route("/gui/admin/guestslist/", methods=["GET"])
-@gui_roles_accepted(AdministratorLabel, UserAdministratorLabel)
 @login_required
+@gui_roles_accepted(AdministratorLabel, UserAdministratorLabel)
 def gui_admin_guestlist():
     return all_guests_json()
 
@@ -610,8 +609,8 @@ def gui_guest_create():
 
 @app.route("/gui/admin/guests/edit/", defaults={"guestid": -1}, methods=["GET", "POST"])
 @app.route("/gui/admin/guests/edit/<int:guestid>", methods=["GET", "POST"])
-@gui_roles_accepted(AdministratorLabel, UserAdministratorLabel)
 @login_required
+@gui_roles_accepted(AdministratorLabel, UserAdministratorLabel)
 def gui_guest_edit(guestid: int):
     if guestid == -1:
         return redirect(url_for("gui_guest_create"))
@@ -675,8 +674,8 @@ def gui_organization_create():
     methods=["GET", "POST"],
 )
 @app.route("/gui/admin/organizations/edit/<int:id>", methods=["GET", "POST"])
-@gui_roles_accepted(AdministratorLabel, UserAdministratorLabel)
 @login_required
+@gui_roles_accepted(AdministratorLabel, UserAdministratorLabel)
 def gui_organization_edit(id: int):
     if id == -1:
         return redirect(url_for("gui_organization_create"))
