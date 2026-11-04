@@ -4,6 +4,7 @@
 import html
 import inspect
 import math
+import os
 import re
 import sys
 import traceback
@@ -28,7 +29,8 @@ from to_back.ecotaxa_cli_py import UsersApi, MinUserModel
 from appli.security_on_backend import user_from_api
 
 app = Flask("appli")
-app.config.from_pyfile("../config/config.cfg")
+# ECOTAXA_FRONT_CONFIG: alternate config file, e.g. for tests (QA/py).
+app.config.from_pyfile(os.environ.get("ECOTAXA_FRONT_CONFIG", "../config/config.cfg"))
 augment_from_env(app.config)
 # The Flask session cookie also acts as the API bearer token (see ApiClient), and
 # the "remember me" cookie can restore a session for 30 days. Harden both.
