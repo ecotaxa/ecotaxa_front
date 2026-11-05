@@ -4,12 +4,22 @@
 import html
 import inspect
 import math
+import os
 import re
 import sys
 import traceback
 import urllib.parse
 from logging import INFO, WARNING
 from typing import List, Optional
+import flask
+# Replace the flash function with our own version that logs errors
+_original_flash = flask.flash
+def _augmented_flash(message: str, category: str = "message") -> None:
+    if category == "error":
+        user_info = f" | U:{current_user.id}" if getattr(current_user, "is_authenticated", False) else ""
+        app.logger.error(f"in UI: {message}{user_info}")
+    _original_flash(message, category)
+flask.flash = _augmented_flash
 from flask import Flask, render_template, request, g
 from flask_login import current_user, LoginManager
 
@@ -19,7 +29,8 @@ from to_back.ecotaxa_cli_py import UsersApi, MinUserModel
 from appli.security_on_backend import user_from_api
 
 app = Flask("appli")
-app.config.from_pyfile("../config/config.cfg")
+# ECOTAXA_FRONT_CONFIG: alternate config file, e.g. for tests (QA/py).
+app.config.from_pyfile(os.environ.get("ECOTAXA_FRONT_CONFIG", "../config/config.cfg"))
 augment_from_env(app.config)
 # The Flask session cookie also acts as the API bearer token (see ApiClient), and
 # the "remember me" cookie can restore a session for 30 days. Harden both.

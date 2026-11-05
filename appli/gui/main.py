@@ -5,12 +5,13 @@ import json
 import os
 import urllib
 from datetime import timedelta
-from typing import List
+from typing import List, Dict, Any, Optional
 
 from flask import make_response
 from flask import request, url_for, render_template, redirect, flash, session
 from flask_login import current_user, login_required, login_user
-from requests import Response
+import requests
+from werkzeug.wrappers import Response
 
 from appli import app, gvg, gvp, ApiClient
 from appli.back_config import (
@@ -184,10 +185,10 @@ def openid_callback():
     )
 
 
-def copy_cookies(from_rsp: Response, to_rsp: Response):
-    for h, v in from_rsp.headers.items():
-        if h.lower() == "set-cookie":
-            to_rsp.headers.add("Set-Cookie", v)
+def copy_cookies(from_rsp: requests.Response, to_rsp: Response):
+    # from_rsp.headers joins several Set-Cookie headers in one, read them one by one
+    for v in from_rsp.raw.headers.getlist("Set-Cookie"):
+        to_rsp.headers.add("Set-Cookie", v)
 
 
 @app.route("/gui/login", methods=["GET", "POST"])
@@ -317,8 +318,9 @@ def gui_prjlist():
     response = make_response(content)
 
     response.headers["Content-length"] = len(content)
-    response.headers["Content-Encoding"] = encoding
-    response.headers["Content-Type"] = "application/json"
+    if gz:
+        response.headers["Content-Encoding"] = "gzip"
+    response.headers["Content-Type"] = "application/json; charset=utf-8"
     return response
 
 
@@ -380,8 +382,7 @@ def gui_prj_aboutsamples(projid):
         content = json.dumps(content, separators=(",", ":")).encode(encoding)
         response = make_response(content)
         response.headers["Content-length"] = len(content)
-        response.headers["Content-Encoding"] = encoding
-        response.headers["Content-Type"] = "application/json"
+        response.headers["Content-Type"] = "application/json; charset=utf-8"
         return response
     else:
         return content
@@ -390,7 +391,7 @@ def gui_prj_aboutsamples(projid):
 # help
 @app.route("/gui/help/register")
 def gui_help_nologin():
-    return render_template(".v2/help/_help_user_profile.html")
+    return render_template("v2/help/_help_user_profile.html")
 
 
 @app.route("/gui/help/<path:filename>")
@@ -466,7 +467,7 @@ def gui_other(filename):
         filename = filename.replace("/", "")
         if exists("templates/v2/" + filename):
             return render_template("v2/" + filename)
-    return render_template("v2/" + template + ".html", error=404, message="page404")
+    return render_template("v2/" + template + ".html", error=404, message="page404"), 404
 
 
 @app.route("/gui/jobssummary/", methods=["GET", "POST"])
@@ -559,8 +560,7 @@ def gui_i18n():
     )
     response = make_response(content)
     response.headers["Content-length"] = len(content)
-    response.headers["Content-Encoding"] = encoding
-    response.headers["Content-Type"] = "application/json"
+    response.headers["Content-Type"] = "application/json; charset=utf-8"
     return response
 
 
@@ -620,7 +620,7 @@ def utility_processor():
 
         return get_locale()
 
-    def g_status(key: str = None) -> dict:
+    def g_status(key: Optional[str] = None) -> Any:
         # vars for google and other global data previously stored in g
         g_data = dict(
             {
@@ -688,12 +688,10 @@ def utility_processor():
         flashed = get_flashed_messages(True)
         if len(flashed):
             for f in flashed:
-                message = dict(
-                    {
-                        "type": f[0],
-                        "content": f[1],
-                    }
-                )
+                message: Dict[str, Any] = {
+                    "type": f[0],
+                    "content": f[1],
+                }
                 if f[0] == "success":
                     message["duration"] = 4000
                 else:
@@ -704,13 +702,13 @@ def utility_processor():
         from datetime import datetime
 
         file = app.config.get("APP_GUI_MESSAGE_FILE")
-        if os.path.exists(file):
+        if file and os.path.exists(file):
             messages = None
-            with open(file, "r", encoding="utf-8") as f:
+            with open(file, "r", encoding="utf-8") as msg_file:
                 try:
-                    messages = json.load(f)
+                    messages = json.load(msg_file)
                 except json.JSONDecodeError as e:
-                    print("Invalid JSON syntax:", e)
+                    app.logger.warning("Invalid JSON in %s: %s", file, e)
 
             if isinstance(messages, dict):
                 # build messages param for template {"type":,"content":,"date":,"dismissible":, duration:}
@@ -764,7 +762,7 @@ def utility_processor():
 
         return api_password_regexp()
 
-    def license_texts() -> dict:
+    def license_texts() -> list:
         from appli.gui.commontools import possible_licenses
 
         licenses = possible_licenses()

@@ -1,5 +1,5 @@
-from typing import Optional, Dict, Union, List, Iterable
-from flask import render_template, flash, request, redirect, url_for
+from typing import Optional, Dict, Union, List, Tuple, Any
+from flask import render_template, flash, request, redirect, url_for, current_app
 from flask_login import current_user
 from appli import gvp, gvpm
 from appli.gui.staticlistes import py_messages
@@ -24,6 +24,7 @@ from to_back.ecotaxa_cli_py.models import (
     CreateCollectionReq,
     CollectionAggregatedRsp,
     ProjectUserStatsModel,
+    MinimalUserBO,
 )
 
 from appli.gui.commontools import (
@@ -32,7 +33,6 @@ from appli.gui.commontools import (
     possible_access,
     py_get_messages,
     is_partial_request,
-    new_ui_error,
 )
 
 ###############################################common for create && edit  #######################################################################
@@ -51,18 +51,18 @@ def _user_format(uid: int) -> Union[MinUserModel, GuestModel]:
         return guest
 
 
-def _org_format(uid: int) -> OrganizationModel:
+def _org_format(uid: int) -> Optional[OrganizationModel]:
     try:
         with ApiClient(OrganizationsApi, request) as api:
-            org: OrganizationModel = api.get_organizations(ids=str(uid))
-        return org[0]
+            orgs: List[OrganizationModel] = api.get_organizations(ids=str(uid))
+        return orgs[0]
     except ApiException:
-        pass
+        return None
 
 
-def _set_persons(persons: list) -> Dict[str, list]:
-    plist = {"users": [], "organisations": []}
-    display = []
+def _set_persons(persons: list) -> Tuple[Dict[str, list], List[str]]:
+    plist: Dict[str, list] = {"users": [], "organisations": []}
+    display: List[str] = []
     for i, person in enumerate(persons):
         if person[0 : len(orgprefix)] == orgprefix:
             orga = person[len(orgprefix) :]
@@ -79,7 +79,8 @@ def _prj_format(projid: int) -> dict:
     from appli.gui.project.projectsettings import get_target_prj
 
     prj = get_target_prj(projid)
-    if prj is not None:
+    # no isinstance(prj, ProjectModel): the boosted API client returns mocked classes (ProjectModel2)
+    if prj is not None and not isinstance(prj, dict):
         return dict({"id": prj.projid, "title": prj.title})
     else:
         return dict({"id": None, "title": None})
@@ -127,13 +128,14 @@ def collection_create() -> str:
         try:
             with ApiClient(CollectionsApi, request) as api:
                 req = CreateCollectionReq(title=title, project_ids=project_ids)
-                rsp: Union[str, int] = api.create_collection(req)
+                rsp: int = api.create_collection(req)
             return collection_edit(rsp, new=True)
         except ApiException as ae:
             if ae.status in (401, 403):
                 flash(py_messages["notauthorized"], "error")
             else:
-                new_ui_error(ae)
+                current_app.logger.error("create_collection failed (%s) - body=%s", ae.reason, ae.body)
+                flash(py_messages["updateexception"] + "%s - %s" % (ae.reason, ae.body))
         external_id = gvp("external_id", "?")
         target_coll = CollectionModel(
             0, external_id, "", title, "", "", "", "", "", project_ids
@@ -187,10 +189,12 @@ def collection_aggregated(project_ids: str, simulate: str = "") -> dict:
                 prjstats: List[ProjectUserStatsModel] = api.project_set_get_user_stats(
                     ids=project_ids
                 )
-                annotators = []
+                # unique annotators by id, a set of (boosted) models only removes the same object
+                annotators: Dict[int, MinimalUserBO] = {}
                 for prjst in prjstats:
-                    annotators = list(set(annotators + prjst.annotators))
-                if isinstance(annotators, Iterable) and len(annotators) > 0:
+                    for annotator in prjst.annotators:
+                        annotators.setdefault(annotator.id, annotator)
+                if len(annotators) > 0:
 
                     return {
                         "creator_users": [
@@ -202,7 +206,7 @@ def collection_aggregated(project_ids: str, simulate: str = "") -> dict:
                                 # "email": r.email,
                                 # "organisation": r.organisation,
                             }
-                            for r in annotators
+                            for r in annotators.values()
                         ]
                     }
 
@@ -261,12 +265,11 @@ def collection_edit(collection_id: int, new: bool = False):
     if gvp("save") == "Y":
         # Load posted variables
         varlist = dir(collection)
-        display_order = {"creators": [], "associates": []}
+        display_order: Dict[str, List[str]] = {"creators": [], "associates": []}
         for prefix in ["creator_", "associate_"]:
             varlist.remove(prefix + "users")
             varlist.remove(prefix + "organisations")
         varlist.extend(["creator_persons", "associate_persons"])
-        print("form", request.form)
         # title and short title are frozen once the DOI is set
         published = _is_published(collection)
         for a_var in request.form:
@@ -312,12 +315,12 @@ def collection_edit(collection_id: int, new: bool = False):
                         display_order,
                     )
             elif a_var[0:-2] == "project_ids":
-                val = [int(p) for p in gvpm(a_var)]
-                if getattr(collection, a_var[0:-2]) != val:
-                    setattr(collection, a_var[0:-2], val)
+                ids = [int(p) for p in gvpm(a_var)]
+                if getattr(collection, a_var[0:-2]) != ids:
+                    setattr(collection, a_var[0:-2], ids)
             else:
-                val = gvpm(a_var)
-                if getattr(collection, a_var[0:-2]) != val:
+                vals = gvpm(a_var)
+                if getattr(collection, a_var[0:-2]) != vals:
                     setattr(collection, a_var[0:-2], gvpm(a_var))
 
         try:
@@ -334,16 +337,17 @@ def collection_edit(collection_id: int, new: bool = False):
                     "success",
                 )
 
-            return redirect(request.referrer)
+            return redirect(request.referrer or url_for("gui_collection_edit", collection_id=collection_id))
         except ApiException as ae:
-            new_ui_error(ae)
+            current_app.logger.error("patch_collection failed (%s) - body=%s", ae.reason, ae.body)
+            flash(py_messages["updateexception"] + "%s - %s" % (ae.reason, ae.body))
     licenses = possible_licenses()
     # licenses[0] licenses texts , licenses[1] licenses restriction
     from appli.gui.commontools import crsf_token
 
     projectlist = [_prj_format(int(p)) for p in collection.project_ids]
     published = _is_published(collection)
-    aggregated = {}
+    aggregated: Dict[str, Any] = {}
     creators = {str(creator.id) + "_u": creator for creator in collection.creator_users}
     creators.update(
         {

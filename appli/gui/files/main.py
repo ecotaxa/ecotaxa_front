@@ -1,3 +1,4 @@
+from typing import Optional
 from flask_login import login_required
 from appli import app, gvp, gvpm
 from appli.gui.commontools import make_response
@@ -14,7 +15,7 @@ def gui_files_upload():
 @app.route("/gui/files/list", defaults={"subpath": None}, methods=["GET"])
 @app.route("/gui/files/list/<path:subpath>", methods=["GET"])
 @login_required
-def gui_files_dirlist(subpath: str = None):
+def gui_files_dirlist(subpath: Optional[str] = None):
     from appli.gui.files.tools import dir_list
     from appli.gui.commontools import todict
 

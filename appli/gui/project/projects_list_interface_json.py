@@ -2,7 +2,7 @@
 # import-[...] settings table def - projectsettings page create or update
 
 from to_back.ecotaxa_cli_py.models import ProjectModel
-from typing import List, Dict
+from typing import List, Dict, Any
 from flask_babel import _
 
 
@@ -77,7 +77,7 @@ def project_table_columns(
                 },
             }
         )
-    columns = {
+    columns: Dict[str, Any] = {
         "list": columns_list,
         "prediction": dict(
             {
@@ -360,13 +360,13 @@ def render_samples_stats(
             for t in taxo_with_names(list(set(used_taxa))):
                 usedtaxa.update(dict({str(t[0]): (t[1], t[2])}))
             for i, sample in enumerate(samples):
-                taxa = []
+                named_taxa: List[tuple] = []
                 for taxon in sample["used_taxa"]:
                     if str(taxon) in usedtaxa.keys():
-                        taxa.append((taxon, usedtaxa[str(taxon)]))
+                        named_taxa.append((taxon, usedtaxa[str(taxon)]))
                     else:
-                        taxa.append((taxon, "notfound"))
-                samples[i]["used_taxa"] = taxa
+                        named_taxa.append((taxon, "notfound"))
+                samples[i]["used_taxa"] = named_taxa
     return samples
 
 
@@ -486,6 +486,7 @@ def render_for_js(prjs: list, columns: dict, can_access: dict) -> list:
                 )
 
             else:
+                attrvalue: Any
                 if key == "select":
                     if "select" in column and column["select"] == "controls":
                         select = dict({})
@@ -548,7 +549,7 @@ def render_for_js(prjs: list, columns: dict, can_access: dict) -> list:
 
 
 def _render_privileges(prj: ProjectModel) -> dict:
-    privileges = dict({})
+    privileges: Dict[str, list] = {}
     rights = dict(
         {
             "managers": prj.managers,

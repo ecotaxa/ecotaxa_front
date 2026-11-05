@@ -10,6 +10,25 @@ on:
   workflow_dispatch:
 
 jobs:
+  # Python tests of the GUI (QA/py), back-end mocked: no DB nor back-end needed
+  python_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            QA/py/requirements-test.txt
+      - name: Install dependencies
+        run: pip install -r requirements.txt -r QA/py/requirements-test.txt
+      - name: Run Python tests
+        run: pytest QA/py --cov=appli/gui --cov-report=term
+
   # dev_gui JS tests (QA/dev_gui)
   dev_gui_tests:
     runs-on: ubuntu-latest

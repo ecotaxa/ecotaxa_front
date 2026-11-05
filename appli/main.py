@@ -67,7 +67,7 @@ def index():
 @app.route("/vault/<path:filename>")
 def get_from_vault(filename):
     # Serve an image, if e.g. apache or nginx did not intercept the query
-    return proxy_request("api/vault/" + filename)
+    return proxy_request("vault/" + filename)
 
 
 @app.before_request

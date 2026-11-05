@@ -1,8 +1,8 @@
 import json
 
-from typing import Optional, ClassVar, Union, Tuple
+from typing import Optional, ClassVar, Union, Tuple, List, Any
 import requests
-from flask import flash, request
+from flask import flash, request, Request
 from werkzeug.datastructures import FileStorage
 from appli import gvg, gvp
 from appli.project import sharedfilter
@@ -20,11 +20,11 @@ class Job(object):
 
     JOB_ID_POST_PARAM: ClassVar = "job_id"
     NOOBJ_TEMPLATE: ClassVar = "/v2/project/noright.html"
-    FINAL_TEMPLATE: ClassVar = None
+    FINAL_TEMPLATE: ClassVar[Optional[str]] = None
     TARGET_TYPE: ClassVar = None
     # for loop in collection projects
-    DONE: ClassVar = []
-    params: ClassVar = []
+    DONE: ClassVar[List[Any]] = []
+    params: ClassVar[List[Any]] = []
 
     def __init__(self):
         pass
@@ -70,18 +70,18 @@ class Job(object):
                 raise ApiException(404, "Collection %s not Found" % str(collection_id))
         else:
             if request.method == "GET":
-                prjid = gvg("projid" or "0")
+                prjid = gvg("projid", "0")
             else:
-                prjid = gvp("projid" or "0")
+                prjid = gvp("projid", "0")
             projid = int(prjid)
             return projid
 
     @classmethod
     def get_target_id(cls) -> Tuple[Union[int, str], int]:
         if request.method == "GET":
-            collid = gvg("collection_id" or "")
+            collid = gvg("collection_id", "")
         else:
-            collid = gvp("collection_id" or "")
+            collid = gvp("collection_id", "")
         if collid != "":
             cls.TARGET_TYPE = "collection"
             collection_id = int(collid)
@@ -102,7 +102,7 @@ class Job(object):
             return get_target_prj(projid, full=False)
 
     @classmethod
-    def get_file_from_form(cls, _request: request):
+    def get_file_from_form(cls, _request: Request):
         """
         Common treatment of "file" fields in several tasks.
         We have either:
@@ -111,7 +111,7 @@ class Job(object):
             or
             - request.files posted, with the full file content inside.
         """
-        uploaded_file: FileStorage = request.files.get("uploadfile")
+        uploaded_file: Optional[FileStorage] = _request.files.get("uploadfile")
         if uploaded_file is not None and uploaded_file.filename != "":
             # Relay the file to back-end
             with ApiClient(MyFilesApi, _request) as api:
@@ -131,7 +131,7 @@ class Job(object):
                 else:
                     return file_rsp.json(), None
         else:
-            return request.form.get("ServerPath", ""), None
+            return _request.form.get("ServerPath", ""), None
 
     @classmethod
     def _extract_filters_from_url(cls) -> list:
@@ -165,13 +165,15 @@ class Job(object):
     def get_job(cls) -> Optional[JobModel]:
         try:
             with ApiClient(JobsApi, request) as api:
-                job: JobModel = api.get_job(job_id=int(cls.JOB_ID_POST_PARAM))
+                job_id = int(gvp(cls.JOB_ID_POST_PARAM, gvg(cls.JOB_ID_POST_PARAM, "0")))
+                job: JobModel = api.get_job(job_id=job_id)
             return job
         except ApiException as ae:
             if ae.status in (401, 403):
                 flash(py_messages["notauthorized"], "error")
             elif ae.status == 404:
                 flash(py_messages["notfound"], "error")
+        return None
 
 
 def load_from_json(txt, clazz):

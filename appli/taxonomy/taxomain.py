@@ -1,5 +1,5 @@
 import json
-from typing import Optional, List, Any
+from typing import Optional
 
 from flask import render_template, g, flash, request
 from flask_login import current_user
@@ -71,7 +71,7 @@ def DoSyncStatUpdate():
 
 
 @app.route("/taxo/search", methods=["GET"])
-def routetaxosearch() -> List[Any]:
+def routetaxosearch() -> str:
     name = gvg("q", "").strip()
     user = get_login()
     if user is None:

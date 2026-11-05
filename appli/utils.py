@@ -1,11 +1,12 @@
 #
-# Utility defs not depending on the Flask app.
+# Utility defs not depending (too much...) on the Flask app.
 #
 import urllib.parse
-from typing import Type, TypeVar, Generic, Union, Dict, List, Optional, Tuple
+from typing import Type, TypeVar, Generic, Union, Dict, List, Optional, Tuple, Any
 
 from flask import Request, request
 from flask_login import current_user
+from urllib3.response import HTTPResponse
 from werkzeug.local import LocalProxy
 
 from to_back import booster
@@ -15,7 +16,6 @@ from to_back.ecotaxa_cli_py import (
     ApiException,
     MinUserModel,
 )
-from to_back.ecotaxa_cli_py.models.access_level_enum import AccessLevelEnum
 from to_back.ecotaxa_cli_py.api import (
     AuthentificationApi,
     ProjectsApi,
@@ -30,7 +30,13 @@ from to_back.ecotaxa_cli_py.api import (
     InstrumentsApi,
     JobsApi,
     AdminApi,
+    CollectionsApi,
+    GuestsApi,
+    OrganizationsApi,
+    MyFilesApi,
 )
+from to_back.ecotaxa_cli_py.models.access_level_enum import AccessLevelEnum
+from to_back.ecotaxa_cli_py.rest import RESTResponse
 
 # Lol, generics in python
 A = TypeVar(
@@ -48,6 +54,10 @@ A = TypeVar(
     InstrumentsApi,
     JobsApi,
     AdminApi,
+    CollectionsApi,
+    GuestsApi,
+    OrganizationsApi,
+    MyFilesApi,
 )
 
 
@@ -57,6 +67,7 @@ class ApiClient(Generic[A]):
     def __init__(self, api_class: Type[A], token: Union[str, LocalProxy, Request]):
         api_client = _ApiClient()
         booster.boost(api_client)
+        self._piggyback_call_api(api_client)
         if isinstance(token, LocalProxy):
             token = token.cookies.get("session")  # type: ignore
         api_client.configuration.access_token = token
@@ -66,6 +77,41 @@ class ApiClient(Generic[A]):
         api_client.configuration.host = backend_url
         # Call constructor on base class
         self.under: A = api_class(api_client)
+
+    @classmethod
+    def _piggyback_call_api(cls, api_client: _ApiClient) -> None:
+        # Don't accumulate, just in case
+        if getattr(api_client, "_is_piggybacked", False):
+            return
+
+        orig_call_api = api_client.call_api
+        from appli import app
+
+        def call_api_piggybacked(resource_path: str, method: str, *args: Any, **kwargs: Any) -> Any:
+            try:
+                res = orig_call_api(resource_path, method, *args, **kwargs)
+                status: int | None = None
+                if isinstance(res, tuple) and len(res) >= 2 and isinstance(res[1], int):
+                    status = res[1]
+                elif isinstance(res, (RESTResponse, HTTPResponse)):
+                    status = res.status
+                if status and 400 <= status <= 599:
+                    app.logger.warning("API call %s %s returned %d", method, resource_path, status)
+                return res
+            except ApiException as ae:
+                status = ae.status
+                if status and 400 <= int(status) <= 599:
+                    app.logger.warning(
+                        "API call %s %s returned %s: %s",
+                        method,
+                        resource_path,
+                        status,
+                        ae.reason or ae.body,
+                    )
+                raise
+
+        api_client.call_api = call_api_piggybacked  # type: ignore
+        setattr(api_client, "_is_piggybacked", True)
 
     def __enter__(self) -> A:
         return self.under

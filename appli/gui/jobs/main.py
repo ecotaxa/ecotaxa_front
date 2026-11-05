@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from flask import request, render_template, Response, redirect, url_for, flash
 from flask_login import current_user, login_required
 from appli import app, gvg
@@ -20,7 +20,7 @@ def gui_job_create(job_type: str):
     Used from menu (GET) and in self-submitted POST.
     """
     py_messages = py_get_messages("jobs")
-    target_type = gvg("target_type" or None)
+    target_type = gvg("target_type")
     try:
         job_cls = Job.find_job_class_by_name(Job, job_type)
         if target_type == "collection":
@@ -46,11 +46,17 @@ def gui_job_show(job_id: int):
     Used from full job display (GET) and in self-submitted POST.
     """
     # from appli.gui.project.projectsettings import get_target_prj
-    if job_id and gvg("log") == "Y":
-        with ApiClient(JobsApi, request) as japi:
-            rsp = japi.get_job_log_file(job_id=job_id)
-        return Response(rsp, mimetype="text/plain")
     py_messages = py_get_messages("jobs")
+    if job_id and gvg("log") == "Y":
+        try:
+            with ApiClient(JobsApi, request) as japi:
+                rsp = japi.get_job_log_file(job_id=job_id)
+        except ApiException as ae:
+            # e.g. log file purged from the task directory, the back-end answers 500
+            return Response(
+                py_messages["nolog"], status=ae.status or 500, mimetype="text/plain"
+            )
+        return Response(rsp, mimetype="text/plain")
     with ApiClient(JobsApi, request) as api:
         try:
             job: JobModel = api.get_job(job_id=job_id)
@@ -185,7 +191,7 @@ def gui_job_force_restart(job_id: int):
 @login_required
 def gui_job_cleanup(jobid: int):
     py_messages = py_get_messages("jobs")
-    projid = 0
+    projid: Optional[int] = 0
     collection_id = 0
     try:
         with ApiClient(JobsApi, request) as api:

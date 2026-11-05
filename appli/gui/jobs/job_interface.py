@@ -1,5 +1,5 @@
 from flask_babel import _
-from typing import Dict, Optional
+from typing import Dict, Optional, Tuple
 from flask import request
 from appli.utils import ApiClient
 from appli.gui.jobs.staticlistes import JOB_STATE_TO_USER_STATE
@@ -281,7 +281,7 @@ def export_format_options(
     return formdatas, options, None
 
 
-def import_format_options(_type=None) -> dict:
+def import_format_options(_type: Optional[str] = None) -> Tuple[dict, dict, None]:
 
     formdatas = dict(
         {

@@ -1,3 +1,48 @@
+## 2026-11-03 : v3.4.1
+    Upd: requests 2.32.5 -> 2.34.2 (security advisory, affected < 2.33.0)
+    Upd: Flask 3.1.2 -> 3.1.3 (security advisory GHSA-68rp-wp8r-4726, session Vary: Cookie)
+    Dev: mypy appli clean (227 -> 0 errors), types-requests removed from requirements
+    Fix: login - pending/inactive user got an error 500 instead of the status message (isinstance "dict")
+    Fix: user admin activate - posted status ignored, status messages never matched
+    Fix: user admin activate - error 500 on /activate/<id> without trailing slash, not found page when the user is missing
+    Fix: organization edit - other directories (ROR...) lost when the current organization could not be read
+    Fix: guest edit/create - response id was the python builtin id, KeyError on create with an existing id
+    Fix: guests list - get_guests ids parameter
+    Fix: collection settings - aggregated annotators listed once per project, now unique by id
+    Fix: collections list - project_ids passed as partial
+    Fix: project about - classification preset taxa never shown
+    Fix: taxonomy guide sheets - taxon id keys as str to match the lookup
+    Fix: jobs - job id read from the param name, projid/collection_id defaults never passed to gvg
+    Fix: gui copy_cookies - multiple Set-Cookie headers folded into one
+    Fix: format_exception returned None for errors without body
+    Fix: job page - "View log file" showed the error page when the log file is missing, now a short message
+    Mod: remove dead gui_collection_classify view (jobs templates link to gui_collection_view) and collection_stats.py
+## 2026-10-12 : v3.3.3
+    Fix: my files - archive reported as finished while a large file was still compressed in a worker, file counted as zipped once its last chunk is written
+    Fix: my files - "error : stream finishing" when clicking Upload twice (Chrome), archive closed once, button disabled with "Finalizing archive..."
+    Upd: build prod files
+## 2026-10-09 : v3.3.2
+    Requires back-end v3.3.8 for /token, older back-ends still supported
+    Mod: login uses back-end /token instead of deprecated /login, refresh token revoked at once (GUI session in Flask cookie)
+    Mod: fallback to /login when back-end has no /token (404/405)
+    Upd: to_back API client regenerated (token, refresh_token, revoke_token)
+    Upd: build prod files
+## 2026-10-08 : v3.3.1
+    Requires back-end v3.3.7 (GET /instruments/cnn_networks)
+    Feature: project settings - CNN networks for the project instrument suggested first, any network can still be chosen
+    Mod: CNN network suggestions follow the selected instrument, in JS
+    Mod: reset CNN network and warn when the instrument changes
+    Mod: order CNN networks, suggested by date desc, others by instrument then date desc
+    Fix: cnn_networks suggestion missing files
+## 2026-10-08 : v3.3.0
+    Requires back-end v3.3.6
+    Feature: organizations EDMO code (edmo:<code> in directories, other directories kept), EDMO search suggestions
+    Feature: register form - EDMO search and organization creation with the email token
+    Mod: organizations clean names
+    Mod: sort samples alphabetically for display (ecotaxa/ecotaxa#84)
+    Fix: taxopopup is over everything now (ecotaxa/ecotaxa#82)
+    Fix: EDMO search and organization auth
+    Upd: to_back API client regenerated
 ## 2024-06-10 : v2.7.5
     Feature: users list speed - use of api summary parameter
     Feature : users list : text status instead of int 

@@ -1,4 +1,4 @@
-from flask import request, render_template, make_response
+from flask import request, render_template, make_response, Response
 from flask_login import login_required
 from appli import app, gvg
 from appli.gui.commontools import is_partial_request
@@ -33,17 +33,17 @@ def gui_collection() -> str:
 
 @app.route("/gui/collectionlist/", methods=["GET"])
 @login_required
-def gui_collections_list() -> str:
+def gui_collections_list() -> Response:
     # gzip not really necessary - jsonifiy with separators
     import json
     from appli.gui.collection.collections_list import collections_list
 
-    project_ids = gvg("project_ids", None)
-    gz = gvg("gzip")
+    project_ids = request.args.get("project_ids")
+    # always gzipped, the "gzip" query param is ignored
     gz = True
     content = json.dumps(
-        collections_list(project_ids),
-        separators=[",", ":"],
+        collections_list(project_ids=project_ids),
+        separators=(",", ":"),
     ).encode("utf-8")
     encoding = "utf-8"
     if gz:
@@ -92,15 +92,6 @@ def gui_collection_edit(collection_id):
     from appli.gui.collection.settings import collection_edit
 
     return collection_edit(collection_id)
-
-
-@app.route("/gui/collection/<int:collection_id>", methods=["GET"])
-# TODO - fresh_login_required
-@login_required
-def gui_collection_classify(collection_id):
-    from appli.gui.collection.settings import collection_classify
-
-    return collection_classify(collection_id)
 
 
 @app.route("/gui/collection/erase/<int:collection_id>", methods=["GET", "POST"])

@@ -79,14 +79,15 @@ def get_taxo_recast(
 
     except ApiException as ae:
         new_ui_error(ae)
+        return None
 
 
 def read_taxo_recast(target_id: int, operation: str, is_collection: bool):
     project_ids = ""
     if is_collection:
         try:
-            with ApiClient(CollectionsApi, request) as api:
-                collection = api.get_collection(collection_id=target_id)
+            with ApiClient(CollectionsApi, request) as capi:
+                collection = capi.get_collection(collection_id=target_id)
             project_ids = ",".join([str(pid) for pid in collection.project_ids])
         except ApiException as ae:
             new_ui_error(ae)
@@ -361,7 +362,6 @@ def posted_modified_recast(dwca: bool) -> bool:
         while idx <= int(taxanum):
             to = gvp(prefix + "item-" + k + "-" + str(idx))
             frm = gvp(prefix + "item-from-" + str(idx))
-            print(" to=" + to + " from=", frm)
             if frm in data:
                 keep = data[frm]
                 if str(to) != str(keep):

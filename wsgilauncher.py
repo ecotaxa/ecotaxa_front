@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # This file is part of Ecotaxa, see license.md in the application root directory for license informations.
-# Copyright (C) 2015-2024  Picheral, Colin, Irisson (UPMC-CNRS)
-import logging
-import logging.handlers
+# Copyright (C) 2015-2026  Picheral, Colin, Irisson (UPMC-CNRS)
+#
+# Production WSGI server, @see docker configuration
 import os
 import sys
 
@@ -12,15 +12,9 @@ if app_dir not in sys.path:
     sys.path.insert(0, app_dir)
 os.chdir(app_dir)
 
-from appli import app as application
+from appli import app
+from logging_conf import setup_logging
 
-# Configure logging
-log_file = os.path.join(app_dir, 'Ecotaxa.log')
-handler = logging.handlers.RotatingFileHandler(log_file, maxBytes=1_000_000, backupCount=2)
-handler.setLevel(logging.INFO)
-logging_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-handler.setFormatter(logging.Formatter(logging_format))
+setup_logging(app)
 
-application.logger.setLevel(logging.INFO)
-application.logger.addHandler(handler)
-application.logger.info("App WSGI Startup")
+app.logger.info("App WSGI Startup")

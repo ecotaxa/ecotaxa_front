@@ -17,15 +17,16 @@ def render_content_json(content):
         encoding = "gzip"
     response = make_response(content)
     response.headers["Content-length"] = len(content)
-    response.headers["Content-Encoding"] = encoding
-    response.headers["Content-Type"] = "application/json"
+    if gz:
+        response.headers["Content-Encoding"] = "gzip"
+    response.headers["Content-Type"] = "application/json; charset=utf-8"
 
     return response
 
 
 def allguests_list(ids: str = ""):
     with ApiClient(GuestsApi, request) as api:
-        guests = api.guet_guests(ids)
+        guests = api.get_guests(ids=ids)
     from appli.gui.admin.users_list_interface_json import (
         guest_table_columns,
         render_for_js,
@@ -178,7 +179,9 @@ def gui_person_create():
         else:
             response["error"] = 1
             response["message"] = resp[1]
-        return make_response(jsonify(response), resp[0])
+        # resp[0] is an internal code, not an HTTP status
+        status = 200 if resp[0] == 0 else 403 if resp[0] in (401, 403) else 422
+        return make_response(jsonify(response), status)
     else:
         if _type == "organization":
             from appli.gui.organizations.organizations import (

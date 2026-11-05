@@ -53,7 +53,7 @@ class ExportDarwinCoreJob(ExportJob):
     @classmethod
     def api_job_call(
         cls, export_req: Dict[str, Union[List, DarwinCoreExportReq]]
-    ) -> str:
+    ) -> ExportRsp:
         with ApiClient(CollectionsApi, request) as api:
             rsp: ExportRsp = api.darwin_core_format_export(export_req["request"])
         return rsp

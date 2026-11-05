@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from typing import ClassVar, Dict
+from typing import ClassVar, Dict, Optional
 from flask import render_template, redirect, flash, url_for
 from appli.gui.jobs.Job import Job
 from to_back.ecotaxa_cli_py.models import JobModel, ExportRsp, TaxoRecastRsp
@@ -21,8 +21,8 @@ class ExportJob(Job):
     UI_NAME: ClassVar = "GenExport"
     STEP0_TEMPLATE: ClassVar = "/v2/jobs/export.html"
     FINAL_TEMPLATE: ClassVar = "/v2/jobs/_final_download.html"
-    EXPORT_TYPE: ClassVar = None
-    RECAST_OPERATION: ClassVar = None
+    EXPORT_TYPE: ClassVar[Optional[str]] = None
+    RECAST_OPERATION: ClassVar[Optional[str]] = None
 
     @classmethod
     def initial_dialog(cls):
@@ -75,7 +75,7 @@ class ExportJob(Job):
     @classmethod
     def api_job_call(cls, export_req) -> ExportRsp:
         """call api method depending on export type"""
-        pass
+        raise NotImplementedError
 
     @classmethod
     def create_or_update(cls):
