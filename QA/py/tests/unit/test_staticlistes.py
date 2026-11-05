@@ -9,7 +9,7 @@ def _walk(tree, path=""):
 
 
 def test_apptree_nodes_are_well_formed():
-    allowed = {"root", "one", "children"}
+    allowed = {"root", "one", "url", "children"}
     for path, node in _walk(sl.apptree):
         assert isinstance(node, (str, dict)) or hasattr(node, "__html__") or str(node), path
         if isinstance(node, dict):
@@ -19,8 +19,16 @@ def test_apptree_nodes_are_well_formed():
 
 
 def test_apptree_has_main_sections():
-    for key in ("", "prj", "collection", "jobs", "job"):
+    for key in ("", "prj", "collection", "jobs"):
         assert key in sl.apptree
+
+
+def test_crumb_aliases_point_to_existing_nodes():
+    # old /gui/job/... routes share the "jobs" crumb
+    assert sl.crumb_aliases["job"] == "jobs"
+    for alias, target in sl.crumb_aliases.items():
+        assert alias not in sl.apptree, alias
+        assert target in sl.apptree, target
 
 
 def test_message_dicts_are_flat_strings():

@@ -35,6 +35,18 @@ def test_breadcrumbs_project_settings(app):
     assert crumbs[1]["url"] == "/prj"
 
 
+def test_breadcrumbs_job_view_uses_jobs_crumb(app):
+    # old /gui/job/... route, shown like projects: Home > Jobs > View
+    crumbs = _crumbs(app, "/gui/job/show/12")
+    assert [c["text"] for c in crumbs] == ["Home", "Jobs", "View"]
+    assert crumbs[1]["url"] == "/gui/jobs"
+
+
+def test_breadcrumbs_jobs_list(app):
+    crumbs = _crumbs(app, "/gui/jobs/listall")
+    assert [c["text"] for c in crumbs] == ["Home", "Jobs"]
+
+
 def test_breadcrumbs_carry_trailing_id(app):
     # /gui/prj/123: the "Projects" crumb is followed by the project id
     crumbs = _crumbs(app, "/gui/prj/123")
