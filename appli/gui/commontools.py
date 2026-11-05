@@ -127,7 +127,7 @@ def last_taxo_refresh(cookiename):
 
 
 def breadcrumbs(default=None) -> list:
-    from appli.gui.staticlistes import apptree
+    from appli.gui.staticlistes import apptree, crumb_aliases
 
     crumbs = request.path.split("?")
     crumbs = crumbs[0].split("/")
@@ -142,8 +142,12 @@ def breadcrumbs(default=None) -> list:
     tree = apptree
     for i, crumb in enumerate(crumbs):
         if crumb != "" or (i == 0):
-            crumbvalue, childtree = breadcrumb(tree, crumb)
+            key = crumb_aliases.get(crumb, crumb)
+            crumbvalue, childtree = breadcrumb(tree, key)
             url.append(crumb)
+            node = tree.get(key) if isinstance(tree, dict) else None
+            if isinstance(node, dict) and "url" in node:
+                url = [node["url"]]
             if crumbvalue is not None:
                 crumbdict = dict({"url": "/".join(url), "text": crumbvalue})
                 if i + 2 == len(crumbs) and crumbs[i + 1].isdigit():
