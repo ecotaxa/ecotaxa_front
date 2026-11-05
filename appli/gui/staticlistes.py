@@ -35,11 +35,13 @@ apptree = dict(
                 "purge": _("delete"),
             },
         },
-        "jobs": _("Jobs"),
-        "job": {
-            "root": _("Job"),
+        "jobs": {
+            "root": _("Jobs"),
+            # crumb link target (no /jobs route outside /gui)
+            "url": "/gui/jobs",
             "children": {
                 "show": _("View"),
+                "question": _("question"),
                 "create": {
                     "children": {
                         "GenExport": _("export"),
@@ -55,6 +57,8 @@ apptree = dict(
         "about": _("About Ecotaxa"),
     }
 )
+# url segments sharing another node's crumb (old /gui/job/... routes -> Jobs)
+crumb_aliases = {"job": "jobs"}
 # flash and error messages
 py_messages = dict(
     {

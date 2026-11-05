@@ -2,7 +2,7 @@
   "openapi":"3.0.2",
   "info":{
     "title":"EcoTaxa",
-    "version":"0.0.52"
+    "version":"0.0.54"
   },
   "servers":[
     {
@@ -1125,7 +1125,7 @@
           "organizations"
         ],
         "summary":"Create Organization",
-        "description":"**Create a new organization**, return **NULL upon success.**\n\n🔒 Depending on logged user, different authorizations apply:\n- An administrator or user administrator or logged project manager can create an organization.\n- An ordinary logged user cannot create another organization this way.\n- An unlogged user creating an account can, with the token received by email.",
+        "description":"**Create a new organization**, return **NULL upon success.**\n\n🔒 Depending on logged user, different authorizations apply:\n- An administrator or user administrator can create organizations.\n- Any other logged user can create one, e.g. when updating one's profile.\n- An unlogged user creating an account can create one, with the token received by email.\n\nFor these last two, an organization they created before and that no person nor collection uses yet\nis replaced by the new one.",
         "operationId":"create_organization",
         "security":[
           {
@@ -2828,75 +2828,6 @@
                     "$ref":"#/components/schemas/MinimalCollectionBO"
                   },
                   "title":"Response Project Collections"
-                }
-              }
-            }
-          },
-          "422":{
-            "description":"Validation Error",
-            "content":{
-              "application/json":{
-                "schema":{
-                  "$ref":"#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/project_set/projects":{
-      "get":{
-        "tags":[
-          "projects"
-        ],
-        "summary":"Project Set Get Projects",
-        "description":"**Returns projects statistics**, i.e. used taxa and classification states.",
-        "operationId":"project_set_get_projects",
-        "security":[
-          {
-            "BearerOrCookieAuth":[]
-          }
-        ],
-        "parameters":[
-          {
-            "name":"ids",
-            "in":"query",
-            "required":true,
-            "schema":{
-              "type":"string",
-              "title":"Ids",
-              "description":"String containing the list of one or more project id separated by non-num char. \n \n **If several ids are provided**, one stat record will be returned per project.",
-              "example":"1"
-            },
-            "description":"String containing the list of one or more project id separated by non-num char. \n \n **If several ids are provided**, one stat record will be returned per project."
-          },
-          {
-            "name":"fields",
-            "in":"query",
-            "required":false,
-            "schema":{
-              "title":"Fields",
-              "description":"Return the default fields (typically used in conjunction with an additional field list). To return selected fields.",
-              "default":"*default",
-              "example":"*default,fieldlist",
-              "type":"string",
-              "nullable":true
-            },
-            "description":"Return the default fields (typically used in conjunction with an additional field list). To return selected fields."
-          }
-        ],
-        "responses":{
-          "200":{
-            "description":"Successful Response",
-            "content":{
-              "application/json":{
-                "schema":{
-                  "type":"array",
-                  "items":{
-                    "$ref":"#/components/schemas/ProjectColumnsModel"
-                  },
-                  "title":"Response Project Set Get Projects"
                 }
               }
             }
@@ -6959,16 +6890,6 @@
               "example":47445
             },
             "description":"Internal, the unique numeric id of this job."
-          },
-          {
-            "name":"Range",
-            "in":"header",
-            "required":false,
-            "schema":{
-              "title":"Range",
-              "type":"string",
-              "nullable":true
-            }
           }
         ],
         "responses":{
@@ -10781,33 +10702,6 @@
           "orig_id"
         ],
         "title":"ProcessModel"
-      },
-      "ProjectColumnsModel":{
-        "properties":{
-          "projid":{
-            "type":"integer",
-            "title":"Project ID",
-            "description":"Project ID from the call."
-          },
-          "columns":{
-            "items":{
-              "type":"string"
-            },
-            "type":"array",
-            "title":"Columns",
-            "description":"Column names from the call."
-          },
-          "values":{
-            "items":{
-              "type":"string"
-            },
-            "type":"array",
-            "title":"All rows",
-            "description":"All rows regardless of emptiness."
-          }
-        },
-        "type":"object",
-        "title":"ProjectColumnsModel"
       },
       "ProjectFilters":{
         "properties":{
