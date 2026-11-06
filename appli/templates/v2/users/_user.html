@@ -10,10 +10,10 @@
   {% endif%}
   {% set fieldp="password" if createaccount==True else "newpassword"%}
     <label for="{{fieldp}}">{{_('Password') if createaccount==True else _('New password')}}</label>
-  <input type="password" id="{{fieldp}}" name="{{fieldp}}" class="form-input" data-action="wrapeye" minlength="8" maxlength="20"  pattern="{{api_password_regexp()}}" {{'required' if not user or not user.id or user.id==-1 else ''}}  data-required="{{ _('a password is required')}}" {{' data-update=true' if createccount==False and not incadmin }} placeholder="{{_('Password')}}">
+  <input type="password" id="{{fieldp}}" name="{{fieldp}}" class="form-input" data-action="wrapeye" minlength="8" maxlength="64"  pattern="{{api_password_regexp()}}" {{'required' if not user or not user.id or user.id==-1 else ''}}  data-required="{{ _('a password is required')}}" {{' data-update=true' if createccount==False and not incadmin }} placeholder="{{_('Password')}}">
     {{ password_regexp()}}
     <label for="passwordconfirm">{{_('Password confirmation')}}</label>
-    <input type="password" id="passwordconfirm" name="passwordconfirm"  class="form-input" data-action="wrapeye" minlength="8" maxlength="20" pattern="{{api_password_regexp()}}" data-match="{{fieldp}}" data-matchinvalid="{{_('password does not match')}}" data-matchvalid="{{_('password match')}}" placeholder="{{_('Password confirmation')}}">
+    <input type="password" id="passwordconfirm" name="passwordconfirm"  class="form-input" data-action="wrapeye" minlength="8" maxlength="64" pattern="{{api_password_regexp()}}" data-match="{{fieldp}}" data-matchinvalid="{{_('password does not match')}}" data-matchvalid="{{_('password match')}}" placeholder="{{_('Password confirmation')}}">
      {% if user and user.id and user.id>0%}
     </div>
     {% endif%}
@@ -81,7 +81,7 @@
           {% if createaccount==True and user.id!=-1%}
           <div class="form-box">
           <label for="password">{{_('Your password')}}</label>
-          <input type="password" id="password" name="password" class="form-input" data-action="wrapeye" minlength="8" maxlength="20" required data-required="{{ _('a password is required')}}" placeholder="{{_('Password')}}">
+          <input type="password" id="password" name="password" class="form-input" data-action="wrapeye" required data-required="{{ _('a password is required')}}" placeholder="{{_('Password')}}">
         </div>
           {%endif%}
           {%if  createaccount == True and user.id==-1 and  not incadmin %}

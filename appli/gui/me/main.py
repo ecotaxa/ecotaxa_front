@@ -160,9 +160,18 @@ def gui_me_forgotten(token: str = ""):
         partial = True
         email = gvp("request_email")
         pwd = gvp("request_password")
-        from appli.gui.users.users import reset_password
+        from appli.gui.users.users import (
+            reset_password,
+            is_valid_password,
+            make_person_response,
+        )
 
-        response = reset_password(email, token, pwd)
+        if token and (
+            pwd != gvp("request_passwordconfirm") or not is_valid_password(pwd)
+        ):
+            response = make_person_response(422, py_user["passwordrule"])
+        else:
+            response = reset_password(email, token, pwd)
         return render_template(
             "./v2/security/reply.html",
             bg=True,

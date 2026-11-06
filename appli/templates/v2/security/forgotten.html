@@ -12,10 +12,10 @@
   <fieldset class="mb-0.5"><legend>{{ _('Enter your new password') }}</legend>
       <div class="form-box" class="relative">
       <label for="request_password" class="over">{{_('New password')}}</label>
-      <input name="request_password" id="request_password" class="form-input" data-action="wrapeye" placeholder="Your new password" type="password"  pattern="{{api_password_regexp()}}"  required autofocus>
+      <input name="request_password" id="request_password" class="form-input" data-action="wrapeye" placeholder="Your new password" type="password" minlength="8" maxlength="64" pattern="{{api_password_regexp()}}" required data-required="{{ _('a password is required')}}" autofocus>
       {{password_regexp()}}
       <label for="request_passwordconfirm">{{_('New password confirmation')}}</label>
-      <input type="password" id="request_passwordconfirm" name="request_passwordconfirm"  class="form-input"  data-action="wrapeye" pattern="{{api_password_regexp()}}"  required data-match="request_password" data-matchinvalid="{{_('password does not match')}}"  placeholder="{{_('New password confirmation')}}">
+      <input type="password" id="request_passwordconfirm" name="request_passwordconfirm"  class="form-input"  data-action="wrapeye" minlength="8" maxlength="64" pattern="{{api_password_regexp()}}" required data-required="{{ _('a password is required')}}" data-match="request_password" data-matchinvalid="{{_('password does not match')}}"  placeholder="{{_('New password confirmation')}}">
       <input type="hidden" name="request_email" value={{ email }}>
       </div>
   {% else%}

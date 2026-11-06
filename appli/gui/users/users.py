@@ -1,3 +1,4 @@
+import re
 from flask import request, render_template, flash, redirect, url_for, Response, jsonify
 from werkzeug.exceptions import NotFound, Forbidden, UnprocessableEntity
 from typing import Union, Optional, List, Dict, Any
@@ -572,6 +573,8 @@ def reset_password(
             code = ae.status
             if ae.status in (401, 403, 404):
                 message = py_user["notauthorized"]
+            elif ae.status == 422 and token:
+                message = py_user["passwordrule"]
             else:
                 # dont give too much infos
                 message = ""
@@ -655,7 +658,13 @@ def _get_mail_from_token(token: str, age: int = SHORT_TOKEN_AGE) -> tuple:
 
 
 def api_password_regexp() -> str:
-    return API_PASSWORD_REGEXP
+    # HTML pattern is compiled with the "v" flag: an unescaped "-" in a class is a
+    # syntax error there and the browser silently ignores the whole pattern
+    return re.sub(r"(?<!\\)-\]", r"\\-]", API_PASSWORD_REGEXP)
+
+
+def is_valid_password(pwd: Optional[str]) -> bool:
+    return pwd is not None and re.match(API_PASSWORD_REGEXP, pwd) is not None
 
 
 def api_current_user(redir: bool = True):

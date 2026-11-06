@@ -139,7 +139,7 @@ export class FormSubmit {
         item.focus();
       };
       [input, target].forEach(item => {
-        item.addEventListener('keyup', (e) => {
+        item.addEventListener('input', (e) => {
           const itemtarget = (item === input) ? target : input;
           const itemsrc = (item === input) ? input : target;
           check_match(itemsrc, itemtarget);

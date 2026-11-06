@@ -179,8 +179,9 @@ py_user = dict(
             "An activation request has been sent to the administrator. You will receive instructions to modify your email which is no longer accepted."
         ),
         "passwordrule": _(
-            "The password must be : - minimum length 8 - 1 or more numeric - 1 or more uppercase - 1 or more lowercase - 1 or more  "
-        ),
+            "8 to 64 chars, at least one uppercase, one lowercase, one number and one special char in "
+        )
+        + '"!@#?%^&*-+"',
         "wrongstatus": _("Status value error"),
         "statusnotauthorized": {
             "2": _("Please modify your personal data as requested before by email."),
