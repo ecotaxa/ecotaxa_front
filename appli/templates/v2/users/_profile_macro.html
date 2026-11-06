@@ -20,4 +20,7 @@
  </em>
 {%-endif-%}
 {%-endmacro-%}
+{%- macro password_regexp(type="")-%}
+<em class="password-regexp small text-xs">{{_('8 to 64 chars, at least one uppercase, one lowercase, one number and one special char in ')}}"!@#?%^&*-+"</em>
+{%-endmacro-%}
 
