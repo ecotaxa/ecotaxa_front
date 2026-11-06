@@ -24,6 +24,7 @@ def test_login_page(anon_client):
     rsp = anon_client.get("/gui/login")
     assert rsp.status_code == 200
     assert b'name="email"' in rsp.data and b'name="password"' in rsp.data
+    assert b"password-regexp" not in rsp.data
 
 
 def test_login_page_redirects_logged_user(user_client):

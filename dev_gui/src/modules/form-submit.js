@@ -21,6 +21,25 @@ css.inputvalid = 'valid';
 css.required = 'required';
 css.tshidden = 'ts-hidden-accessible';
 
+// pattern attribute compiled as browsers do: whole value, 'v' flag ('u' in older browsers).
+// A pattern invalid with 'v' (e.g. an unescaped '-' in a class) is ignored by the browser: checked here with 'u'.
+// null: invalid regexp, not checked here - the server decides
+const patterns = new Map();
+
+function patternRegExp(pattern) {
+  if (!patterns.has(pattern)) {
+    let reg = null;
+    for (const flags of ['v', 'u']) {
+      try {
+        reg = new RegExp('^(?:' + pattern + ')$', flags);
+        break;
+      } catch (e) {}
+    }
+    patterns.set(pattern, reg);
+  }
+  return patterns.get(pattern);
+}
+
 export class FormSubmit {
   handlers = {
     validate: [],
@@ -99,53 +118,15 @@ export class FormSubmit {
   specialFields() {
     // check if there is a password confirm input
     // add show text for password fields
-
-    this.form.querySelectorAll('input[data-match]').forEach(input => { //
+    // the match is checked by validateField: check the confirm input again when the field to match changes
+    this.form.querySelectorAll('input[data-match]').forEach(input => {
       const match = input.dataset.match;
       if (!match) return;
       const target = document.getElementById(match);
       if (!target) return;
-      const invalid = (input.dataset.matchinvalid) ? input.dataset.matchinvalid : "no match";
-      const check_match = (item, itemtarget) => {
-        const label = item.closest(domselectors.component.form.formbox).querySelector('label[for="' + item.id + '"]');
-        const labeltarget = itemtarget.closest(domselectors.component.form.formbox).querySelector('label[for="' + itemtarget.id + '"]');
-        const {
-          patternMismatch = false
-        } = item.validity;
-        const customvalidity = (patternMismatch) ? this.getMessage(item, 'invalid') : ``;
-        if (item.checkValidity() === true) {
-          item.setCustomValidity('');
-          if (item == input && label !== null) label.classList.remove(css.invalid);
-          else if (labeltarget !== null) labeltarget.classList.remove(css.invalid);
-          item.classList.remove(css.invalid);
-          if (item.value !== itemtarget.value) {
-            itemtarget.setCustomValidity(invalid);
-            if (labeltarget) {
-              labeltarget.dataset.invalid = invalid;
-              labeltarget.classList.add(css.invalid);
-            }
-            itemtarget.classList.add(css.invalid);
-          } else {
-            itemtarget.setCustomValidity("");
-            if (labeltarget) labeltarget.classList.remove(css.invalid);
-            itemtarget.classList.remove(css.invalid);
-          }
-        } else {
-          item.setCustomValidity(customvalidity);
-          label.dataset.invalid = customvalidity;
-          if (label) label.classList.add(css.invalid);
-          item.classList.add(css.invalid);
-        }
-        item.focus();
-      };
-      [input, target].forEach(item => {
-        item.addEventListener('keyup', (e) => {
-          const itemtarget = (item === input) ? target : input;
-          const itemsrc = (item === input) ? input : target;
-          check_match(itemsrc, itemtarget);
-        });
+      target.addEventListener('input', () => {
+        if (input.value || input.classList.contains(css.invalid)) this.validateField(input, false, false);
       });
-
     });
   }
   getMessage(field, type = 'invalid') {
@@ -159,28 +140,43 @@ export class FormSubmit {
     const label = this.getFieldLabel(field);
     if (label == null) return;
     if (valid === true) {
+      field.classList.remove(css.invalid);
       label.classList.remove(css.invalid);
     } else {
       label.dataset.invalid = this.getMessage(field);
       label.classList.add(css.invalid);
-      const rect = label.getBoundingClientRect();
-      const x = rect.left;
-      const y = rect.top;
-      window.scrollTo({
-        top: y,
-        left: x,
-        behavior: 'smooth'
-      });
+      field.classList.add(css.invalid);
     }
   }
-  validateField(field, init = false) {
-   if (field.hasOwnProperty('readonly')) return true;
-    if (['select'].indexOf(field.tagName.toLowerCase()) >= 0) {
-      field.querySelectorAll('option:checked').forEach(option => {
-        option.value = decode_HTMLEntities(DOMPurify.sanitize(option.value));
-      });
-    } else field.value = decode_HTMLEntities(DOMPurify.sanitize(field.value));
+  validateField(field, init = false, sanitize = true) {
+    if (field.hasOwnProperty('readonly')) return true;
+    // sanitize on change and submit, not while typing
+    if (sanitize === true) {
+      if (['select'].indexOf(field.tagName.toLowerCase()) >= 0) {
+        field.querySelectorAll('option:checked').forEach(option => {
+          option.value = decode_HTMLEntities(DOMPurify.sanitize(option.value));
+        });
+      } else if (field.type !== 'password') {
+        field.value = decode_HTMLEntities(DOMPurify.sanitize(field.value));
+      }
+    }
+    // one custom message at a time, set below: pattern, then match
+    field.setCustomValidity('');
     let rep = field.checkValidity();
+    if (rep && field.value && field.getAttribute('pattern')) {
+      const reg = patternRegExp(field.getAttribute('pattern'));
+      if (reg !== null && !reg.test(field.value)) {
+        rep = false;
+        field.setCustomValidity(field.dataset.invalid || this.form.dataset.isinvalid || this.form.dataset.invalid || 'input invalid');
+      }
+    }
+    if (rep && field.dataset.match) {
+      const target = document.getElementById(field.dataset.match);
+      if (target && target.value !== field.value) {
+        rep = false;
+        field.setCustomValidity((field.dataset.matchinvalid) ? field.dataset.matchinvalid : 'no match');
+      }
+    }
     if (field.tomselect) field.classList.add(css.tshidden);
     if (rep && field.dataset.hasOwnProperty('unique')) {
       rep = this.validateFieldUnique(field);
@@ -201,6 +197,8 @@ export class FormSubmit {
 
   getFieldLabel(field) {
     let label = field.closest('[for="' + field.name + '"]') ? field.closest('[for="' + field.name + '"]') : (field.closest('[data-for="' + field.name + '"]')) ? field.closest('[data-for="' + field.name + '"]') : null;
+    // own label (e.g. password and confirmation in the same form-box) - checkboxes and radios: label of the group
+    if (label === null && field.labels && field.labels.length > 0 && ['checkbox', 'radio'].indexOf(field.type) < 0) label = field.labels[0];
     if (label === null) {
       label = (field.closest(domselectors.component.form.formbox)) ? ((field.closest(domselectors.component.form.formbox).querySelector('.label')) ? field.closest(domselectors.component.form.formbox).querySelector('.label') : field.closest(domselectors.component.form.formbox).querySelector('label')) : null;
     }
@@ -257,6 +255,13 @@ export class FormSubmit {
           }
           field.addEventListener('change', (e) => {
             this.validateField(e.target);
+          });
+          field.addEventListener('input', (e) => {
+            // live check while typing: fields with a pattern or to match, invalid fields
+            if (e.target !== field) return;
+            if (field.getAttribute('pattern') || field.dataset.match || field.classList.contains(css.invalid)) {
+              this.validateField(field, false, false);
+            }
           });
           field.dataset.listen = true;
           field.addEventListener('invalid', (e) => {
@@ -360,6 +365,15 @@ export class FormSubmit {
           content: 'Form not submitted, please check required fields and warning messages',
           dismissible: true
         });
+    // show the first invalid field
+    const invalid = this.form.querySelector('input:invalid, select:invalid, textarea:invalid');
+    if (invalid) {
+      const label = this.getFieldLabel(invalid);
+      ((label) ? label : invalid).scrollIntoView({
+        block: 'center',
+        behavior: 'smooth'
+      });
+    }
     this.enableForm();
     return false;
   }

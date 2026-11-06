@@ -385,10 +385,9 @@ def person_posted_data(usrid: int, isfrom: bool, fields: list) -> dict:
         del posted["lastname"]
 
     if "newpassword" in posted.keys():
-        if len(posted["newpassword"]) > 6:
+        if posted["newpassword"].strip() != "":
             posted["password"] = posted["newpassword"]
-        else:
-            del posted["newpassword"]
+        del posted["newpassword"]
     if isfrom:
         posted["status"] = gvp("status", "0")
         posted["can_do"] = gvpm("can_do")
@@ -413,8 +412,6 @@ def user_account(
     if action == ACCOUNT_USER_EDIT:
         if "newpassword" in posted:
             del posted["newpassword"]
-        elif "password" in posted:
-            del posted["password"]
         if usrid == -1:
             return 1, "nouserid"
         elif current_user.id == usrid:
