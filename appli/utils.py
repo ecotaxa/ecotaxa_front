@@ -61,6 +61,63 @@ A = TypeVar(
 )
 
 
+def _params_to_tuples(
+    api_client: Optional[_ApiClient],
+    params: Any,
+    collection_formats: Any = None,
+) -> List[Tuple[str, Any]]:
+    if not params:
+        return []
+    if api_client is not None and hasattr(api_client, "sanitize_for_serialization") and hasattr(api_client, "parameters_to_tuples"):
+        sanitized = api_client.sanitize_for_serialization(params)
+        return api_client.parameters_to_tuples(sanitized, collection_formats)
+    if isinstance(params, dict):
+        return list(params.items())
+    if isinstance(params, (list, tuple)):
+        return list(params)
+    return []
+
+
+def reconstitute_url(
+    api_client: Optional[_ApiClient],
+    resource_path: str,
+    *args: Any,
+    **kwargs: Any,
+) -> str:
+    """
+    Reconstitute the called URL/method path from resource_path, positional *args and **kwargs without host/protocol.
+    Query parameters exceeding 250 characters are truncated with '...'.
+    """
+    try:
+        path_params = kwargs.get("path_params") if "path_params" in kwargs else (args[0] if len(args) > 0 else None)
+        query_params = kwargs.get("query_params") if "query_params" in kwargs else (args[1] if len(args) > 1 else None)
+        collection_formats = kwargs.get("collection_formats") if "collection_formats" in kwargs else (args[10] if len(args) > 10 else None)
+
+        url = resource_path
+
+        # Substitute path parameters
+        if path_params:
+            config = getattr(api_client, "configuration", None) if api_client is not None else None
+            safe_chars = getattr(config, "safe_chars_for_path_param", "") if config is not None else ""
+            for k, v in _params_to_tuples(api_client, path_params, collection_formats):
+                url = url.replace("{%s}" % k, urllib.parse.quote(str(v), safe=safe_chars))
+
+        # Append query parameters
+        if query_params:
+            query_param_tuples = _params_to_tuples(api_client, query_params, collection_formats)
+            if query_param_tuples:
+                encoded_query = urllib.parse.urlencode(query_param_tuples)
+                if encoded_query:
+                    if len(encoded_query) > 250:
+                        encoded_query = encoded_query[:250] + "..."
+                    separator = "&" if "?" in url else "?"
+                    url += separator + encoded_query
+
+        return url
+    except Exception:
+        return resource_path
+
+
 class ApiClient(Generic[A]):
     """A client with guaranteed resource released"""
 
@@ -96,15 +153,17 @@ class ApiClient(Generic[A]):
                 elif isinstance(res, (RESTResponse, HTTPResponse)):
                     status = res.status
                 if status and 400 <= status <= 599:
-                    app.logger.warning("API call %s %s returned %d", method, resource_path, status)
+                    url = reconstitute_url(api_client, resource_path, *args, **kwargs)
+                    app.logger.warning("API call %s %s returned %d", method, url, status)
                 return res
             except ApiException as ae:
                 status = ae.status
                 if status and 400 <= int(status) <= 599:
+                    url = reconstitute_url(api_client, resource_path, *args, **kwargs)
                     app.logger.warning(
                         "API call %s %s returned %s: %s",
                         method,
-                        resource_path,
+                        url,
                         status,
                         ae.reason or ae.body,
                     )
