@@ -1,9 +1,11 @@
+import re
 import time
 
 import pytest
 from itsdangerous import URLSafeTimedSerializer, TimestampSigner
+from markupsafe import escape
 
-from fakes import api_exception, make_user, populate
+from fakes import api_exception, load_constants, make_user, populate
 from to_back.ecotaxa_cli_py.api import UsersApi
 
 
@@ -192,6 +194,72 @@ def test_register_with_token_creates_account(app, anon_client, backend):
     assert kw["token"] == tok
     sent = kw["user_model_with_rights"]
     assert sent.name == "Ann Smith" and sent.email == "new@example.org" and sent.password == "Secret#1234"
+
+
+# ------------------------------------------------------------------ password fields
+# Strength (pattern: password_regexp of the back-end) is checked on a new password only.
+# The current password, asked to confirm an action, can be weaker (older accounts).
+
+
+def _password_inputs(html: str) -> dict:
+    tags = re.findall(r'<input[^>]*type="password"[^>]*>', html)
+    return {re.search(r'\bid="([^"]*)"', tag).group(1): tag for tag in tags}
+
+
+@pytest.mark.parametrize(
+    "client_fixture, url, fields",
+    [
+        ("user_client", "/gui/me/profile", ("newpassword", "passwordconfirm")),
+        ("anon_client", "/gui/me/forgotten/tok", ("request_password", "request_passwordconfirm")),
+    ],
+    ids=["profile", "forgotten"],
+)
+def test_new_password_pattern(request, backend, client_fixture, url, fields):
+    from appli.gui.users.users import api_password_regexp
+
+    populate(backend)
+    rsp = request.getfixturevalue(client_fixture).get(url)
+    assert rsp.status_code == 200
+    inputs = _password_inputs(rsp.get_data(as_text=True))
+    pattern = 'pattern="%s"' % escape(api_password_regexp())
+    for field in fields:
+        assert pattern in inputs[field], field
+
+
+def test_activate_current_password_has_no_pattern(anon_client, backend):
+    populate(backend)
+    rsp = anon_client.get("/gui/me/activate/tok")
+    assert rsp.status_code == 200
+    inputs = _password_inputs(rsp.get_data(as_text=True))
+    assert "password" in inputs
+    assert not [tag for tag in inputs.values() if "pattern=" in tag]
+
+
+@pytest.mark.parametrize(
+    "user",
+    [None, {"id": 42, "email": "pending@example.org", "name": "Pending User"}],
+    ids=["password-first", "profile-form"],
+)
+def test_pending_account_current_password_has_no_pattern(app, anon_client, backend, user):
+    # account validation: the password of the pending account is asked, then sent again with the profile
+    from flask import render_template
+
+    populate(backend)
+    with app.test_request_context("/gui/register/tok"):
+        html = render_template(
+            "v2/register.html",
+            usrid=42,
+            user=user,
+            token="tok",
+            createaccount=True,
+            api_account_validation=True,
+            api_email_verification=True,
+            organisations=[],
+            countries=[],
+        )
+    inputs = _password_inputs(html)
+    assert "password" in inputs
+    assert not [tag for tag in inputs.values() if "pattern=" in tag]
 
 
 def test_homecaptcha_round_trip(app, backend):
