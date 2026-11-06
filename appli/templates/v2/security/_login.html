@@ -1,4 +1,3 @@
-  {% from "./v2/users/_profile_macro.html" import password_regexp %}
 <form id="form-signin" action="{{ url_for('gui_login') }}" method="POST" name="login_user_form">
   {%- set next = get_referrer() -%}
 <fieldset class="py-0 mb-0.5"><legend>{{ _('Log in') }}</legend>
@@ -9,7 +8,6 @@
     <div class="form-box md:-mt-4">
     <label for="password" class="over required">Password</label>
     <input type="password" name="password" id="password" class="form-input" data-action="wrapeye" placeholder="your password" required>
-    {{password_regexp()}}
     </div>
     <div class="h-6 py-0 -mt-4 mb-0"><a class="leading-6 text-xs italic float-right clear-right" href="{{url_for('gui_me_forgotten')}}">{{ _('forgot password?')}}</a>
       <label for="remember" class="font-normal leading-6">

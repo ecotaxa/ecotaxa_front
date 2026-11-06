@@ -1,6 +1,6 @@
   {% from "./v2/macros/macros.html" import inputdict, alertbox with context %}
   {% from "./v2/macros/_captcha.html" import captcha with context%}
-  {% from "./v2/users/_profile_macro.html" import promail_required, password_regexp %}
+  {% from "./v2/users/_profile_macro.html" import promail_required %}
   {%macro password_box()-%}
   {% set disabled=""%}
   <div class="form-box">
@@ -10,10 +10,9 @@
   {% endif%}
   {% set fieldp="password" if createaccount==True else "newpassword"%}
     <label for="{{fieldp}}">{{_('Password') if createaccount==True else _('New password')}}</label>
-  <input type="password" id="{{fieldp}}" name="{{fieldp}}" class="form-input" data-action="wrapeye" minlength="8" maxlength="64"  pattern="{{api_password_regexp()}}" {{'required' if not user or not user.id or user.id==-1 else ''}}  data-required="{{ _('a password is required')}}" {{' data-update=true' if createccount==False and not incadmin }} placeholder="{{_('Password')}}">
-    {{ password_regexp()}}
+  <input type="password" id="{{fieldp}}" name="{{fieldp}}" class="form-input" data-action="wrapeye" minlength="8" maxlength="64"  pattern="{{api_password_regexp()}}" data-invalid="{{_('8 to 64 chars, at least one uppercase, one lowercase, one number and one special char in ')}}&quot;!@#?%^&amp;*-+&quot;" {{'required' if not user or not user.id or user.id==-1 else ''}}  data-required="{{ _('a password is required')}}" {{' data-update=true' if createccount==False and not incadmin }} placeholder="{{_('Password')}}">
     <label for="passwordconfirm">{{_('Password confirmation')}}</label>
-    <input type="password" id="passwordconfirm" name="passwordconfirm"  class="form-input" data-action="wrapeye" minlength="8" maxlength="64" pattern="{{api_password_regexp()}}" data-match="{{fieldp}}" data-matchinvalid="{{_('password does not match')}}" data-matchvalid="{{_('password match')}}" placeholder="{{_('Password confirmation')}}">
+    <input type="password" id="passwordconfirm" name="passwordconfirm"  class="form-input" data-action="wrapeye" minlength="8" maxlength="64" pattern="{{api_password_regexp()}}" data-invalid="{{_('8 to 64 chars, at least one uppercase, one lowercase, one number and one special char in ')}}&quot;!@#?%^&amp;*-+&quot;" data-match="{{fieldp}}" data-matchinvalid="{{_('password does not match')}}" data-matchvalid="{{_('password match')}}" placeholder="{{_('Password confirmation')}}">
      {% if user and user.id and user.id>0%}
     </div>
     {% endif%}
