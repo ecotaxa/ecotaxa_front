@@ -16,10 +16,7 @@ from werkzeug.wsgi import wrap_file
 from appli import app, backend_url
 
 
-# noinspection HttpUrlsUsage
-
-
-@app.route("/api/<path:path>", methods=["GET", "POST", "DELETE", "PUT", "PATCH"])
+@app.route("/api/<path:path>", methods=["GET", "POST", "DELETE", "PUT", "PATCH", "HEAD"])
 def proxy_request(path):
     start = time.time()
     # Prepare request data
@@ -27,24 +24,12 @@ def proxy_request(path):
     url = f"/api/{path}"
     body = request.get_data()
     headers = _copy_headers_and_session(request.headers)
-    if method == "POST":
-        params = request.args  # re-encode URL params if any
-        if path == "login":
-            # Proxy the login which is here and not in backend yet
-            # TODO
-            pass
-    elif method == "GET":
+    if method == "GET":
         # From URL
         params = request.values  # join of request.args and request.form
-    elif method == "DELETE":
-        params = request.args
-    elif method == "PUT":
-        params = request.args
-    elif method == "PATCH":
-        params = request.args
     else:
-        return "Not implemented"
-    # Do the call itself
+        params = request.args
+    # Do the call itself, backend _is_ http://something
     req = HTTPConnection(host=backend_url[7:])
     if params:
         url += "?" + urlencode(params)

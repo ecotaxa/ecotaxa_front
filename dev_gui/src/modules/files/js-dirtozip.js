@@ -614,7 +614,7 @@ async function listStorage(entry = null,name=null) {
     message.path = path;
     const upload = new tus.Upload(file, {
       endpoint: options.tusuploadurl,
-      retryDelays: [0, 3000, 5000, 10000, 20000],
+      retryDelays: [150000, 225000, 300000, 600000],
       chunkSize: 128*1024*1024, // TODO: Some config
       storeFingerprintForResumableUploads: false,
       removeFingerprintOnSuccess: true,
