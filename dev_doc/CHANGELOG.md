@@ -1,3 +1,19 @@
+## 2026-11-10 : v3.4.2
+    QA: pytest suite for the GUI (QA/py), mock API client, route access matrix, page and form unit tests
+    Fix: login required decorator order on taxonomy routes (/gui/taxotreejson, /gui/taxonomy/worms) and prj/taxofix
+    Fix: admin routes - login checked before roles so anonymous users get the login page, not 403
+    Fix: breadcrumbs - trailing numeric ID resolution and jobs breadcrumbs aligned with projects and collections
+    Fix: help register template path (leading dot removed)
+    Fix: project & collection settings - display flashed error messages on save/create failures instead of message key or silent fail; redirect back to edit page if Referer missing
+    Fix: HTTP status - unknown /gui routes return 404, gui_person_create returns proper HTTP status codes (200/403/422)
+    Fix: JSON responses - Content-Encoding set only when gzip compressed, charset in Content-Type
+    Fix: format_exception handles non-JSON / HTML error responses without crash
+    Fix: safe_url_redir sanitizes leading slashes and backslashes to prevent open redirects
+    Fix: password validation - HTML pattern regex escaping, 64-char length limit, backend complexity validation on password reset
+    Mod: remove password rule hints on login form while keeping them on profile/registration/reset forms
+    Fix: upload - adapt HEAD probes to delay for backend decompression
+    Dev: include called URL in API error logs
+    Mod: remove dead async me/upload route
 ## 2026-11-03 : v3.4.1
     Upd: requests 2.32.5 -> 2.34.2 (security advisory, affected < 2.33.0)
     Upd: Flask 3.1.2 -> 3.1.3 (security advisory GHSA-68rp-wp8r-4726, session Vary: Cookie)
@@ -17,6 +33,26 @@
     Fix: format_exception returned None for errors without body
     Fix: job page - "View log file" showed the error page when the log file is missing, now a short message
     Mod: remove dead gui_collection_classify view (jobs templates link to gui_collection_view) and collection_stats.py
+## 2026-11-03 : v3.4.0
+    Mod: remove classification from editdatamass (ecotaxa/ecotaxa#6)
+    Mod: run tests before Docker build
+    Mod: test suite with vitest and playwright
+    Upd: table virtual scroll
+    Upd: clean dirtozip unused functions, add upload and projects merge error messages and translations
+    Upd: frontend packages
+    Upd: sync text with back-end
+    Fix: vault call URL ending in /api/api/vault
+    Fix: build css random error
+    Dev: logging - more relevant logs and clear conditions for API status handling
+## 2026-10-24 : v3.3.5
+    Fix: produce zip64 archives for big files (ecotaxa/ecotaxa#885)
+    Fix: explore Access Denied when not connected (can_read_visible_project helper)
+    Fix: user modifying email could block own account (ecotaxa/ecotaxa#96)
+    Fix: enforce at least 1 user feature to predict (ecotaxa/ecotaxa#15)
+    Fix: dev default data page crash
+    Mod: prevent collection title modification when DOI is set
+    Mod: explore global map loading faster
+    Dev: harden OpenID login flow
 ## 2026-10-12 : v3.3.3
     Fix: my files - archive reported as finished while a large file was still compressed in a worker, file counted as zipped once its last chunk is written
     Fix: my files - "error : stream finishing" when clicking Upload twice (Chrome), archive closed once, button disabled with "Finalizing archive..."
