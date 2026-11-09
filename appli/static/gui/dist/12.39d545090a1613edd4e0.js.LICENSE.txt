@@ -1,3 +1,5 @@
+/*! ../modules/js-components.js */
+
 /*! ../modules/utils.js */
 
 /*! dompurify */

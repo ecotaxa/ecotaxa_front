@@ -18,6 +18,7 @@ PUBLIC = {
     "gui_check_captcha",
     "gui_explore",
     "gui_explore_map_projects",
+    "gui_explore_projects",
     "gui_graphicpalette",
     "gui_help_nologin",
     "gui_i18n",

@@ -1,0 +1,56 @@
+{# The sample selected on the map, returned by /gui/explore/map/projects #}
+{% set sample = row.sample %}
+{# Same width as the table of the projects of several samples, _map_projects_table.html #}
+<div class="container mx-auto block">
+<div class="border border-stone-200 rounded-sm shadow-sm p-3 bg-white min-w-0 w-full" data-projid="{{ project.projid }}">
+  <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+    <span class="font-semibold">[{{ project.projid }}] {{ project.title }}</span>
+    <span><span class="text-stone-500">{{ _('Instrument') }}:</span> {{ project.instrument or '' }}</span>
+    {% set contact = project.contact or (project.managers[0] if project.managers else none) %}
+    {% if contact %}
+    <span><span class="text-stone-500">{{ _('Contact') }}:</span> {{ contact.name }}{% if contact.email %} <a href="mailto:{{ contact.email }}" class="text-mainblue-700 hover:underline">{{ contact.email }}</a>{% endif %}</span>
+    {% endif %}
+    <span class="is-controls ml-auto"><a href="/prj/{{ project.projid }}" class="btn is-view order-1">{{ _('View') }}</a></span>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm mt-2">
+      <thead class="text-left text-stone-500">
+        <tr>
+          <th class="pr-4 font-normal">{{ _('Sample') }}</th>
+          <th class="pr-4 font-normal">{{ _('Lat/Lon') }}</th>
+          <th class="pr-4 font-normal">{{ _('Depth') }}</th>
+          <th class="pr-4 font-normal">{{ _('Date time') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="border-t border-stone-100">
+          <td class="pr-4">{{ sample.orig_id }} <span class="text-stone-400">({{ sample.sampleid }})</span></td>
+          <td class="pr-4 whitespace-nowrap">{% if sample.latitude is not none %}{{ '%.4f'|format(sample.latitude) }} / {{ '%.4f'|format(sample.longitude) }}{% endif %}</td>
+          <td class="pr-4 whitespace-nowrap">{% if row.depthmin is not none or row.depthmax is not none %}{{ row.depthmin if row.depthmin is not none else '' }} – {{ row.depthmax if row.depthmax is not none else '' }}{% endif %}</td>
+          <td class="pr-4 whitespace-nowrap">{% if row.fromdate %}{{ row.fromdate }}{% if row.todate and row.todate != row.fromdate %} – {{ row.todate }}{% endif %}{% endif %}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  {% if stats %}
+  <div class="text-sm mt-2">
+    <span class="text-stone-500">{{ _('Objects') }}:</span>
+    {{ _('validated') }} {{ stats.nb_validated }} · {{ _('predicted') }} {{ stats.nb_predicted }} · {{ _('dubious') }} {{ stats.nb_dubious }} · {{ _('unclassified') }} {{ stats.nb_unclassified }}
+  </div>
+  {% if stats.taxa %}
+  <div class="text-sm mt-1">
+    <span class="text-stone-500">{{ _('%(nb)s taxa', nb=stats.taxa|length) }}:</span>
+    <ul class="flex flex-wrap gap-x-3 max-h-40 overflow-y-auto">
+      {% for name, status in stats.taxa %}<li{% if status == 'D' %} class="deprecated"{% endif %}>{{ name }}</li>{% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+  {% endif %}
+  <div class="flex flex-wrap items-baseline gap-2 mt-4 mb-2">
+    <span class="text-sm text-stone-500">{{ _('%(nb)s displayed of %(total)s validated objects', nb=images|length, total=total) }}</span>
+  </div>
+  {% with empty_message = _('No validated object in this sample.') %}
+  {% include "./v2/explore/_images_grid.html" %}
+  {% endwith %}
+</div>
+</div>

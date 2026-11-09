@@ -1,21 +1,29 @@
 # -*- coding: utf-8 -*-
-# Explore page, v2: public map of the samples, with the projects of the selected samples
+# Explore page, v2: public map of the samples, with the selected samples below it
+import json
 from typing import List, Dict, Any, Optional, Tuple
 
-from flask import render_template, request
+from flask import Response, render_template, request
 from flask_babel import _
+from flask_login import current_user
 
 from appli import app, gvp
 from appli.gui.commontools import alert_box
 from appli.project.main import vignette_size
-from appli.utils import ApiClient
+from appli.gui.project.projects_list import projects_access
+from appli.gui.project.projects_list_interface_json import (
+    project_table_columns,
+    render_for_js,
+    render_samples_stats,
+)
+from appli.utils import ApiClient, can_read_visible_project, get_all_visible_projects
 from to_back.ecotaxa_cli_py import ApiException
-from to_back.ecotaxa_cli_py.api import ProjectsApi, ObjectsApi, SamplesApi, TaxonomyTreeApi
+from to_back.ecotaxa_cli_py.api import ProjectsApi, ObjectsApi, SamplesApi
 from to_back.ecotaxa_cli_py.models import (
     ObjectSetQueryRsp,
+    ProjectModel,
     SampleModel,
-    ProjectTaxoStatsModel,
-    TaxonModel,
+    SampleTaxoStatsModel,
 )
 
 IMAGE_FIELDS = [
@@ -32,7 +40,7 @@ IMAGE_FIELDS = [
 
 @app.route("/gui/explore/")
 def gui_explore():
-    # Map of the samples, the projects of the selected samples are displayed below it
+    # Map of the samples, the selected samples are displayed below it
     return render_template("v2/explore/index.html")
 
 
@@ -74,8 +82,6 @@ def _object_images(
     return images, objs.total_ids
 
 
-# Above, the selection is truncated: each sample costs a few queries
-MAX_MAP_SAMPLES = 50
 EXTENT_FIELDS = ["obj.objdate", "obj.objtime", "obj.depth_min", "obj.depth_max"]
 
 
@@ -118,95 +124,101 @@ def _sample_extent(api: ObjectsApi, sample: SampleModel) -> Dict[str, Any]:
     }
 
 
-TOP_TAXA = 5
-
-
-def _projects_taxo_stats(projids: List[int]) -> Dict[int, Dict[str, Any]]:
-    """Classification totals and most validated taxa per project, from the precomputed
-    projects stats (cheap, unlike the samples ones). Without stats, the boxes are still displayed."""
+def _sample_taxo_stats(sample: SampleModel) -> Optional[Dict[str, Any]]:
+    """Classification totals and used taxa of the sample. Without stats, the sample is still displayed."""
     try:
-        with ApiClient(ProjectsApi, request) as api:
-            rows: List[ProjectTaxoStatsModel] = api.project_set_get_stats(
-                ids="+".join(str(p) for p in projids), taxa_ids="all"
+        with ApiClient(SamplesApi, request) as api:
+            rows: List[SampleTaxoStatsModel] = api.sample_set_get_stats(
+                sample_ids=str(sample.sampleid)
             )
-        # one row per taxon present in the project
-        stats: Dict[int, Dict[str, Any]] = {}
-        for row in rows:
-            stat = stats.setdefault(
-                row.projid,
-                {"validated": 0, "predicted": 0, "dubious": 0, "unclassified": 0, "taxa": []},
-            )
-            stat["validated"] += row.nb_validated
-            stat["predicted"] += row.nb_predicted
-            stat["dubious"] += row.nb_dubious
-            stat["unclassified"] += row.nb_unclassified
-            if row.used_taxa[0] != -1 and row.nb_validated > 0:
-                stat["taxa"].append((row.used_taxa[0], row.nb_validated))
-        for stat in stats.values():
-            stat["nbtaxa"] = len(stat["taxa"])
-            stat["taxa"] = sorted(stat["taxa"], key=lambda t: -t[1])[:TOP_TAXA]
-        taxa_ids = {tid for stat in stats.values() for tid, _nb in stat["taxa"]}
-        names: Dict[int, str] = {}
-        if taxa_ids:
-            with ApiClient(TaxonomyTreeApi, request) as api:
-                taxa: List[TaxonModel] = api.query_taxa_set(
-                    ids="+".join(str(t) for t in taxa_ids)
-                )
-            names = {taxon.id: taxon.display_name for taxon in taxa}
-        for stat in stats.values():
-            stat["taxa"] = [(names.get(tid, str(tid)), nb) for tid, nb in stat["taxa"]]
-        return stats
+        if not rows:
+            return None
+        stats = render_samples_stats([sample], rows)[0]
     except ApiException:
-        return {}
+        return None
+    # (id, (name, status)), or (id, "notfound") for the -1 of unclassified objects
+    stats["taxa"] = [
+        named for _id, named in stats["used_taxa"] if named != "notfound"
+    ]
+    return stats
 
 
 @app.route("/gui/explore/map/projects", methods=["POST"])
 def gui_explore_map_projects():
-    """Projects of the samples selected on the map, with the samples information."""
+    """The selected samples of the map: for several ones the usual table of their projects, loaded
+    apart, for a single one its project, taxonomy stats and validated objects."""
     sampleids = [int(s) for s in gvp("samples").split(",") if s.strip().isdigit()]
-    truncated = len(sampleids) > MAX_MAP_SAMPLES
-    sampleids = sampleids[:MAX_MAP_SAMPLES]
-    projects: Dict[int, Dict[str, Any]] = {}
+    if len(sampleids) != 1:
+        projids = sorted({int(p) for p in gvp("projects").split(",") if p.strip().isdigit()})
+        return render_template(
+            "v2/explore/_map_projects_table.html",
+            projids=",".join(str(p) for p in projids),
+            partial=True,
+        )
     try:
         with ApiClient(SamplesApi, request) as sapi:
-            samples: List[SampleModel] = [
-                sapi.sample_query(sample_id=sampleid) for sampleid in sampleids
-            ]
-        with ApiClient(ProjectsApi, request) as papi, ApiClient(
-            ObjectsApi, request
-        ) as oapi:
-            for sample in samples:
-                if sample.projid not in projects:
-                    projects[sample.projid] = {
-                        "project": papi.project_query(
-                            sample.projid, for_managing=False
-                        ),
-                        "samples": [],
-                    }
-                projects[sample.projid]["samples"].append(_sample_extent(oapi, sample))
+            sample: SampleModel = sapi.sample_query(sample_id=sampleids[0])
+        with ApiClient(ProjectsApi, request) as papi:
+            project = papi.project_query(sample.projid, for_managing=False)
+        with ApiClient(ObjectsApi, request) as oapi:
+            extent = _sample_extent(oapi, sample)
     except ApiException as ae:
         if ae.status in (401, 403):
             return alert_box("warning", "", "accessdenied", _("Access denied"))
         return alert_box("error", "", "explore", _("Error loading the projects"))
-    single = len(samples) == 1
-    if single:
-        # only one sample: its validated objects are displayed in its project box
-        sample = samples[0]
-        prj = projects[sample.projid]
-        try:
-            prj["images"], prj["total"] = _object_images(
-                sample.projid, {"samples": str(sample.sampleid), "statusfilter": "V"}, 100, 100
-            )
-        except ApiException:
-            prj["images"], prj["total"] = [], 0
-    stats = _projects_taxo_stats(list(projects.keys()))
-    for projid, prj in projects.items():
-        prj["stats"] = stats.get(projid)
+    try:
+        images, total = _object_images(
+            sample.projid, {"samples": str(sample.sampleid), "statusfilter": "V"}, 100, 100
+        )
+    except ApiException:
+        images, total = [], 0
     return render_template(
-        "v2/explore/_map_projects.html",
-        projects=list(projects.values()),
-        single=single,
-        truncated=truncated,
-        max_samples=MAX_MAP_SAMPLES,
+        "v2/explore/_map_sample.html",
+        project=project,
+        row=extent,
+        stats=_sample_taxo_stats(sample),
+        images=images,
+        total=total,
         partial=True,
     )
+
+
+def _project_row(prj: ProjectModel) -> Dict[str, Any]:
+    """A project as the usual projects table reads it. Field by field: a boosted API model has no
+    attribute for what the back-end didn't send, as members to anonymous users, and to_dict() is shallow."""
+
+    def person(user) -> Optional[Dict[str, Any]]:
+        if user is None:
+            return None
+        return {key: getattr(user, key, None) for key in ("id", "name", "email")}
+
+    row = {
+        key: getattr(prj, key, None)
+        for key in ("projid", "title", "instrument", "status", "access", "objcount", "pctvalidated")
+    }
+    row["contact"] = person(getattr(prj, "contact", None))
+    for key in ("managers", "annotators", "viewers"):
+        row[key] = [person(user) for user in getattr(prj, key, None) or []]
+    return row
+
+
+@app.route("/gui/explore/projects/<ids>")
+def gui_explore_projects(ids: str):
+    """The usual projects table, public, for the given projects among the readable ones."""
+    wanted = {int(p) for p in ids.split(",") if p.strip().isdigit()}
+    # an anonymous user gets the same projects from both searches
+    prjs = {
+        prj.projid: _project_row(prj)
+        for prj in get_all_visible_projects(fields="*default")
+        if prj.projid in wanted and can_read_visible_project(prj)
+    }
+    rows = sorted(prjs.values(), key=lambda prj: prj["projid"])
+    columns = project_table_columns("", listall=True)
+    if not current_user.is_authenticated:
+        del columns["status"]
+    # not the json of flask, which sorts the keys: the cells of a row are in the order of the columns
+    content = json.dumps(
+        {"columns": columns, "data": render_for_js(rows, columns, projects_access(rows))},
+        separators=(",", ":"),
+    )
+    return Response(content, mimetype="application/json")

@@ -4,6 +4,9 @@ import {
   fetchSettings,
   html_spinner
 } from '../modules/utils.js';
+import {
+  JsComponents
+} from '../modules/js-components.js';
 // Global map of samples, OpenLayers full build loaded from cdnjs
 const OL_URL = 'https://cdnjs.cloudflare.com/ajax/libs/openlayers/10.6.1/';
 // polar projections definitions for OpenLayers
@@ -23,11 +26,11 @@ const COLORS = {
   land: '#e7e5e4',
   border: '#a8a29e',
   graticule: 'rgba(87,83,78,0.35)',
-  // danger colors of the theme
-  // opaque: a translucent red turns muddy over the blue sea
-  sample: '#d35643',
+  // colors of the theme: navy mainblue for the samples, done for the selection
+  // opaque: a translucent color turns muddy over the blue sea
+  sample: '#10203b',
   'sample-stroke': '#ffffff',
-  selected: '#661f18'
+  selected: '#1ffb53'
 };
 
 function map_colors(item) {
@@ -406,22 +409,48 @@ async function JsMap(item) {
   clip_to_disk(ol, map, land, disk);
   clip_to_disk(ol, map, graticule, disk);
   // redraws the selected samples, after a change of projection
-  let refresh_selection = () => {};
-  if (item.dataset.projects) refresh_selection = select_samples(ol, map, samples, item, colors.selected);
+  let selection = {
+    refresh: () => {},
+    clear: () => {}
+  };
+  if (item.dataset.projects) selection = select_samples(ol, map, samples, item, colors.selected);
   else popover(ol, map, item);
-  let data = [];
-  try {
-    const response = await fetch(item.dataset.samples, fetchSettings());
-    if (response.ok) data = await response.json();
-  } catch (err) {
-    // the map is displayed without samples
+  // name of the displayed view, the samples are placed for it
+  const view = {
+    name: 'world'
+  };
+  const filters = item.dataset.filters ? document.getElementById(item.dataset.filters) : null;
+  const count = item.dataset.count ? document.getElementById(item.dataset.count) : null;
+  let loading_samples = null;
+  // false if a more recent call replaced this one
+  async function load_samples(params = '') {
+    if (loading_samples) loading_samples.abort();
+    const controller = new AbortController();
+    loading_samples = controller;
+    let data = [];
+    try {
+      const response = await fetch(item.dataset.samples + (params ? '?' + params : ''), fetchSettings({
+        signal: controller.signal
+      }));
+      if (response.ok) data = await response.json();
+    } catch (err) {
+      // the map is displayed without samples
+    }
+    if (controller.signal.aborted) return false;
+    samples.clear();
+    samples.addFeatures(data.map(sam => {
+      const feature = new ol.Feature({
+        lonlat: [sam.long, sam.lat],
+        sampleid: sam.id,
+        projid: sam.projid
+      });
+      place_sample(ol, feature, view.name);
+      return feature;
+    }));
+    if (count) count.textContent = data.length;
+    return true;
   }
-  samples.addFeatures(data.map(sam => new ol.Feature({
-    geometry: new ol.geom.Point(ol.proj.fromLonLat([sam.long, sam.lat])),
-    lonlat: [sam.long, sam.lat],
-    sampleid: sam.id,
-    projid: sam.projid
-  })));
+  await load_samples();
   // without the world data, the samples are displayed on the sea only
   const world_data = await world;
   land.setSource(world_source(ol, world_data, 'EPSG:3857'));
@@ -439,14 +468,112 @@ async function JsMap(item) {
     ocean: ocean,
     bathy: bathy,
     land: land
-  }, world_data, bathy_json, disk, samples, item, fit_width, refresh_selection);
+  }, world_data, bathy_json, disk, samples, item, fit_width, selection.refresh, view);
   map.getViewport().classList.remove('opacity-50');
   loading.remove();
+  if (filters) samples_filters(filters, map, selection, load_samples, document.getElementById(item.dataset.filterstext));
+}
+
+// the samples of the map are reloaded with the values of the form, the selection doesn't survive
+// the button opens and closes the form, see style.css. Once applied, the filters are displayed as tags and the form is closed
+// a filter removed from its tag is removed from the form, the values changed in the form and not applied stay not applied
+function samples_filters(form, map, selection, load_samples, text) {
+  const menu = form.parentElement;
+  const toggle = menu.querySelector('[aria-expanded]');
+  function open_form(open) {
+    toggle.setAttribute('aria-expanded', open);
+  }
+  toggle.addEventListener('click', () => open_form(toggle.getAttribute('aria-expanded') !== 'true'));
+  let applied = [];
+  function show_filters() {
+    if (!text) return;
+    text.replaceChildren(...applied.map(entry => {
+      const tag = document.createElement('div');
+      tag.className = 'item';
+      tag.textContent = entry.label + ': ' + entry.text;
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'remove';
+      remove.title = text.dataset.remove || '';
+      remove.textContent = '×';
+      remove.addEventListener('click', () => {
+        applied = applied.filter(other => other !== entry);
+        clear_filter(form, entry);
+        show_filters();
+        apply(filters_params(applied));
+      });
+      tag.append(remove);
+      return tag;
+    }));
+  }
+  async function apply(params) {
+    selection.clear();
+    map.getViewport().classList.add('opacity-50');
+    if (await load_samples(params)) map.getViewport().classList.remove('opacity-50');
+  }
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    applied = filters_entries(form);
+    show_filters();
+    open_form(false);
+    // the focused field is no more displayed
+    toggle.focus();
+    apply(filters_params(applied));
+  });
+  form.addEventListener('reset', () => {
+    form.querySelectorAll('select').forEach(select => {
+      if (select.tomselect) select.tomselect.clear(true);
+    });
+    applied = [];
+    show_filters();
+    apply();
+  });
+  menu.querySelectorAll('button').forEach(button => {
+    button.disabled = false;
+  });
+}
+
+// the filled fields, one entry for each value of a multiple one
+function filters_entries(form) {
+  const entries = [];
+  form.querySelectorAll('select[name], input[name]').forEach(field => {
+    const values = (field.tagName === 'SELECT') ? Array.from(field.selectedOptions).map(opt => [opt.value, opt.textContent.trim()]) : [[field.value, field.value]];
+    // the label of a tom-select is no more linked to its select
+    const label = field.closest('div').querySelector('label').textContent.trim();
+    values.filter(([value]) => value !== '').forEach(([value, text]) => entries.push({
+      name: field.name,
+      value: value,
+      label: label,
+      text: text
+    }));
+  });
+  return entries;
+}
+
+// the values of a multiple field are comma-separated
+function filters_params(entries) {
+  const params = new URLSearchParams();
+  entries.forEach(({name, value}) => params.set(name, params.has(name) ? params.get(name) + ',' + value : value));
+  return params.toString();
+}
+
+function clear_filter(form, entry) {
+  const field = form.elements[entry.name];
+  if (field.tomselect) field.tomselect.removeItem(entry.value, true);
+  else if (field.value === entry.value) field.value = '';
+}
+
+// the sample in the projection of the view, without geometry when out of a polar disk
+function place_sample(ol, feature, view_name) {
+  const lonlat = feature.get('lonlat');
+  const polar = POLAR[view_name];
+  const visible = !polar || polar.visible(lonlat[1]);
+  feature.setGeometry(visible ? new ol.geom.Point(ol.proj.fromLonLat(lonlat, polar ? polar.code : 'EPSG:3857')) : undefined);
 }
 
 // world or polar views, the samples are displayed in the projection of the view
 // polar views are round, from the pole to the edge latitude
-function views_switch(ol, map, layers, world_data, bathy_json, disk, samples, item, fit_width, refresh_selection) {
+function views_switch(ol, map, layers, world_data, bathy_json, disk, samples, item, fit_width, refresh_selection, view) {
   // ocean, depth and land sources by view, the features are read once for each projection
   const sources = {
     world: {
@@ -495,11 +622,8 @@ function views_switch(ol, map, layers, world_data, bathy_json, disk, samples, it
       extent: disk_extent,
       constrainOnlyCenter: true
     }));
-    samples.getFeatures().forEach(f => {
-      const lonlat = f.get('lonlat');
-      const visible = name === 'world' || POLAR[name].visible(lonlat[1]);
-      f.setGeometry(visible ? new ol.geom.Point(ol.proj.fromLonLat(lonlat, projection)) : undefined);
-    });
+    view.name = name;
+    samples.getFeatures().forEach(f => place_sample(ol, f, name));
     refresh_selection();
     if (name === 'world') fit_width();
     else map.getView().fit(disk_extent);
@@ -541,8 +665,8 @@ function popover(ol, map, item) {
   });
 }
 
-// the projects of the clicked samples are displayed in the target element,
-// shift+click adds or removes samples, ctrl+drag selects the samples in a box, a box close button deselects its samples
+// the clicked samples are displayed in the target element,
+// shift+click adds or removes samples, ctrl+drag selects the samples in a box
 function select_samples(ol, map, samples, item, color) {
   const target = document.getElementById(item.dataset.target);
   const selected = new ol.source.Vector();
@@ -584,6 +708,7 @@ function select_samples(ol, map, samples, item, color) {
     selected.addFeatures(features.map(f => f.clone()));
     const fd = new FormData();
     fd.append('samples', features.map(f => f.get('sampleid')).join(','));
+    fd.append('projects', Array.from(new Set(features.map(f => f.get('projid')))).join(','));
     // the images of a single sample are sized for the space available
     fd.append('resultwidth', target.clientWidth);
     fd.append('windowheight', window.innerHeight);
@@ -594,22 +719,12 @@ function select_samples(ol, map, samples, item, color) {
         body: fd
       }));
       target.innerHTML = DOMPurify.sanitize(await response.text());
+      // the table of the projects of several samples
+      JsComponents.applyTo(target);
     } catch (err) {
       target.textContent = '';
     }
   }
-  // closing a project box deselects its samples
-  if (target) target.addEventListener('click', (e) => {
-    const close = e.target.closest('[data-closeproject]');
-    if (!close) return;
-    const projid = parseInt(close.dataset.closeproject);
-    selection.forEach((f, sampleid) => {
-      if (f.get('projid') === projid) selection.delete(sampleid);
-    });
-    redraw();
-    const box = close.closest('[data-projid]');
-    if (box) box.remove();
-  });
   // all the samples under the click, the points overlap a lot
   map.on('click', (evt) => {
     const features = [];
@@ -631,9 +746,13 @@ function select_samples(ol, map, samples, item, color) {
     });
     show(features);
   });
-  return redraw;
+  return {
+    refresh: redraw,
+    clear: () => show([])
+  };
 }
 
 export {
-  JsMap
+  JsMap,
+  samples_filters
 }

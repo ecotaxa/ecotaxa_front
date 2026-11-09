@@ -83,9 +83,9 @@ transform : rotate(360deg);
 .ts-dropdown.plugin-optgroup_columns .optgroup:last-child {@apply border-none}
 .ts-dropdown.plugin-optgroup_columns .optgroup:before {@apply hidden}
 .ts-dropdown.plugin-optgroup_columns .optgroup-header {@apply border-none}
-.ts-wrapper.plugin-remove_button .item {@apply inline-flex items-center pr-0}
-.ts-wrapper.plugin-remove_button .item .remove {@apply text-inherit decoration-0 align-middle inline-block py-0 px-[6px] border-l border-stone-50 rounded-r-lg ml-[6px]}
-.ts-wrapper.plugin-remove_button .item .remove:hover {@apply bg-secondblue-50}
+.ts-wrapper.plugin-remove_button .item, .filter-tags .item {@apply inline-flex items-center pr-0}
+.ts-wrapper.plugin-remove_button .item .remove, .filter-tags .item .remove {@apply text-inherit decoration-0 align-middle inline-block py-0 px-[6px] border-l border-stone-50 rounded-r-lg ml-[6px]}
+.ts-wrapper.plugin-remove_button .item .remove:hover, .filter-tags .item .remove:hover {@apply bg-secondblue-50}
 .ts-wrapper.plugin-remove_button .item.active .remove {@apply border-l border-secondblue-50}
 .ts-wrapper.plugin-remove_button.disabled .item .remove:hover {@apply bg-transparent;}
 .ts-wrapper.plugin-remove_button.disabled .item .remove {@apply border-l border-white}
@@ -108,7 +108,7 @@ option[disabled][hidden], .ts-control > div.item[data-value=""] {@apply text-sto
 .ts-wrapper.single , .ts-wrapper.multi   {@apply rounded border border-stone-300 ring-0 }
 .ts-wrapper.multi.focus .ts-control {@apply border-transparent ring-0 outline-none  }
 .ts-wrapper.single.focus , .ts-wrapper.multi.focus {@apply rounded border border-secondblue-300 ring-0 outline-none bg-transparent }
-.ts-wrapper.multi  .ts-control > div.item  {@apply py-1 flex inline-flex text-xs rounded bg-stone-100 text-stone-900 shadow w-auto inline px-1.5 pl-1 ml-1  my-1 align-middle ;}
+.ts-wrapper.multi  .ts-control > div.item, .filter-tags .item  {@apply py-1 flex inline-flex text-xs rounded bg-stone-100 text-stone-900 shadow w-auto inline px-1.5 pl-1 ml-1  my-1 align-middle ;}
 .ts-dropdown .option {@apply text-sm text-stone-800 }
 .ts-dropdown .option.active , .ts-dropdown .option:hover, .ts-dropdown .option:active {@apply font-normal text-stone-800 !important}
 .ts-wrapper.multi .ts-control > div.item.active {@apply text-stone-700 font-light}

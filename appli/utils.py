@@ -149,16 +149,22 @@ def format_date_time(
         rec[a_col] = val[:5]
 
 
-def get_all_visible_projects() -> List[ProjectModel]:
+def get_all_visible_projects(
+    instrument_filter: str = "", fields: str = "projid,title,access"
+) -> List[ProjectModel]:
     with ApiClient(ProjectsApi, request) as api:
         try:
-            # only the fields used by callers, not members and settings of every project
-            fields = "projid,title,access"
+            # by default only the fields used by callers, not members and settings of every project
+            filters = {}
+            if instrument_filter:
+                # the back-end matches a part of the instrument code, callers can compare the whole one
+                fields += ",instrument"
+                filters["instrument_filter"] = instrument_filter
             projects: List[ProjectModel] = api.search_projects(
-                title_filter="%", fields=fields
+                title_filter="%", fields=fields, **filters
             )
             otherprojects: List[ProjectModel] = api.search_projects(
-                title_filter="%", not_granted=True, fields=fields
+                title_filter="%", not_granted=True, fields=fields, **filters
             )
             prjs = [prj for prj in projects if prj.access != "0"] + [
                 prj for prj in otherprojects if prj.access != "0"

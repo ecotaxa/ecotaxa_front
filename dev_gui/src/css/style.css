@@ -470,9 +470,13 @@ a.contact[data-contact] {@apply  text-secondblue-800 hover:bg-secondblue-100 hov
 /*tooltips */
 [data-title]:hover:after , [data-title]:active:after, .tooltip {@apply  absolute top-0 -mt-6 -ml-6  whitespace-nowrap w-auto left-0 block z-[999999999] content-[attr(data-title)] rounded font-sans tracking-normal text-xs font-light bg-info-900 rounded text-stone-50 px-2 py-0.5 drop-shadow;}
 /* map colors, read by js-map.js when the map is created; the sea goes from ocean (shore) to ocean-deep (10000m) */
-.js-map {--map-ocean:#dbeafe;--map-ocean-deep:#3b82f6;--map-land:#e7e5e4;--map-border:#a8a29e;--map-graticule:rgba(87,83,78,0.35);--map-sample:theme('colors.danger.500');--map-sample-stroke:#ffffff;--map-selected:theme('colors.danger.800')}
+.js-map {--map-ocean:#dbeafe;--map-ocean-deep:#3b82f6;--map-land:#e7e5e4;--map-border:#a8a29e;--map-graticule:rgba(87,83,78,0.35);--map-sample:theme('colors.mainblue.900');--map-sample-stroke:#ffffff;--map-selected:theme('colors.done.medium')}
 .js-map .ol-mouse-position {@apply top-2 right-2 px-2 py-0.5 rounded shadow-sm bg-white/90 text-stone-800 font-mono text-xs whitespace-pre pointer-events-none}
 .js-map .ol-mouse-position:empty {@apply hidden}
+/* explore: filters in line once opened by their button, see samples_filters in js-map.js */
+#explore-filters {@apply hidden}
+[aria-expanded="true"] + #explore-filters {@apply flex}
+#explore-filters-menu button:disabled {@apply cursor-not-allowed}
 }
 @layer utilities {
  /**********************************************/
@@ -759,6 +763,9 @@ content:url('data:image/svg+xml; utf8,<svg class="-mr-1 ml-2 h-5 w-5" xmlns="htt
 .icon-arrow-up-tray {
   content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="stroke-current"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" /></svg>');
 }
+.icon-funnel {
+  content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="stroke-current"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z" /></svg>');
+}
 .icon-arrow-up-tray-sm {
   content:url('data:image/svg+xml; utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="fill-current"><path d="M9.25 13.25a.75.75 0 0 0 1.5 0V4.636l2.955 3.129a.75.75 0 0 0 1.09-1.03l-4.25-4.5a.75.75 0 0 0-1.09 0l-4.25 4.5a.75.75 0 1 0 1.09 1.03L9.25 4.636v8.614Z" /><path d="M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z" /></svg>');
 }
@@ -937,6 +944,15 @@ a.disabled {@apply pointer-events-none;}
 .prjlist .table-table tr.last-used {@apply  bg-white text-stone-900  border-stone-100 }
 .prjlist .table-table tr.last-used .ellipsis {@apply font-normal}
 .prjlist .table-table tr.last-used th , .prjlist .table-table tr.last-used td {@apply bg-transparent border-transparent}
+/* projects of the samples selected on the explore map: same as the box of a single sample, black and white */
+.explore-projects.prjlist .table-table {@apply border border-stone-200 rounded-sm shadow-sm bg-white text-stone-900}
+.explore-projects.prjlist .table-table thead tr th {@apply bg-white text-stone-900 hover:text-stone-900 border-stone-200 shadow-none}
+.explore-projects.prjlist .table-table th .sublabel {@apply text-stone-900}
+.explore-projects.prjlist .table-sorter::after {@apply border-b-stone-900}
+.explore-projects.prjlist .table-sorter::before {@apply border-t-stone-900}
+.explore-projects.prjlist .table-table tbody tr:nth-child(n of :not([hidden])) {@apply bg-white border-t border-stone-100}
+.explore-projects.prjlist .table-table .btn:not(.is-view) {@apply bg-white text-stone-900 ring-stone-900 hover:bg-stone-900 hover:text-white hover:ring-stone-900}
+#map-projects .btn.is-view {@apply ring-mainblue-700 text-mainblue-700 hover:bg-mainblue-700 hover:ring-mainblue-800 hover:text-white}
 
 /* contact */
 td a.contact {@apply float-right w-auto }
