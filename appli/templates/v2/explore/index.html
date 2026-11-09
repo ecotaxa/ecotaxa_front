@@ -1,13 +1,55 @@
 {% extends "./v2/layout.html" %}
 {% block body %}
-{# Full width map of the samples, the projects of the selected samples are displayed below #}
+{# Full width map of the samples, the selected samples are displayed below #}
 <div class="px-4">
   <div class="flex flex-wrap items-baseline gap-4 mt-4">
     <h2 class="h2">{{ _('Explore') }}</h2>
-    <span class="text-sm text-stone-500">{{ _('Click on a sample to display its project. Shift+click or Ctrl+drag (Cmd+drag on Mac) to select several samples.') }}</span>
+    <span class="text-sm text-stone-500">{{ _('Click on a sample to display its taxonomy statistics. Shift+click or Ctrl+drag (Cmd+drag on Mac) to select several samples and list their projects.') }}</span>
+  </div>
+  {# Filters on the samples displayed on the map, not on their objects. The buttons are enabled once the map is ready.
+     The button displays the form in line after it, see style.css #}
+  <div class="flex flex-wrap items-center gap-2 mt-2">
+  <div id="explore-filters-menu" class="flex flex-wrap items-start gap-4">
+  <button type="button" class="button is-secondary inverse text-sm py-0.5" aria-expanded="false" aria-controls="explore-filters" disabled><i class="icon icon-funnel inline-block align-middle h-4 w-4 mr-1"></i>{{ _('Filters') }}</button>
+  <form id="explore-filters" class="flex-wrap items-end gap-4" autocomplete="off">
+    <div class="w-full md:w-96">
+      <label for="filt_projid">{{ _('Projects') }}</label>
+      <select id="filt_projid" name="projid" class="js js-autocomplete form-multiselect" data-type="exploreproject" data-placeholder="{{ _('Search a project') }}" multiple></select>
+    </div>
+    <div class="w-full md:w-48">
+      <label for="filt_instrum">{{ _('Instrument') }}</label>
+      <select id="filt_instrum" name="instrum" class="js js-autocomplete form-select" data-type="instr" data-placeholder="{{ _('Instrument') }}"></select>
+    </div>
+    <div class="w-24">
+      <label for="filt_mapn">{{ _('North') }}</label>
+      <input id="filt_mapn" name="MapN" type="number" step="any" min="-90" max="90" class="form-input">
+    </div>
+    <div class="w-24">
+      <label for="filt_maps">{{ _('South') }}</label>
+      <input id="filt_maps" name="MapS" type="number" step="any" min="-90" max="90" class="form-input">
+    </div>
+    <div class="w-24">
+      <label for="filt_mapw">{{ _('West') }}</label>
+      <input id="filt_mapw" name="MapW" type="number" step="any" min="-180" max="180" class="form-input">
+    </div>
+    <div class="w-24">
+      <label for="filt_mape">{{ _('East') }}</label>
+      <input id="filt_mape" name="MapE" type="number" step="any" min="-180" max="180" class="form-input">
+    </div>
+    <div class="flex items-center gap-2">
+      <button type="submit" class="button is-primary" disabled>{{ _('Apply') }}</button>
+      <button type="reset" class="button is-secondary inverse" disabled>{{ _('Reset') }}</button>
+    </div>
+  </form>
+  </div>
+  <span class="text-sm text-stone-500"><span id="explore-count"></span> {{ _('samples') }}</span>
+  <div id="explore-filters-text" class="filter-tags flex flex-wrap items-center gap-1" data-remove="{{ _('Remove') }}"></div>
   </div>
   <div id="explore-map" class="js js-map w-full h-[70vh] relative mt-2 border border-stone-200 rounded"
        data-samples="/search/mappopup/samples/"
+       data-filters="explore-filters"
+       data-count="explore-count"
+       data-filterstext="explore-filters-text"
        data-projects="/gui/explore/map/projects"
        data-fitwidth="true"
        data-views='{{ [["world", _("World")], ["north", _("Arctic")], ["south", _("Antarctic")]]|tojson }}'

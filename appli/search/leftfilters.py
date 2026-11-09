@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from typing import List
+import math
+from typing import Dict, List, Mapping
 
 from flask import render_template, g, request, json
 
@@ -12,6 +13,40 @@ from to_back.ecotaxa_cli_py import (
     ProjectModel,
     ApiException,
 )
+
+
+def _map_bounds(args: Mapping[str, str]) -> Dict[str, float]:
+    """
+    The usable bounds among MapN, MapS, MapW and MapE: a missing or invalid one doesn't filter.
+    """
+    bounds = {}
+    for name in ("MapN", "MapS", "MapW", "MapE"):
+        try:
+            value = float(args.get(name, ""))
+        except ValueError:
+            continue
+        if math.isfinite(value):
+            bounds[name] = value
+    return bounds
+
+
+def _in_map_bounds(lat: float, lon: float, bounds: Dict[str, float]) -> bool:
+    """
+    Is the point inside the bounds? West greater than East is a box across the antimeridian.
+    """
+    north, south = bounds.get("MapN"), bounds.get("MapS")
+    west, east = bounds.get("MapW"), bounds.get("MapE")
+    if north is not None and lat > north:
+        return False
+    if south is not None and lat < south:
+        return False
+    if west is not None and east is not None and west > east:
+        return lon >= west or lon <= east
+    if west is not None and lon < west:
+        return False
+    if east is not None and lon > east:
+        return False
+    return True
 
 
 @app.route("/search/mappopup/")
@@ -50,15 +85,19 @@ def search_mappopup_samples():
     AJAX call to return data for drawing samples points in the global map.
     """
     app.logger.info("Search mappopup req: %s", request.args)
+    instrum = gvg("instrum")
+    projids = None
     if gvg("projid"):
         projids = [int(x) for x in gvg("projid").split(",") if x.strip().isdigit()]
-    else:
+    if projids is None or instrum:
         # anonymous users can only read samples of open projects, a public one refuses the whole search
-        projids = [
+        visible = [
             a_proj.projid
-            for a_proj in get_all_visible_projects()
+            for a_proj in get_all_visible_projects(instrument_filter=instrum)
             if can_read_visible_project(a_proj)
+            and (not instrum or a_proj.instrument == instrum)
         ]
+        projids = visible if projids is None else [p for p in projids if p in visible]
     if not projids:
         return json.dumps([])
     str_project_ids = "+".join([str(p) for p in projids])
@@ -86,10 +125,13 @@ def search_mappopup_samples():
     #
     #     res = GetAll(sql, sqlparam)
 
+    bounds = _map_bounds(request.args)
     ores = []
     for sam in samples:
         # no point on the map without coordinates
         if sam.latitude is None or sam.longitude is None:
+            continue
+        if not _in_map_bounds(sam.latitude, sam.longitude, bounds):
             continue
         ores.append(
             {

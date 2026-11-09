@@ -146,10 +146,11 @@ function createJsTomSelect() {
         }
         }
     switch (type) {
+      case models.exploreproject:
       case models.project:
       case models.renamingrules:
         // for top navigation search and collections
-        option.url = "/gui/prjlist/";
+        option.url = (type === models.exploreproject) ? "/search/exploreproject?opts=all_visible" : "/gui/prjlist/";
         option.settings = { ...option.settings,
           ...{
             valueField: 'id',
@@ -355,6 +356,9 @@ function createJsTomSelect() {
           case models.project:
           case models.renamingrules:
             if (query) url += '?filt_title=' + encodeURIComponent(query); //+ '&filt_instrum=' + encodeURIComponent(query);
+            break;
+          case models.exploreproject:
+            if (query) url += '&q=' + encodeURIComponent(query);
             break;
         }
         if (url !== null) {

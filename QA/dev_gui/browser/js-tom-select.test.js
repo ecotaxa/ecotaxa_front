@@ -35,6 +35,37 @@ function taxoSelect(options, attrs = '') {
   return select.tomselect;
 }
 
+describe('js-tom-select explore projects', () => {
+  it('searches the public route and keeps several projects', async () => {
+    const urls = [];
+    const realfetch = window.fetch;
+    window.fetch = async (url) => {
+      urls.push(String(url));
+      return new Response(JSON.stringify([{ id: 12, text: 'Tara' }, { id: 13, text: 'Tara 2' }]));
+    };
+    try {
+      const div = document.createElement('div');
+      div.className = 'test-page';
+      div.innerHTML = `<select id="filt_projid" name="projid" class="js js-autocomplete form-multiselect" data-type="exploreproject" multiple></select>`;
+      document.body.append(div);
+      const select = div.querySelector('select');
+      JsTomSelect.applyTo(select);
+      const ts = select.tomselect;
+      await new Promise((resolve) => ts.settings.load.call(ts, 'tara', (json) => {
+        ts.addOptions(json.map(([, opt]) => opt));
+        resolve();
+      }));
+      expect(urls).toEqual(['/search/exploreproject?opts=all_visible&q=tara']);
+      ts.addItem('12');
+      ts.addItem('13');
+      expect(ts.getItem('12').textContent).toContain('Tara');
+      expect([...select.selectedOptions].map((o) => o.value)).toEqual(['12', '13']);
+    } finally {
+      window.fetch = realfetch;
+    }
+  });
+});
+
 describe('js-tom-select taxo items', () => {
   it('strikes through selected deprecated taxa', async () => {
     const ts = taxoSelect([[11, 'Deprecated taxon', 'D'], [12, 'Active taxon', 'A']]);

@@ -504,8 +504,9 @@ def render_for_js(prjs: list, columns: dict, can_access: dict) -> list:
                             select.update(translations["controls"]["V"])
                         elif prj["access"] in [AccessLevelEnum._1, AccessLevelEnum._2]:
                             select.update(translations["controls"]["V"])
-                            select.update(translations["controls"]["R"])
-                        else:
+                            if current_user.is_authenticated:
+                                select.update(translations["controls"]["R"])
+                        elif current_user.is_authenticated:
                             select.update(translations["controls"]["R"])
                         if prj["projid"] in can_access["Manage"] or isadmin:
                             select.update(translations["controls"]["M"])
