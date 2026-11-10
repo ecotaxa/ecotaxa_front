@@ -1,6 +1,6 @@
 {# Usual table of the projects of the samples selected on the map, its data come from /gui/explore/projects. Same container and attributes as project/_listcontainer.html #}
 <div class="container mx-auto block">
-<div id="projects-list" data-from="exploreprojects" data-fromid="{{ projids }}" data-current="{{ current_user.id|string }}" data-is="{{ current_user.is_app_admin }}" data-cellid="projid" data-instanceid="explore_projects" class="w-full shadow-1 mb-8 js js-datatable prjlist explore-projects" {% if current_user.is_authenticated %}data-details=true data-detailsurl=/gui/prj/about/{% endif %} data-paging=false data-sortable=true data-searchable=true>
+<div id="projects-list" data-from="exploreprojects" data-fromid="{{ projids }}" data-current="{{ current_user.id|string }}" data-is="{{ current_user.is_app_admin }}" data-cellid="projid" data-instanceid="explore_projects" class="w-full shadow-1 mb-8 js js-datatable prjlist{% if not current_user.is_authenticated %} explore-projects{% endif %}" {% if current_user.is_authenticated %}data-details=true data-detailsurl=/gui/prj/about/{% endif %} data-paging=false data-sortable=true data-searchable=true>
 <div id="wait-please" data-wait="{{ _('Please wait') }}" data-loaded="{{ _('Data loaded. Displaying...') }}"> {{ _('Please wait') }}...</div>
 <table></table>
 </div>

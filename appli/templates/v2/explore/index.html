@@ -54,8 +54,9 @@
        data-fitwidth="true"
        data-views='{{ [["world", _("World")], ["north", _("Arctic")], ["south", _("Antarctic")]]|tojson }}'
        data-target="map-projects"
+       {% if current_user.is_authenticated %}data-clickone="true"{% endif %}
        data-nomap="{{ _('Displaying the map requires an Internet access to https://cdnjs.cloudflare.com and https://cdn.jsdelivr.net') }}">
   </div>
-  <div id="map-projects" class="flex flex-wrap gap-4 mt-4 mb-8"></div>
+  <div id="map-projects" class="flex flex-wrap gap-4 mt-4 mb-8{% if not current_user.is_authenticated %} anonymous{% endif %}"></div>
 </div>
 {% endblock %}

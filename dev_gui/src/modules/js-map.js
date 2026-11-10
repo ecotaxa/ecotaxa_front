@@ -725,11 +725,13 @@ function select_samples(ol, map, samples, item, color) {
       target.textContent = '';
     }
   }
-  // all the samples under the click, the points overlap a lot
+  // all the samples under the click, the points overlap a lot; with data-clickone only the top one
   map.on('click', (evt) => {
     const features = [];
     map.forEachFeatureAtPixel(evt.pixel, (f) => {
       features.push(f);
+      // a truthy return stops at the first feature
+      return item.dataset.clickone === 'true';
     }, {
       layerFilter: (layer) => layer.getSource() === samples
     });
