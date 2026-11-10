@@ -115,14 +115,19 @@ export class DataImport {
   // scroll (table-component.js enableVirtualScroll), so this must be re-run each time rows are
   // re-rendered - see the onRowsRendered registration in table-project.js - not just once at
   // setup, otherwise rows scrolled into view later never get their import handler attached.
-  rebindSelectors() {
+  // root: only bind the selectors of this element (eg. a single re-rendered <tr>), to avoid
+  // stacking a second handler on the selectors of rows which were not re-rendered.
+  rebindSelectors(root = null) {
     this.trs = Array.from(this.dom.querySelectorAll('tbody tr'));
     const indextocheck = this.indexToCheck();
-    this.selectors = this.dom.querySelectorAll('[' + this.selector + '] button, [' + this.selector + '] input');
-    this.selectors.forEach(selector => {
+    const query = '[' + this.selector + '] button, [' + this.selector + '] input';
+    this.selectors = this.dom.querySelectorAll(query);
+    const tobind = (root) ? root.querySelectorAll(query) : this.selectors;
+    tobind.forEach(selector => {
       // checkbox possible
       const index = Array.from(selector.parentElement.children).indexOf((selector));
-      if (indextocheck && selector.closest('tr').children[indextocheck[index]].innerHTML === '') this.disableSelector(selector, false);
+      const tocheck = (indextocheck) ? selector.closest('tr').children[indextocheck[index]] : null;
+      if (tocheck && tocheck.innerHTML === '') this.disableSelector(selector, false);
       else {
         const evt = (selector.tagName.toLowerCase() === 'input') ? 'change' : 'click';
         const apply_selection = (e) => {
@@ -263,13 +268,21 @@ export class DataImport {
     }
   }
 
-  toImport(td, whatpart = 0, add = true) {
+  async toImport(td, whatpart = 0, add = true) {
     // cell values in json  - no parse
-    const tr=td.parentElement;
-    if (add) tr.dataset.checked=add; else delete tr.dataset.checked;
     if (td.tagName.toLowerCase() !== 'td') td = td.closest('td');
+    let tr=td.parentElement;
     const rowindex = this.rowIndex(td);
     if (rowindex === null) return;
+    // taxo lists are lazy-loaded: if clicked before its row data arrived, load it now
+    if (this.tbl && this.tbl.ensureTaxa && this.columnProperty('what', td.cellIndex) === typeimport.taxo) {
+      const newtr = await this.tbl.ensureTaxa(rowindex, tr);
+      if (newtr) {
+        td = newtr.cells[td.cellIndex];
+        tr = newtr;
+      }
+    }
+    if (add) tr.dataset.checked=add; else delete tr.dataset.checked;
     let showbtns = true;
     let contact = null;
     const cellindex = td.cellIndex;
@@ -842,11 +855,8 @@ export class DataImport {
     if (index === -1) return [0];
     const parts = (grid.columns[index].parts) ? grid.columns[index].parts : null;
     if (parts) {
-      const indextocheck = grid.columns.filter((column, i) => {
-        if (parts.indexOf(column.name) >= 0) return i;
-      }).map(v => {
-        return v.index;
-      });
+      // position among the rendered <td>s (hidden columns are not rendered), not the grid data index
+      const indextocheck = parts.map(name => this.columnIndex('name', name)).filter(i => i >= 0);
       return indextocheck;
     }
 

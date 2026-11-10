@@ -114,6 +114,7 @@ def project_table_columns(
             ),
             "taxo": dict(
                 {
+                    "initclassiflist": {"label": _("preset ids"), "hidden": True},
                     "preset": {
                         "label": _("Preset categories"),
                         "format": "taxons",

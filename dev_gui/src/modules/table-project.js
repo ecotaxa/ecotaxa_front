@@ -5,7 +5,8 @@ import {
 } from '../modules/modules-config.js';
 
 import equal from 'deep-equal';
-import {create_box, unescape_html} from "./utils";
+import {create_box, unescape_html, fetchSettings} from "./utils";
+import {AlertBox} from "./alert-box";
 css.lastused = "last-used";
 css.small = "tdsmall";
 
@@ -100,6 +101,7 @@ export const initImport = async (state) => {
   // virtual scroll destroys and recreates <tr>/<td> on every scroll, so the import
   // buttons/inputs on rows scrolled into view later need their handlers re-bound too.
   state.onRowsRendered(() => state.dataImport.rebindSelectors());
+  if (state.params.import === typeimport.taxo) initTaxoLazyLoad(state);
   state.importfields = state.grid.columns.filter(column => (column.hasOwnProperty('selectcells')));
   state.importfields = (state.importfields.length) ? state.importfields[0].selectcells : null;
   state.dataImport.itemRemove = itemRemove;
@@ -111,6 +113,117 @@ export const initImport = async (state) => {
   }
   if (state.dataImport.initList) state.dataImport.initList();
   state.waitdiv.remove();
+}
+
+// "pick taxonomy from other project": the list comes without the taxa (too costly for all projects),
+// preset & extra taxa are fetched, by small batches, for the rows which get displayed.
+const taxolazy = {
+  url: '/gui/prj/importtaxo',
+  presetids: 'initclassiflist',
+  batch: 40,
+  delay: 150,
+};
+
+function initTaxoLazyLoad(state) {
+  const tbody = state.dom.tBodies[0];
+  if (!tbody) return;
+  const presetcell = state.getCellId('preset');
+  const extracell = state.getCellId('objtaxonnotinpreset');
+  if (presetcell < 0 || extracell < 0) return;
+  const pending = new Map(); // rowindex -> promise of the batch loading it
+  let queue = new Set();
+  let timer = null;
+
+  const isLoaded = (rowindex) => (state.grid.data[rowindex] && state.grid.data[rowindex][presetcell] !== null);
+
+  const rerenderRow = (rowindex, oldtr = null) => {
+    oldtr = oldtr || tbody.querySelector('tr[data-rowindex="' + rowindex + '"]');
+    if (!oldtr || !oldtr.isConnected) return null;
+    const newtr = state.createTableRow(state.grid.data[rowindex], rowindex);
+    if (oldtr.hidden) newtr.hidden = true;
+    oldtr.replaceWith(newtr);
+    if (state.dataImport) state.dataImport.rebindSelectors(newtr);
+    return newtr;
+  };
+
+  const loadRows = (rowindexes) => {
+    const body = {};
+    const byprj = {};
+    rowindexes.forEach(rowindex => {
+      const projid = state.getCellData(rowindex, models.projid);
+      if (projid === null) return;
+      body[projid] = state.getCellData(rowindex, taxolazy.presetids) || '';
+      byprj[projid] = rowindex;
+    });
+    const promise = fetch(taxolazy.url, fetchSettings({
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body),
+    })).then(response => {
+      if (!response.ok) throw new Error(response.statusText);
+      return response.json();
+    }).then(details => {
+      Object.entries(byprj).forEach(([projid, rowindex]) => {
+        const detail = details[projid] || {};
+        state.grid.data[rowindex][presetcell] = detail.preset || {};
+        state.grid.data[rowindex][extracell] = detail.objtaxonnotinpreset || {};
+        pending.delete(rowindex);
+        rerenderRow(rowindex);
+      });
+    }).catch(err => {
+      // leave the rows unloaded, they will be retried when displayed again
+      rowindexes.forEach(rowindex => pending.delete(rowindex));
+      AlertBox.addAlert({
+        type: AlertBox.alertconfig.types.danger,
+        content: String(err),
+        dismissible: true,
+      });
+    });
+    rowindexes.forEach(rowindex => pending.set(rowindex, promise));
+    return promise;
+  };
+
+  const flush = () => {
+    timer = null;
+    const todo = Array.from(queue).filter(rowindex => !isLoaded(rowindex) && !pending.has(rowindex));
+    queue = new Set();
+    for (let i = 0; i < todo.length; i += taxolazy.batch) loadRows(todo.slice(i, i + taxolazy.batch));
+  };
+
+  const enqueue = (rowindex) => {
+    if (isLoaded(rowindex) || pending.has(rowindex)) return;
+    queue.add(rowindex);
+    if (timer === null) timer = setTimeout(flush, taxolazy.delay);
+  };
+
+  // rows are rendered asynchronously (batches or virtual scroll window), watch which get on screen
+  const visible = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      visible.unobserve(entry.target);
+      const rowindex = parseInt(entry.target.dataset.rowindex, 10);
+      if (!isNaN(rowindex)) enqueue(rowindex);
+    });
+  });
+  const observeRows = (trs) => trs.forEach(tr => {
+    if (tr.tagName !== 'TR' || tr.dataset.rowindex === undefined) return;
+    if (!isLoaded(parseInt(tr.dataset.rowindex, 10))) visible.observe(tr);
+  });
+  new MutationObserver(mutations => {
+    mutations.forEach(mutation => observeRows(Array.from(mutation.addedNodes)));
+  }).observe(tbody, {childList: true});
+  observeRows(Array.from(tbody.rows));
+
+  // clicked before its batch came back: wait for it, or load this row alone
+  state.ensureTaxa = async (rowindex, tr) => {
+    if (isLoaded(rowindex)) return null;
+    const promise = pending.get(rowindex) || loadRows([rowindex]);
+    await promise;
+    if (!isLoaded(rowindex)) return null;
+    // the batch re-rendered the row if it was still in the DOM
+    const current = tbody.querySelector('tr[data-rowindex="' + rowindex + '"]');
+    return current || rerenderRow(rowindex, tr);
+  };
 }
 
 export default function(state) {
@@ -202,7 +315,8 @@ export default function(state) {
           case models.taxo:
             ((column.parts) ? column.parts : column.selectcells).forEach((v, index) => {
               let impid = state.getCellData(rowIndex, v);
-              impid = (impid === null || equal(impid, {})) ? ` disabled` : ``;
+              // null: not loaded yet (lazy-load), keep it clickable
+              impid = (impid !== null && equal(impid, {})) ? ` disabled` : ``;
               if (index > 0) txt = (state.params.btn1) ? state.params.btn1 : 'extra';
               btns.push({
                 nodename: "BUTTON",
@@ -349,7 +463,11 @@ export default function(state) {
       return td;
     },
     taxons: (value, rowIndex, cellIndex, td = {}) => {
-      if (value === null) td.childnodes = [state.setTextNode(``)];
+      if (value === null) {
+        // not loaded yet (lazy-load)
+        td.childnodes = [state.setTextNode(`…`)];
+        return td;
+      }
       const num = Object.keys(value).length;
       if (num > 0) {
         value = Object.values(value).join(', ');

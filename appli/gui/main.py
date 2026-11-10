@@ -324,6 +324,27 @@ def gui_prjlist():
     return response
 
 
+@app.route("/gui/prj/importtaxo", methods=["POST"])
+@login_required
+def gui_prj_importtaxo():
+    """Lazy-load of preset & extra taxa for the rows displayed in 'pick taxonomy from other project'.
+    Posted JSON: {projid: "preset ids comma separated", ...}"""
+    from appli.gui.project.projects_list import prj_import_taxo_details, _split_preset
+
+    posted = request.get_json(silent=True)
+    if not isinstance(posted, dict):
+        return make_response("Bad request", 400)
+    presets: Dict[int, List[int]] = {}
+    for a_key, a_val in posted.items():
+        if not str(a_key).isdigit():
+            continue
+        presets[int(a_key)] = _split_preset(a_val if isinstance(a_val, str) else "")
+    details = prj_import_taxo_details(presets)
+    response = make_response(json.dumps(details, separators=(",", ":")))
+    response.headers["Content-Type"] = "application/json; charset=utf-8"
+    return response
+
+
 @app.route("/gui/prj/importsettings", methods=["GET"])
 @login_required
 def gui_importsettings():

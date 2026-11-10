@@ -289,6 +289,8 @@ def projects_list_page(
 
 
 # new import taxo ( no more separate ids and text)
+# Light list: no stats nor taxa names, these are lazy-loaded per visible rows
+# by the table, via prj_import_taxo_details() below.
 def _prj_import_taxo_api(
     prjid: int = 0, filt: Optional[dict] = None, not_granted: bool = False
 ) -> List[Dict[str, Any]]:
@@ -317,59 +319,77 @@ def _prj_import_taxo_api(
                     "filter_subset": False,
                 }
             )
-            payload.update({"fields": "instrument,initclassiflist,classiffieldlist"})
+            payload.update(
+                {"fields": "instrument,initclassiflist,classiffieldlist,objcount"}
+            )
             r = requests.get(url, headers=headers, params=payload)
             if r.status_code == 200:
                 prjs.extend(r.json())
             else:
                 r.raise_for_status()
-    prj_ids = " ".join([str(a_prj["projid"]) for a_prj in prjs])
-    with ApiClient(ProjectsApi, request) as api:
-        stats: List[ProjectTaxoStatsModel] = api.project_set_get_stats(ids=prj_ids)
     # Sort for consistency
     prjs.sort(key=lambda prj: prj["title"].strip().lower())
-    # Collect id for each taxon to show
-    taxa_ids_for_all = set()
-    stats_per_project = {}
-    for a_prj in prjs:
-        if a_prj["initclassiflist"] is None:
-            a_prj["init_classif_list"] = []
-        else:
-            a_prj["init_classif_list"] = [
-                int(x) for x in a_prj["initclassiflist"].split(",") if x.isdigit()
-            ]
-        taxa_ids_for_all.update(a_prj["init_classif_list"])
-    for a_stat in stats:
-        taxa_ids_for_all.update(a_stat.used_taxa)
-        stats_per_project[a_stat.projid] = a_stat.used_taxa
-    # Collect name for each existing id
-    lst = [str(tid) for tid in taxa_ids_for_all if tid != -1]
-    with ApiClient(TaxonomyTreeApi, request) as api:
-        res: List[TaxonModel] = api.query_taxa_set(ids=" ".join(lst))
-    taxo_map = {
-        taxon_rec.id: (taxon_rec.display_name, taxon_rec.lineage_status[0])
-        for taxon_rec in res
-    }
     prjs_pojo = []
     for a_prj in prjs:
         # exclude current prj
-        if a_prj["projid"] != prjid:
-            # Inject taxon lists for display
-            prj_initclassif_list = set(a_prj["init_classif_list"])
-            try:
-                objtaxon = set(stats_per_project[a_prj["projid"]])
-            except KeyError:
-                # No stats
-                objtaxon = set()
-            # 'Extra' are the taxa used, but not in the classification preset
-            objtaxon.difference_update(prj_initclassif_list)
-            a_prj["preset"] = dict(
-                (t, taxo_map.get(int(t))) for t in prj_initclassif_list if t in taxo_map
-            )
-            a_prj["objtaxonnotinpreset"] = dict(
-                (t, taxo_map.get(int(t))) for t in objtaxon if t in taxo_map
-            )
-            # return only prjs with taxons
-            if len(a_prj["preset"]) or len(a_prj["objtaxonnotinpreset"]):
-                prjs_pojo.append(a_prj)
+        if a_prj["projid"] == prjid:
+            continue
+        preset_ids = _split_preset(a_prj.get("initclassiflist"))
+        # return only prjs which can have taxa: a preset, or objects (hence maybe extra ones)
+        if len(preset_ids) == 0 and not a_prj.get("objcount"):
+            continue
+        a_prj["initclassiflist"] = ",".join(str(t) for t in preset_ids)
+        # None means 'not loaded yet' for the table
+        a_prj["preset"] = None
+        a_prj["objtaxonnotinpreset"] = None
+        prjs_pojo.append(a_prj)
     return prjs_pojo
+
+
+def _split_preset(initclassiflist: Optional[str]) -> List[int]:
+    if not initclassiflist:
+        return []
+    return [int(x) for x in initclassiflist.split(",") if x.strip().isdigit()]
+
+
+MAX_TAXO_DETAILS_PRJS = 50
+
+
+def prj_import_taxo_details(presets: Dict[int, List[int]]) -> Dict[int, Dict[str, Any]]:
+    """For a few projects, return the preset & extra (used, not in preset) taxa
+    as {taxon_id: (display_name, status)}, keyed by project id.
+    presets: project id -> preset taxa ids, as already sent in the light list."""
+    prj_ids = list(presets.keys())[:MAX_TAXO_DETAILS_PRJS]
+    if len(prj_ids) == 0:
+        return {}
+    with ApiClient(ProjectsApi, request) as api:
+        stats: List[ProjectTaxoStatsModel] = api.project_set_get_stats(
+            ids=" ".join(str(p) for p in prj_ids)
+        )
+    stats_per_project = {a_stat.projid: a_stat.used_taxa for a_stat in stats}
+    taxa_ids_for_all = set()
+    for a_prj_id in prj_ids:
+        taxa_ids_for_all.update(presets[a_prj_id])
+        taxa_ids_for_all.update(stats_per_project.get(a_prj_id, []))
+    taxa_ids_for_all.discard(-1)
+    taxo_map = {}
+    if len(taxa_ids_for_all) > 0:
+        with ApiClient(TaxonomyTreeApi, request) as api:
+            res: List[TaxonModel] = api.query_taxa_set(
+                ids=" ".join(str(t) for t in taxa_ids_for_all)
+            )
+        taxo_map = {
+            taxon_rec.id: (taxon_rec.display_name, taxon_rec.lineage_status[0])
+            for taxon_rec in res
+        }
+    ret = {}
+    for a_prj_id in prj_ids:
+        prj_initclassif_list = set(presets[a_prj_id])
+        # 'Extra' are the taxa used, but not in the classification preset
+        objtaxon = set(stats_per_project.get(a_prj_id, []))
+        objtaxon.difference_update(prj_initclassif_list)
+        ret[a_prj_id] = {
+            "preset": {t: taxo_map[t] for t in prj_initclassif_list if t in taxo_map},
+            "objtaxonnotinpreset": {t: taxo_map[t] for t in objtaxon if t in taxo_map},
+        }
+    return ret

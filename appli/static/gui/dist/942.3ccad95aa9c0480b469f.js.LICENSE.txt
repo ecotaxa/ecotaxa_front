@@ -4,6 +4,8 @@
 
 /*! ../modules/table-projects-tools.js */
 
+/*! ./alert-box */
+
 /*! ./utils */
 
 /*! deep-equal */

@@ -16,6 +16,16 @@ from to_back.ecotaxa_cli_py.models import (
 )
 
 
+# Max ids per back call: the HTTP parser (httptools) rejects URLs over 64KB with
+# "400 Invalid HTTP request received.", and collections can gather many projects/taxa.
+IDS_CHUNK_SIZE = 2000
+
+
+def _chunks(ids: List[str], size: int = IDS_CHUNK_SIZE):
+    for i in range(0, len(ids), size):
+        yield ids[i : i + size]
+
+
 ######################################################################################################################
 # taxo names
 def taxo_with_names(ids: list) -> list:
@@ -124,8 +134,10 @@ def read_taxo_recast(target_id: int, operation: str, is_collection: bool):
     if operation == recast_operation["dwca_export_emof"]:
         taxo_doc = {}
         # get automatic worms taxo
+        ids = {}
         with ApiClient(TaxonomyTreeApi, request) as api:
-            ids = api.get_taxonomy_worms(taxaids=",".join(taxaids))
+            for a_chunk in _chunks(taxaids):
+                ids.update(api.get_taxonomy_worms(taxaids=",".join(a_chunk)))
         autoids = {str(k): str(v) for k, v in ids.items()}
         # get modified automatic worms taxo
         res = get_taxo_recast(
@@ -140,17 +152,17 @@ def read_taxo_recast(target_id: int, operation: str, is_collection: bool):
         if recastres is None:
             recastids = wormsids
         # search worms ids and recast ids in one request
-        reqids = ",".join(
-            list(
-                set(
-                    list(wormsids.values())
-                    + list(recastids.values())
-                    + list(autoids.values())
-                )
+        reqids = list(
+            set(
+                list(wormsids.values())
+                + list(recastids.values())
+                + list(autoids.values())
             )
         )
+        recastitems = {}
         with ApiClient(TaxonomyTreeApi, request) as api:
-            recastitems = api.wormsification_taxa_set(reqids)
+            for a_chunk in _chunks(reqids):
+                recastitems.update(api.wormsification_taxa_set(",".join(a_chunk)))
         keys = recastitems.keys()
         taxo_worms = taxa_populate(wormsids, keys, recastitems)
         taxo_auto = taxa_populate(autoids, keys, recastitems)
@@ -166,11 +178,12 @@ def read_taxo_recast(target_id: int, operation: str, is_collection: bool):
         )
     else:
         taxo_auto = {str(t.id): t for t in taxalist}
-        recastvals = recastids.values()
-        reqids = ",".join(list(recastvals))
-        if len(recastvals) > 0:
+        reqids = list(recastids.values())
+        if len(reqids) > 0:
+            recasts = []
             with ApiClient(TaxonomyTreeApi, request) as api:
-                recasts = api.query_taxa_set(reqids)
+                for a_chunk in _chunks(reqids):
+                    recasts.extend(api.query_taxa_set(",".join(a_chunk)))
             taxo_recast = {str(t.id): t for t in recasts}
         else:
             taxo_recast = taxo_auto
@@ -241,15 +254,32 @@ def projects_with_recast(operation: str,project_ids: List[int]=[],taxonames:bool
         return []
 
 
-def get_taxostats(project_ids: str):
+def _project_set_stats(project_ids: str) -> List[ProjectTaxoStatsModel]:
+    """project_set_get_stats over a ','-separated list of project ids, by chunks."""
+    prj_ids = [pid for pid in project_ids.split(",") if pid.strip() != ""]
+    stats: List[ProjectTaxoStatsModel] = []
     with ApiClient(ProjectsApi, request) as api:
-        taxa = api.project_set_get_stats(ids=project_ids)
+        for a_chunk in _chunks(prj_ids):
+            stats.extend(api.project_set_get_stats(ids=",".join(a_chunk)))
+    return stats
+
+
+def _query_taxa_set(taxa_ids: List[str]) -> List[TaxonModel]:
+    """query_taxa_set by chunks."""
+    taxalist: List[TaxonModel] = []
+    with ApiClient(TaxonomyTreeApi, request) as api:
+        for a_chunk in _chunks(taxa_ids):
+            taxalist.extend(api.query_taxa_set(",".join(a_chunk)))
+    return taxalist
+
+
+def get_taxostats(project_ids: str):
+    taxa = _project_set_stats(project_ids)
     used_taxa = []
     for res in taxa:
         used_taxa.extend([str(r) for r in res.used_taxa])
     taxaids = list(set(used_taxa))
-    with ApiClient(TaxonomyTreeApi, request) as api:
-        taxalist = api.query_taxa_set(",".join(taxaids))
+    taxalist = _query_taxa_set(taxaids)
     return taxalist, taxaids
 
 
@@ -259,13 +289,11 @@ TEMPORARY_TAXON = "temporary"
 def temporary_taxa(project_ids: str, filters: Optional[Dict] = None) -> list:
     """display names of the temporary categories (under 'temporary' in the taxonomy) of the objects
     exported from the projects with the filters"""
-    with ApiClient(ProjectsApi, request) as api:
-        stats: List[ProjectTaxoStatsModel] = api.project_set_get_stats(ids=project_ids)
+    stats = _project_set_stats(project_ids)
     taxaids = list(set([str(t) for res in stats for t in res.used_taxa if t > 0]))
     if len(taxaids) == 0:
         return []
-    with ApiClient(TaxonomyTreeApi, request) as api:
-        taxalist: List[TaxonModel] = api.query_taxa_set(",".join(taxaids))
+    taxalist = _query_taxa_set(taxaids)
     # lineage begins with the taxon itself
     temporaries = {
         t.id: t.display_name for t in taxalist if TEMPORARY_TAXON in t.lineage[1:]
