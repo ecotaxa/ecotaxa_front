@@ -603,24 +603,49 @@ async function listStorage(entry = null,name=null) {
     const file = await filestream.getFile();
     return file;
   }
-  // poll the back status of the unpacking of a TUS upload, emit its progress, until done or stopped
+  // poll the back status of the unpacking of a TUS upload, emit its progress, until its end.
+  // finish() resolves with {done: true} or {error: detail} once the unpacking has ended.
   function pollUnpack(uploadurl, path) {
     const url = window.location.origin + '/api/user_files/unpack_status/' + uploadurl.split('/').pop();
     let stopped = false;
     let timer = null;
+    let inflight = false;
+    let final = false; // the upload request has answered: no status means nothing to wait for
+    let result = null;
+    let resolveEnd = null;
+    const end = (res) => {
+      result = res;
+      stopped = true;
+      if (resolveEnd) resolveEnd(res);
+    };
     const poll = async () => {
       if (stopped) return;
+      inflight = true;
       let delay = 2000;
       try {
         const response = await fetch(url, {
           credentials: 'same-origin'
         });
         if (stopped) return;
-        // 404: status not written yet. Other errors are reported by the upload request.
-        if (!response.ok && response.status !== 404) return;
-        if (response.ok) {
+        if (response.status === 404) {
+          // not written yet while the upload request waits, or no / expired status after it
+          if (final) return end({
+            done: true
+          });
+        } else if (!response.ok) {
+          let detail = response.statusText;
+          try {
+            const json = await response.json();
+            if (json && json.detail) detail = json.detail;
+          } catch (err) {}
+          return end({
+            error: detail
+          });
+        } else {
           const status = await response.json();
-          if (status.state !== 'unpacking') return;
+          if (status.state !== 'unpacking') return end({
+            done: true
+          });
           ModuleEventEmitter.emit(eventnames.progress, {
             name: eventnames.progress,
             phase: 'unpacking',
@@ -634,13 +659,29 @@ async function listStorage(entry = null,name=null) {
         }
       } catch (err) {
         // network hiccup: try again
+      } finally {
+        inflight = false;
       }
       if (!stopped) timer = setTimeout(poll, delay);
     };
     timer = setTimeout(poll, 500);
-    return () => {
-      stopped = true;
-      if (timer) clearTimeout(timer);
+    return {
+      stop: () => {
+        stopped = true;
+        if (timer) clearTimeout(timer);
+      },
+      finish: () => {
+        if (result) return Promise.resolve(result);
+        final = true;
+        return new Promise((resolve) => {
+          resolveEnd = resolve;
+          // ask now, unless a request is on its way: it goes on polling
+          if (!inflight) {
+            if (timer) clearTimeout(timer);
+            poll();
+          }
+        });
+      }
     };
   }
 
@@ -666,7 +707,8 @@ async function listStorage(entry = null,name=null) {
         path: path
       },
       onError: async (error) => {
-        if (unpackPoll) unpackPoll();
+        if (unpackPoll) unpackPoll.stop();
+        unpackPoll = null;
         properties.follow = null;
         if (bigfile || properties.hashandlers) {
           // unchanged: multi-part / big-file uploads can't be resumed here
@@ -706,7 +748,21 @@ async function listStorage(entry = null,name=null) {
         if (bytesUploaded === bytesTotal && !unpackPoll && upload.url) unpackPoll = pollUnpack(upload.url, path);
       },
       onSuccess: async () => {
-        if (unpackPoll) unpackPoll();
+        // the back may still unpack in background: wait for its real end
+        if (!unpackPoll && upload.url) unpackPoll = pollUnpack(upload.url, path);
+        const end = (unpackPoll) ? await unpackPoll.finish() : {
+          done: true
+        };
+        unpackPoll = null;
+        if (end.error) {
+          ModuleEventEmitter.emit(eventnames.message, {
+            name: AlertBox.alertconfig.types.error,
+            message: 'Unpacking failed: ' + end.error,
+            path: message.path,
+          }, _listener);
+          // reset and ready: the refreshed list shows the .unpack_error.log
+          return endProcess(true);
+        }
         if (callbackchunk) {
           await callbackchunk();
         } else {
