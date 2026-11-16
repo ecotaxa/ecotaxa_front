@@ -381,6 +381,8 @@ tr.disabled {@apply opacity-70}
 .folders .wait > .entry-content > .entryB, .folders .wait > .entry-content > .entryD, .folders .wait > .entry-content > .entryR {@apply after:mr-1 after:p-0.5 after:icon after:icon-arrow-path-sm}
 .entries .editable {@apply font-normal border border-stone-300 border-dashed text-ellipsis min-w-[3rem] outline-transparent outline-none before:pl-0 after:pr-2 pl-2 bg-white}
 .entrycontrols {@apply text-sm  w-auto  mr-1 inline-block float-right relative}
+/* each toolbar icon (new folder, rename, trash...) is clickable */
+.entrycontrols > span {@apply cursor-pointer}
 /* wrapContent rows only (entrycontrols is prepended before .entry-content,
    hence the forward sibling combinator): match .entry-content's vertical
    rhythm so the toolbar doesn't look shorter than the icon+name next to it */

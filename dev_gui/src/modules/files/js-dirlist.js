@@ -577,10 +577,19 @@ export class JsDirList {
           // crossing a boundary while the toolbar's own insertion shifts the
           // row's layout) shouldn't make the controls flicker off and back on
           if (this._hoverLeaveTimer) clearTimeout(this._hoverLeaveTimer);
-          this._hoverLeaveTimer = setTimeout(() => {
-            this._hoverLeaveTimer = null;
-            if (this.entrycontrols && !this.dragentry) this.entrycontrols.detachControls();
-          }, 150);
+          {
+            const row = e.entry.container;
+            const check = () => {
+              // still over the row or its toolbar (prepended into the row): keep it
+              if (row.isConnected && row.matches(':hover')) {
+                this._hoverLeaveTimer = setTimeout(check, 150);
+                return;
+              }
+              this._hoverLeaveTimer = null;
+              if (this.entrycontrols && !this.dragentry) this.entrycontrols.detachControls();
+            };
+            this._hoverLeaveTimer = setTimeout(check, 150);
+          }
           break;
         case "drop":
           // nothing goes into an extraction in progress

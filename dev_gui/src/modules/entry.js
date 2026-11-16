@@ -667,6 +667,9 @@ export function EntryControls(container = document, options = {}) {
 
   function attachControls(entry) {
     if (entry.isUnpacking && entry.isUnpacking()) return;
+    // already there: moving it again shifts the row under the pointer, which leaves
+    // and re-enters, i.e. the toolbar blinks
+    if (activentry === entry && !box.classList.contains(css.hide)) return;
     detachControls();
     activentry = entry;
     activentry.container.prepend(box);
