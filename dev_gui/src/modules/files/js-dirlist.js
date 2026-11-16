@@ -267,7 +267,13 @@ function EntryAction(args, options) {
               duration: 2000,
               dismissible:true
             });
-            else txt = txt.split(dirseparator).pop();
+            else {
+              txt = txt.split(dirseparator).pop();
+              // the entry is now known by its new name: paths built from it
+              // (destination, upload target, controls) must use it
+              entry.name = entry.container.dataset.name = txt;
+              entry.isnew = false;
+            }
             label.textContent = txt;
             if (entry.type === entryTypes.branch) entry.branchListener();
             delete entry.container.dataset.action;
