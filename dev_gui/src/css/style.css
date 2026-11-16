@@ -332,8 +332,9 @@ tr.disabled {@apply opacity-70}
 .dirlist {@apply h-full mt-2 }
 /* a little vertical breathing room around every row, of any type */
 [data-name][data-type="R"] , [data-name][data-type="D"] {@apply relative}
-/* staging of an archive extraction in progress (back PROGRESS_PREFIX): no action on it */
-.folders [data-name^="⌛"] > [class^="entry"] {@apply text-stone-400 italic cursor-wait animate-pulse}
+/* staging of an archive extraction in progress (back PROGRESS_PREFIX): not shown, its
+   progress is on the upload button, the result appears once the extraction is over */
+.folders [data-name^="⌛"] {@apply hidden}
 .folders [data-name].removed {@apply font-normal border border-stone-300 bg-danger-200}
 .folders [data-name].dragging {@apply font-normal border border-warning-300 bg-warning-200}
 .folders [data-name].dragover {@apply font-normal border border-secondblue-100 bg-secondblue-100 min-h-32}
