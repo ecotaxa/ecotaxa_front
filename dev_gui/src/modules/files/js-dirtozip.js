@@ -605,7 +605,7 @@ async function listStorage(entry = null,name=null) {
   }
   // poll the back status of the unpacking of a TUS upload, emit its progress, until its end.
   // finish() resolves with {done: true} or {error: detail} once the unpacking has ended.
-  function pollUnpack(uploadurl, path, quiet = false) {
+  function pollUnpack(uploadurl, path) {
     const url = window.location.origin + '/api/user_files/unpack_status/' + uploadurl.split('/').pop();
     let stopped = false;
     let timer = null;
@@ -646,7 +646,7 @@ async function listStorage(entry = null,name=null) {
           if (status.state !== 'unpacking') return end({
             done: true
           });
-          if (!quiet) ModuleEventEmitter.emit(eventnames.progress, {
+          ModuleEventEmitter.emit(eventnames.progress, {
             name: eventnames.progress,
             phase: 'unpacking',
             path: path,
@@ -709,14 +709,23 @@ async function listStorage(entry = null,name=null) {
   async function checkPending() {
     const pending = Object.entries(getPending());
     for (const [uploadurl, value] of pending) {
-      const end = await pollUnpack(uploadurl, value.path, true).finish();
+      // same "Unpacking N% (x/y)" on the upload button as when the page did the upload
+      const end = await pollUnpack(uploadurl, value.path).finish();
       setPending(uploadurl, null);
-      if (end.error) ModuleEventEmitter.emit(eventnames.message, {
+      ModuleEventEmitter.emit(eventnames.message, (end.error) ? {
         name: AlertBox.alertconfig.types.error,
         message: 'Unpacking failed: ' + end.error,
         path: value.path,
+      } : {
+        name: AlertBox.alertconfig.types.success,
+        message: 'Upload of ' + value.path + ' is done',
+        path: value.path,
       }, _listener);
     }
+    // the button back to its idle state, other trees refreshed (filesmutated)
+    if (pending.length) ModuleEventEmitter.emit(eventnames.complete, {
+      name: eventnames.ready
+    }, _listener);
     return pending.length > 0;
   }
 
