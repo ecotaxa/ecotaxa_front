@@ -485,7 +485,13 @@ export class Entry {
     return json;
   }
   isDraggable() {
+    if (this.isUnpacking()) return false;
     return (this.options.draggables && this.options.draggables.indexOf(this.type) >= 0);
+  }
+  // staging folder of an archive extraction in progress in the back (its PROGRESS_PREFIX):
+  // its content is not final, no action on it
+  isUnpacking() {
+    return (typeof this.name === 'string' && this.name.startsWith('\u231B'));
   }
   async list() {
     if (this.type === entryTypes.node) return;
@@ -651,7 +657,7 @@ export function EntryControls(container = document, options = {}) {
   }
 
   function attachControls(entry) {
-
+    if (entry.isUnpacking && entry.isUnpacking()) return;
     detachControls();
     activentry = entry;
     activentry.container.prepend(box);
@@ -772,6 +778,7 @@ export function MultiEntryControls(options = {}) {
 
   // Returns the entry's controls ({key: ctrl}), or null when it gets none.
   function attachControls(entry) {
+    if (entry.isUnpacking && entry.isUnpacking()) return null;
     if (entry.rowcontrols) return entry.rowcontrols;
     if (typeof options.accept === 'function' && !options.accept(entry)) return null;
     const available = Object.entries(options.controls).filter(([key, control]) => isAvailable(control, entry));

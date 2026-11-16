@@ -135,6 +135,10 @@ export class JsMyFiles {
       this.jsDirToZip = JsDirToZip({
         listener: this.uuid
       });
+      // uploads still unpacking when a page was left: tell how they ended
+      this.jsDirToZip.checkPending().then((changed) => {
+        if (changed && this.jsDirList) this.jsDirList.root.list();
+      });
 
       Object.keys(this.jsDirToZip.eventnames).forEach((key) => {
         this.eventnames[key] = this.jsDirToZip.eventnames[key];
@@ -470,7 +474,8 @@ export class JsMyFiles {
     this.activentry = this.jsDirList.root;
     this.rootitem = this.targetitem = this.activentry.container;
     ModuleEventEmitter.on(this.jsDirList.eventnames.attach, (e) => {
-      if (!e.entry) return;
+      // an extraction in progress is not an upload target
+      if (!e.entry || (e.entry.isUnpacking && e.entry.isUnpacking())) return;
       if (e.entry !== this.activentry && this.activentry.isBranch(true)) this.detachDropzone();
       this.activentry = e.entry;
       this.targetitem = this.activentry.container;

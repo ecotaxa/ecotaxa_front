@@ -583,6 +583,11 @@ export class JsDirList {
           }, 150);
           break;
         case "drop":
+          // nothing goes into an extraction in progress
+          if (e.entry && e.entry.isUnpacking && e.entry.isUnpacking()) {
+            e.entry.resetDragOver();
+            break;
+          }
           if (!this.dragentry) {
             ModuleEventEmitter.emit(this.eventnames.action, e, this.uuid);
           }

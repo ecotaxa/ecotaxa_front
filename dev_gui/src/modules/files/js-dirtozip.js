@@ -605,7 +605,7 @@ async function listStorage(entry = null,name=null) {
   }
   // poll the back status of the unpacking of a TUS upload, emit its progress, until its end.
   // finish() resolves with {done: true} or {error: detail} once the unpacking has ended.
-  function pollUnpack(uploadurl, path) {
+  function pollUnpack(uploadurl, path, quiet = false) {
     const url = window.location.origin + '/api/user_files/unpack_status/' + uploadurl.split('/').pop();
     let stopped = false;
     let timer = null;
@@ -646,7 +646,7 @@ async function listStorage(entry = null,name=null) {
           if (status.state !== 'unpacking') return end({
             done: true
           });
-          ModuleEventEmitter.emit(eventnames.progress, {
+          if (!quiet) ModuleEventEmitter.emit(eventnames.progress, {
             name: eventnames.progress,
             phase: 'unpacking',
             path: path,
@@ -685,6 +685,41 @@ async function listStorage(entry = null,name=null) {
     };
   }
 
+  // uploads unpacking in the back, by TUS upload url, kept in the browser across pages
+  const PENDING_KEY = 'ecotaxa.unpackpending';
+
+  function getPending() {
+    try {
+      return JSON.parse(localStorage.getItem(PENDING_KEY)) || {};
+    } catch (err) {
+      return {};
+    }
+  }
+
+  function setPending(uploadurl, value) {
+    try {
+      const pending = getPending();
+      if (value) pending[uploadurl] = value;
+      else delete pending[uploadurl];
+      localStorage.setItem(PENDING_KEY, JSON.stringify(pending));
+    } catch (err) {}
+  }
+
+  // tell how ended the uploads left unpacking by a previous page. Resolves true if any ended.
+  async function checkPending() {
+    const pending = Object.entries(getPending());
+    for (const [uploadurl, value] of pending) {
+      const end = await pollUnpack(uploadurl, value.path, true).finish();
+      setPending(uploadurl, null);
+      if (end.error) ModuleEventEmitter.emit(eventnames.message, {
+        name: AlertBox.alertconfig.types.error,
+        message: 'Unpacking failed: ' + end.error,
+        path: value.path,
+      }, _listener);
+    }
+    return pending.length > 0;
+  }
+
   async function sendZipFile(file, path, callbackchunk = null, bigfile = false) {
     if (properties.counter.error > 0) return endProcess();
     const message = {
@@ -709,6 +744,7 @@ async function listStorage(entry = null,name=null) {
       onError: async (error) => {
         if (unpackPoll) unpackPoll.stop();
         unpackPoll = null;
+        if (upload.url) setPending(upload.url, null);
         properties.follow = null;
         if (bigfile || properties.hashandlers) {
           // unchanged: multi-part / big-file uploads can't be resumed here
@@ -745,7 +781,14 @@ async function listStorage(entry = null,name=null) {
           path: path
         }, _listener);
         // all bytes sent: the back unpacks while the last request waits, show its progress
-        if (bytesUploaded === bytesTotal && !unpackPoll && upload.url) unpackPoll = pollUnpack(upload.url, path);
+        if (bytesUploaded === bytesTotal && !unpackPoll && upload.url) {
+          unpackPoll = pollUnpack(upload.url, path);
+          // if the page is left meanwhile, the next My Files tells how it ended
+          setPending(upload.url, {
+            name: file.name,
+            path: path
+          });
+        }
       },
       onSuccess: async () => {
         // the back may still unpack in background: wait for its real end
@@ -754,13 +797,14 @@ async function listStorage(entry = null,name=null) {
           done: true
         };
         unpackPoll = null;
+        if (upload.url) setPending(upload.url, null);
         if (end.error) {
           ModuleEventEmitter.emit(eventnames.message, {
             name: AlertBox.alertconfig.types.error,
             message: 'Unpacking failed: ' + end.error,
             path: message.path,
           }, _listener);
-          // reset and ready: the refreshed list shows the .unpack_error.log
+          // reset and ready
           return endProcess(true);
         }
         if (callbackchunk) {
@@ -842,6 +886,7 @@ async function listStorage(entry = null,name=null) {
     scanBrowse,
     scanHandle,
     quotaEstimate,
-    browserRequired
+    browserRequired,
+    checkPending
   }
 }
