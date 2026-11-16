@@ -135,9 +135,13 @@ export class JsMyFiles {
       this.jsDirToZip = JsDirToZip({
         listener: this.uuid
       });
-      // uploads still unpacking when a page was left: tell how they ended
+      // uploads still unpacking when a page was left: tell how they ended,
+      // and no new upload meanwhile (uploadBusy)
+      this.done = false;
       this.jsDirToZip.checkPending().then((changed) => {
         if (changed && this.jsDirList) this.jsDirList.root.list();
+      }).finally(() => {
+        this.done = true;
       });
 
       Object.keys(this.jsDirToZip.eventnames).forEach((key) => {
