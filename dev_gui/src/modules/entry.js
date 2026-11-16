@@ -530,10 +530,19 @@ export class Entry {
       }
       this.setLoaded();
     } else {
+      // e.g. an archive extraction in progress there: the back tells its state, not the list
+      let content = response.statusText;
+      try {
+        const detail = (await response.json()).detail;
+        if (detail && detail.state === 'unpacking') content = detail.message;
+        else if (typeof detail === 'string') content = detail;
+      } catch (err) {}
+      // not loaded: a later open lists it again
+      this.container.classList.remove(css.wait);
       AlertBox.addMessage({
         parent: this.container,
         type: "error",
-        content: response.error + ' ' + response.text
+        content: content
       })
     }
 

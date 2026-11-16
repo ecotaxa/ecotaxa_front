@@ -22,7 +22,15 @@ def dir_list(sub_path=None):
         sub_path = "/"
 
     with ApiClient(MyFilesApi, request) as api:
-        dirlist = api.list_user_files(sub_path)
+        try:
+            dirlist = api.list_user_files(sub_path)
+        except ApiException as e:
+            # e.g. 422 for an archive extraction in progress, its state in the body
+            try:
+                body = json.loads(e.body)
+            except (TypeError, ValueError):
+                body = {"detail": e.reason}
+            return None, {"status": e.status, "body": body}
     return dirlist, None
 
 

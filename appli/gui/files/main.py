@@ -20,6 +20,8 @@ def gui_files_dirlist(subpath: Optional[str] = None):
     from appli.gui.commontools import todict
 
     dirlist, err = dir_list(subpath)
+    if err:
+        return err["body"], err["status"]
     response = todict(dirlist)
     return response
 
