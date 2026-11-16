@@ -194,8 +194,18 @@ function EntryAction(args, options) {
         data.append(api_parameters.dest, destpath.join(dirseparator));
         break;
     }
-    if(_fetching) return;
+    // one action at a time: tell, instead of a click silently lost
+    if (_fetching) {
+      AlertBox.addAlert({
+        type: AlertBox.alertconfig.types.info,
+        content: 'Wait for the previous action to finish.',
+        dismissible: true,
+      });
+      return false;
+    }
     _fetching=true;
+    // the row shows the loading icon while its action runs
+    this.container.classList.add(css.wait);
     const response = await fetch(this.options.url + urlseparator + action, fetchSettings({
       method: "POST",
       body: data,
@@ -206,7 +216,9 @@ function EntryAction(args, options) {
         dismissible: false,
       });
     }).finally(()=> {
-      _fetching=false;});
+      _fetching=false;
+      this.container.classList.remove(css.wait);});
+    if (!response) return false;
     const json = await response.json();
     if (response.status === 200) {
       if (callback) callback(json.message);
