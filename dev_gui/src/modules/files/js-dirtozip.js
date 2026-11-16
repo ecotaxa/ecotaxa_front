@@ -603,6 +603,47 @@ async function listStorage(entry = null,name=null) {
     const file = await filestream.getFile();
     return file;
   }
+  // poll the back status of the unpacking of a TUS upload, emit its progress, until done or stopped
+  function pollUnpack(uploadurl, path) {
+    const url = window.location.origin + '/api/user_files/unpack_status/' + uploadurl.split('/').pop();
+    let stopped = false;
+    let timer = null;
+    const poll = async () => {
+      if (stopped) return;
+      let delay = 2000;
+      try {
+        const response = await fetch(url, {
+          credentials: 'same-origin'
+        });
+        if (stopped) return;
+        // 404: status not written yet. Other errors are reported by the upload request.
+        if (!response.ok && response.status !== 404) return;
+        if (response.ok) {
+          const status = await response.json();
+          if (status.state !== 'unpacking') return;
+          ModuleEventEmitter.emit(eventnames.progress, {
+            name: eventnames.progress,
+            phase: 'unpacking',
+            path: path,
+            percentage: status.percent,
+            done: status.entries_done,
+            total: status.entries_total,
+          }, _listener);
+          const retry = parseFloat(response.headers.get('Retry-After'));
+          if (retry > 0) delay = retry * 1000;
+        }
+      } catch (err) {
+        // network hiccup: try again
+      }
+      if (!stopped) timer = setTimeout(poll, delay);
+    };
+    timer = setTimeout(poll, 500);
+    return () => {
+      stopped = true;
+      if (timer) clearTimeout(timer);
+    };
+  }
+
   async function sendZipFile(file, path, callbackchunk = null, bigfile = false) {
     if (properties.counter.error > 0) return endProcess();
     const message = {
@@ -612,6 +653,7 @@ async function listStorage(entry = null,name=null) {
     }
     path = path + ((path.slice(-1) === dirseparator) ? `` : dirseparator) + file.name;
     message.path = path;
+    let unpackPoll = null; // stops the polling of the extraction status
     const upload = new tus.Upload(file, {
       endpoint: options.tusuploadurl,
       retryDelays: [150000, 225000, 300000, 600000],
@@ -624,6 +666,7 @@ async function listStorage(entry = null,name=null) {
         path: path
       },
       onError: async (error) => {
+        if (unpackPoll) unpackPoll();
         properties.follow = null;
         if (bigfile || properties.hashandlers) {
           // unchanged: multi-part / big-file uploads can't be resumed here
@@ -659,8 +702,11 @@ async function listStorage(entry = null,name=null) {
           percentage: percentage,
           path: path
         }, _listener);
+        // all bytes sent: the back unpacks while the last request waits, show its progress
+        if (bytesUploaded === bytesTotal && !unpackPoll && upload.url) unpackPoll = pollUnpack(upload.url, path);
       },
       onSuccess: async () => {
+        if (unpackPoll) unpackPoll();
         if (callbackchunk) {
           await callbackchunk();
         } else {

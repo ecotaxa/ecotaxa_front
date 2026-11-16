@@ -919,7 +919,10 @@ export class JsMyFiles {
         return;
         break;
       case this.eventnames.progress:
-        if (parseFloat(opts.percentage) >= 100) {
+        if (opts.phase === 'unpacking') {
+          const files = (opts.total) ? ` (${opts.done || 0}/${opts.total})` : ``;
+          this.showBusy(btn, ` Unpacking ${opts.percentage || 0}%${files}`);
+        } else if (parseFloat(opts.percentage) >= 100) {
           this.showBusy(btn, ` Decompressing...`);
         } else {
           this.showBusy(btn, ` Uploading ` + ((target !== 'zip') ? ' big file' : '') + ` ${opts.percentage}%`);
