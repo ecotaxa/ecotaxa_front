@@ -314,7 +314,7 @@ tr.disabled {@apply opacity-70}
    attachControls) is intentionally included here too: its class also starts
    with "entry", so it picks up the exact same tint as the icon+name instead
    of standing out with its own background. */
-.has-controls > [class^="entry"] {@apply bg-mainblue-50}
+.has-controls > [class^="entry"] {@apply bg-stone-100}
 /* the actually-selected row (sticks after a click, unlike the hover preview
    above) - darker so the two states read as distinct, and placed after
    .has-controls so it wins when a row is both currently hovered and selected */
@@ -336,9 +336,10 @@ tr.disabled {@apply opacity-70}
    progress is on the upload button, the result appears once the extraction is over */
 .folders [data-name^="⌛"] {@apply hidden}
 .folders [data-name].removed {@apply font-normal border border-stone-300 bg-danger-200}
-.folders [data-name].dragging {@apply font-normal border border-warning-300 bg-warning-200}
-.folders [data-name].dragover {@apply font-normal border border-secondblue-100 bg-secondblue-100 min-h-32}
-.folders [data-name].droptarget.dragover {@apply hover:drop-shadow pb-4}
+/* dragged entry and drop target: the selection tint on the row's own icon+name only,
+   no border nor height change, so nothing moves while dragging */
+.folders [data-name].dragging > [class^="entry"] {@apply bg-mainblue-100 opacity-60}
+.folders [data-name].dragover > [class^="entry"] {@apply bg-mainblue-100 ring-1 ring-inset ring-mainblue-300}
 .folders [data-name].dragover .entrycontrols , .folders [data-name].dragover #dropzone {@apply hide}
 .on {@apply  block sm:max-h-[50v]  overflow-y-hidden}
 /* clear-both: always start below the icon/checkbox/toolbar floats, whatever
@@ -422,7 +423,7 @@ tr.disabled {@apply opacity-70}
 /* :hover on the row itself would trigger from anywhere in its box (its own
    padding, the checkbox's area) - scope it to only the icon or the name
    actually being hovered, matching where click/dblclick actually respond */
-:is(.folders, .taxotree) [data-name]:has(> .rowcontrols > .control-select.import-toggle):has(> [class^="ico-entry"]:hover, > [class^="entry"]:hover) > [class^="entry"] {@apply bg-mainblue-50}
+:is(.folders, .taxotree) [data-name]:has(> .rowcontrols > .control-select.import-toggle):has(> [class^="ico-entry"]:hover, > [class^="entry"]:hover) > [class^="entry"] {@apply bg-stone-100}
 /* tint (and lightly shade) the entry's own name while its select toggle is
    on - target the label span, not the [data-name] li, so neither the colour
    nor the background inherit into nested rows (e.g. the trash dir, which has
