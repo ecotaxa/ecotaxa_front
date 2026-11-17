@@ -88,10 +88,13 @@ def gui_job_show(job_id: int):
         target_proj = get_target_prj(projid)
 
     finalaction = ""
-    if job.state == "F":
+    erroraction = ""
+    if job.state in ("F", "E"):
         job_cls = Job.find_job_class_by_name(Job, job.type)
-        if job_cls is not None:
+        if job_cls is not None and job.state == "F":
             finalaction = job_cls.final_action(job)
+        elif job_cls is not None:
+            erroraction = job_cls.error_action(job)
 
     return render_template(
         "./v2/jobs/show.html",
@@ -99,6 +102,7 @@ def gui_job_show(job_id: int):
         owner=owner,
         partial=is_partial_request(),
         finalaction=finalaction,
+        erroraction=erroraction,
         target_proj=target_proj,
         projid=projid,
         collection_id=collection_id,
@@ -174,6 +178,8 @@ def gui_job_status(job_id: int):
         job_cls = Job.find_job_class_by_name(Job, job_type)
         if job_cls is not None:
             rep["finalaction"] = job_cls.final_action(job)
+            if job.state == "E":
+                rep["erroraction"] = job_cls.error_action(job)
     except ValueError:
         rep = dict({"errors": [{"err": 422, "message": py_messages["jobiderror"]}]})
     return rep

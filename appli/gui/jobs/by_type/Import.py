@@ -3,6 +3,7 @@ import time
 from pathlib import Path
 from typing import ClassVar, Optional, Union, Any
 from flask import render_template, redirect, request, url_for
+from markupsafe import escape
 from appli import gvp, app
 from appli.gui.jobs.Job import Job
 from appli.gui.jobs.staticlistes import py_messages
@@ -277,3 +278,26 @@ class ImportJob(Job):
             )
         else:
             return ""
+
+    @classmethod
+    def error_action(cls, job: JobModel) -> str:
+        """For a failed import of files/directories picked in My Files: they stay in the
+        import_ folder where they were gathered."""
+        projid = job.params.get("prj_id")
+        source_path = (job.params.get("req") or {}).get("source_path")
+        if not projid or not source_path:
+            return ""
+        from appli.gui.files.tools import get_staged_import_manifest
+
+        try:
+            staged = get_staged_import_manifest(projid, source_path)
+        except ApiException:
+            return ""
+        if not staged:
+            return ""
+        return "<p>%s</p>" % escape(
+            _(
+                "The selected files and directories are in the folder %s in My Files."
+            )
+            % source_path
+        )

@@ -60,6 +60,13 @@ class Job(object):
         return ""
 
     @classmethod
+    def error_action(cls, job: JobModel) -> str:
+        """
+        Return HTML displayed below the error message when the job is in error.
+        """
+        return ""
+
+    @classmethod
     def get_project_id(cls, collection_id: int = 0) -> Union[int, str]:
         if collection_id != 0:
             coll = cls.get_target_obj(0, collection_id)

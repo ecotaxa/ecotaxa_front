@@ -167,6 +167,8 @@ export function jobMonitor(item, options = {}) {
             break;
           case "E":
             stop = true;
+            // same message as the page loaded in error, with what the job type adds below it
+            if (item.dataset.errors) html.push(`<div class="alert danger"><p>${item.dataset.errors}</p>${job.erroraction || ''}</div>`);
             break;
           case "P":
             // pending

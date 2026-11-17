@@ -126,3 +126,28 @@ def test_job_create_dialog(user_client, project_backend, job_type):
 def test_job_create_unknown_type(user_client):
     rsp = user_client.get("/gui/job/create/NoSuchJob?projid=1")
     assert rsp.status_code == 404
+
+
+def _failed_import(source_path="import_20261117_abc123"):
+    return _job(type="FileImport", state="E", params={"prj_id": 1, "req": {"source_path": source_path}})
+
+
+def test_failed_import_tells_where_the_files_are(user_client, backend):
+    import json
+    from to_back.ecotaxa_cli_py.api import UsersApi
+
+    backend.on(JobsApi, "get_job", returns=_failed_import())
+    manifest = {"source_path": "import_20261117_abc123", "entries": [{"staged": "a", "original": "x/a"}]}
+    backend.on(UsersApi, "get_current_user_prefs", returns=json.dumps(manifest))
+    body = user_client.get("/gui/job/status/5").get_json()
+    assert "import_20261117_abc123" in body["erroraction"]
+
+
+def test_failed_import_of_a_folder_has_no_message(user_client, backend):
+    # a folder imported as is, not gathered from a selection
+    from to_back.ecotaxa_cli_py.api import UsersApi
+
+    backend.on(JobsApi, "get_job", returns=_failed_import("my_folder"))
+    backend.on(UsersApi, "get_current_user_prefs", returns="")
+    body = user_client.get("/gui/job/status/5").get_json()
+    assert body["erroraction"] == ""
