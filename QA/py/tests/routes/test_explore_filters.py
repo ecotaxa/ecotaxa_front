@@ -11,7 +11,7 @@ from fakes import make_project, model
 from to_back.ecotaxa_cli_py.api import ProjectsApi, SamplesApi
 from to_back.ecotaxa_cli_py.models import SampleModel
 
-URL = "/search/mappopup/samples/"
+URL = "/gui/explore/map/samples/"
 
 
 def sample(sampleid, projid=1, lat=10.0, lon=20.0):

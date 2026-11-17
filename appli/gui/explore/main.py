@@ -1,22 +1,22 @@
 # -*- coding: utf-8 -*-
 # Explore page, v2: public map of the samples, with the selected samples below it
 import json
-from typing import List, Dict, Any, Optional, Tuple
+import math
+from typing import List, Dict, Any, Optional, Tuple, Mapping
 
 from flask import Response, render_template, request
 from flask_babel import _
 from flask_login import current_user
 
-from appli import app, gvp
+from appli import app, gvg, gvp
 from appli.gui.commontools import alert_box
-from appli.project.main import vignette_size
 from appli.gui.project.projects_list import projects_access
 from appli.gui.project.projects_list_interface_json import (
     project_table_columns,
     render_for_js,
     render_samples_stats,
 )
-from appli.utils import ApiClient, can_read_visible_project, get_all_visible_projects
+from appli.utils import ApiClient, can_read_visible_project
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import ProjectsApi, ObjectsApi, SamplesApi
 from to_back.ecotaxa_cli_py.models import (
@@ -42,6 +42,140 @@ IMAGE_FIELDS = [
 def gui_explore():
     # Map of the samples, the selected samples are displayed below it
     return render_template("v2/explore/index.html")
+
+
+def _visible_projects(
+    instrument_filter: str = "", fields: str = "projid,title,access"
+) -> List[ProjectModel]:
+    """The visible projects, granted or not, with only the given fields."""
+    with ApiClient(ProjectsApi, request) as api:
+        try:
+            filters = {}
+            if instrument_filter:
+                # the back-end matches a part of the instrument code, callers can compare the whole one
+                fields += ",instrument"
+                filters["instrument_filter"] = instrument_filter
+            projects: List[ProjectModel] = api.search_projects(
+                title_filter="%", fields=fields, **filters
+            )
+            otherprojects: List[ProjectModel] = api.search_projects(
+                title_filter="%", not_granted=True, fields=fields, **filters
+            )
+        except ApiException:
+            return []
+    return [prj for prj in projects + otherprojects if prj.access != "0"]
+
+
+def _map_bounds(args: Mapping[str, str]) -> Dict[str, float]:
+    """
+    The usable bounds among MapN, MapS, MapW and MapE: a missing or invalid one doesn't filter.
+    """
+    bounds = {}
+    for name in ("MapN", "MapS", "MapW", "MapE"):
+        try:
+            value = float(args.get(name, ""))
+        except ValueError:
+            continue
+        if math.isfinite(value):
+            bounds[name] = value
+    return bounds
+
+
+def _in_map_bounds(lat: float, lon: float, bounds: Dict[str, float]) -> bool:
+    """
+    Is the point inside the bounds? West greater than East is a box across the antimeridian.
+    """
+    north, south = bounds.get("MapN"), bounds.get("MapS")
+    west, east = bounds.get("MapW"), bounds.get("MapE")
+    if north is not None and lat > north:
+        return False
+    if south is not None and lat < south:
+        return False
+    if west is not None and east is not None and west > east:
+        return lon >= west or lon <= east
+    if west is not None and lon < west:
+        return False
+    if east is not None and lon > east:
+        return False
+    return True
+
+
+@app.route("/gui/explore/map/samples/")
+def gui_explore_map_samples():
+    """
+    The points of the map: readable samples with coordinates, filtered on projects, instrument and lat/lon box.
+    """
+    instrum = gvg("instrum")
+    projids = None
+    if gvg("projid"):
+        projids = [int(x) for x in gvg("projid").split(",") if x.strip().isdigit()]
+    if projids is None or instrum:
+        # anonymous users can only read samples of open projects, a public one refuses the whole search
+        visible = [
+            a_proj.projid
+            for a_proj in _visible_projects(instrument_filter=instrum)
+            if can_read_visible_project(a_proj)
+            and (not instrum or a_proj.instrument == instrum)
+        ]
+        projids = visible if projids is None else [p for p in projids if p in visible]
+    if not projids:
+        return Response("[]", mimetype="application/json")
+    with ApiClient(SamplesApi, request) as api:
+        try:
+            samples: List[SampleModel] = api.samples_search(
+                project_ids="+".join([str(p) for p in projids]), id_pattern="%"
+            )
+        except ApiException as ae:
+            app.logger.error("Explore map samples error: %s", ae.status)
+            return Response("[]", mimetype="application/json")
+    bounds = _map_bounds(request.args)
+    points = [
+        {"id": sam.sampleid, "projid": sam.projid, "lat": sam.latitude, "long": sam.longitude}
+        for sam in samples
+        # no point on the map without coordinates
+        if sam.latitude is not None
+        and sam.longitude is not None
+        and _in_map_bounds(sam.latitude, sam.longitude, bounds)
+    ]
+    return Response(json.dumps(points), mimetype="application/json")
+
+
+def vignette_size(
+    origwidth: Optional[int],
+    origheight: Optional[int],
+    zoom: int,
+    page_width: int,
+    window_height: int,
+) -> Tuple[int, int]:
+    """
+    Displayed size of an object image: zoomed, at least 75px, at most the page width and window height.
+    Same rules as the images of the legacy classification page.
+    """
+    if origwidth is None or origheight is None:
+        # no image, happens for subsets without images
+        origwidth = width = 80
+        origheight = height = 40
+    else:
+        width = origwidth * zoom // 100
+        height = origheight * zoom // 100
+    if max(width, height) < 75:  # under 75px, no scaling
+        if max(origwidth, origheight) < 75:
+            width = origwidth  # a small image is displayed as is
+            height = origheight
+        elif max(origwidth, origheight) == origwidth:
+            width = 75
+            height = max(origheight * 75 // origwidth, 1)
+        else:
+            height = 75
+            width = max(origwidth * 75 // origheight, 1)
+    # the image always fits in the screen
+    if width > page_width:
+        width = page_width
+        height = max(math.trunc(origheight * width / origwidth), 1)
+    if height > window_height:
+        height = window_height
+        width = max(math.trunc(origwidth * height / origheight), 1)
+    return width, height
 
 
 def _object_images(
@@ -209,7 +343,7 @@ def gui_explore_projects(ids: str):
     # an anonymous user gets the same projects from both searches
     prjs = {
         prj.projid: _project_row(prj)
-        for prj in get_all_visible_projects(fields="*default")
+        for prj in _visible_projects(fields="*default")
         if prj.projid in wanted and can_read_visible_project(prj)
     }
     rows = sorted(prjs.values(), key=lambda prj: prj["projid"])
