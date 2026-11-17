@@ -14,30 +14,29 @@ from to_back.ecotaxa_cli_py import SamplesApi, SampleModel, ApiException, Taxono
     TaxonModel, ProjectsApi, ProjectModel
 
 
-def explore_preselection() -> Dict[str, Any]:
-    """
-    Filters values from the query string (shared link), with the selected projects, samples and taxa
-    as (id, label) lists for the select boxes. Used by the legacy and the v2 Explore pages.
-    """
+@app.route('/explore/')
+def indexExplore() -> str:
     data: Dict[str, Any] = {}
     for k, v in FilterList.items():
         data[k] = gvg(k, v)
+    data['inexplore'] = True
     data["projid"] = gvg("projid", '0')
     data["taxochild"] = gvg("taxochild", '1')
 
-    data["projects_selected"] = []
+    data["projects_for_select"] = ""
     if data["projid"]:
         # query only the selected projects, not all visible ones
-        project_ids = [p for p in data['projid'].split(",") if p.strip().isdigit() and int(p) > 0]
+        project_ids = [p for p in data['projid'].split(",") if p.strip().isdigit()]
         with ApiClient(ProjectsApi, request) as papi:
             for a_projid in project_ids:
                 try:
                     a_project: ProjectModel = papi.project_query(int(a_projid), for_managing=False)
                 except ApiException:
                     continue
-                data["projects_selected"].append((a_project.projid, a_project.title))
+                data["projects_for_select"] += "\n<option value='%s' selected>%s</option> " % (
+                    a_project.projid, XSSEscape(a_project.title))
 
-    data["samples_selected"] = []
+    data["sample_for_select"] = ""
     if data["samples"]:
         PrjIds = data["projid"].replace(",", "+")
         # Sample filter was posted, select the corresponding items.
@@ -49,11 +48,12 @@ def explore_preselection() -> Dict[str, Any]:
                 for a_sample in samples:
                     # TODO: Could be filtered server-side
                     if str(a_sample.sampleid) in sample_ids:
-                        data["samples_selected"].append((a_sample.sampleid, a_sample.orig_id))
+                        data["sample_for_select"] += "\n<option value='%s' selected>%s</option> " % (
+                            a_sample.sampleid, XSSEscape(a_sample.orig_id))
             except ApiException as ae:
                 pass
 
-    data["taxa_selected"] = []
+    data["taxo_for_select"] = ""
     # taxo is a comma-separated list of ids, taxo[] kept for links shared before
     taxo_ids = [t for t in gvg("taxo").split(",") + gvgm("taxo[]") if t.strip().isdigit()]
     if taxo_ids:
@@ -62,22 +62,9 @@ def explore_preselection() -> Dict[str, Any]:
                 categs: List[TaxonModel] = tapi.query_taxa_set("+".join(taxo_ids))
             except ApiException as ae:
                 categs = []
-        data["taxa_selected"] = [(a_taxon.id, a_taxon.display_name) for a_taxon in categs]
-    return data
-
-
-def _options_html(selected) -> str:
-    return "".join("\n<option value='%s' selected>%s</option> " % (an_id, XSSEscape(label))
-                   for an_id, label in selected)
-
-
-@app.route('/explore/')
-def indexExplore() -> str:
-    data = explore_preselection()
-    data['inexplore'] = True
-    data["projects_for_select"] = _options_html(data["projects_selected"])
-    data["sample_for_select"] = _options_html(data["samples_selected"])
-    data["taxo_for_select"] = _options_html(data["taxa_selected"])
+        for a_taxon in categs:
+            data["taxo_for_select"] += "\n<option value='%s' selected>%s</option> " % (
+                a_taxon.id, XSSEscape(a_taxon.display_name))
 
     data["month_for_select"] = ""
     for (a_filter, default) in enumerate(MONTH_LABELS, start=1):
