@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-17 15:35+0100\n"
+"POT-Creation-Date: 2026-11-17 16:33+0100\n"
 "PO-Revision-Date: 2023-03-31 12:48+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -1290,17 +1290,9 @@ msgstr ""
 msgid "Import from a folder or zip file on the server"
 msgstr ""
 
-#: appli/gui/jobs/by_type/Import.py:123
-msgid "Unable to prepare the selected files/directories for import."
-msgstr ""
-
-#: appli/gui/jobs/by_type/Import.py:162
-msgid "The selected files/directories are back in their place in My Files."
-msgstr ""
-
-#: appli/gui/jobs/by_type/Import.py:164
+#: appli/gui/jobs/by_type/Import.py:300
 #, python-format
-msgid "Could not put back in their place, kept in %s:"
+msgid "The selected files and directories are in the folder %s in My Files."
 msgstr ""
 
 #: appli/gui/project/main.py:237 appli/gui/project/main.py:256
@@ -6697,12 +6689,22 @@ msgstr ""
 #~ "The password must be : - minimum"
 #~ " length 8 - 1 or more numeric"
 #~ " - 1 or more uppercase - 1 "
-#~ "or more lowercase - 1 or more  \n"
+#~ "or more lowercase - 1 or more"
+#~ "  \n"
 #~ msgstr ""
 
 #~ msgid ""
 #~ "Classif_id update will cause update of"
 #~ " classif_who and classif_when and insert"
 #~ " a line in historical."
+#~ msgstr ""
+
+#~ msgid "Unable to prepare the selected files/directories for import."
+#~ msgstr ""
+
+#~ msgid "The selected files/directories are back in their place in My Files."
+#~ msgstr ""
+
+#~ msgid "Could not put back in their place, kept in %s:"
 #~ msgstr ""
 
