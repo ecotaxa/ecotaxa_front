@@ -57,6 +57,15 @@ function createJsComponents() {
                 dynamics.JsTomSelect.applyTo(item);
               }
               break;
+            case 'js-map':
+              if (!dynamics.JsMap) {
+                const {
+                  JsMap
+                } = await import('../modules/js-map.js');
+                dynamics.JsMap = JsMap;
+              }
+              dynamics.JsMap(item);
+              break;
             case 'js-datatable':
               if (!dynamics.TableComponent) {
                 const {

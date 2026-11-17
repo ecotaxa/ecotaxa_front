@@ -4,6 +4,8 @@ export const models = {
   collection: 'collection',
   id: 'id',
   project: 'project',
+  // projects readable on the public explore page, anonymous users included
+  exploreproject: 'exploreproject',
   projid: 'projid',
   sampleid: 'sampleid',
   contact: 'contact',

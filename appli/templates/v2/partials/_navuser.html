@@ -22,5 +22,5 @@
 {%- if current_user.is_admin -%}
 <li>
 <a href="{{url_for("gui_admin")}}" target="winadmin">{{_('Admin')}}</a></li>
-{%-endif-%}<li><a href="/taxo/browse"> {{_('Browse Taxonomy')}} </a></li><li><a href="/explore"> {{_('Explore')}} </a></li><li><a href="{{ecopart_url()}}"> {{_('Go to Ecopart')}} </a></li></ul></div>{%endif%}
+{%-endif-%}<li><a href="/taxo/browse"> {{_('Browse Taxonomy')}} </a></li><li><a href="/gui/explore/"> {{_('Explore')}} </a></li><li><a href="{{ecopart_url()}}"> {{_('Go to Ecopart')}} </a></li></ul></div>{%endif%}
 </nav>

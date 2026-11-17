@@ -31,6 +31,7 @@ const instances = new Map();
 const fetchfroms = Object.freeze({
   collectionlist: '/gui/collectionlist/',
   prjlist: '/gui/prjlist/',
+  exploreprojects: '/gui/explore/projects',
   prjsamplestats: '/gui/prjsamplestats',
   userslist: '/gui/admin/userslist/',
   guestslist:'/gui/guestslist/',
@@ -956,6 +957,7 @@ export class TableComponent {
     const pluginLoaders = {
       collectionlist: () => import('../modules/table-collection.js'),
       prjlist: () => import('../modules/table-project.js'),
+      exploreprojects: () => import('../modules/table-project.js'),
       prjsamplestats: () => import('../modules/table-sample.js'),
       prjpredict: () => import('../modules/table-prediction.js'),
       prjtaxorecast: () => import('../modules/table-project.js'),
@@ -968,6 +970,7 @@ export class TableComponent {
       const modelIds = {
         collectionlist: models.id,
         prjlist: models.projid,
+        exploreprojects: models.projid,
         prjsamplestats: models.sampleid,
         prjpredict: models.projid,
         prjtaxorecast:models.recastid,

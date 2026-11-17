@@ -29,6 +29,18 @@ def list_privileges() -> dict:
     return dict({"viewers": "View", "annotators": "Annotate", "managers": "Manage"})
 
 
+def projects_access(prjs: list) -> Dict[str, List[int]]:
+    # ids of the projects by right of the current user
+    can_access: Dict[str, List[int]] = {}
+    for k, v in list_privileges().items():
+        can_access.update({v: []})
+        for prj in prjs:
+            for u in prj[k]:
+                if current_user.id == u["id"]:
+                    can_access[v].append(prj["projid"])
+    return can_access
+
+
 def _get_mailto_manager(request, type: str = "") -> str:
     from to_back.ecotaxa_cli_py import MiscApi, Constants
 
@@ -225,13 +237,7 @@ def projects_list(
             prjs = lastprjs + prjs
         if typeimport == "":
             # reformat  current_user privileges with projects id list -usage in  main projects list
-            rights = list_privileges()
-            for k, v in rights.items():
-                can_access.update({v: []})
-                for prj in prjs:
-                    for u in prj[k]:
-                        if current_user.id == u["id"]:
-                            can_access[v].append(prj["projid"])
+            can_access = projects_access(prjs)
     from appli.gui.project.projects_list_interface_json import (
         project_table_columns,
         render_for_js,

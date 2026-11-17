@@ -16,6 +16,11 @@ PUBLIC = {
     "gui_about",
     "gui_alert",
     "gui_check_captcha",
+    # public map of the samples, each route only returns what the user can read
+    "gui_explore",
+    "gui_explore_map_projects",
+    "gui_explore_map_samples",
+    "gui_explore_projects",
     "gui_graphicpalette",
     "gui_help_nologin",
     "gui_i18n",
