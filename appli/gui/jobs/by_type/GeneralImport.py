@@ -16,7 +16,7 @@ class ImportGeneralJob(ImportJob):
 
     @classmethod
     def job_req(cls) -> ImportReq:
-        file_to_load = cls._source_path()
+        file_to_load = gvp("file_to_load")
         # Decode posted variables & load defaults from class
         skip_already_loaded_file = gvp("skiploaded") == "Y"
         skip_object_duplicate = (

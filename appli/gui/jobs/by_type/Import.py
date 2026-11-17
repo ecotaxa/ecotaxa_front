@@ -2,8 +2,8 @@
 import time
 from pathlib import Path
 from typing import ClassVar, Optional, Union, Any
-from flask import render_template, redirect, request, url_for, g, flash
-from appli import gvp, gvpm, app
+from flask import render_template, redirect, request, url_for
+from appli import gvp, app
 from appli.gui.jobs.Job import Job
 from appli.gui.jobs.staticlistes import py_messages
 from appli.utils import ApiClient
@@ -24,7 +24,6 @@ from appli.gui.jobs.job_interface import import_format_options
 from appli.back_config import get_back_constants
 from appli.gui.taxonomy.tools import update_taxo_recast, get_taxo_recast
 from flask_babel import _
-from markupsafe import escape
 
 
 class ImportJob(Job):
@@ -112,26 +111,9 @@ class ImportJob(Job):
                 # directory or zip.
                 cwd = str(Path(server_path).parent)
                 api.set_current_user_prefs(int(projid), "cwd", cwd)
-        # Several entries picked in My Files: gathered into one folder for the job
-        staged = None
-        entries = gvpm("entries")
-        if entries:
-            from appli.gui.files.tools import stage_import_sources
-
-            ret = stage_import_sources(int(projid), entries)
-            if "error" in ret:
-                flash(_("Unable to prepare the selected files/directories for import."), "error")
-            else:
-                staged = g.import_staged = ret["source_path"]
-        if staged is not None or not entries:
-            rsp = None
-            try:
-                req = cls.job_req()
-                if req is not None:
-                    rsp = cls.api_job_call(req)
-            finally:
-                if rsp is None and staged is not None:
-                    cls._restore(int(projid), staged)
+        req = cls.job_req()
+        if req is not None:
+            rsp = cls.api_job_call(req)
             if rsp is not None:
                 return redirect(url_for("gui_job_show", job_id=rsp.job_id))
         formdatas, formoptions, import_links = import_format_options(cls.IMPORT_TYPE)
@@ -144,41 +126,6 @@ class ImportJob(Job):
             target_proj=target_proj,
             action=cls.ACTION,
         )
-
-    @classmethod
-    def _source_path(cls) -> str:
-        """The folder the selected entries were staged into, else the posted one"""
-        return g.get("import_staged") or gvp("file_to_load")
-
-    @staticmethod
-    def _restore(projid: int, source_path: str) -> str:
-        """Put back staged entries. Return HTML telling it, or '' if nothing to do."""
-        from appli.gui.files.tools import restore_import_sources
-
-        kept = restore_import_sources(projid, source_path)
-        if kept is None:
-            return ""
-        if not kept:
-            msg = _("The selected files/directories are back in their place in My Files.")
-            return '<div class="alert is-info">%s</div>' % msg
-        msg = _("Could not put back in their place, kept in %s:") % escape(source_path)
-        items = "".join("<li>%s</li>" % escape(an_item["original"]) for an_item in kept)
-        return '<div class="alert warning">%s<ul>%s</ul></div>' % (msg, items)
-
-    @classmethod
-    def on_failure(cls, job: JobModel) -> str:
-        if job.state != "E":
-            return ""
-        return cls._restore(job.params["prj_id"], job.params["req"]["source_path"])
-
-    @classmethod
-    def on_erase(cls, job: JobModel) -> None:
-        from appli.gui.files.tools import forget_staged_import
-
-        projid, source_path = job.params["prj_id"], job.params["req"]["source_path"]
-        if job.state in ("E", "A"):  # Failed or abandoned at the question
-            cls._restore(projid, source_path)
-        forget_staged_import(projid, source_path)
 
     @classmethod
     def _get_file_to_load(cls):

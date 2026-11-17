@@ -2,8 +2,10 @@ import {
   ActivRequest
 } from "../modules/activ-request.js";
 import {
+  fetchSettings,
   create_box,
   dirseparator,
+  error_content
 } from '../modules/utils.js';
 import {
   css,
@@ -32,6 +34,7 @@ export function JsImport(container, options = {}) {
     url: {
       import: "gui/import",
       dirlist: "gui/files",
+      stageimport: "gui/files/import/stage"
     },
     browse: ['directory', 'file'],
     textimport: 'import'
@@ -61,6 +64,7 @@ export function JsImport(container, options = {}) {
   let url = {};
   url.dirlist = (container.dataset.dirlist) ? container.dataset.dirlist : options.url.dirlist;
   url.import = (container.dataset.import) ? container.dataset.import : options.url.import;
+  url.stageimport = (container.dataset.stageimport) ? container.dataset.stageimport : options.url.stageimport;
   options.selectors.importzoneid = (container.dataset.importzoneid) ? container.dataset.importzoneid : options.selectors.importzoneid;
   options.browse = (container.dataset.browse) ? container.dataset.browse.split(',') : options.browse;
   options.textimport = (container.dataset.textimport) ? container.dataset.textimport : options.textimport;
@@ -483,16 +487,34 @@ export function JsImport(container, options = {}) {
           return false;
         }
       }
-      // Sent with the job, which gathers them into one folder, and puts them
-      // back if the import fails.
-      const form = filetoload.form || container;
-      form.querySelectorAll('input[name="entries"]').forEach(input => input.remove());
+      const formdata = new FormData();
+      const projid = document.getElementById('projid');
+      formdata.append('projid', (projid) ? projid.value : '');
       multiSelected.forEach((entry, key) => {
         // Use the map key: a subtree wiped by removeEntries() can leave an
         // entry whose parent chain (and thus getCurrentPath()) is stale.
-        create_box('input', {type: 'hidden', name: 'entries', value: key}, form);
+        formdata.append('entries', key);
       });
-      filetoload.value = '';
+      const json = await fetch(url.stageimport, fetchSettings({
+        method: 'POST',
+        body: formdata,
+      })).then(response => response.json()).catch(err => {
+        AlertBox.addAlert({
+          type: AlertBox.alertconfig.types.danger,
+          content: error_content(err),
+          dismissible: false,
+        });
+        return null;
+      });
+      if (!json || json.status !== 200 || !json.message || !json.message.source_path) {
+        AlertBox.addAlert({
+          type: AlertBox.alertconfig.types.danger,
+          content: 'Unable to prepare the selected files/directories for import.',
+          dismissible: true,
+        });
+        return false;
+      }
+      filetoload.value = json.message.source_path;
       return true;
     }
     if (filetoload.value === "") {

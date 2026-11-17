@@ -27,7 +27,7 @@ class SimpleImportJob(ImportJob):
 
     @classmethod
     def job_req(cls) -> SimpleImportReq:
-        file_to_load = cls._source_path()
+        file_to_load = gvp("file_to_load")
         # update_classification = cls._update_mode(gvp("updateclassif"))
         # taxo_map = json.loads(gvp("taxo_mapping", "{}"))
         req = SimpleImportReq(source_path=file_to_load, values={})
