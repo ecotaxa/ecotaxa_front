@@ -59,6 +59,18 @@ class Job(object):
         """
         return ""
 
+    @staticmethod
+    def on_failure(job: JobModel) -> str:
+        """
+        Called when the job is seen in error. Return HTML telling what was done.
+        """
+        return ""
+
+    @staticmethod
+    def on_erase(job: JobModel) -> None:
+        """Called before the job is erased"""
+        return
+
     @classmethod
     def get_project_id(cls, collection_id: int = 0) -> Union[int, str]:
         if collection_id != 0:

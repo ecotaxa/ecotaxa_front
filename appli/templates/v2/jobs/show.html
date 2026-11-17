@@ -33,7 +33,7 @@ is-done
   {%set texterrors =_('This task has errors. Check the error messages below, fix these errors, go back to your project and restart your job.') %}
   <div data-id="{{job.id}}" data-request="monitor" data-event="load" data-state="{{job.state}}" data-errors={{texterrors}} {{'data-out=true' if job.outfile else ''}} data-populate='{"errors":"job-errors","state":"job-state","taskstep":"job-taskstep","questiondata":"job-questiondata","answerdata":"job-answerdata"}'>
   {%- if job.state !="E" and job.state!="F" -%}<div id="spinner-icon" class="hide mx-auto my-8"></div>
-  {%elif job.state =='E' %}<div class="alert danger "><p>{{texterrors}}</p></div>
+  {%elif job.state =='E' %}<div class="alert danger "><p>{{texterrors}}</p></div>{{finalaction|safe}}
   {%elif job.state !='E' %}<div id="responsediv" class="{{'hide' if job.state!='F'}} mr-2 ">{{finalaction|safe}}</div>{%-endif%}
   </div>
   <div class="mt-8 flex flex-col mb-2 sm:flex-row  sm:mb-0">

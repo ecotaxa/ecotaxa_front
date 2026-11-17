@@ -3,6 +3,7 @@ import json
 import posixpath
 import time
 import uuid
+from typing import Optional
 
 import requests
 from flask import request
@@ -14,7 +15,8 @@ from werkzeug.datastructures import FileStorage
 
 file_service = "/user_files/"
 IMPORT_MANIFEST_LOG_NAME = "_import_original_locations.log"
-IMPORT_MANIFEST_PREF_KEY = "last_import_manifest"
+# Per staged import folder, its mapping, until the job is erased or its sources restored
+IMPORT_MANIFEST_PREF_KEY = "import_staged:"
 
 
 def dir_list(sub_path=None):
@@ -67,7 +69,7 @@ def _dedupe_nested_entries(entries: list) -> list:
     relocates it."""
     cleaned = sorted(
         {e.strip().strip("/") for e in entries if e and e.strip().strip("/")},
-        key=len,
+        key=lambda e: (len(e), e),  # Ancestors first, then a stable order
     )
     kept: list = []
     for entry in cleaned:
@@ -98,11 +100,11 @@ def stage_import_sources(projid: int, entries: list) -> dict:
     Files tree, into a single flat temporary staging directory so they can
     be imported as one plain-directory import:
     - each selected entry is moved directly under the staging directory,
-      renamed on name collisions,
+      renamed on name collisions; if a move fails, those done are put back,
     - the real (original) location of every selected entry is written to a
       log file left in the staging directory,
-    - the same mapping is remembered server-side so the import confirmation
-      screen can display it once the import job completes.
+    - the same mapping is remembered server-side, to display it once the job
+      is done, or to put the entries back if it fails, see restore_import_sources.
     """
     entries = _dedupe_nested_entries(entries)
     if not entries:
@@ -117,12 +119,18 @@ def stage_import_sources(projid: int, entries: list) -> dict:
     used_names: set = set()
     with ApiClient(MyFilesApi, request) as api:
         api.create_user_file(source_path=staging_root)
-        for entry in entries:
-            staged_name = _unique_staged_name(posixpath.basename(entry), used_names)
-            api.move_user_file(
-                source_path=entry, dest_path=staging_root + "/" + staged_name
-            )
-            mapping.append({"staged": staged_name, "original": entry})
+        try:
+            for entry in entries:
+                staged_name = _unique_staged_name(posixpath.basename(entry), used_names)
+                api.move_user_file(
+                    source_path=entry, dest_path=staging_root + "/" + staged_name
+                )
+                mapping.append({"staged": staged_name, "original": entry})
+        except ApiException as ae:
+            kept = _move_back(api, staging_root, mapping)
+            if not kept:
+                api.remove_user_file(source_path=staging_root)
+            return {"error": "staging_failed", "detail": ae.reason, "kept": kept}
 
     _write_staging_log(staging_root, mapping)
     _remember_manifest(projid, staging_root, mapping)
@@ -155,28 +163,77 @@ def _write_staging_log(staging_root: str, mapping: list) -> None:
 
 
 def _remember_manifest(projid: int, staging_root: str, mapping: list) -> None:
+    """mapping empty: forget it"""
     with ApiClient(UsersApi, request) as api:
         api.set_current_user_prefs(
             int(projid),
-            IMPORT_MANIFEST_PREF_KEY,
-            json.dumps({"source_path": staging_root, "entries": mapping}),
+            IMPORT_MANIFEST_PREF_KEY + staging_root,
+            json.dumps(mapping) if mapping else "",
         )
+
+
+def _exists(api, path: str) -> bool:
+    parent, name = posixpath.split(path)
+    try:
+        listing = api.list_user_files(parent or "/")
+    except ApiException:
+        return False
+    return any(an_entry.name == name for an_entry in listing.entries or [])
+
+
+def _move_back(api, staging_root: str, mapping: list) -> list:
+    """Move each staged entry back to its original place. Return those kept."""
+    kept = []
+    for item in mapping:
+        try:
+            if _exists(api, item["original"]):
+                raise ApiException(status=422, reason="taken")
+            api.move_user_file(
+                source_path=staging_root + "/" + item["staged"],
+                dest_path=item["original"],
+            )
+        except ApiException:
+            kept.append(item)
+    return kept
+
+
+def restore_import_sources(projid: int, source_path: str) -> Optional[list]:
+    """
+    Put back the entries staged into source_path for an import which failed or was
+    abandoned. Return None if it was not a staged import, or is already restored,
+    else the entries which could not be put back, kept in source_path for a retry.
+    """
+    mapping = get_staged_import_manifest(projid, source_path)
+    if not mapping:
+        return None
+    with ApiClient(MyFilesApi, request) as api:
+        kept = _move_back(api, source_path, mapping)
+        if not kept:
+            try:
+                api.remove_user_file(source_path=source_path)  # Only the log left
+            except ApiException:
+                pass
+    _remember_manifest(projid, source_path, kept)
+    return kept
+
+
+def forget_staged_import(projid: int, source_path: str) -> None:
+    """The import job is erased, nothing to display or put back anymore"""
+    if get_staged_import_manifest(projid, source_path):
+        _remember_manifest(projid, source_path, [])
 
 
 def get_staged_import_manifest(projid: int, source_path: str):
     """Return the [{staged, original}, ...] mapping for a staged import
     directory, previously recorded by stage_import_sources(), or None."""
     with ApiClient(UsersApi, request) as api:
-        raw = api.get_current_user_prefs(int(projid), IMPORT_MANIFEST_PREF_KEY)
-    if not raw:
-        return None
+        raw = api.get_current_user_prefs(
+            int(projid), IMPORT_MANIFEST_PREF_KEY + source_path
+        )
     try:
-        manifest = json.loads(raw)
+        return json.loads(raw) if raw else None
     except (TypeError, ValueError):
         return None
-    if manifest.get("source_path") != source_path:
-        return None
-    return manifest.get("entries")
 
 
 def upload_file():

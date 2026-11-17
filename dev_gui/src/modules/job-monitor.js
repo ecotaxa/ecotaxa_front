@@ -167,6 +167,8 @@ export function jobMonitor(item, options = {}) {
             break;
           case "E":
             stop = true;
+            // e.g. the files staged for an import, put back
+            if (job.finalaction) html.push(job.finalaction);
             break;
           case "P":
             // pending

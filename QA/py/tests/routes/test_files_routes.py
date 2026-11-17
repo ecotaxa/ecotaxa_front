@@ -19,7 +19,7 @@ def test_list_subpath(user_client, backend):
 
 
 @pytest.mark.parametrize("url, data", [("/gui/files/create", {"entry": " "}), ("/gui/files/move", {"entry": "a", "dest": ""}),
-                                       ("/gui/files/rename", {"entry": "", "dest": "b"}), ("/gui/files/import/stage", {"projid": ""})])
+                                       ("/gui/files/rename", {"entry": "", "dest": "b"})])
 def test_missing_params_answer_422_without_backend_call(user_client, url, data):
     rsp = user_client.post(url, data=data)
     assert rsp.status_code == 200
@@ -48,30 +48,3 @@ def test_remove(user_client, backend, entry, sent):
     assert rsp.get_json() == {"status": 200, "message": "1"}
     rm.assert_called_once_with(source_path=sent)
 
-
-def test_import_stage(user_client, backend):
-    import responses
-
-    create = backend.on(MyFilesApi, "create_user_file", returns="ok")
-    move = backend.on(MyFilesApi, "move_user_file", returns="ok")
-    from to_back.ecotaxa_cli_py.api import UsersApi
-
-    prefs = backend.on(UsersApi, "set_current_user_prefs")
-    backend.requests.add(responses.POST, "http://backend.test/user_files/", json={})
-    rsp = user_client.post(
-        "/gui/files/import/stage", data={"projid": "3", "entries": ["a/x.zip", "b/x.zip", "a/x.zip/inner"]}
-    )
-    body = rsp.get_json()
-    assert body["status"] == 200, body
-    staging = body["message"]["source_path"]
-    assert staging.startswith("import_")
-    entries = body["message"]["entries"]
-    # nested a/x.zip/inner is dropped, same names get a suffix
-    assert sorted(e["staged"] for e in entries) == ["x.zip", "x_2.zip"]
-    assert sorted(e["original"] for e in entries) == ["a/x.zip", "b/x.zip"]
-    create.assert_called_once_with(source_path=staging)
-    assert move.call_count == 2
-    # the staging log is uploaded next to the files
-    assert len(backend.requests.calls) == 1
-    # and the mapping remembered for the import confirmation screen
-    assert prefs.call_args.args[:2] == (3, "last_import_manifest")

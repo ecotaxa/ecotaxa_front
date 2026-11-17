@@ -88,10 +88,11 @@ def gui_job_show(job_id: int):
         target_proj = get_target_prj(projid)
 
     finalaction = ""
-    if job.state == "F":
-        job_cls = Job.find_job_class_by_name(Job, job.type)
-        if job_cls is not None:
-            finalaction = job_cls.final_action(job)
+    job_cls = Job.find_job_class_by_name(Job, job.type)
+    if job_cls is not None and job.state == "F":
+        finalaction = job_cls.final_action(job)
+    elif job_cls is not None and job.state == "E":
+        finalaction = job_cls.on_failure(job)
 
     return render_template(
         "./v2/jobs/show.html",
@@ -173,10 +174,22 @@ def gui_job_status(job_id: int):
         rep = job.to_dict()
         job_cls = Job.find_job_class_by_name(Job, job_type)
         if job_cls is not None:
-            rep["finalaction"] = job_cls.final_action(job)
+            on_state = job_cls.on_failure if job.state == "E" else job_cls.final_action
+            rep["finalaction"] = on_state(job)
     except ValueError:
         rep = dict({"errors": [{"err": 422, "message": py_messages["jobiderror"]}]})
     return rep
+
+
+def _before_erase(job: JobModel) -> None:
+    """Let the job class clean up its own stuff, never preventing the erase"""
+    job_cls = Job.find_job_class_by_name(Job, job.type)
+    if job_cls is None:
+        return
+    try:
+        job_cls.on_erase(job)
+    except Exception as e:
+        app.logger.error("Before erase of job %s: %s", job.id, e)
 
 
 @app.route("/gui/job/forcerestart/<int:job_id>", methods=["GET"])
@@ -209,6 +222,7 @@ def gui_job_cleanup(jobid: int):
                 if collection_id is None:
                     collection_id = 0
         if job is not None:
+            _before_erase(job)
             with ApiClient(JobsApi, request) as api:
                 api.erase_job(job_id=jobid)
 
@@ -256,6 +270,7 @@ def gui_list_jobs():
                     or (cleanerror and ajob.state == "E")
                     or (cleandone and ajob.state == "F")
                 ):
+                    _before_erase(ajob)
                     api.erase_job(job_id=ajob.id)
                     cleanresult.append(ajob.id)
 
