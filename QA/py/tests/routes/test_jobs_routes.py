@@ -151,3 +151,35 @@ def test_failed_import_of_a_folder_has_no_message(user_client, backend):
     backend.on(UsersApi, "get_current_user_prefs", returns="")
     body = user_client.get("/gui/job/status/5").get_json()
     assert body["erroraction"] == ""
+
+
+@pytest.mark.parametrize(
+    "question, expected",
+    [
+        ({"missing_taxa": ["copepoda"]}, ["Taxonomy manual mapping"]),
+        ({"missing_users": ["Jane Doe"]}, ["Users manual mapping"]),
+        (
+            {"missing_taxa": ["copepoda"], "missing_users": ["Jane Doe"]},
+            ["Taxonomy manual mapping", "Users manual mapping"],
+        ),
+    ],
+)
+def test_import_question_page(user_client, backend, question, expected):
+    # "... or if (users...)" in the template crashed when there were only missing users
+    from conftest import page_chrome
+    from fakes import make_min_user, make_project
+    from to_back.ecotaxa_cli_py.api import ProjectsApi, TaxonomyTreeApi, UsersApi
+
+    page_chrome(backend)
+    job = _job(type="FileImport", state="A", params={"prj_id": 1})
+    job.question = question
+    backend.on(JobsApi, "get_job", returns=job)
+    backend.on(UsersApi, "get_user", returns=make_min_user(id=42, name="Owner", email="o@example.org"))
+    backend.on(ProjectsApi, "project_query", returns=make_project(1))
+    backend.on(TaxonomyTreeApi, "get_taxonomy_recast", returns=None)
+    rsp = user_client.get("/gui/job/question/5")
+    assert rsp.status_code == 200, rsp.data[:500]
+    body = rsp.get_data(as_text=True)
+    for a_text in expected:
+        assert a_text in body
+    assert "Continue" in body

@@ -4,7 +4,7 @@
 
 {% block body %}
   <div class="container mx-auto">
-      {% if (taxo|length())>0  or  if (users|length())>0 %}
+      {% if taxo|length > 0 or users|length > 0 %}
     <h2>{{_('Import data (step 2 of 2)')}}</h2>
     <h3 class="mt-2">{{_('Question reason')}}</h3>
     <div class=" ml-2 my-2  text-sm">{{ job.progress_msg |nl2br|safe }}</div>
