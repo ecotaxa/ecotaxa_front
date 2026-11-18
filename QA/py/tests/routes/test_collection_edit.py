@@ -78,6 +78,16 @@ def test_collection_save_refused_shows_error(user_client, coll_backend):
     assert "not yours" in rsp.get_data(as_text=True)
 
 
+def test_collection_save_db_refusal_shows_back_message(user_client, coll_backend):
+    msg = "The short title 'nt' is already used by another collection"
+    coll_backend.on(CollectionsApi, "patch_collection", raises=api_exception(422, msg))
+    rsp = user_client.post("/gui/collection/edit/1", data=_form(), headers=REFERER)
+    page = rsp.get_data(as_text=True)
+    # only the back message, not the raw JSON body
+    assert "already used by another collection" in page
+    assert '{"detail"' not in page and "{&#34;detail" not in page
+
+
 def test_collection_create_refused_shows_error(user_client, coll_backend):
     coll_backend.on(CollectionsApi, "create_collection", raises=api_exception(422, "bad title"))
     rsp = user_client.post("/gui/collection/create", data={"save": "Y", "title": "T", "project_ids[]": ["1"]})

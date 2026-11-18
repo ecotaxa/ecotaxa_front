@@ -79,7 +79,9 @@ function createActivItems() {
           const normalize_title= function(value) {
             // space replaced by _ , and only alfa-numeric lowercase
             value=value.replace(/[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/gu, '').toLowerCase();
-            return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "_");
+            value = value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "_");
+            // the target may limit its length (e.g. collection short title, 64 in the DB)
+            return (target.maxLength > 0) ? value.slice(0, target.maxLength) : value;
           }
            if(target!==item ) {
            item.addEventListener("input",(e)=> {

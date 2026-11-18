@@ -33,6 +33,7 @@ from appli.gui.commontools import (
     possible_access,
     py_get_messages,
     is_partial_request,
+    format_exception,
 )
 
 ###############################################common for create && edit  #######################################################################
@@ -135,7 +136,7 @@ def collection_create() -> str:
                 flash(py_messages["notauthorized"], "error")
             else:
                 current_app.logger.error("create_collection failed (%s) - body=%s", ae.reason, ae.body)
-                flash(py_messages["updateexception"] + "%s - %s" % (ae.reason, ae.body))
+                flash(py_messages["updateexception"] + format_exception(ae)[1], "error")
         external_id = gvp("external_id", "?")
         target_coll = CollectionModel(
             0, external_id, "", title, "", "", "", "", "", project_ids
@@ -340,7 +341,7 @@ def collection_edit(collection_id: int, new: bool = False):
             return redirect(request.referrer or url_for("gui_collection_edit", collection_id=collection_id))
         except ApiException as ae:
             current_app.logger.error("patch_collection failed (%s) - body=%s", ae.reason, ae.body)
-            flash(py_messages["updateexception"] + "%s - %s" % (ae.reason, ae.body))
+            flash(py_messages["updateexception"] + format_exception(ae)[1], "error")
     licenses = possible_licenses()
     # licenses[0] licenses texts , licenses[1] licenses restriction
     from appli.gui.commontools import crsf_token
