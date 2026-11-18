@@ -980,18 +980,18 @@ class ObjectsApi(object):
             _request_timeout=local_var_params.get('_request_timeout'),
             collection_formats=collection_formats)
 
-    def get_object_set(self, project_id, object_set_query_filters, **kwargs):  # noqa: E501
+    def get_object_set(self, project_id, project_filters, **kwargs):  # noqa: E501
         """Get Object Set  # noqa: E501
 
         Returns **filtered object Ids** for the given project.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.get_object_set(project_id, object_set_query_filters, async_req=True)
+        >>> thread = api.get_object_set(project_id, project_filters, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
         :param int project_id: Internal, numeric id of the project. (required)
-        :param ObjectSetQueryFilters object_set_query_filters: (required)
+        :param ProjectFilters project_filters: (required)
         :param str fields:   Specify the needed object (and ancillary entities) fields.  May instead be sent as `fields` in the JSON body, useful for long lists which could exceed URL length limits. Sending it in both the query string and the body is refused with a 422 error.  It follows the naming convention 'prefix.field' : Prefix is either 'obj' for main object, 'fre' for free fields, 'img' for the visible image.  The column obj.imgcount contains the total count of images for the object.  Use a comma to separate fields.  More help :  You can get the field labels by parsing the classiffieldlist returned by a call to https://ecotaxa.obs-vlfr.fr/api/docs#/projects/project_query_projects__project_id__get.  **Note that the following fields must be prefixed with the header \"obj.\"** (for example → obj.orig_id):  acquisid classif_auto_id, classif_auto_score, classif_auto_when, classif_crossvalidation_id, classif_id, classif_qual, classif_who, classif_when, complement_info, depth_max, depth_min, latitude, longitude, objdate, object_link, objid, objtime, orig_id, random_value, similarity, sunpos.  **Note that the following fields must be prefixed with the header \"img.\"** (for example → img.file_name):  file_name, height, imgid, imgrank, file_name, objid, orig_file_name, thumb_file_name, thumb_height, thumb_width, width.  **Note that the following fields must be prefixed with the header \"txo.\"** (for example → txo.display_name):  creation_datetime, creator_email, display_name, id, id_instance,aphia_id, lastupdate_datetime, name, nbrobj, nbrobjcum, parent_id, rename_to, source_desc, source_url, taxostatus, taxotype.  **All other fields must be prefixed by the header \"fre.\"** (for example → fre.circ.).                    
         :param str order_field: Order the result using given field. If prefixed with \"-\" then it will be reversed. When using *special syntax ss-Innnn*, the order is similarity with given (by its ID) object.
         :param int window_start:  Allows to return only a slice of the result, by skipping window_start objects before returning data. If no **unique order** is specified, the result can vary for same call and conditions.
@@ -1008,20 +1008,20 @@ class ObjectsApi(object):
                  returns the request thread.
         """
         kwargs['_return_http_data_only'] = True
-        return self.get_object_set_with_http_info(project_id, object_set_query_filters, **kwargs)  # noqa: E501
+        return self.get_object_set_with_http_info(project_id, project_filters, **kwargs)  # noqa: E501
 
-    def get_object_set_with_http_info(self, project_id, object_set_query_filters, **kwargs):  # noqa: E501
+    def get_object_set_with_http_info(self, project_id, project_filters, **kwargs):  # noqa: E501
         """Get Object Set  # noqa: E501
 
         Returns **filtered object Ids** for the given project.  # noqa: E501
         This method makes a synchronous HTTP request by default. To make an
         asynchronous HTTP request, please pass async_req=True
-        >>> thread = api.get_object_set_with_http_info(project_id, object_set_query_filters, async_req=True)
+        >>> thread = api.get_object_set_with_http_info(project_id, project_filters, async_req=True)
         >>> result = thread.get()
 
         :param async_req bool: execute request asynchronously
         :param int project_id: Internal, numeric id of the project. (required)
-        :param ObjectSetQueryFilters object_set_query_filters: (required)
+        :param ProjectFilters project_filters: (required)
         :param str fields:   Specify the needed object (and ancillary entities) fields.  May instead be sent as `fields` in the JSON body, useful for long lists which could exceed URL length limits. Sending it in both the query string and the body is refused with a 422 error.  It follows the naming convention 'prefix.field' : Prefix is either 'obj' for main object, 'fre' for free fields, 'img' for the visible image.  The column obj.imgcount contains the total count of images for the object.  Use a comma to separate fields.  More help :  You can get the field labels by parsing the classiffieldlist returned by a call to https://ecotaxa.obs-vlfr.fr/api/docs#/projects/project_query_projects__project_id__get.  **Note that the following fields must be prefixed with the header \"obj.\"** (for example → obj.orig_id):  acquisid classif_auto_id, classif_auto_score, classif_auto_when, classif_crossvalidation_id, classif_id, classif_qual, classif_who, classif_when, complement_info, depth_max, depth_min, latitude, longitude, objdate, object_link, objid, objtime, orig_id, random_value, similarity, sunpos.  **Note that the following fields must be prefixed with the header \"img.\"** (for example → img.file_name):  file_name, height, imgid, imgrank, file_name, objid, orig_file_name, thumb_file_name, thumb_height, thumb_width, width.  **Note that the following fields must be prefixed with the header \"txo.\"** (for example → txo.display_name):  creation_datetime, creator_email, display_name, id, id_instance,aphia_id, lastupdate_datetime, name, nbrobj, nbrobjcum, parent_id, rename_to, source_desc, source_url, taxostatus, taxotype.  **All other fields must be prefixed by the header \"fre.\"** (for example → fre.circ.).                    
         :param str order_field: Order the result using given field. If prefixed with \"-\" then it will be reversed. When using *special syntax ss-Innnn*, the order is similarity with given (by its ID) object.
         :param int window_start:  Allows to return only a slice of the result, by skipping window_start objects before returning data. If no **unique order** is specified, the result can vary for same call and conditions.
@@ -1044,7 +1044,7 @@ class ObjectsApi(object):
 
         all_params = [
             'project_id',
-            'object_set_query_filters',
+            'project_filters',
             'fields',
             'order_field',
             'window_start',
@@ -1071,10 +1071,10 @@ class ObjectsApi(object):
         if self.api_client.client_side_validation and ('project_id' not in local_var_params or  # noqa: E501
                                                         local_var_params['project_id'] is None):  # noqa: E501
             raise ApiValueError("Missing the required parameter `project_id` when calling `get_object_set`")  # noqa: E501
-        # verify the required parameter 'object_set_query_filters' is set
-        if self.api_client.client_side_validation and ('object_set_query_filters' not in local_var_params or  # noqa: E501
-                                                        local_var_params['object_set_query_filters'] is None):  # noqa: E501
-            raise ApiValueError("Missing the required parameter `object_set_query_filters` when calling `get_object_set`")  # noqa: E501
+        # verify the required parameter 'project_filters' is set
+        if self.api_client.client_side_validation and ('project_filters' not in local_var_params or  # noqa: E501
+                                                        local_var_params['project_filters'] is None):  # noqa: E501
+            raise ApiValueError("Missing the required parameter `project_filters` when calling `get_object_set`")  # noqa: E501
 
         collection_formats = {}
 
@@ -1098,8 +1098,8 @@ class ObjectsApi(object):
         local_var_files = {}
 
         body_params = None
-        if 'object_set_query_filters' in local_var_params:
-            body_params = local_var_params['object_set_query_filters']
+        if 'project_filters' in local_var_params:
+            body_params = local_var_params['project_filters']
         # HTTP header `Accept`
         header_params['Accept'] = self.api_client.select_header_accept(
             ['application/json'])  # noqa: E501

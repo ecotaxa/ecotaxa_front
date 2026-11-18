@@ -59,7 +59,8 @@ class ProjectFilters(object):
         'freetxt': 'str',
         'freetxtval': 'str',
         'filt_annot': 'str',
-        'filt_last_annot': 'str'
+        'filt_last_annot': 'str',
+        'fields': 'str'
     }
 
     attribute_map = {
@@ -89,10 +90,11 @@ class ProjectFilters(object):
         'freetxt': 'freetxt',
         'freetxtval': 'freetxtval',
         'filt_annot': 'filt_annot',
-        'filt_last_annot': 'filt_last_annot'
+        'filt_last_annot': 'filt_last_annot',
+        'fields': 'fields'
     }
 
-    def __init__(self, taxo=None, taxochild=None, statusfilter=None, map_n=None, map_w=None, map_e=None, map_s=None, depthmin=None, depthmax=None, samples=None, instrum=None, daytime=None, month=None, fromdate=None, todate=None, fromtime=None, totime=None, inverttime=None, validfromdate=None, validtodate=None, freenum=None, freenumst=None, freenumend=None, freetxt=None, freetxtval=None, filt_annot=None, filt_last_annot=None, local_vars_configuration=None):  # noqa: E501
+    def __init__(self, taxo=None, taxochild=None, statusfilter=None, map_n=None, map_w=None, map_e=None, map_s=None, depthmin=None, depthmax=None, samples=None, instrum=None, daytime=None, month=None, fromdate=None, todate=None, fromtime=None, totime=None, inverttime=None, validfromdate=None, validtodate=None, freenum=None, freenumst=None, freenumend=None, freetxt=None, freetxtval=None, filt_annot=None, filt_last_annot=None, fields=None, local_vars_configuration=None):  # noqa: E501
         """ProjectFilters - a model defined in OpenAPI"""  # noqa: E501
         if local_vars_configuration is None:
             local_vars_configuration = Configuration()
@@ -125,6 +127,7 @@ class ProjectFilters(object):
         self._freetxtval = None
         self._filt_annot = None
         self._filt_last_annot = None
+        self._fields = None
         self.discriminator = None
 
         self.taxo = taxo
@@ -154,6 +157,7 @@ class ProjectFilters(object):
         self.freetxtval = freetxtval
         self.filt_annot = filt_annot
         self.filt_last_annot = filt_last_annot
+        self.fields = fields
 
     @property
     def taxo(self):
@@ -775,6 +779,29 @@ class ProjectFilters(object):
         """
 
         self._filt_last_annot = filt_last_annot
+
+    @property
+    def fields(self):
+        """Gets the fields of this ProjectFilters.  # noqa: E501
+
+        Only used by POST /object_set/{project_id}/query: same as its 'fields' query parameter, use it when the field list makes the URL too long. Sending 'fields' in both the query string and the body is refused with a 422 error. Ignored by the other endpoints.  # noqa: E501
+
+        :return: The fields of this ProjectFilters.  # noqa: E501
+        :rtype: str
+        """
+        return self._fields
+
+    @fields.setter
+    def fields(self, fields):
+        """Sets the fields of this ProjectFilters.
+
+        Only used by POST /object_set/{project_id}/query: same as its 'fields' query parameter, use it when the field list makes the URL too long. Sending 'fields' in both the query string and the body is refused with a 422 error. Ignored by the other endpoints.  # noqa: E501
+
+        :param fields: The fields of this ProjectFilters.  # noqa: E501
+        :type: str
+        """
+
+        self._fields = fields
 
     def to_dict(self):
         """Returns the model properties as a dict"""

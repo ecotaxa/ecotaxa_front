@@ -253,8 +253,8 @@ def object_set_fields_args(filters: Dict, fields: str) -> Dict[str, Any]:
     get_object_set kwargs: 'fields' in the query string as before, in the body only when too long for the URL.
     """
     if _too_long_for_url(fields):
-        return {"object_set_query_filters": {**filters, "fields": fields}}
-    return {"object_set_query_filters": filters, "fields": fields}
+        return {"project_filters": {**filters, "fields": fields}}
+    return {"project_filters": filters, "fields": fields}
 
 
 def search_samples(api: SamplesApi, project_ids: str, id_pattern: str) -> List[SampleModel]:

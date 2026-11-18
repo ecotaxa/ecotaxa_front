@@ -71,7 +71,7 @@ def test_xss_escape_and_helpers():
 def test_object_set_fields_short_in_query_string():
     filters = {"taxo": "45"}
     assert object_set_fields_args(filters, "obj.objid,img.file_name") == {
-        "object_set_query_filters": {"taxo": "45"},
+        "project_filters": {"taxo": "45"},
         "fields": "obj.objid,img.file_name",
     }
 
@@ -80,7 +80,7 @@ def test_object_set_fields_long_in_body():
     filters = {"taxo": "45"}
     fields = ",".join("fre.col%d" % i for i in range(MAX_QUERY_PARAM_LEN // 5))
     args = object_set_fields_args(filters, fields)
-    assert args == {"object_set_query_filters": {"taxo": "45", "fields": fields}}
+    assert args == {"project_filters": {"taxo": "45", "fields": fields}}
     # the caller's filters are not modified
     assert filters == {"taxo": "45"}
 

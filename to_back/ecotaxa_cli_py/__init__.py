@@ -103,7 +103,6 @@ from to_back.ecotaxa_cli_py.models.minimal_collection_bo import MinimalCollectio
 from to_back.ecotaxa_cli_py.models.minimal_user_bo import MinimalUserBO
 from to_back.ecotaxa_cli_py.models.object_header_model import ObjectHeaderModel
 from to_back.ecotaxa_cli_py.models.object_model import ObjectModel
-from to_back.ecotaxa_cli_py.models.object_set_query_filters import ObjectSetQueryFilters
 from to_back.ecotaxa_cli_py.models.object_set_query_rsp import ObjectSetQueryRsp
 from to_back.ecotaxa_cli_py.models.object_set_revert_to_history_rsp import ObjectSetRevertToHistoryRsp
 from to_back.ecotaxa_cli_py.models.object_set_summary_rsp import ObjectSetSummaryRsp

@@ -189,7 +189,7 @@ def _object_images(
     with ApiClient(ObjectsApi, request) as api:
         objs: ObjectSetQueryRsp = api.get_object_set(
             project_id=prj_id,
-            object_set_query_filters=filters,
+            project_filters=filters,
             fields=",".join(IMAGE_FIELDS),
             window_size=ipp,
             window_start=0,
@@ -228,7 +228,7 @@ def _sample_extreme(
     filters = dict(filters, samples=str(sample.sampleid))
     objs: ObjectSetQueryRsp = api.get_object_set(
         project_id=sample.projid,
-        object_set_query_filters=filters,
+        project_filters=filters,
         fields=",".join(EXTENT_FIELDS),
         order_field=order_field,
         window_size=1,
