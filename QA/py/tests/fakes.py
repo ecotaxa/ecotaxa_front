@@ -211,6 +211,7 @@ def populate(backend):
     backend.on(MiscApi, "query_ml_models", returns=[])
     backend.on(InstrumentsApi, "instrument_cnn_networks", returns={})
     backend.on(SamplesApi, "samples_search", returns=[])
+    backend.on(SamplesApi, "samples_search_post", returns=[])
     backend.on(SamplesApi, "sample_set_get_stats", returns=[])
     backend.on(JobsApi, "list_jobs", returns=[])
     backend.requests.add(responses.GET, "http://backend.test/projects/search", json=[])

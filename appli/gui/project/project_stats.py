@@ -1,6 +1,6 @@
 from flask import request, render_template, flash, redirect, url_for
 from typing import List, Dict, Any
-from appli.utils import ApiClient
+from appli.utils import ApiClient, search_samples
 from to_back.ecotaxa_cli_py.api import ProjectsApi
 from to_back.ecotaxa_cli_py import ApiException
 
@@ -158,9 +158,8 @@ def prj_samples_stats(project_ids: str, partial: bool, _format: str = "json"):
     from to_back.ecotaxa_cli_py.api import SamplesApi
 
     with ApiClient(SamplesApi, request) as api:
-        samples: List[SampleModel] = api.samples_search(
-            project_ids=project_ids, id_pattern=""
-        )
+        # GET, or POST when the list is too long for the URL
+        samples: List[SampleModel] = search_samples(api, project_ids, "")
     sample_ids = ",".join(list([str(sample.sampleid) for sample in samples]))
     with ApiClient(SamplesApi, request) as api:
         samplestats: List[SampleModel] = api.sample_set_get_stats(sample_ids=sample_ids)

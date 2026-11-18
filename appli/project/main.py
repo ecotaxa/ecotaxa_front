@@ -27,7 +27,7 @@ from appli.project.widgets import ClassificationPageStats, PopoverPane
 from appli.search.leftfilters import getcommonfilters
 
 ######################################################################################################################
-from appli.utils import ApiClient, format_date_time, ScaleForDisplay, DecodeEqualList
+from appli.utils import ApiClient, format_date_time, ScaleForDisplay, DecodeEqualList, object_set_fields_args
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import (
     ProjectsApi,
@@ -743,12 +743,12 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
                     sort_col_signed = (
                         "-" if sortorder.lower() != "desc" else ""
                     ) + sortby
-        needed_fields = ",".join(api_cols)
+        # fields in query string, or in body when the list is too long for the URL
+        fields_args = object_set_fields_args(filtres, ",".join(api_cols))
         while True:
             objs: ObjectSetQueryRsp = api.get_object_set(
                 project_id=PrjId,
-                project_filters=filtres,
-                fields=needed_fields,
+                **fields_args,
                 order_field=sort_col_signed,
                 window_size=ippdb,
                 window_start=pageoffset * ippdb,

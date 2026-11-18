@@ -6,7 +6,11 @@ from appli.utils import (
     ntcv,
     DecodeEqualList,
     EncodeEqualList,
+    MAX_QUERY_PARAM_LEN,
+    object_set_fields_args,
+    search_samples,
 )
+from unittest.mock import Mock
 from appli.back_config import bytes_to_human_readable
 
 
@@ -62,3 +66,36 @@ def test_xss_escape_and_helpers():
 
     assert XSSEscape('<a href="x">') == "&lt;a href=&quot;x&quot;&gt;"
     assert appli_ntcv(None) == ""
+
+
+def test_object_set_fields_short_in_query_string():
+    filters = {"taxo": "45"}
+    assert object_set_fields_args(filters, "obj.objid,img.file_name") == {
+        "object_set_query_filters": {"taxo": "45"},
+        "fields": "obj.objid,img.file_name",
+    }
+
+
+def test_object_set_fields_long_in_body():
+    filters = {"taxo": "45"}
+    fields = ",".join("fre.col%d" % i for i in range(MAX_QUERY_PARAM_LEN // 5))
+    args = object_set_fields_args(filters, fields)
+    assert args == {"object_set_query_filters": {"taxo": "45", "fields": fields}}
+    # the caller's filters are not modified
+    assert filters == {"taxo": "45"}
+
+
+def test_search_samples_short_list_uses_get():
+    api = Mock()
+    search_samples(api, "1+2", "%")
+    api.samples_search.assert_called_once_with(project_ids="1+2", id_pattern="%")
+    api.samples_search_post.assert_not_called()
+
+
+def test_search_samples_long_list_uses_post():
+    api = Mock()
+    # 4 digits + "%2B" per id: 7n-3 chars, over the limit
+    ids = "+".join(str(1000 + i) for i in range(MAX_QUERY_PARAM_LEN // 7 + 2))
+    search_samples(api, ids, "%")
+    api.samples_search_post.assert_called_once_with({"project_ids": ids, "id_pattern": "%"})
+    api.samples_search.assert_not_called()

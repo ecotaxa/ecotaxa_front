@@ -151,7 +151,9 @@ class PredictionJob(Job):
             filters = cls._extract_filters_from_url()
             filters["statusfilter"] = "UP"
             res: ObjectSetQueryRsp = api.get_object_set(
-                project_id=target_proj.projid, project_filters=filters, window_size=100
+                project_id=target_proj.projid,
+                object_set_query_filters=filters,
+                window_size=100,
             )
 
         if len(res.object_ids) == 0:

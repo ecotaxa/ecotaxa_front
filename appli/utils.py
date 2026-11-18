@@ -15,6 +15,7 @@ from to_back.ecotaxa_cli_py import (
     ProjectModel,
     ApiException,
     MinUserModel,
+    SampleModel,
 )
 from to_back.ecotaxa_cli_py.api import (
     AuthentificationApi,
@@ -237,6 +238,34 @@ def can_read_visible_project(prj: ProjectModel) -> bool:
     if current_user.is_authenticated:
         return access != AccessLevelEnum._0
     return access == AccessLevelEnum._2
+
+
+# Above this length once URL-encoded, a parameter goes in the JSON body (nginx default header buffer is 8k)
+MAX_QUERY_PARAM_LEN = 2000
+
+
+def _too_long_for_url(value: str) -> bool:
+    return len(urllib.parse.quote(value)) > MAX_QUERY_PARAM_LEN
+
+
+def object_set_fields_args(filters: Dict, fields: str) -> Dict[str, Any]:
+    """
+    get_object_set kwargs: 'fields' in the query string as before, in the body only when too long for the URL.
+    """
+    if _too_long_for_url(fields):
+        return {"object_set_query_filters": {**filters, "fields": fields}}
+    return {"object_set_query_filters": filters, "fields": fields}
+
+
+def search_samples(api: SamplesApi, project_ids: str, id_pattern: str) -> List[SampleModel]:
+    """
+    GET /samples/search as before, POST (parameters in body) only when the project list is too long for the URL.
+    """
+    if _too_long_for_url(project_ids):
+        return api.samples_search_post(
+            {"project_ids": project_ids, "id_pattern": id_pattern}
+        )
+    return api.samples_search(project_ids=project_ids, id_pattern=id_pattern)
 
 
 def ScaleForDisplay(v) -> str:

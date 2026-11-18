@@ -80,6 +80,16 @@ def test_no_filter_searches_all_visible_projects(user_client, backend):
     assert "instrument_filter" not in search_prj.call_args.kwargs
 
 
+def test_many_visible_projects_search_in_body(user_client, backend):
+    # logged in, all public projects: the id list is too long for the URL (prod: 0 points on the map)
+    set_projects(backend, [make_project(1000 + i) for i in range(400)])
+    get = backend.on(SamplesApi, "samples_search", returns=[])
+    post = backend.on(SamplesApi, "samples_search_post", returns=[sample(1, projid=1000)])
+    assert get_ids(user_client) == [1]
+    get.assert_not_called()
+    assert post.call_args.args[0]["project_ids"].count("+") == 399
+
+
 def test_projects_filter_needs_no_project_search(user_client, backend):
     # an unexpected ProjectsApi call would fail the test
     search = backend.on(SamplesApi, "samples_search", returns=[sample(1)])

@@ -4,7 +4,7 @@ from typing import List
 from flask import render_template, request, json, jsonify
 
 from appli import app, gvg
-from appli.utils import ApiClient, DecodeEqualList, can_read_visible_project
+from appli.utils import ApiClient, DecodeEqualList, can_read_visible_project, search_samples
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import SamplesApi, InstrumentsApi, TaxonomyTreeApi, ProjectsApi
 from to_back.ecotaxa_cli_py.models import ProjectModel, SampleModel, TaxonModel, ProjectUserStatsModel
@@ -24,8 +24,8 @@ def searchsamples():
     pattern = gvg("q")
     # Do back-end call
     with ApiClient(SamplesApi, request) as api:
-        samples: List[SampleModel] = api.samples_search(project_ids=project_ids,
-                                                        id_pattern=pattern)
+        # GET, or POST when the list is too long for the URL
+        samples: List[SampleModel] = search_samples(api, project_ids, pattern)
     # Sort samples alphabetically by origin ID, case-sensitive on purpose
     samples.sort(key=lambda s: s.orig_id)
     if gvg("format", 'J') == 'J':  # version JSon par defaut

@@ -9,7 +9,7 @@ from appli.constants import DayTimeList
 from appli.project.main import FilterList, MONTH_LABELS, LoadRightPaneForProj
 from appli.search.leftfilters import getcommonfilters
 ######################################################################################################################
-from appli.utils import ApiClient, can_read_visible_project
+from appli.utils import ApiClient, can_read_visible_project, search_samples
 from to_back.ecotaxa_cli_py import SamplesApi, SampleModel, ApiException, TaxonomyTreeApi, \
     TaxonModel, ProjectsApi, ProjectModel
 
@@ -42,8 +42,8 @@ def indexExplore() -> str:
         # Sample filter was posted, select the corresponding items.
         with ApiClient(SamplesApi, request) as api:
             try:
-                samples: List[SampleModel] = api.samples_search(project_ids=PrjIds,
-                                                                id_pattern="")
+                # GET, or POST when the list is too long for the URL
+                samples: List[SampleModel] = search_samples(api, PrjIds, "")
                 sample_ids = set(data['samples'].split(","))
                 for a_sample in samples:
                     # TODO: Could be filtered server-side

@@ -16,7 +16,7 @@ from appli.gui.project.projects_list_interface_json import (
     render_for_js,
     render_samples_stats,
 )
-from appli.utils import ApiClient, can_read_visible_project
+from appli.utils import ApiClient, can_read_visible_project, search_samples
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import ProjectsApi, ObjectsApi, SamplesApi
 from to_back.ecotaxa_cli_py.models import (
@@ -122,8 +122,9 @@ def gui_explore_map_samples():
         return Response("[]", mimetype="application/json")
     with ApiClient(SamplesApi, request) as api:
         try:
-            samples: List[SampleModel] = api.samples_search(
-                project_ids="+".join([str(p) for p in projids]), id_pattern="%"
+            # GET, or POST when all visible projects are too long for the URL
+            samples: List[SampleModel] = search_samples(
+                api, "+".join([str(p) for p in projids]), "%"
             )
         except ApiException as ae:
             app.logger.error("Explore map samples error: %s", ae.status)
@@ -188,7 +189,7 @@ def _object_images(
     with ApiClient(ObjectsApi, request) as api:
         objs: ObjectSetQueryRsp = api.get_object_set(
             project_id=prj_id,
-            project_filters=filters,
+            object_set_query_filters=filters,
             fields=",".join(IMAGE_FIELDS),
             window_size=ipp,
             window_start=0,
@@ -227,7 +228,7 @@ def _sample_extreme(
     filters = dict(filters, samples=str(sample.sampleid))
     objs: ObjectSetQueryRsp = api.get_object_set(
         project_id=sample.projid,
-        project_filters=filters,
+        object_set_query_filters=filters,
         fields=",".join(EXTENT_FIELDS),
         order_field=order_field,
         window_size=1,

@@ -3,7 +3,7 @@ from typing import List, Dict, Optional,Any
 from flask import request, render_template
 from appli.back_config import get_back_constants
 from appli import gvp
-from appli.utils import ApiClient
+from appli.utils import ApiClient, object_set_fields_args
 from appli.gui.commontools import new_ui_error
 from werkzeug.exceptions import NotFound
 from to_back.ecotaxa_cli_py import ApiException
@@ -306,7 +306,7 @@ def temporary_taxa(project_ids: str, filters: Optional[Dict] = None) -> list:
         with ApiClient(ObjectsApi, request) as api:
             for projid in project_ids.split(","):
                 res = api.get_object_set(
-                    int(projid), filters, fields="obj.classif_id"
+                    int(projid), **object_set_fields_args(filters, "obj.classif_id")
                 )
                 exported.update([row[0] for row in res.details])
         temporaries = {k: v for k, v in temporaries.items() if k in exported}

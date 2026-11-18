@@ -4,7 +4,7 @@ from typing import List
 from flask import render_template, g, request, json
 
 from appli import app, gvg, XSSEscape
-from appli.utils import ApiClient, get_all_visible_projects, can_read_visible_project
+from appli.utils import ApiClient, get_all_visible_projects, can_read_visible_project, search_samples
 from to_back.ecotaxa_cli_py import (
     SamplesApi,
     SampleModel,
@@ -64,9 +64,8 @@ def search_mappopup_samples():
     str_project_ids = "+".join([str(p) for p in projids])
     with ApiClient(SamplesApi, request) as api:
         try:
-            samples: List[SampleModel] = api.samples_search(
-                project_ids=str_project_ids, id_pattern="%"
-            )
+            # GET, or POST when the list is too long for the URL
+            samples: List[SampleModel] = search_samples(api, str_project_ids, "%")
         except ApiException as ae:
             app.logger.error("Search mappopup samples error: %s", ae.status)
             return json.dumps([])
