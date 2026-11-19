@@ -97,6 +97,7 @@
     <input type="hidden" id="taxofilterlabel" value="" autocomplete="off">
     <input type="hidden" id="taxofilterchild" value="" autocomplete="off">
     <input type="hidden" id="pageoffset" value="{{ data.pageoffset }}" autocomplete="off">
+    <input type="hidden" id="img_order" value="1" autocomplete="off">
     <table>
       <tr>
         <td>
@@ -526,6 +527,7 @@
               PrevTxtFilter = TxtFilter;
           }
           req['pageoffset'] = jqpageoffset.val();
+          req['img_order'] = $("#img_order").val();
           var urlparam = {}, url, k;
           if ((NoAjax === 'mail') || (NoAjax === 'mailN')) {
               delete req["resultwidth"];
@@ -768,6 +770,18 @@
           });
           $('#statusfilter,#ipp,#zoom,#magenabled,#popupenabled').change(function () {
               LoadRightPane();
+          });
+          $('label[for="ipp"] span.glyphicon-th').click(function (e) {
+              if (!e.ctrlKey && !e.metaKey) {
+                  return;
+              }
+              var next_order = (parseInt($("#img_order").val(), 10) || 1) + 1;
+              if (next_order >= 4) {
+                  next_order = 1;
+              }
+              $("#img_order").val(next_order);
+              LoadRightPane();
+              e.preventDefault();
           });
 
           $(document).bind('keydown', 'Test1', function (e) {

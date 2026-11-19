@@ -641,6 +641,12 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
         filtres["statusfilter"] = "V"  # Ne voir que les objets validés
 
     pageoffset = int(gvp("pageoffset", "0"))
+    image_pos_str = gvp("img_order", "")
+    image_pos: Optional[int] = (
+        int(image_pos_str)
+        if image_pos_str.isdigit() and int(image_pos_str) > 1
+        else None
+    )
     sortby = Filt["sortby"]
     simsearch_seed = int(sortby[4:]) if sortby and sortby.startswith("ss-I") else None
     sortorder = Filt["sortorder"]
@@ -752,6 +758,7 @@ def LoadRightPaneForProj(PrjId: int, read_only: bool, force_first_page: bool):
                 order_field=sort_col_signed,
                 window_size=ippdb,
                 window_start=pageoffset * ippdb,
+                **({"img_order": image_pos} if image_pos is not None else {}),
             )
             pagecount = math.ceil(objs.total_ids / ippdb)
             if pageoffset < pagecount:

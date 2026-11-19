@@ -91,3 +91,74 @@ def test_explore_only_project_is_refused(user_client, backend, page):
     rsp = user_client.get(f"/gui/prj/{page}/7")
     assert rsp.status_code == 302
     assert rsp.headers["Location"].endswith("/gui/prj/noright/7")
+
+
+def test_prj_manual_classification_has_image_rank_click_handler(user_client, backend):
+    from fakes import populate
+
+    populate(backend)
+    rsp = user_client.get("/prj/1")
+    assert rsp.status_code == 200
+    html = rsp.data.decode()
+    assert 'id="img_order"' in html
+    assert "req['img_order']" in html
+    assert "glyphicon-th" in html
+    assert "!e.ctrlKey && !e.metaKey" in html
+    assert "$('#img_order').val(next_order)" in html or '$("#img_order").val(next_order)' in html
+    assert "next_order >= 4" in html
+    for code in (97, 98, 99):
+        assert f"case {code}:" not in html
+
+
+@pytest.mark.parametrize(
+    "posted_rank, expected_kw",
+    [
+        ("2", 2),
+        ("3", 3),
+        ("1", None),
+        ("", None),
+        ("0", None),
+        ("abc", None),
+    ],
+)
+def test_load_right_pane_transmits_image_position(user_client, backend, posted_rank, expected_kw):
+    from fakes import model, populate
+    from to_back.ecotaxa_cli_py.api import ObjectsApi, UsersApi
+    from to_back.ecotaxa_cli_py.models import ObjectSetQueryRsp
+
+    populate(backend)
+    backend.on(UsersApi, "set_current_user_prefs")
+    get_obj_set = backend.on(
+        ObjectsApi,
+        "get_object_set",
+        returns=model(ObjectSetQueryRsp, object_ids=[], details=[], total_ids=0),
+    )
+    form = {"projid": "1", "ipp": "100", "zoom": "100", "popupenabled": "0", "dispfield": ""}
+    if posted_rank:
+        form["img_order"] = posted_rank
+    rsp = user_client.post("/prj/LoadRightPane", data=form)
+    assert rsp.status_code == 200
+    get_obj_set.assert_called_once()
+    if expected_kw is None:
+        assert "img_order" not in get_obj_set.call_args.kwargs
+    else:
+        assert get_obj_set.call_args.kwargs["img_order"] == expected_kw
+
+
+def test_objects_api_get_object_set_image_rank(monkeypatch):
+    from to_back.ecotaxa_cli_py.api import ObjectsApi
+    from to_back.ecotaxa_cli_py.api_client import ApiClient
+
+    client = ApiClient()
+    captured = {}
+
+    def fake_call_api(resource_path, method, path_params, query_params, *args, **kwargs):
+        captured["resource_path"] = resource_path
+        captured["query_params"] = query_params
+        return None
+
+    monkeypatch.setattr(client, "call_api", fake_call_api)
+    api = ObjectsApi(client)
+    api.get_object_set(1, {}, img_order=2)
+    assert captured["resource_path"] == "/object_set/{project_id}/query"
+    assert ("img_order", 2) in captured["query_params"]
