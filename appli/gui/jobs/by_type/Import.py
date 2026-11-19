@@ -189,7 +189,7 @@ class ImportJob(Job):
             not_found_taxo = question["missing_taxa"]
         else:
             not_found_taxo = []
-        if "missisng_users" in question.keys():
+        if "missing_users" in question.keys():
             not_found_users = question["missing_users"]
         else:
             not_found_users = []
