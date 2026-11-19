@@ -996,6 +996,7 @@ class ObjectsApi(object):
         :param str order_field: Order the result using given field. If prefixed with \"-\" then it will be reversed. When using *special syntax ss-Innnn*, the order is similarity with given (by its ID) object.
         :param int window_start:  Allows to return only a slice of the result, by skipping window_start objects before returning data. If no **unique order** is specified, the result can vary for same call and conditions.
         :param int window_size:  Allows to return only a slice of the result, by returning a _maximum_ of window_size lines. If no **unique order** is specified, the result can vary for same call and conditions.
+        :param int img_order: Selects which image to return for each object, by order of increasing `imgrank`.
         :param _preload_content: if False, the urllib3.HTTPResponse object will
                                  be returned without reading/decoding response
                                  data. Default is True.
@@ -1026,6 +1027,7 @@ class ObjectsApi(object):
         :param str order_field: Order the result using given field. If prefixed with \"-\" then it will be reversed. When using *special syntax ss-Innnn*, the order is similarity with given (by its ID) object.
         :param int window_start:  Allows to return only a slice of the result, by skipping window_start objects before returning data. If no **unique order** is specified, the result can vary for same call and conditions.
         :param int window_size:  Allows to return only a slice of the result, by returning a _maximum_ of window_size lines. If no **unique order** is specified, the result can vary for same call and conditions.
+        :param int img_order: Selects which image to return for each object, by order of increasing `imgrank`.
         :param _return_http_data_only: response data without head status code
                                        and headers
         :param _preload_content: if False, the urllib3.HTTPResponse object will
@@ -1048,7 +1050,8 @@ class ObjectsApi(object):
             'fields',
             'order_field',
             'window_start',
-            'window_size'
+            'window_size',
+            'img_order'
         ]
         all_params.extend(
             [
@@ -1091,6 +1094,8 @@ class ObjectsApi(object):
             query_params.append(('window_start', local_var_params['window_start']))  # noqa: E501
         if 'window_size' in local_var_params and local_var_params['window_size'] is not None:  # noqa: E501
             query_params.append(('window_size', local_var_params['window_size']))  # noqa: E501
+        if 'img_order' in local_var_params and local_var_params['img_order'] is not None:  # noqa: E501
+            query_params.append(('img_order', local_var_params['img_order']))  # noqa: E501
 
         header_params = {}
 
