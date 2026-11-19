@@ -15,7 +15,9 @@ def getGuideSheets(
     params: Dict[str, Any] = {"ins_id": instrument_id, "cat_ids": taxon_ids}
     try:
         rsp = requests.get(SHEETS_QUERY_URL, params=params, timeout=15)
-        guides: List[Dict[str, Any]] = rsp.json()
+        guides: List[Dict[str, Any]]|Dict[str,str] = rsp.json()
+        if isinstance(guides, dict) and guides.get("error"):
+            return {}
         return {str(assoc["taxon_id"]): assoc["sheet_id"] for assoc in guides}
     except requests.exceptions.RequestException as e:
         logging.error(e)
