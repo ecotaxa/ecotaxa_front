@@ -196,7 +196,7 @@ class ImportJob(Job):
         answers = {"users": users, "taxa": categs}
         with ApiClient(JobsApi, request) as api:
             try:
-                api.reply_job_question(job_id=job.id, body=answers)
+                api.reply_job_question(job_id=job.id, request_body=answers)
             except ApiException as ae:
                 cls.flash_any_error([str(ae)])
                 return render_template(
