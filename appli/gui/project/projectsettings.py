@@ -240,6 +240,7 @@ def prj_edit(prjid: int, new: bool = False):
     if gvp("save") == "Y":
         # Load posted variables
         previous_cnn = target_proj.cnn_network_id
+        previous_cnn_img_pos = target_proj.cnn_image_position
         # posted_contact_id = None
         # Update the project (from API call) with posted variables
 
@@ -247,6 +248,13 @@ def prj_edit(prjid: int, new: bool = False):
         for a_var in request.form:
             if a_var in dir(target_proj):
                 setattr(target_proj, a_var, gvp(a_var))
+
+        if "cnn_image_position" in request.form:
+            cnn_img_pos = gvp("cnn_image_position")
+            if cnn_img_pos.isdigit() and int(cnn_img_pos) >= 1:
+                target_proj.cnn_image_position = int(cnn_img_pos)
+            else:
+                target_proj.cnn_image_position = None
 
         # other
         posted_classif_list = gvpm("inittaxo[]")
@@ -257,7 +265,10 @@ def prj_edit(prjid: int, new: bool = False):
         ]
 
         posted_contact_id = gvp("contact_user_id")
-        if new != True and previous_cnn != target_proj.cnn_network_id:
+        if new != True and (
+            previous_cnn != target_proj.cnn_network_id
+            or (previous_cnn_img_pos or 1) != (target_proj.cnn_image_position or 1)
+        ):
             flash(py_messages["scnerased"], "success")
         # process members privileges results - members_by_right is empty as backend records are deleted on every update
         # process formulae

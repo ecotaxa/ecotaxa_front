@@ -56,6 +56,15 @@
               {% endfor %}
             </select>
             <div id="cnn_network_warning" class="hide">{{ alertbox(type='warning', message="selectcnnwarning",inverse = True,extra = {'small': True} )}}</div></div>
+          <div class="form-box">
+            <label for="cnn_image_position">{{_('CNN image position')}}<i data-for="help_cnn_image_position" data-request="help"></i></label>
+            <select id="cnn_image_position" name="cnn_image_position" class="form-select" data-hotmodif>
+              {% set cnn_img_pos = target_proj.cnn_image_position if target_proj and target_proj.cnn_image_position else 1 %}
+              {% for pos_val, pos_label in [(1, _('first')), (2, _('second')), (3, _('third')), (4, _('fourth')), (5, _('fifth')), (6, _('sixth')), (7, _('seventh')), (8, _('eighth')), (9, _('ninth')), (10, _('tenth'))] %}
+              <option value="{{ pos_val }}" {{'selected' if cnn_img_pos == pos_val}}>{{ pos_label }}</option>
+              {% endfor %}
+            </select>
+          </div>
          <div class="form-box">
             <div class="label" data-for="access">{{ _('Access') }}<i data-for="help_project_access" data-request="help"></i> {{badge('success',_('new'),True)}}</div>
             <div class="form-group" id="proj_access" role="group">

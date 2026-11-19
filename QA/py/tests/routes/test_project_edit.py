@@ -95,3 +95,67 @@ def test_edit_backend_refusal_keeps_page(user_client, edit_backend):
     edit_backend.on(ProjectsApi, "update_project", raises=api_exception(422, "bad formulae"))
     rsp = user_client.post("/gui/prj/edit/1", data=_form())
     assert rsp.status_code == 200
+
+
+def test_edit_renders_cnn_image_position(user_client, edit_backend):
+    edit_backend.on(ProjectsApi, "project_query", returns=make_project(1, cnn_image_position=3))
+    rsp = user_client.get("/gui/prj/edit/1")
+    assert rsp.status_code == 200
+    page = rsp.get_data(as_text=True)
+    assert 'name="cnn_image_position"' in page
+    assert '<option value="1" >first</option>' in page
+    assert '<option value="3" selected>third</option>' in page
+    assert '<option value="10" >tenth</option>' in page
+
+
+def test_edit_renders_cnn_image_position_none_defaults_to_first(user_client, edit_backend):
+    edit_backend.on(ProjectsApi, "project_query", returns=make_project(1, cnn_image_position=None))
+    rsp = user_client.get("/gui/prj/edit/1")
+    assert rsp.status_code == 200
+    page = rsp.get_data(as_text=True)
+    select_block = page.split('id="cnn_image_position"')[1].split("</select>")[0]
+    assert '<option value=""></option>' not in select_block
+    assert '<option value="1" selected>first</option>' in select_block
+
+
+def test_edit_saves_cnn_image_position_as_int(user_client, edit_backend):
+    update = edit_backend.on(ProjectsApi, "update_project")
+    rsp = user_client.post("/gui/prj/edit/1", data=_form(cnn_image_position="3"))
+    assert rsp.status_code == 302
+    sent = update.call_args.kwargs["project_model"]
+    assert sent.cnn_image_position == 3
+    assert isinstance(sent.cnn_image_position, int)
+
+
+def test_edit_clears_cnn_image_position_when_empty(user_client, edit_backend):
+    edit_backend.on(ProjectsApi, "project_query", returns=make_project(1, cnn_image_position=2))
+    update = edit_backend.on(ProjectsApi, "update_project")
+    rsp = user_client.post("/gui/prj/edit/1", data=_form(cnn_image_position=""))
+    assert rsp.status_code == 302
+    sent = update.call_args.kwargs["project_model"]
+    assert sent.cnn_image_position is None
+
+
+@pytest.mark.parametrize(
+    "initial_pos, posted_pos, expect_flash",
+    [
+        (None, "1", False),
+        (1, "", False),
+        (2, "2", False),
+        (None, "2", True),
+        (2, "3", True),
+        (2, "", True),
+    ],
+)
+def test_edit_flashes_scnerased_on_cnn_image_position_change(
+    user_client, edit_backend, initial_pos, posted_pos, expect_flash
+):
+    from appli.gui.staticlistes import py_messages
+
+    edit_backend.on(ProjectsApi, "project_query", returns=make_project(1, cnn_image_position=initial_pos))
+    edit_backend.on(ProjectsApi, "update_project")
+    rsp = user_client.post("/gui/prj/edit/1", data=_form(cnn_image_position=posted_pos))
+    assert rsp.status_code == 302
+    with user_client.session_transaction() as sess:
+        flashes = [msg for _cat, msg in sess.get("_flashes", [])]
+    assert (str(py_messages["scnerased"]) in flashes) is expect_flash
