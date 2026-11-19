@@ -362,7 +362,7 @@ function createJsTomSelect() {
             break;
         }
         if (url !== null) {
-          if(_fetching[url]) return;
+          if(_fetching[url]) { callback(); return; }
           _fetching[url]=true;
           fetch(url, fetchSettings()).then(response => response.json()).then(json => {
             if (type === models.project || type === models.renamingrules) {
