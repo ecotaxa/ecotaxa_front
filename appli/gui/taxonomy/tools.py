@@ -163,7 +163,7 @@ def read_taxo_recast(target_id: int, operation: str, is_collection: bool):
         with ApiClient(TaxonomyTreeApi, request) as api:
             for a_chunk in _chunks(reqids):
                 recastitems.update(api.wormsification_taxa_set(",".join(a_chunk)))
-        keys = recastitems.keys()
+        keys = list(recastitems.keys())
         taxo_worms = taxa_populate(wormsids, keys, recastitems)
         taxo_auto = taxa_populate(autoids, keys, recastitems)
         taxo_recast = taxa_populate(recastids, keys, recastitems)

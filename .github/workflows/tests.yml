@@ -26,6 +26,8 @@ jobs:
             QA/py/requirements-test.txt
       - name: Install dependencies
         run: pip install -r requirements.txt -r QA/py/requirements-test.txt
+      - name: Type check (mypy)
+        run: mypy
       - name: Run Python tests
         run: pytest QA/py --cov=appli/gui --cov-report=term
 
