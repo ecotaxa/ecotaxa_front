@@ -246,7 +246,7 @@ def prj_edit(prjid: int, new: bool = False):
 
         # same names as in target_proj
         for a_var in request.form:
-            if a_var in dir(target_proj):
+            if a_var != "cnn_image_position" and a_var in dir(target_proj):
                 setattr(target_proj, a_var, gvp(a_var))
 
         if "cnn_image_position" in request.form:

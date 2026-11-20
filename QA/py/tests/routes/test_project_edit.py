@@ -127,6 +127,20 @@ def test_edit_saves_cnn_image_position_as_int(user_client, edit_backend):
     assert isinstance(sent.cnn_image_position, int)
 
 
+@pytest.mark.parametrize("posted_pos, expected", [("3", 3), ("", None)])
+def test_edit_cnn_image_position_with_client_side_validation(
+    user_client, edit_backend, posted_pos, expected
+):
+    proj = make_project(1)
+    proj.local_vars_configuration.client_side_validation = True
+    edit_backend.on(ProjectsApi, "project_query", returns=proj)
+    update = edit_backend.on(ProjectsApi, "update_project")
+    rsp = user_client.post("/gui/prj/edit/1", data=_form(cnn_image_position=posted_pos))
+    assert rsp.status_code == 302
+    sent = update.call_args.kwargs["project_model"]
+    assert sent.cnn_image_position == expected
+
+
 def test_edit_clears_cnn_image_position_when_empty(user_client, edit_backend):
     edit_backend.on(ProjectsApi, "project_query", returns=make_project(1, cnn_image_position=2))
     update = edit_backend.on(ProjectsApi, "update_project")
