@@ -175,7 +175,7 @@ def projects_list(
         elif typeimport == "fields":
             fields = "*default,classifsettings,classiffieldlist"
         elif typeimport == "settings":
-            fields = "*default,viewers,annotators,managers,contact,initclassiflist,classiffieldlist,cnn_network_id"
+            fields = "*default,viewers,annotators,managers,contact,initclassiflist,classiffieldlist,cnn_network_id,cnn_image_position"
         elif typeimport == "privileges":
             fields = "*summary,viewers,annotators,managers,contact"
         elif typeimport == "formulae":
@@ -202,9 +202,12 @@ def projects_list(
                         if x.isdigit()
                     ]
         if typeimport != "" and current_user.is_app_admin == False:
-            prjs = prjs + _prjs_list_api(
+            prjs += _prjs_list_api(
                 True, filt, for_managing=for_managing, fields=fields
             )
+        if typeimport == "settings":
+            for a_prj in prjs:
+                a_prj["cnn_image_position"] = a_prj.get("cnn_image_position") or 1
 
         if typeimport == "formulae":
             # split the single 'formulae' string into the 3 form keys (front-end

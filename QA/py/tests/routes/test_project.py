@@ -74,6 +74,34 @@ def test_prjlist_backend_error(user_client, backend):
     assert rsp.status_code >= 400
 
 
+def test_prjlist_import_settings_includes_cnn_image_position(user_client, backend):
+    def _settings_prj(projid, cnn_image_position):
+        return _project_json(
+            projid,
+            initclassiflist="",
+            classiffieldlist="",
+            cnn_network_id="net1",
+            cnn_image_position=cnn_image_position,
+        )
+
+    backend.requests.add(
+        responses.GET,
+        BACK + "/projects/search",
+        json=[_settings_prj(1, 3), _settings_prj(2, None)],
+    )
+    backend.requests.add(responses.GET, BACK + "/projects/search", json=[])
+    rsp = user_client.get("/gui/prjlist/?selection=import&typeimport=settings")
+    assert rsp.status_code == 200
+    body = _json_body(rsp)
+    col_names = list(body["columns"].keys())
+    assert "cnn_image_position" in col_names
+    assert "cnn_image_position" in body["columns"]["select"]["selectcells"]
+    pos_idx = col_names.index("cnn_image_position")
+    assert body["data"][0][pos_idx] == 3
+    assert body["data"][1][pos_idx] == 1
+    assert any("cnn_image_position" in c.request.url for c in backend.requests.calls)
+
+
 @pytest.mark.parametrize("status", [403, 404])
 @pytest.mark.parametrize("page", ["purge", "edit", "merge", "editannot", "resettopredicted", "editdatamass", "taxofix"])
 def test_project_pages_without_rights_go_to_noright(user_client, backend, page, status):
