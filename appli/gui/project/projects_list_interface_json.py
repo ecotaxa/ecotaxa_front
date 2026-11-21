@@ -162,6 +162,7 @@ def project_table_columns(
                     "access": {"label": _("access"), "format": "access"},
                     "classiffieldlist": {"label": _("sorting tools"), "format": "text"},
                     "cnn_network_id": {"label": _("Deep feature ext.")},
+                    "cnn_image_position": {"label": _("CNN image position"), "hidden": True},
                 }
             ),
             "project": dict(
@@ -267,6 +268,7 @@ def project_table_columns(
                     "classiffieldlist",
                     "privileges",
                     "cnn_network_id",
+                    "cnn_image_position",
                 ],
             },
         },

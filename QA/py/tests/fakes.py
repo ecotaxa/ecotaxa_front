@@ -140,6 +140,7 @@ def make_project(projid=1, status="Annotate", **kw):
         formulae=None,
         comments="",
         cnn_network_id=None,
+        cnn_image_position=None,
         contact=None,
         obj_free_cols={},
         sample_free_cols={},
