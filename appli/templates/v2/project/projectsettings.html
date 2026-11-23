@@ -49,7 +49,7 @@
             </div></div>
           <div class="form-box">
             <label for="cnn_network_id" >{{_('Deep feature extractor')}}<i data-for="help_cnn_network_id" data-request="help"></i></label>
-            <select id="cnn_network_id" name="cnn_network_id" class="form-select" data-hotmodif data-action="suggest" data-event="change" data-trigger="instrument" data-suggestby="instruments" data-sortby="date" data-suggestedlabel="{{ _('Suggested for') }}" data-otherlabel="{{ _('Other networks') }}" data-warning="cnn_network_warning">
+            <select id="cnn_network_id" name="cnn_network_id" class="form-select" data-hotmodif data-modifmessage="{{ _('Existing features will be erased') }}" data-action="suggest" data-event="change" data-trigger="instrument" data-suggestby="instruments" data-sortby="date" data-suggestedlabel="{{ _('Suggested for') }}" data-otherlabel="{{ _('Other networks') }}" data-warning="cnn_network_warning">
               <option value=""></option>
               {% for k,v in scn.items() %}
               <option value="{{ k }}" data-instruments="{{ v.instruments|join('|') }}" data-date="{{ v.date }}" {{'selected' if target_proj.cnn_network_id==k}}>{{v.name}}</option>
@@ -57,8 +57,8 @@
             </select>
             <div id="cnn_network_warning" class="hide">{{ alertbox(type='warning', message="selectcnnwarning",inverse = True,extra = {'small': True} )}}</div></div>
           <div class="form-box">
-            <label for="cnn_image_position">{{_('CNN image position')}}<i data-for="help_cnn_image_position" data-request="help"></i></label>
-            <select id="cnn_image_position" name="cnn_image_position" class="form-select" data-hotmodif>
+            <label for="cnn_image_position">{{_('Image from which deep features are extracted')}}<i data-for="help_cnn_image_position" data-request="help"></i></label>
+            <select id="cnn_image_position" name="cnn_image_position" class="form-select" data-hotmodif data-modifmessage="{{ _('Existing features will be erased') }}">
               {% set cnn_img_pos = target_proj.cnn_image_position if target_proj and target_proj.cnn_image_position else 1 %}
               {% for pos_val, pos_label in [(1, _('first')), (2, _('second')), (3, _('third')), (4, _('fourth')), (5, _('fifth')), (6, _('sixth')), (7, _('seventh')), (8, _('eighth')), (9, _('ninth')), (10, _('tenth'))] %}
               <option value="{{ pos_val }}" {{'selected' if cnn_img_pos == pos_val}}>{{ pos_label }}</option>
