@@ -145,9 +145,17 @@ export function jobMonitor(item, options = {}) {
 
   }
 
+  function update_clean_btn(state) {
+    const cleanBtn = document.getElementById('job-clean-btn');
+    if (!cleanBtn) return;
+    const label = (state === 'R') ? cleanBtn.dataset.interruptLabel : cleanBtn.dataset.cleanLabel;
+    if (label) cleanBtn.textContent = label;
+  }
+
   function display_infos(job) {
     spinner_icon(job.state);
     progress_bar(job.state, job.progress_pct, job.progress_msg);
+    update_clean_btn(job.state);
     Object.keys(populates).forEach(info => {
       set_jobinfo(job, info);
     });

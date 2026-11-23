@@ -199,9 +199,11 @@ def gui_job_cleanup(jobid: int):
     py_messages = py_get_messages("jobs")
     projid: Optional[int] = 0
     collection_id = 0
+    was_running = False
     try:
         with ApiClient(JobsApi, request) as api:
             job: JobModel = api.get_job(job_id=jobid)
+            was_running = job.state == "R"
             params = job.params
             if "prj_id" in params:
                 projid = params["prj_id"]
@@ -225,7 +227,9 @@ def gui_job_cleanup(jobid: int):
             flash(py_messages["notfound"], "error")
 
     partial = is_partial_request()
-    if not partial and gvg("thengotoproject") == "Y":
+    if not partial and was_running:
+        return redirect(url_for("gui_job_show", job_id=jobid))
+    elif not partial and gvg("thengotoproject") == "Y":
         return redirect(url_for("gui_prj_classify", projid=projid))
     else:
         return render_template(
