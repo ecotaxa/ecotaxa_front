@@ -32,5 +32,3 @@ BG_SCALE = ""
 # Special logo suffix (christmas, easter...)
 LOGO_SPECIAL = "_noel"
 
-# Block upload in several zip parts
-UPLOAD_IN_PARTS = False

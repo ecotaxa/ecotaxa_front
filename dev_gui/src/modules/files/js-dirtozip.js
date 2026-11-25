@@ -39,7 +39,6 @@ export function acceptFile(entry) {
 
 export function JsDirToZip(options = {}) {
   const MAXSIZE = (document.querySelector('[data-max_upload_size]'))?parseInt(document.querySelector('[data-max_upload_size]').dataset['max_upload_size']):1073741824;//681574400;//681574400; // 650M //1073741824; //4294967296; //// 3221225472; // 2147483648;
-  const UPLOADINPARTS = (document.querySelector('[data-uploadinparts]'))?true:false;
   // translated messages from the template, {file} and {max} are replaced
   const TOOLARGE = {
     file: (document.querySelector('[data-toolargefile]')) ? document.querySelector('[data-toolargefile]').dataset['toolargefile'] : 'The file {file} is too large to upload (over {max}).',
@@ -199,7 +198,6 @@ const browser = detect();
       filestream: null,
       streamhandle: null,
       sizetozip: 0,
-      part: 0,
       follow: null,
       endcounter: false,
       endreaddir: false,
@@ -273,9 +271,6 @@ const browser = detect();
   }
 
   function buildMessage(e, message = {}) {
-    if (e.hasOwnProperty("part")) {
-      message.part = e.part;
-    } else properties.part = 0;
     if (e.hasOwnProperty("bigfile")) message.bigfile = e.bigfile;
     if (e.hasOwnProperty("path")) message.path = e.path;
     return message;
@@ -346,7 +341,6 @@ const browser = detect();
       properties.filestream = filestream;
       properties.streamhandle = streamhandle;
       let size = 0;
-      properties.part = 0;
       await initZip();
       if (!jsScanDir) {
         const {
@@ -431,14 +425,6 @@ const browser = detect();
     }
     return;
   }
-  async function partZip() {
-    properties.part += 1;
-    ModuleEventEmitter.emit(eventnames.complete, {
-      name: eventnames.endzip,
-      part: properties.part
-    }, _listener);
-  }
-
   async function zipStream(file, filepath) {
     const relativePath = (filepath.indexOf(dirseparator) === 0) ? filepath.slice(1) : filepath;
     const ext = relativePath.slice(relativePath.lastIndexOf('.') + 1).toLowerCase();
@@ -491,22 +477,15 @@ const browser = detect();
       // check zip file size > total zip size
       properties.sizetozip += compressed_size;
       if (properties.sizetozip > MAXSIZE) {
-      if(UPLOADINPARTS) {
-      properties.follow = async () => {
-          await zipStream(file, filepath);
-        }
-        partZip();
-        } else {
-          // the archive being built is over the server limit: alert and stop
-          const message = TOOLARGE.archive.replace('{max}', format_bytes(MAXSIZE));
-          properties.counter.error += 1;
-          onError(eventnames.errorfile, {
-            name: eventnames.error,
-            path: filepath,
-            message: message,
-          }, _listener);
-          return endProcess(true);
-        }
+        // the archive being built is over the server limit: alert and stop
+        const message = TOOLARGE.archive.replace('{max}', format_bytes(MAXSIZE));
+        properties.counter.error += 1;
+        onError(eventnames.errorfile, {
+          name: eventnames.error,
+          path: filepath,
+          message: message,
+        }, _listener);
+        return endProcess(true);
       } else {
         await zipStream(file, filepath);
       }
@@ -778,7 +757,6 @@ async function listStorage(entry = null,name=null) {
         ModuleEventEmitter.emit(eventnames.complete, {
           name: eventnames.uploaderror,
           path: uploadpath, // dir only; sendfile handler appends file.name
-          part: 0,
           bigfile: false,
         }, _listener);
       },
@@ -850,8 +828,7 @@ async function listStorage(entry = null,name=null) {
     path = path + ((path.slice(-1) === dirseparator) ? `` : dirseparator) + file.name;
     formdata.append('path', path);
     formdata.append('file', file, file.name);
-    if (properties.part) formdata.append('part', properties.part);
-    else if (callbackchunk !== null) formdata.append('ischunk', true);
+    if (callbackchunk !== null) formdata.append('ischunk', true);
     message.path = path;
     const response = await fetch(options.uploadurl, {
       //  mode: 'cors',

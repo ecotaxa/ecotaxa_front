@@ -816,9 +816,6 @@ def utility_processor():
     def days_to_live():
         return get_back_constants("TIME_TO_LIVE")
 
-    def upload_in_parts() -> bool:
-        return app.config.get("UPLOAD_IN_PARTS", False)
-
     def all_in_one() -> bool:
         return get_back_constants("ALL_IN_ONE")
 
@@ -842,7 +839,6 @@ def utility_processor():
         ecopart_url=ecopart_url,
         max_upload_size=max_upload_size,
         days_to_live=days_to_live,
-        upload_in_parts=upload_in_parts,
         all_in_one=all_in_one,
         taxoserver_url=taxoserver_url,
     )
