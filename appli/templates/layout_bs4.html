@@ -68,6 +68,7 @@
         {% else %}
             {%  if g.jobs_summary %} <a href="/Jobs/listall">
             {%  if g.jobs_summary.Pending  %}<span class="badge badge-default">Pending : {{g.jobs_summary['Pending']}}</span>{% endif %}
+            {%  if g.jobs_summary.Starting  %}<span class="badge badge-info">Starting : {{g.jobs_summary['Starting']}}</span>{% endif %}
             {%  if g.jobs_summary.Question  %}<span class="badge badge-warning">Question : {{g.jobs_summary['Question']}}</span>{% endif %}
             {%  if g.jobs_summary.Running  %}<span class="badge badge-info">Run : {{g.jobs_summary['Running']}}</span>{% endif %}
             {%  if g.jobs_summary.Error  %}<span class="badge badge-danger">Error :{{g.jobs_summary['Error']}}</span>{% endif %}

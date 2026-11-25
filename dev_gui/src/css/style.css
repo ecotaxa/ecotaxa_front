@@ -1127,8 +1127,9 @@ details.project-search .ts-dropdown .option ,  details.project-search .ts-dropdo
 .is-success {@apply text-success-50 bg-success-400 border-success-400}
 .is-done {@apply text-done-light bg-done-dark border-done-dark}
 .is-running {@apply text-done-dark bg-success-200 border-done-dark hover:border-done-light }
+.is-starting {@apply text-done-dark bg-success-100 border-done-light hover:border-done-dark }
 .is-pending {@apply text-done-dark bg-success-50 border-done-light hover:border-done-dark }
-.is-running a, .is-pending a {@apply text-done-dark !important}
+.is-running a, .is-starting a, .is-pending a {@apply text-done-dark !important}
 .is-warning {@apply  bg-warning-300 text-stone-800 selection:bg-warning-200  border-warning-400 }
 .button.is-warning {@apply hover:bg-warning-200 focus:bg-warning-200}
 .is-question {@apply text-mainblue-100 bg-stone-600 border-mainblue-100 }

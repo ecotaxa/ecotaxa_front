@@ -14,6 +14,10 @@
     <a href="/Job/Show/{{ id }}">
       <button class="btn btn-xs btn-info">{{ state }}</button>
     </a>
+  {% elif state=="Starting" %}
+    <a href="/Job/Show/{{ id }}">
+      <button class="btn btn-xs btn-info">{{ state }}</button>
+    </a>
   {% elif state=="Done" %}
     <a href="/Job/Show/{{ id }}">
       <button class="btn btn-xs btn-success">{{ state }}</button>

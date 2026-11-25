@@ -239,7 +239,7 @@ async function deleteCurrentProject(page: Page, prj: Project) {
 async function answerImportQuestion(page: Page) {
     // This export has an unknown user
     await page.goto(baseUrl + '/gui/jobs/listall');
-    const pendingOrRunning = page.getByRole('button', {name: 'Pending'}).or(page.getByRole('button', {name: 'Running'}));
+    const pendingOrRunning = page.getByRole('button', {name: 'Pending'}).or(page.getByRole('button', {name: 'Starting'})).or(page.getByRole('button', {name: 'Running'}));
     if (await pendingOrRunning.isVisible()) {
         await delay(1000);
         await answerImportQuestion(page);

@@ -183,3 +183,48 @@ def test_import_question_page(user_client, backend, question, expected):
     for a_text in expected:
         assert a_text in body
     assert "Continue" in body
+
+
+def test_job_show_starting_state(user_client, backend):
+    from conftest import page_chrome
+    from fakes import make_min_user, make_project
+    from to_back.ecotaxa_cli_py.api import ProjectsApi, UsersApi
+
+    page_chrome(backend)
+    backend.on(JobsApi, "get_job", returns=_job(type="Subset", state="S", params={"prj_id": 1}))
+    backend.on(UsersApi, "get_user", returns=make_min_user(id=42, name="Owner", email="o@example.org"))
+    backend.on(ProjectsApi, "project_query", returns=make_project(1))
+    rsp = user_client.get("/gui/job/show/5")
+    assert rsp.status_code == 200
+    body = rsp.get_data(as_text=True)
+    assert "Starting" in body
+    assert "is-starting" in body
+    assert "Interrupt task" in body
+
+
+def test_job_listall_starting_state(user_client, backend):
+    from datetime import datetime
+    from conftest import page_chrome
+    from fakes import make_min_user
+    from to_back.ecotaxa_cli_py.api import UsersApi
+
+    page_chrome(backend)
+    now = datetime(2026, 11, 4, 10, 0, 0)
+    job = _job(type="Subset", state="S", params={"prj_id": 1})
+    job.creation_date = now
+    job.updated_on = now
+    backend.on(JobsApi, "list_jobs", returns=[job])
+    backend.on(UsersApi, "get_user", returns=make_min_user(id=42, name="Owner", email="o@example.org"))
+    rsp = user_client.get("/gui/jobs/listall")
+    assert rsp.status_code == 200
+    body = rsp.get_data(as_text=True)
+    assert "Starting" in body
+    assert "is-starting" in body
+
+
+def test_job_emul_state_mapping():
+    from appli.jobs.emul import JOB_STATE_TO_USER_STATE
+    from appli.gui.jobs.staticlistes import JOB_STATE_TO_USER_STATE as GUI_JOB_STATE_TO_USER_STATE
+
+    assert JOB_STATE_TO_USER_STATE["S"] == "Starting"
+    assert GUI_JOB_STATE_TO_USER_STATE["S"] == "Starting"

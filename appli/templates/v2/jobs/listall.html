@@ -14,6 +14,10 @@
     <a href="{{url_for("gui_job_show", job_id =id)}}">
       <button class="button text-sm is-running px-2  py-0.5">{{ state }}</button>
     </a>
+  {% elif state=="Starting" %}
+    <a href="{{url_for("gui_job_show", job_id =id)}}">
+      <button class="button text-sm is-starting px-2  py-0.5">{{ state }}</button>
+    </a>
   {% elif state=="Done" %}
     <a href="{{url_for("gui_job_show", job_id =id)}}">
       <button class="button text-sm is-done py-0.5">{{ state }}</button>

@@ -203,7 +203,7 @@ def gui_job_cleanup(jobid: int):
     try:
         with ApiClient(JobsApi, request) as api:
             job: JobModel = api.get_job(job_id=jobid)
-            was_running = job.state == "R"
+            was_running = job.state in ("R", "S")
             params = job.params
             if "prj_id" in params:
                 projid = params["prj_id"]

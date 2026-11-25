@@ -3,6 +3,7 @@ from flask_babel import _
 JOB_STATE_TO_USER_STATE = dict(
     {
         "P": _("Pending"),
+        "S": _("Starting"),
         "R": _("Running"),
         "A": _("Question"),
         "E": _("Error"),

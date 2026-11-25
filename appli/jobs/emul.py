@@ -13,6 +13,7 @@ from to_back.ecotaxa_cli_py.models import MinUserModel, JobModel
 
 JOB_STATE_TO_USER_STATE = {
     "P": "Pending",
+    "S": "Starting",
     "R": "Running",
     "A": "Question",
     "E": "Error",

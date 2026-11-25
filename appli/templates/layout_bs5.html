@@ -86,6 +86,8 @@
               {% if g.jobs_summary %} <a href="/Jobs/listall">
                 {% if g.jobs_summary.Pending %}<span class="badge bg-default">Pending :
                   {{g.jobs_summary['Pending']}}</span>{% endif %}
+                {% if g.jobs_summary.Starting %}<span class="badge bg-info">Starting :
+                  {{g.jobs_summary['Starting']}}</span>{% endif %}
                 {% if g.jobs_summary.Question %}<span class="badge bg-warning">Question :
                   {{g.jobs_summary['Question']}}</span>{% endif %}
                 {% if g.jobs_summary.Running %}<span class="badge bg-info">Run : {{g.jobs_summary['Running']}}</span>{%

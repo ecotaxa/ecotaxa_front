@@ -23,6 +23,7 @@ export function jobMonitor(item, options = {}) {
     E: 'Error',
     F: 'Done',
     R: 'Running',
+    S: 'Starting',
     A: 'Question',
     P: 'Waiting'
   }
@@ -60,6 +61,12 @@ export function jobMonitor(item, options = {}) {
           case 'A':
             cl = 'is-warning';
             break;
+          case 'S':
+            cl = 'is-starting';
+            break;
+          case 'P':
+            cl = 'is-pending';
+            break;
         }
         if (!progressbarsz.classList.contains(cl)) progressbarsz.classList.add(cl);
         progressbarsz.style.width = percent + '%';
@@ -73,6 +80,7 @@ export function jobMonitor(item, options = {}) {
     if (spinner === null) return;
     switch (state) {
       case 'R':
+      case 'S':
       case 'P':
         if (spinner) spinner.classList.remove(css.hide);
         const svg = spinner.querySelector('svg');
@@ -148,7 +156,7 @@ export function jobMonitor(item, options = {}) {
   function update_clean_btn(state) {
     const cleanBtn = document.getElementById('job-clean-btn');
     if (!cleanBtn) return;
-    const label = (state === 'R') ? cleanBtn.dataset.interruptLabel : cleanBtn.dataset.cleanLabel;
+    const label = (state === 'R' || state === 'S') ? cleanBtn.dataset.interruptLabel : cleanBtn.dataset.cleanLabel;
     if (label) cleanBtn.textContent = label;
   }
 
@@ -180,6 +188,9 @@ export function jobMonitor(item, options = {}) {
             break;
           case "P":
             // pending
+            break;
+          case "S":
+            // starting
             break;
           case "R":
             // running

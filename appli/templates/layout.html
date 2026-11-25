@@ -82,6 +82,8 @@
               {% if g.jobs_summary %} <a href="{{url_for('gui_list_jobs')}}">
                 {% if g.jobs_summary.Pending %}
                   <span class="label label-default">Pending : {{ g.jobs_summary['Pending'] }}</span>{% endif %}
+                {% if g.jobs_summary.Starting %}
+                  <span class="label label-info">Starting : {{ g.jobs_summary['Starting'] }}</span>{% endif %}
                 {% if g.jobs_summary.Question %}
                   <span class="label label-warning">Question : {{ g.jobs_summary['Question'] }}</span>{% endif %}
                 {% if g.jobs_summary.Running %}

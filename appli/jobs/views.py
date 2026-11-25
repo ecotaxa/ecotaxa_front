@@ -173,6 +173,8 @@ def jobGetStatus(job_id: int):
                 rep["d"]["IsError"] = "Y"
             elif job.state == "P":
                 rep["d"]["WorkDescription"] = "Pending"
+            elif job.state == "S":
+                rep["d"]["WorkDescription"] = "Starting"
     except ValueError as e:  # Exception as e:
         rep = {"d": {"IsError": "Y", "WorkDescription": str(e)}}
     # app.logger.info("Getstatus=%s",rep)
