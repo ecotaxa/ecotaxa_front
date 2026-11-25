@@ -2,7 +2,7 @@
 import time
 from pathlib import Path
 from typing import ClassVar, Optional, Union, Any
-from flask import render_template, redirect, request, url_for
+from flask import render_template, redirect, request, url_for, flash
 from markupsafe import escape
 from appli import gvp, app
 from appli.gui.jobs.Job import Job
@@ -23,7 +23,7 @@ from to_back.ecotaxa_cli_py.models import (
 )
 from appli.gui.jobs.job_interface import import_format_options
 from appli.back_config import get_back_constants
-from appli.gui.taxonomy.tools import update_taxo_recast, get_taxo_recast
+from appli.gui.taxonomy.tools import update_taxo_recasts, get_taxo_recast
 from flask_babel import _
 
 
@@ -241,14 +241,11 @@ class ImportJob(Job):
         else:
             recast.from_to.update(newrecast.from_to)
             recast.doc.update(newrecast.doc)
-        recasts = {operation: recast}
-        for operation, recast in recasts.items():
-            update_taxo_recast(
-                target_id=target_id,
-                taxonomy_recast=recast,
-                operation=operation,
-                is_collection=False,
-            )
+        error = update_taxo_recasts(
+            target_id=target_id, recasts={operation: recast}, is_collection=False
+        )
+        if error is not None:
+            flash(error, "error")
 
     @classmethod
     def _must_skip_existing_objects(cls) -> bool:

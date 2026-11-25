@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from typing import ClassVar, Dict, Optional
-from flask import render_template, redirect, flash, url_for
+from flask import render_template, redirect, flash, url_for, request
 from appli.gui.jobs.Job import Job
 from to_back.ecotaxa_cli_py.models import JobModel, ExportRsp, TaxoRecastRsp
 from appli.gui.jobs.job_interface import export_format_options
@@ -8,9 +8,13 @@ from appli.back_config import get_back_constants
 from appli.gui.taxonomy.tools import (
     posted_dwca_taxo_recast,
     posted_taxo_recast,
-    update_taxo_recast,
+    update_taxo_recasts,
     temporary_taxa,
 )
+
+
+class RecastSaveError(Exception):
+    """The taxonomy mappings of the export could not be saved."""
 
 
 class ExportJob(Job):
@@ -83,7 +87,16 @@ class ExportJob(Job):
         projid, collid = cls.get_target_id()
         errors = []
         filters = cls._extract_filters_from_form()
-        req = cls.job_req()
+        try:
+            req = cls.job_req()
+        except RecastSaveError as rse:
+            # Don't start an export with mappings other than the displayed ones.
+            # Back to the export page, with its filters, and the saved mappings.
+            flash(str(rse), "error")
+            if request.referrer:
+                return redirect(request.referrer)
+            errors.append(str(rse))
+            req = None
         if len(errors) > 0 or cls.EXPORT_TYPE is None:
             for e in errors:
                 flash(e, "error")
@@ -126,13 +139,11 @@ class ExportJob(Job):
             else:
                 operation = recast_operation["project_export"]
             recasts = {operation: recast}
-        for operation, recast in recasts.items():
-            update_taxo_recast(
-                target_id=target_id,
-                taxonomy_recast=recast,
-                operation=operation,
-                is_collection=is_collection,
-            )
+        error = update_taxo_recasts(
+            target_id=target_id, recasts=recasts, is_collection=is_collection
+        )
+        if error is not None:
+            raise RecastSaveError(error)
 
     # noinspection PyUnresolvedReferences
     @classmethod

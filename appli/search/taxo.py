@@ -151,17 +151,21 @@ def gui_get_taxo_recast():
 @app.route("/gui/update_taxo_recast", methods=["POST"])
 @login_required
 def gui_update_taxo_recast():
-    from appli.gui.taxonomy.tools import update_taxo_recast
+    from appli.gui.taxonomy.tools import update_taxo_recasts, read_taxo_recast
 
-    is_collection = gvg("is_collection", "0")
-    target_id = gvg("target_id")
+    is_collection = gvg("is_collection", "0") == "1"
+    target_id = int(gvg("target_id"))
     operation = gvp("operation")
     from_to = gvp("from_to")
     doc = gvp("doc", {})
     taxonomy_recast = TaxoRecastRsp(from_to=from_to, doc=doc)
-    return update_taxo_recast(
-        target_id=int(target_id),
-        recast=taxonomy_recast,
-        operation=operation,
-        is_collection=(is_collection == "1"),
+    error = update_taxo_recasts(
+        target_id=target_id,
+        recasts={operation: taxonomy_recast},
+        is_collection=is_collection,
+    )
+    if error is not None:
+        return error, 422
+    return read_taxo_recast(
+        target_id=target_id, operation=operation, is_collection=is_collection
     )

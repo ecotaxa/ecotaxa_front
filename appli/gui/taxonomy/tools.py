@@ -4,7 +4,11 @@ from flask import request, render_template
 from appli.back_config import get_back_constants
 from appli import gvp
 from appli.utils import ApiClient, object_set_fields_args
-from appli.gui.commontools import new_ui_error
+from appli.gui.commontools import (
+    new_ui_error,
+    format_exception,
+    py_get_messages,
+)
 from werkzeug.exceptions import NotFound
 from to_back.ecotaxa_cli_py import ApiException
 from to_back.ecotaxa_cli_py.api import TaxonomyTreeApi, ProjectsApi, CollectionsApi
@@ -197,30 +201,53 @@ def read_taxo_recast(target_id: int, operation: str, is_collection: bool):
         )
 
 
-def update_taxo_recast(
-    target_id: int,
-    taxonomy_recast: TaxoRecastRsp,
-    operation: str,
-    is_collection: bool = False,
-):
-    from_to = {k: int(v) if v != "" else 0 for k, v in taxonomy_recast.from_to.items()}
-    taxonomy_recast.from_to = from_to
-    recast = TaxonomyRecastReq(
-        target_id=target_id,
-        operation=operation,
-        recast=taxonomy_recast,
-        is_collection=is_collection,
-    )
-    try:
-        with ApiClient(TaxonomyTreeApi, request) as api:
-            api.update_taxonomy_recast(recast)
-    except ApiException as ae:
-        new_ui_error(ae)
-    recast_operation = get_back_constants("RECAST_OPERATION")
-    if operation != recast_operation["project_import"]:
-        return read_taxo_recast(
-            target_id, operation=operation, is_collection=is_collection
+def recast_errors(from_to: Dict[str, Any]) -> Optional[str]:
+    """
+    Same check as the back's TaxoRecastBO.valid_remap: a taxon can't be both
+    renamed and the target of a rename (chains and loops are refused).
+    """
+    renamed = {k: str(v) for k, v in from_to.items() if str(v) != str(k)}
+    targets = set(renamed.values()).difference({"0"})
+    common = sorted(set(renamed.keys()).intersection(targets))
+    if len(common):
+        return (
+            "inconsistent taxonomy renaming, can't do remap chains or loops: common part is "
+            + ",".join(common)
         )
+    return None
+
+
+def update_taxo_recasts(
+    target_id: int,
+    recasts: Dict[str, TaxoRecastRsp],
+    is_collection: bool = False,
+) -> Optional[str]:
+    """
+    Save the recasts, keyed by operation, in the dict order.
+    All are validated before the first save. Returns the error message, or None.
+    """
+    for operation, taxonomy_recast in recasts.items():
+        taxonomy_recast.from_to = {
+            k: int(v) if v != "" else 0 for k, v in taxonomy_recast.from_to.items()
+        }
+        error = recast_errors(taxonomy_recast.from_to)
+        if error is not None:
+            return operation + ": " + error
+    for operation, taxonomy_recast in recasts.items():
+        recast = TaxonomyRecastReq(
+            target_id=target_id,
+            operation=operation,
+            recast=taxonomy_recast,
+            is_collection=is_collection,
+        )
+        try:
+            with ApiClient(TaxonomyTreeApi, request) as api:
+                api.update_taxonomy_recast(recast)
+        except ApiException as ae:
+            if ae.status in (401, 403):
+                return "%s - %s" % (ae.status, py_get_messages()["access403"])
+            return operation + ": " + format_exception(ae)[1]
+    return None
 
 
 def projects_with_recast(operation: str,project_ids: List[int]=[],taxonames:bool=False) -> list:
@@ -336,16 +363,16 @@ def posted_dwca_taxo_recast(
         from_to_final[frm] = int(tofinal)
         doc_final[frm] = todoc
         idx += 1
-    return dict(
-        {
-            recast_operation["dwca_export_occurrence"]: TaxoRecastRsp(
-                from_to=from_to_worms, doc=doc_worms
-            ),
-            recast_operation["dwca_export_emof"]: TaxoRecastRsp(
-                from_to=from_to_final, doc=doc_final
-            ),
-        }
-    )
+    # The grouping (emof) comes first: it is saved first, as it is the one most
+    # likely to be refused (chains), and then the WoRMS mapping stays untouched.
+    return {
+        recast_operation["dwca_export_emof"]: TaxoRecastRsp(
+            from_to=from_to_final, doc=doc_final
+        ),
+        recast_operation["dwca_export_occurrence"]: TaxoRecastRsp(
+            from_to=from_to_worms, doc=doc_worms
+        ),
+    }
 
 
 def posted_taxo_recast() -> TaxoRecastRsp:

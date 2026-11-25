@@ -2,7 +2,7 @@
   "openapi":"3.0.2",
   "info":{
     "title":"EcoTaxa",
-    "version":"0.0.58"
+    "version":"0.0.57"
   },
   "servers":[
     {
@@ -11276,18 +11276,10 @@
             "nullable":true
           },
           "cnn_network_id":{
-            "title":"CNN model id",
+            "title":"Cnn network id",
             "description":"",
             "example":"SCN_zooscan_group1",
             "type":"string",
-            "nullable":true
-          },
-          "cnn_image_position":{
-            "title":"CNN image position",
-            "description":"Use image at this position (following imgrank) for predictions.",
-            "example":1,
-            "type":"integer",
-            "minimum":1.0,
             "nullable":true
           },
           "formulae":{
@@ -11476,18 +11468,10 @@
             "nullable":true
           },
           "cnn_network_id":{
-            "title":"CNN model id",
+            "title":"Cnn network id",
             "description":"",
             "example":"SCN_zooscan_group1",
             "type":"string",
-            "nullable":true
-          },
-          "cnn_image_position":{
-            "title":"CNN image position",
-            "description":"Use image at this position (following imgrank) for predictions",
-            "example":1,
-            "type":"integer",
-            "minimum":1.0,
             "nullable":true
           },
           "formulae":{
