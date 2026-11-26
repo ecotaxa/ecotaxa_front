@@ -64,6 +64,38 @@ const POLAR = {
     visible: (lat) => lat <= -40
   }
 };
+// beyond this latitude, the filtered zone is shown in the polar view of its hemisphere
+const POLAR_FOCUS = 60;
+const BOX = ['MapN', 'MapS', 'MapW', 'MapE'];
+
+// where the map goes once the filters are applied, null to stay: the lon/lat points to fit and the view to use
+// the lat/lon box of the filters when complete, else the filtered samples
+function focus_target(entries, lonlats) {
+  const box = {};
+  entries.filter(({name}) => BOX.includes(name)).forEach(({name, value}) => {
+    box[name] = parseFloat(value);
+  });
+  let points = lonlats;
+  if (BOX.every(name => Number.isFinite(box[name]))) {
+    // west greater than east: across the antimeridian
+    const east = box.MapE < box.MapW ? box.MapE + 360 : box.MapE;
+    // densified edges, curved in the polar views
+    points = [];
+    for (let i = 0; i <= 16; i++) {
+      const lon = box.MapW + (east - box.MapW) * i / 16;
+      points.push([lon, box.MapS], [lon, box.MapN]);
+    }
+  }
+  if (!points.length) return null;
+  const lats = points.map(p => p[1]);
+  let view = 'world';
+  if (Math.max(...lats) <= -POLAR_FOCUS) view = 'south';
+  else if (Math.min(...lats) >= POLAR_FOCUS) view = 'north';
+  return {
+    points: points,
+    view: view
+  };
+}
 const loadings = {};
 
 function load_script(url) {
@@ -464,20 +496,42 @@ async function JsMap(item) {
     if (size && size[0] > 0) map.getView().setResolution(ol.extent.getWidth(ol.proj.get('EPSG:3857').getExtent()) / size[0]);
   }
   fit_width();
-  if (item.dataset.views) views_switch(ol, map, {
+  // changes the view by its name, none without the views buttons
+  let set_view = null;
+  if (item.dataset.views) set_view = views_switch(ol, map, {
     ocean: ocean,
     bathy: bathy,
     land: land
   }, world_data, bathy_json, disk, samples, item, fit_width, selection.refresh, view);
+  // once the filters applied, the map shows their box or the filtered samples, back to the whole world without
+  async function focus(entries) {
+    const target = focus_target(entries, samples.getFeatures().map(f => f.get('lonlat')));
+    const name = (target && set_view) ? target.view : 'world';
+    if (set_view && name !== view.name) await set_view(name);
+    if (!target) {
+      fit_width();
+      return;
+    }
+    const polar = POLAR[view.name];
+    // mercator stops before the poles
+    const coords = target.points.map(([lon, lat]) => (polar ? ol.proj.fromLonLat([lon, lat], polar.code) : ol.proj.fromLonLat([lon, Math.max(-85, Math.min(85, lat))])));
+    map.getView().fit(ol.extent.boundingExtent(coords), {
+      padding: [40, 40, 40, 40],
+      // a single sample is not zoomed in to the street
+      maxZoom: 7,
+      duration: 300
+    });
+  }
   map.getViewport().classList.remove('opacity-50');
   loading.remove();
-  if (filters) samples_filters(filters, map, selection, load_samples, document.getElementById(item.dataset.filterstext));
+  if (filters) samples_filters(filters, map, selection, load_samples, document.getElementById(item.dataset.filterstext), focus);
 }
 
 // the samples of the map are reloaded with the values of the form, the selection doesn't survive
 // the button opens and closes the form, see style.css. Once applied, the filters are displayed as tags and the form is closed
 // a filter removed from its tag is removed from the form, the values changed in the form and not applied stay not applied
-function samples_filters(form, map, selection, load_samples, text) {
+// once the samples loaded, focus moves the map to the applied filters
+function samples_filters(form, map, selection, load_samples, text, focus = async () => {}) {
   const menu = form.parentElement;
   const toggle = menu.querySelector('[aria-expanded]');
   function open_form(open) {
@@ -509,7 +563,9 @@ function samples_filters(form, map, selection, load_samples, text) {
   async function apply(params) {
     selection.clear();
     map.getViewport().classList.add('opacity-50');
-    if (await load_samples(params)) map.getViewport().classList.remove('opacity-50');
+    if (!await load_samples(params)) return;
+    await focus(applied);
+    map.getViewport().classList.remove('opacity-50');
   }
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -592,7 +648,8 @@ function views_switch(ol, map, layers, world_data, bathy_json, disk, samples, it
     button.classList.toggle('text-white', on);
     button.classList.toggle('hover:bg-stone-100', !on);
   }
-  async function set_view(name, button) {
+  async function set_view(name) {
+    const button = control.querySelector('[data-view="' + name + '"]');
     let projection = 'EPSG:3857';
     let polar = null;
     if (name !== 'world') {
@@ -632,11 +689,13 @@ function views_switch(ol, map, layers, world_data, bathy_json, disk, samples, it
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'px-2 py-1';
+    button.dataset.view = name;
     button.textContent = label;
     active(button, name === 'world');
-    button.addEventListener('click', () => set_view(name, button));
+    button.addEventListener('click', () => set_view(name));
     control.append(button);
   });
+  return set_view;
 }
 
 // sample information on click
@@ -756,5 +815,6 @@ function select_samples(ol, map, samples, item, color) {
 
 export {
   JsMap,
-  samples_filters
+  samples_filters,
+  focus_target
 }
